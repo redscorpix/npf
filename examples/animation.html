@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+
+<title>NPF Animation</title>
+
+<link rel="icon" href="/favicon.ico" type="image/x-icon" />
+
+<script type="text/javascript" src="../build/npf_animation.js" charset="utf-8"></script>
+</head>
+<body>
+<div onclick="cssAnimate()" style="background: #aaa; height: 300px; left: 0; position: absolute; top: 0; width: 500px;">
+	<div id="css_block" style="background: red; height: 100px; left: 100px; position: absolute; top: 100px; width: 100px;"></div>
+</div>
+<div onclick="jsAnimate()" style="background: #bbb; height: 300px; left: 500px; position: absolute; top: 0; width: 500px;">
+	<div id="js_block" style="background: red; height: 100px; left: 100px; position: absolute; top: 100px; width: 100px;"></div>
+</div>
+<script>
+var cssEl = document.getElementById('css_block');
+var cssPos = true;
+
+function cssAnimate() {
+	var fromLeft = cssPos ? 100 : 300;
+	var toLeft = cssPos ? 300 : 100;
+
+	npfAnimation.css(cssEl, 300, 'easeOutCubic')
+		.fromTo({
+			'left': fromLeft + 'px'
+		}, {
+			'left': toLeft + 'px'
+		})
+		.play();
+
+	cssPos = !cssPos;
+}
+
+var jsEl = document.getElementById('js_block');
+var jsPos = true;
+
+function jsAnimate() {
+	var fromLeft = jsPos ? 100 : 300;
+	var toLeft = jsPos ? 300 : 100;
+
+	npfAnimation.js(jsEl, 300, 'easeOutCubic')
+		.addSlideLeft(fromLeft, toLeft)
+		.play();
+
+	jsPos = !jsPos;
+}
+</script>
+</body>
+</html>
