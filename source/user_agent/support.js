@@ -4,6 +4,7 @@ goog.provide('npf.userAgent.support');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('goog.events.EventType');
+goog.require('goog.math');
 goog.require('goog.object');
 
 
@@ -15,49 +16,49 @@ npf.userAgent.Support = function() {
 	this._mStyle = goog.dom.createElement(npf.userAgent.Support.MOD).style;
 
 	this._tests = goog.object.create(
-		npf.userAgent.Support.Property.APPLICATION_CACHE, goog.bind(this._testApplicationCache, this),
-		npf.userAgent.Support.Property.AUDIO, goog.bind(this._testAudio, this),
-		npf.userAgent.Support.Property.BACKGROUND_SIZE, goog.bind(this._testBackgroundSize, this),
-		npf.userAgent.Support.Property.BORDER_IMAGE, goog.bind(this._testBorderImage, this),
-		npf.userAgent.Support.Property.BORDER_RADIUS, goog.bind(this._testBorderRadius, this),
-		npf.userAgent.Support.Property.BOX_SHADOW, goog.bind(this._testBoxShadow, this),
-		npf.userAgent.Support.Property.CANVAS, goog.bind(this._testCanvas, this),
-		npf.userAgent.Support.Property.CANVAS_TEXT, goog.bind(this._testCanvasText, this),
-		npf.userAgent.Support.Property.CSS_ANIMATIONS, goog.bind(this._testCssAnimations, this),
-		npf.userAgent.Support.Property.CSS_COLUMNS, goog.bind(this._testCssColumns, this),
-		npf.userAgent.Support.Property.CSS_GRADIENTS, goog.bind(this._testCssGradients, this),
-		npf.userAgent.Support.Property.CSS_REFLECTIONS, goog.bind(this._testCssReflections, this),
-		npf.userAgent.Support.Property.CSS_TRANSFORMS, goog.bind(this._testCssTransforms, this),
-		npf.userAgent.Support.Property.CSS_TRANSFORMS_3D, goog.bind(this._testCssTransforms3d, this),
-		npf.userAgent.Support.Property.CSS_TRANSITIONS, goog.bind(this._testCssTransitions, this),
-		npf.userAgent.Support.Property.DRAG_AND_DROP, goog.bind(this._testDragAndDrop, this),
-		npf.userAgent.Support.Property.FLEX_BOX, goog.bind(this._testFlexbox, this),
-		npf.userAgent.Support.Property.FONT_FACE, goog.bind(this._testFontFace, this),
-		npf.userAgent.Support.Property.GENERATED_CONTENT, goog.bind(this._testGeneratedContent, this),
-		npf.userAgent.Support.Property.GEOLOCATION, goog.bind(this._testGeolocation, this),
-		npf.userAgent.Support.Property.HASH_CHANGE, goog.bind(this._testHashChange, this),
-		npf.userAgent.Support.Property.HISTORY, goog.bind(this._testHistory, this),
-		npf.userAgent.Support.Property.HSLA, goog.bind(this._testHsla, this),
-		npf.userAgent.Support.Property.INDEXED_DB, goog.bind(this._testIndexedDb, this),
-		npf.userAgent.Support.Property.INLINE_SVG, goog.bind(this._testInlineSvg, this),
-		npf.userAgent.Support.Property.INPUT, goog.bind(this._webforms, this),
-		npf.userAgent.Support.Property.INPUT_TYPES, goog.bind(this._webforms, this),
-		npf.userAgent.Support.Property.LOCAL_STORAGE, goog.bind(this._testLocalStorage, this),
-		npf.userAgent.Support.Property.MULTIPLE_BACKGROUNDS, goog.bind(this._testMultipleBackgrounds, this),
-		npf.userAgent.Support.Property.OPACITY, goog.bind(this._testOpacity, this),
-		npf.userAgent.Support.Property.POST_MESSAGE, goog.bind(this._testPostMessage, this),
-		npf.userAgent.Support.Property.RGBA, goog.bind(this._testRgba, this),
-		npf.userAgent.Support.Property.SESSION_STORAGE, goog.bind(this._testSessionStorage, this),
-		npf.userAgent.Support.Property.SMIL, goog.bind(this._testSmil, this),
-		npf.userAgent.Support.Property.SVG, goog.bind(this._testSvg, this),
-		npf.userAgent.Support.Property.SVG_CLIP_PATHS, goog.bind(this._testSvgClipPaths, this),
-		npf.userAgent.Support.Property.TEXT_SHADOW, goog.bind(this._testTextShadow, this),
-		npf.userAgent.Support.Property.TOUCH, goog.bind(this._testTouch, this),
-		npf.userAgent.Support.Property.VIDEO, goog.bind(this._testVideo, this),
-		npf.userAgent.Support.Property.WEB_GL, goog.bind(this._testWebgl, this),
-		npf.userAgent.Support.Property.WEB_SOCKETS, goog.bind(this._testWebSockets, this),
-		npf.userAgent.Support.Property.WEB_SQL_DATABASE, goog.bind(this._testWebSqlDatabase, this),
-		npf.userAgent.Support.Property.WEB_WORKERS, goog.bind(this._testWebWorkers, this)
+		npf.userAgent.Support.Property.APPLICATION_CACHE, this._testApplicationCache,
+		npf.userAgent.Support.Property.AUDIO, this._testAudio,
+		npf.userAgent.Support.Property.BACKGROUND_SIZE, this._testBackgroundSize,
+		npf.userAgent.Support.Property.BORDER_IMAGE, this._testBorderImage,
+		npf.userAgent.Support.Property.BORDER_RADIUS, this._testBorderRadius,
+		npf.userAgent.Support.Property.BOX_SHADOW, this._testBoxShadow,
+		npf.userAgent.Support.Property.CANVAS, this._testCanvas,
+		npf.userAgent.Support.Property.CANVAS_TEXT, this._testCanvasText,
+		npf.userAgent.Support.Property.CSS_ANIMATIONS, this._testCssAnimations,
+		npf.userAgent.Support.Property.CSS_COLUMNS, this._testCssColumns,
+		npf.userAgent.Support.Property.CSS_GRADIENTS, this._testCssGradients,
+		npf.userAgent.Support.Property.CSS_REFLECTIONS, this._testCssReflections,
+		npf.userAgent.Support.Property.CSS_TRANSFORMS, this._testCssTransforms,
+		npf.userAgent.Support.Property.CSS_TRANSFORMS_3D, this._testCssTransforms3d,
+		npf.userAgent.Support.Property.CSS_TRANSITIONS, this._testCssTransitions,
+		npf.userAgent.Support.Property.DRAG_AND_DROP, this._testDragAndDrop,
+		npf.userAgent.Support.Property.FLEX_BOX, this._testFlexbox,
+		npf.userAgent.Support.Property.FONT_FACE, this._testFontFace,
+		npf.userAgent.Support.Property.GENERATED_CONTENT, this._testGeneratedContent,
+		npf.userAgent.Support.Property.GEOLOCATION, this._testGeolocation,
+		npf.userAgent.Support.Property.HASH_CHANGE, this._testHashChange,
+		npf.userAgent.Support.Property.HISTORY, this._testHistory,
+		npf.userAgent.Support.Property.HSLA, this._testHsla,
+		npf.userAgent.Support.Property.INDEXED_DB, this._testIndexedDb,
+		npf.userAgent.Support.Property.INLINE_SVG, this._testInlineSvg,
+		npf.userAgent.Support.Property.INPUT, this._webforms,
+		npf.userAgent.Support.Property.INPUT_TYPES, this._webforms,
+		npf.userAgent.Support.Property.LOCAL_STORAGE, this._testLocalStorage,
+		npf.userAgent.Support.Property.MULTIPLE_BACKGROUNDS, this._testMultipleBackgrounds,
+		npf.userAgent.Support.Property.OPACITY, this._testOpacity,
+		npf.userAgent.Support.Property.POST_MESSAGE, this._testPostMessage,
+		npf.userAgent.Support.Property.RGBA, this._testRgba,
+		npf.userAgent.Support.Property.SESSION_STORAGE, this._testSessionStorage,
+		npf.userAgent.Support.Property.SMIL, this._testSmil,
+		npf.userAgent.Support.Property.SVG, this._testSvg,
+		npf.userAgent.Support.Property.SVG_CLIP_PATHS, this._testSvgClipPaths,
+		npf.userAgent.Support.Property.TEXT_SHADOW, this._testTextShadow,
+		npf.userAgent.Support.Property.TOUCH, this._testTouch,
+		npf.userAgent.Support.Property.VIDEO, this._testVideo,
+		npf.userAgent.Support.Property.WEB_GL, this._testWebgl,
+		npf.userAgent.Support.Property.WEB_SOCKETS, this._testWebSockets,
+		npf.userAgent.Support.Property.WEB_SQL_DATABASE, this._testWebSqlDatabase,
+		npf.userAgent.Support.Property.WEB_WORKERS, this._testWebWorkers
 	);
 };
 goog.addSingletonGetter(npf.userAgent.Support);
@@ -90,12 +91,12 @@ npf.userAgent.Support.Property = {
 	HASH_CHANGE: 'hashchange',
 	HISTORY: 'history',
 	HSLA: 'hsla',
-	INDEXED_DB: 'indexedDB',
+	INDEXED_DB: 'indexeddb',
 	INLINE_SVG: 'inlinesvg',
 	INPUT: 'input',
 	INPUT_TYPES: 'inputtypes',
 	LOCAL_STORAGE: 'localstorage',
-	MULTIPLE_BACKGROUNDS: 'multiplebgs',
+	MULTIPLE_BACKGROUNDS: 'multiplebackgrounds',
 	OPACITY: 'opacity',
 	POST_MESSAGE: 'postmessage',
 	RGBA: 'rgba',
@@ -139,7 +140,7 @@ npf.userAgent.Support.VERSION = '2.0.6';
  * @type {string}
  * @const
  */
-npf.userAgent.Support.MOD = 'diuseragentsupport';
+npf.userAgent.Support.MOD = 'useragentsupport_' + goog.math.randomInt(1000000);
 
 /**
  * @type {string}
@@ -208,13 +209,9 @@ npf.userAgent.Support.prototype._tests;
  * @param {npf.userAgent.Support.Property} prop
  * @return {*}
  */
-npf.userAgent.Support.prototype.isSupported = function(prop) {
-	if (!goog.isDef(this._checks[prop])) {
-		var checked = this._tests[prop]();
-
-		if (goog.isDef(checked)) {
-			this._checks[prop] = checked;
-		}
+npf.userAgent.Support.prototype.isPropertySupported = function(prop) {
+	if (!goog.isDef(this._checks[prop]) && this._tests[prop]) {
+		this._checks[prop] = goog.bind(this._tests[prop], this)();
 	}
 
 	return this._checks[prop];
@@ -409,7 +406,7 @@ npf.userAgent.Support.prototype._testCanvas = function() {
  * @private
  */
 npf.userAgent.Support.prototype._testCanvasText = function() {
-	return /** @type {boolean} */ (this.isSupported(npf.userAgent.Support.Property.CANVAS)) && goog.isFunction(goog.dom.createElement(goog.dom.TagName.CANVAS).getContext('2d').fillText);
+	return /** @type {boolean} */ (this.isPropertySupported(npf.userAgent.Support.Property.CANVAS)) && !!goog.dom.createElement(goog.dom.TagName.CANVAS).getContext('2d').fillText;
 };
 
 /**
@@ -475,13 +472,13 @@ npf.userAgent.Support.prototype._testCssTransforms = function() {
  */
 npf.userAgent.Support.prototype._testCssTransforms3d = function() {
 	/** @type {boolean} */
-	var isSupported = !!this._testProps(['perspectiveProperty', 'WebkitPerspective', 'MozPerspective', 'OPerspective', 'msPerspective']);
+	var isPropertySupported = !!this._testProps(['perspectiveProperty', 'WebkitPerspective', 'MozPerspective', 'OPerspective', 'msPerspective']);
 
 	// Webkits 3D transforms are passed off to the browser's own graphics renderer.
 	//   It works fine in Safari on Leopard and Snow Leopard, but not in Chrome in
 	//   some conditions. As a result, Webkit typically recognizes the syntax but
 	//   will sometimes throw a false positive, thus we must do a more thorough check:
-	if (isSupported && 'webkitPerspective' in document.documentElement.style) {
+	if (isPropertySupported && 'webkitPerspective' in document.documentElement.style) {
 		// Webkit allows this media query to succeed only if the feature is enabled.
 		// `@media (transform-3d),(-o-transform-3d),(-moz-transform-3d),(-ms-transform-3d),(-webkit-transform-3d),(modernizr){ ... }`
 
@@ -490,15 +487,15 @@ npf.userAgent.Support.prototype._testCssTransforms3d = function() {
 		/** @type {string} */
 		var style = ['@media (', npf.userAgent.Support.prefixes.join('transform-3d),('), npf.userAgent.Support.MOD, ')', '{#', id, '{left:9px;position:absolute}}'].join('');
 
-		this._testStyles(style, goog.bind(function(node, rule) {
+		this._testStyles(style, function(node, rule) {
 			// IE8 will bork if you create a custom build that excludes both fontface and generatedcontent tests.
 			// So we check for cssRules and that there is a rule available
 			// More here: https://github.com/Modernizr/Modernizr/issues/288 & https://github.com/Modernizr/Modernizr/issues/293
-			isSupported = node.childNodes[0].offsetLeft === 9;
-		}, this), id);
+			isPropertySupported = node.childNodes[0].offsetLeft === 9;
+		}, id);
 	}
 
-	return isSupported;
+	return isPropertySupported;
 };
 
 /**
@@ -563,23 +560,23 @@ npf.userAgent.Support.prototype._testFlexbox = function() {
  */
 npf.userAgent.Support.prototype._testFontFace = function() {
 	/** @type {boolean} */
-	var isSupported;
+	var isPropertySupported;
 	/** @type {string} */
 	var id = 'testFontFace';
 	/** @type {string} */
 	var style = '@font-face {font-family:"font";src:url("https://")}';
 
-	this._testStyles(style, goog.bind(function(node, rule) {
+	this._testStyles(style, function(node, rule) {
 		var style = document.styleSheets[document.styleSheets.length - 1];
 		// IE8 will bork if you create a custom build that excludes both fontface and generatedcontent tests.
 		// So we check for cssRules and that there is a rule available
 		// More here: https://github.com/Modernizr/Modernizr/issues/288 & https://github.com/Modernizr/Modernizr/issues/293
 		var cssText = style.cssRules && style.cssRules[0] ? style.cssRules[0].cssText : style.cssText || "";
 
-		isSupported = /src/i.test(cssText) && cssText.indexOf(rule.split(' ')[0]) === 0;
-	}, this), id);
+		isPropertySupported = /src/i.test(cssText) && cssText.indexOf(rule.split(' ')[0]) === 0;
+	}, id);
 
-	return isSupported;
+	return isPropertySupported;
 };
 
 /**
@@ -589,20 +586,20 @@ npf.userAgent.Support.prototype._testFontFace = function() {
  */
 npf.userAgent.Support.prototype._testGeneratedContent = function() {
 	/** @type {boolean} */
-	var isSupported;
+	var isPropertySupported;
 	/** @type {string} */
 	var id = 'testGeneratedContent';
 	/** @type {string} */
 	var style = ['#', id, ':after{content:"', npf.userAgent.Support.SMILE, '";visibility:hidden}'].join('');
 
-	this._testStyles(style, goog.bind(function(node, rule) {
+	this._testStyles(style, function(node, rule) {
 		// IE8 will bork if you create a custom build that excludes both fontface and generatedcontent tests.
 		// So we check for cssRules and that there is a rule available
 		// More here: https://github.com/Modernizr/Modernizr/issues/288 & https://github.com/Modernizr/Modernizr/issues/293
-		isSupported = node.childNodes[0].offsetHeight >= 1;
-	}, this), id);
+		isPropertySupported = node.childNodes[0].offsetHeight >= 1;
+	}, id);
 
-	return isSupported;
+	return isPropertySupported;
 };
 
 /**
@@ -824,28 +821,28 @@ npf.userAgent.Support.prototype._testTextShadow = function() {
  */
 npf.userAgent.Support.prototype._testTouch = function() {
 	/** @type {boolean} */
-	var isSupported;
+	var isPropertySupported;
 	/** @type {string} */
 	var id = 'testTouch';
 	/** @type {string} */
 	var style = ['@media (', npf.userAgent.Support.prefixes.join('touch-enabled),('), npf.userAgent.Support.MOD, ')', '{#', id, '{top:9px;position:absolute}}'].join('');
 
-	this._testStyles(style, goog.bind(function(node, rule) {
+	this._testStyles(style, function(node, rule) {
 		// IE8 will bork if you create a custom build that excludes both fontface and generatedcontent tests.
 		// So we check for cssRules and that there is a rule available
 		// More here: https://github.com/Modernizr/Modernizr/issues/288 & https://github.com/Modernizr/Modernizr/issues/293
-		isSupported = ('ontouchstart' in window) || node.childNodes[0].offsetTop === 9;
-	}, this), id);
+		isPropertySupported = ('ontouchstart' in window) || node.childNodes[0].offsetTop === 9;
+	}, id);
 
-	return isSupported;
+	return isPropertySupported;
 };
 
 // These tests evaluate support of the video/audio elements, as well as
 // testing what types of content they support.
 //
 // We're using the Boolean constructor here, so that we can extend the value
-// e.g.  npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.VIDEO) // true
-//       npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.VIDEO).ogg // 'probably'
+// e.g.  npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.VIDEO) // true
+//       npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.VIDEO).ogg // 'probably'
 //
 // Codec values from : http://github.com/NielsLeenheer/html5test/blob/9106a8/index.html#L845
 //                     thx to NielsLeenheer and zcorpan
@@ -1147,9 +1144,9 @@ npf.userAgent.Support.prototype.hasEvent = function(eventName, opt_element) {
 	// When using `setAttribute`, IE skips "unload", WebKit skips "unload" and "resize", whereas `in` "catches" those
 
 	/** @type {boolean} */
-	var isSupported = eventFullName in element;
+	var isPropertySupported = eventFullName in element;
 
-	if (!isSupported) {
+	if (!isPropertySupported) {
 		// If it has no `setAttribute` (i.e. doesn't implement Node interface), try generic element
 		if (!element.setAttribute) {
 			element = goog.dom.createElement(goog.dom.TagName.DIV);
@@ -1157,7 +1154,7 @@ npf.userAgent.Support.prototype.hasEvent = function(eventName, opt_element) {
 
 		if (element.setAttribute && element.removeAttribute) {
 			element.setAttribute(eventFullName, '');
-			isSupported = goog.isFunction(element[eventFullName]);
+			isPropertySupported = !!element[eventFullName];
 
 			// If property was created, "remove it" (by setting value to `undefined`)
 			if (goog.isDef(element[eventFullName])) {
@@ -1168,28 +1165,28 @@ npf.userAgent.Support.prototype.hasEvent = function(eventName, opt_element) {
 		}
 	}
 
-	return isSupported;
+	return isPropertySupported;
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isApplicationCacheSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.APPLICATION_CACHE));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.APPLICATION_CACHE));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isAudioSupported = function() {
-	return !!npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.AUDIO);
+	return !!npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.AUDIO);
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isAudioOggSupported = function() {
-	var types = npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.AUDIO);
+	var types = npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.AUDIO);
 
 	return types ? types.ogg : false;
 };
@@ -1198,7 +1195,7 @@ npf.userAgent.support.isAudioOggSupported = function() {
  * @return {boolean}
  */
 npf.userAgent.support.isAudioMp3Supported = function() {
-	var types = npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.AUDIO);
+	var types = npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.AUDIO);
 
 	return types ? types.mp3 : false;
 };
@@ -1207,7 +1204,7 @@ npf.userAgent.support.isAudioMp3Supported = function() {
  * @return {boolean}
  */
 npf.userAgent.support.isAudioWavSupported = function() {
-	var types = npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.AUDIO);
+	var types = npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.AUDIO);
 
 	return types ? types.wav : false;
 };
@@ -1216,7 +1213,7 @@ npf.userAgent.support.isAudioWavSupported = function() {
  * @return {boolean}
  */
 npf.userAgent.support.isAudioM4aSupported = function() {
-	var types = npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.AUDIO);
+	var types = npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.AUDIO);
 
 	return types ? types.m4a : false;
 };
@@ -1225,266 +1222,266 @@ npf.userAgent.support.isAudioM4aSupported = function() {
  * @return {boolean}
  */
 npf.userAgent.support.isBackgroundSizeSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.BACKGROUND_SIZE));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.BACKGROUND_SIZE));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isBorderImageSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.BORDER_IMAGE));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.BORDER_IMAGE));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isBorderRadiusSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.BORDER_RADIUS));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.BORDER_RADIUS));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isBoxShadowSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.BOX_SHADOW));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.BOX_SHADOW));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isCanvasSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.CANVAS));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.CANVAS));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isCanvasTextSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.CANVAS_TEXT));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.CANVAS_TEXT));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isCssAnimationSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.CSS_ANIMATIONS));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.CSS_ANIMATIONS));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isCssColumnSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.CSS_COLUMNS));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.CSS_COLUMNS));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isCssGradientSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.CSS_GRADIENTS));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.CSS_GRADIENTS));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isCssReflectionSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.CSS_REFLECTIONS));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.CSS_REFLECTIONS));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isCssTransformSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.CSS_TRANSFORMS));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.CSS_TRANSFORMS));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isCssTransform3dSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.CSS_TRANSFORMS_3D));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.CSS_TRANSFORMS_3D));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isCssTransitionSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.CSS_TRANSITIONS));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.CSS_TRANSITIONS));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isDragAndDropSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.DRAG_AND_DROP));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.DRAG_AND_DROP));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isFlexBoxSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.FLEX_BOX));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.FLEX_BOX));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isFontFaceSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.FONT_FACE));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.FONT_FACE));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isGeneratedContentSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.GENERATED_CONTENT));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.GENERATED_CONTENT));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isGeolocationSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.GEOLOCATION));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.GEOLOCATION));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isHashChangeSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.HASH_CHANGE));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.HASH_CHANGE));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isHistorySupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.HISTORY));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.HISTORY));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isHslaSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.HSLA));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.HSLA));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isIndexedDbSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.INDEXED_DB));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.INDEXED_DB));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isInlineSvgSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.INLINE_SVG));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.INLINE_SVG));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isInputSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.INPUT));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.INPUT));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isInputTypesSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.INPUT_TYPES));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.INPUT_TYPES));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isLocalStorageSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.LOCAL_STORAGE));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.LOCAL_STORAGE));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isMultipleBackgroundSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.MULTIPLE_BACKGROUNDS));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.MULTIPLE_BACKGROUNDS));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isOpacitySupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.OPACITY));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.OPACITY));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isPostMessageSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.POST_MESSAGE));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.POST_MESSAGE));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isRgbaSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.RGBA));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.RGBA));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isSessionStorageSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.SESSION_STORAGE));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.SESSION_STORAGE));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isSmilSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.SMIL));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.SMIL));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isSvgSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.SVG));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.SVG));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isSvgClipPathSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.SVG_CLIP_PATHS));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.SVG_CLIP_PATHS));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isTextShadowSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.TEXT_SHADOW));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.TEXT_SHADOW));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isTouchSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.TOUCH));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.TOUCH));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isVideoSupported = function() {
-	return !!npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.VIDEO);
+	return !!npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.VIDEO);
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isVideoOggSupported = function() {
-	var types = npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.VIDEO);
+	var types = npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.VIDEO);
 
 	return types ? types.ogg : false;
 };
@@ -1493,7 +1490,7 @@ npf.userAgent.support.isVideoOggSupported = function() {
  * @return {boolean}
  */
 npf.userAgent.support.isVideoH264Supported = function() {
-	var types = npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.VIDEO);
+	var types = npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.VIDEO);
 
 	return types ? types.h264 : false;
 };
@@ -1502,7 +1499,7 @@ npf.userAgent.support.isVideoH264Supported = function() {
  * @return {boolean}
  */
 npf.userAgent.support.isVideoWebmSupported = function() {
-	var types = npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.VIDEO);
+	var types = npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.VIDEO);
 
 	return types ? types.webm : false;
 };
@@ -1511,28 +1508,28 @@ npf.userAgent.support.isVideoWebmSupported = function() {
  * @return {boolean}
  */
 npf.userAgent.support.isWebGlSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.WEB_GL));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.WEB_GL));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isWebSocketSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.WEB_SOCKETS));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.WEB_SOCKETS));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isWebSqlDatabaseSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.WEB_SQL_DATABASE));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.WEB_SQL_DATABASE));
 };
 
 /**
  * @return {boolean}
  */
 npf.userAgent.support.isWebWorkersSupported = function() {
-	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isSupported(npf.userAgent.Support.Property.WEB_WORKERS));
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.WEB_WORKERS));
 };
 
 /**
