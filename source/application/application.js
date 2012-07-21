@@ -14,8 +14,6 @@ npf.Application = function(settings) {
 
 	this._settings = settings;
 	this.registerDisposable(this._settings);
-
-	npf.fx.Animation.enabled = this.isAnimationEnabled();
 };
 goog.inherits(npf.Application, goog.events.EventTarget);
 
@@ -46,18 +44,4 @@ npf.Application.prototype.getUrl = function(urlType, opt_params) {
  */
 npf.Application.prototype.getOption = function(optionType) {
 	return this._settings.getOption(optionType);
-};
-
-/**
- * @return {boolean}
- */
-npf.Application.prototype.isAnimationEnabled = function() {
-  /** @type {boolean} */
-  var oldIe = goog.userAgent.IE && 9 > parseInt(goog.userAgent.VERSION, 10);
-  /** @type {boolean} */
-  var fineResolution = window.screen.width && 1024 < window.screen.width;
-  /** @type {boolean} */
-  var oldNotWinGecko = goog.userAgent.GECKO && 2 > parseInt(goog.userAgent.VERSION, 10) && !goog.userAgent.WINDOWS;
-
-  return !oldIe && fineResolution && !oldNotWinGecko;
 };
