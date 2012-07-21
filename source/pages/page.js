@@ -1,10 +1,9 @@
 goog.provide('npf.pages.Page');
+goog.provide('npf.pages.Page.EventType');
 
 goog.require('goog.events');
 goog.require('goog.events.EventHandler');
 goog.require('goog.events.EventTarget');
-goog.require('goog.net.HttpStatus');
-goog.require('goog.object');
 goog.require('npf.Router');
 goog.require('npf.pages.Request');
 
@@ -29,22 +28,13 @@ goog.inherits(npf.pages.Page, goog.events.EventTarget);
  */
 npf.pages.Page.EventType = {
 	/**
-	 * status (number)
+	 * status (goog.net.HttpStatus)
 	 */
 	ERROR: goog.events.getUniqueId('error'),
 	/**
 	 * title (string)
 	 */
 	TITLE_CHANGE: goog.events.getUniqueId('titleChange')
-};
-
-/**
- * @enum {string}
- */
-npf.pages.Page.ErrorPageType = {
-	ERROR404: goog.net.HttpStatus.NOT_FOUND + '',
-	ERROR500: goog.net.HttpStatus.INTERNAL_SERVER_ERROR + '',
-	ERROR503: goog.net.HttpStatus.SERVICE_UNAVAILABLE + ''
 };
 
 /**
@@ -110,7 +100,6 @@ npf.pages.Page.prototype.load = function(request) {
 	this._isLoaded = true;
 
 	try {
-		this.initHelpers(request);
 		this.loadInternal(request);
 	} catch (e) {
 		if (goog.DEBUG && window.console) {
@@ -126,7 +115,7 @@ npf.pages.Page.prototype.load = function(request) {
  * @protected
  */
 npf.pages.Page.prototype.loadInternal = function(request) {
-
+	this.initHelpers(request);
 };
 
 npf.pages.Page.prototype.unload = function() {
@@ -138,7 +127,6 @@ npf.pages.Page.prototype.unload = function() {
 
 	try {
 		this.unloadInternal();
-		this.removeHelpers();
 		this._wasLoaded = false;
 	} catch (e) {
 		if (goog.DEBUG && window.console) {
@@ -153,7 +141,7 @@ npf.pages.Page.prototype.unload = function() {
  * @protected
  */
 npf.pages.Page.prototype.unloadInternal = function() {
-
+	this.removeHelpers();
 };
 
 /**
@@ -250,7 +238,7 @@ npf.pages.Page.prototype.getHelpersMap = function() {
  * @return {goog.Disposable}
  */
 npf.pages.Page.prototype.getHelper = function(type) {
-	return /** @type {goog.Disposable} */ (goog.object.get(this._helpersMap, type, null));
+	return this._helpersMap[type] || null;
 };
 
 /**
@@ -258,7 +246,7 @@ npf.pages.Page.prototype.getHelper = function(type) {
  * @param {string} type
  */
 npf.pages.Page.prototype.setHelper = function(helper, type) {
-	goog.object.set(this._helpersMap, type, helper);
+	this._helpersMap[type] = helper;
 };
 
 /**
@@ -392,7 +380,7 @@ npf.pages.Page.prototype.getRequestFromHistory = function(opt_index) {
 };
 
 /**
- * @param {number} status
+ * @param {goog.net.HttpStatus} status
  * @protected
  */
 npf.pages.Page.prototype.dispatchErrorEvent = function(status) {
