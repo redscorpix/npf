@@ -341,14 +341,14 @@ npf.userAgent.Support.prototype._testAudio = function() {
 	try {
 		if (elem.canPlayType) {
 			types = {};
-			types.ogg = elem.canPlayType('audio/ogg; codecs="vorbis"').replace(/^no$/,'');
-			types.mp3 = elem.canPlayType('audio/mpeg;').replace(/^no$/,'');
+			types.ogg = elem.canPlayType('audio/ogg; codecs="vorbis"').replace(/^no$/, '');
+			types.mp3 = elem.canPlayType('audio/mpeg;').replace(/^no$/, '');
 
 			// Mimetypes accepted:
 			//   https://developer.mozilla.org/En/Media_formats_supported_by_the_audio_and_video_elements
 			//   http://bit.ly/iphoneoscodecs
-			types.wav = elem.canPlayType('audio/wav; codecs="1"').replace(/^no$/,'');
-			types.m4a = elem.canPlayType('audio/x-m4a;') || elem.canPlayType('audio/aac;').replace(/^no$/,'');
+			types.wav = elem.canPlayType('audio/wav; codecs="1"').replace(/^no$/, '');
+			types.m4a = elem.canPlayType('audio/x-m4a;') || elem.canPlayType('audio/aac;').replace(/^no$/, '');
 		}
 	} catch(e) { }
 
@@ -871,10 +871,10 @@ npf.userAgent.Support.prototype._testVideo = function() {
 
 		if (bool) {
 			bool = new Boolean(bool);
-			bool.ogg = elem.canPlayType('video/ogg; codecs="theora"').replace(/^no$/,'');
+			bool.ogg = elem.canPlayType('video/ogg; codecs="theora"').replace(/^no$/, '');
 			// Without QuickTime, this value will be `undefined`. github.com/Modernizr/Modernizr/issues/546
-			bool.h264 = elem.canPlayType('video/mp4; codecs="avc1.42E01E"').replace(/^no$/,'');
-			bool.webm = elem.canPlayType('video/webm; codecs="vp8, vorbis"').replace(/^no$/,'');
+			bool.h264 = elem.canPlayType('video/mp4; codecs="avc1.42E01E"').replace(/^no$/, '');
+			bool.webm = elem.canPlayType('video/webm; codecs="vp8, vorbis"').replace(/^no$/, '');
 		}
 	} catch(e) { }
 
