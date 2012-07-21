@@ -48,11 +48,6 @@ npf.pages.Manager.EventType = {
 	 * request (npf.pages.Request)
 	 * page (npf.pages.Page)
 	 */
-	UPDATE: goog.events.getUniqueId('update'),
-	/**
-	 * request (npf.pages.Request)
-	 * page (npf.pages.Page)
-	 */
 	UNLOAD: goog.events.getUniqueId('unload')
 };
 
@@ -269,10 +264,8 @@ npf.pages.Manager.prototype._load = function(request, opt_page) {
 		this.loadPage(/** @type {!npf.pages.Page} */ (page), unloadPage);
 	}
 
-	var eventType = update ? npf.pages.Manager.EventType.UPDATE : npf.pages.Manager.EventType.LOAD;
-
 	this.dispatchEvent({
-		type: eventType,
+		type: npf.pages.Manager.EventType.LOAD,
 		request: request,
 		page: page
 	});
@@ -280,17 +273,17 @@ npf.pages.Manager.prototype._load = function(request, opt_page) {
 
 /**
  * @param {!npf.pages.Page} page
- * @param {npf.pages.Page} unloadPage
+ * @param {npf.pages.Page=} opt_unloadPage
  * @protected
  */
-npf.pages.Manager.prototype.loadPage = function(page, unloadPage) {
-	if (unloadPage) {
-		unloadPage.unload();
+npf.pages.Manager.prototype.loadPage = function(page, opt_unloadPage) {
+	if (opt_unloadPage) {
+		opt_unloadPage.unload();
 
 		this.dispatchEvent({
 			type: npf.pages.Manager.EventType.UNLOAD,
 			request: this.getRequestFromHistory(),
-			page: unloadPage
+			page: opt_unloadPage
 		});
 	}
 
