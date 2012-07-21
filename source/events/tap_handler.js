@@ -109,9 +109,9 @@ npf.events.TapHandler.prototype._onTouchEnd = function(evt) {
  * @private
  */
 npf.events.TapHandler.prototype._onTouchMove = function(evt) {
-	var touches = evt['touches'];
+	var touches = evt.getBrowserEvent()['touches'];
 
-	if (this._started && goog.isArray(touches) && 1 == touches.length) {
+	if (this._started && touches && 1 == touches.length) {
 		if (
 			npf.events.TapHandler.MAX_MOVING < Math.abs(touches[0].pageX - this._startLeft) ||
 			npf.events.TapHandler.MAX_MOVING < Math.abs(touches[0].pageY - this._startTop)
@@ -126,9 +126,9 @@ npf.events.TapHandler.prototype._onTouchMove = function(evt) {
  * @private
  */
 npf.events.TapHandler.prototype._onTouchStart = function(evt) {
-	var touches = evt['touches'];
+	var touches = evt.getBrowserEvent()['touches'];
 
-	if (goog.isArray(touches) && 1 == touches.length) {
+	if (touches && 1 == touches.length) {
 		this._started = true;
 		this._startLeft = /** @type {number} */ (touches[0].pageX);
 		this._startTop = /** @type {number} */ (touches[0].pageY);
