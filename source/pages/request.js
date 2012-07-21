@@ -37,7 +37,7 @@ npf.pages.Request = function(uri, opt_route, opt_name, opt_options) {
 /**
  * @return {npf.pages.Request}
  */
-npf.pages.Request.prototype.copy = function() {
+npf.pages.Request.prototype.clone = function() {
 	var options = options ? goog.object.clone(this.options) : null;
 
 	return new npf.pages.Request(this.uri.clone(), this.route, this.name, options);
