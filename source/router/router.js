@@ -51,9 +51,10 @@ npf.Router.NamedRoute;
 
 /**
  * Проверяет, на корневую ли страницу зашел пользователь.
- * @return {boolean}
+ * Осуществляет редирект, если требуется.
+ * @return {boolean} false, если произошла перезагрузка страницы.
  */
-npf.Router.checkRootPath = function() {
+npf.Router.normalizeRootPath = function() {
 	/** @type {string} */
 	var hash = window.location.hash;
 	/** @type {string} */

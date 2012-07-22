@@ -33,6 +33,7 @@ npf.userAgent.Support = function() {
 		npf.userAgent.Support.Property.CSS_TRANSITIONS, this._testCssTransitions,
 		npf.userAgent.Support.Property.DRAG_AND_DROP, this._testDragAndDrop,
 		npf.userAgent.Support.Property.FLEX_BOX, this._testFlexbox,
+		npf.userAgent.Support.Property.FLEX_BOX_LEGACY, this._testFlexboxLegacy,
 		npf.userAgent.Support.Property.FONT_FACE, this._testFontFace,
 		npf.userAgent.Support.Property.GENERATED_CONTENT, this._testGeneratedContent,
 		npf.userAgent.Support.Property.GEOLOCATION, this._testGeolocation,
@@ -85,6 +86,7 @@ npf.userAgent.Support.Property = {
 	CSS_TRANSITIONS: 'csstransitions',
 	DRAG_AND_DROP: 'draganddrop',
 	FLEX_BOX: 'flexbox',
+	FLEX_BOX_LEGACY: 'flexboxLegacy',
 	FONT_FACE: 'fontface',
 	GENERATED_CONTENT: 'generatedcontent',
 	GEOLOCATION: 'geolocation',
@@ -172,6 +174,12 @@ npf.userAgent.Support.vendorPrefix =
 npf.userAgent.Support.prefixes = (npf.userAgent.Support.vendorPrefix ? ' -' + npf.userAgent.Support.vendorPrefix + '- ' : ' ').split(' ');
 
 /**
+ * @type {string}
+ * @private
+ */
+npf.userAgent.Support._omPrefixes = 'Webkit Moz O ms';
+
+/**
  * Following spec is to expose vendor-specific style properties as:
  * 	elem.style.WebkitBorderRadius
  * and the following would be incorrect:
@@ -184,7 +192,9 @@ npf.userAgent.Support.prefixes = (npf.userAgent.Support.vendorPrefix ? ' -' + np
  * More here: http://github.com/Modernizr/Modernizr/issues/issue/21
  * @type {Array.<string>}
  */
-npf.userAgent.Support.domPrefixes = 'Webkit Moz O ms Khtml'.split(' ');
+npf.userAgent.Support.domPrefixes = npf.userAgent.Support._omPrefixes.toLowerCase().split(' ');
+
+npf.userAgent.Support.cssomPrefixes = npf.userAgent.Support._omPrefixes.split(' ');
 
 /**
  * @type {!Object.<npf.userAgent.Support.Property,*>}
@@ -232,8 +242,10 @@ npf.userAgent.Support.prototype.isPropertySupported = function(prop) {
  * @return boolean
  */
 npf.userAgent.Support.prototype.mq = function(mq) {
-	if (window.matchMedia) {
-		return window.matchMedia(mq).matches;
+	var matchMedia = window['matchMedia'] || window['msMatchMedia'];
+
+	if (matchMedia) {
+		return matchMedia(mq)['matches'];
 	}
 
 	/** @type {boolean} */
@@ -329,14 +341,14 @@ npf.userAgent.Support.prototype._testAudio = function() {
 	try {
 		if (elem.canPlayType) {
 			types = {};
-			types.ogg = elem.canPlayType('audio/ogg; codecs="vorbis"');
-			types.mp3 = elem.canPlayType('audio/mpeg;');
+			types.ogg = elem.canPlayType('audio/ogg; codecs="vorbis"').replace(/^no$/, '');
+			types.mp3 = elem.canPlayType('audio/mpeg;').replace(/^no$/, '');
 
 			// Mimetypes accepted:
 			//   https://developer.mozilla.org/En/Media_formats_supported_by_the_audio_and_video_elements
 			//   http://bit.ly/iphoneoscodecs
-			types.wav = elem.canPlayType('audio/wav; codecs="1"');
-			types.m4a = elem.canPlayType('audio/x-m4a;') || elem.canPlayType('audio/aac;');
+			types.wav = elem.canPlayType('audio/wav; codecs="1"').replace(/^no$/, '');
+			types.m4a = elem.canPlayType('audio/x-m4a;') || elem.canPlayType('audio/aac;').replace(/^no$/, '');
 		}
 	} catch(e) { }
 
@@ -445,7 +457,7 @@ npf.userAgent.Support.prototype._testCssGradients = function() {
 	/** @type {string} */
 	var str3 = 'linear-gradient(left top,#9f9, white);';
 
-	this._mStyle.cssText = (str1 + npf.userAgent.Support.prefixes.join(str2 + str1) + npf.userAgent.Support.prefixes.join(str3 + str1)).slice(0, -str1.length);
+	this._mStyle.cssText = (str1 + '-webkit- '.split(' ').join(str2 + str1) + npf.userAgent.Support.prefixes.join(str3 + str1)).slice(0, -str1.length);
 
 	return this._contains(this._mStyle.backgroundImage, 'gradient');
 };
@@ -463,7 +475,7 @@ npf.userAgent.Support.prototype._testCssReflections = function() {
  * @private
  */
 npf.userAgent.Support.prototype._testCssTransforms = function() {
-	return !!this._testProps(['transformProperty', 'WebkitTransform', 'MozTransform', 'OTransform', 'msTransform']);
+	return !!this._testPropsAll('transform');
 };
 
 /**
@@ -472,7 +484,7 @@ npf.userAgent.Support.prototype._testCssTransforms = function() {
  */
 npf.userAgent.Support.prototype._testCssTransforms3d = function() {
 	/** @type {boolean} */
-	var isPropertySupported = !!this._testProps(['perspectiveProperty', 'WebkitPerspective', 'MozPerspective', 'OPerspective', 'msPerspective']);
+	var isPropertySupported = !!this._testPropsAll('perspective');
 
 	// Webkits 3D transforms are passed off to the browser's own graphics renderer.
 	//   It works fine in Safari on Leopard and Snow Leopard, but not in Chrome in
@@ -485,13 +497,13 @@ npf.userAgent.Support.prototype._testCssTransforms3d = function() {
 		/** @type {string} */
 		var id = 'testCssTransforms3d';
 		/** @type {string} */
-		var style = ['@media (', npf.userAgent.Support.prefixes.join('transform-3d),('), npf.userAgent.Support.MOD, ')', '{#', id, '{left:9px;position:absolute}}'].join('');
+		var style = ['@media (', npf.userAgent.Support.prefixes.join('transform-3d),('), npf.userAgent.Support.MOD, ')', '{#', id, '{left:9px;position:absolute;height:3px;}}'].join('');
 
 		this._testStyles(style, function(node, rule) {
 			// IE8 will bork if you create a custom build that excludes both fontface and generatedcontent tests.
 			// So we check for cssRules and that there is a rule available
 			// More here: https://github.com/Modernizr/Modernizr/issues/288 & https://github.com/Modernizr/Modernizr/issues/293
-			isPropertySupported = node.childNodes[0].offsetLeft === 9;
+			isPropertySupported = node.childNodes[0].offsetLeft === 9 && node.childNodes[0].offsetHeight === 3;
 		}, id);
 	}
 
@@ -503,7 +515,7 @@ npf.userAgent.Support.prototype._testCssTransforms3d = function() {
  * @private
  */
 npf.userAgent.Support.prototype._testCssTransitions = function() {
-	return this._testPropsAll('transitionProperty');
+	return this._testPropsAll('transition');
 };
 
 /**
@@ -511,45 +523,30 @@ npf.userAgent.Support.prototype._testCssTransitions = function() {
  * @private
  */
 npf.userAgent.Support.prototype._testDragAndDrop = function() {
-	return this.hasEvent(goog.events.EventType.DRAGSTART) && this.hasEvent(goog.events.EventType.DROP);
+	/** @type {Element} */
+	var element = goog.dom.createElement(goog.dom.TagName.DIV);
+
+	return ('draggable' in element) || ('ondragstart' in element && 'ondrop' in element);
 };
 
 /**
+ * The *new* flexbox
+ * dev.w3.org/csswg/css3-flexbox
  * @return {boolean}
  * @private
  */
 npf.userAgent.Support.prototype._testFlexbox = function() {
-	/**
-	 * Sets the property of a specified element adding vendor prefixes to the VALUE of the property.
-	 * @param {Element} element
-	 * @param {string} property The property name. This will not be prefixed.
-	 * @param {string} value The value of the property. This WILL be prefixed.
-	 * @param {string=} extra Additional CSS to append unmodified to the end of the CSS string.
-	 */
-	function setPrefixedValueCSS(element, property, value, extra) {
-		property += ':';
-		element.style.cssText = (property + npf.userAgent.Support.prefixes.join(value + ';' + property)).slice(0, -property.length) + (extra || '');
-	}
+	return this._testPropsAll('flexWrap');
+};
 
-	/** @type {Element} */
-	var c = goog.dom.createElement(goog.dom.TagName.DIV);
-	/** @type {Element} */
-	var elem = goog.dom.createElement(goog.dom.TagName.DIV);
-
-	setPrefixedValueCSS(c, 'display', 'box', 'width:42px;padding:0;');
-	// Sets the property of a specified element adding vendor prefixes to the NAME of the property.
-	elem.style.cssText = npf.userAgent.Support.prefixes.join('box-flex:1;') + 'width:10px;';
-
-	goog.dom.appendChild(c, elem);
-	goog.dom.appendChild(document.documentElement, c);
-
-	/** @type {boolean} */
-	var ret = elem.offsetWidth === 42;
-
-	goog.dom.removeNode(elem);
-	goog.dom.removeNode(c);
-
-	return ret;
+/**
+ * The *old* flexbox
+ * www.w3.org/TR/2009/WD-css3-flexbox-20090723/
+ * @return {boolean}
+ * @private
+ */
+npf.userAgent.Support.prototype._testFlexboxLegacy = function() {
+	return this._testPropsAll('boxDirection');
 };
 
 /**
@@ -613,7 +610,7 @@ npf.userAgent.Support.prototype._testGeneratedContent = function() {
  * @private
  */
 npf.userAgent.Support.prototype._testGeolocation = function() {
-	return !!navigator.geolocation;
+	return 'geolocation' in navigator;
 };
 
 /**
@@ -659,7 +656,7 @@ npf.userAgent.Support.prototype._testIndexedDb = function() {
 		}
 	}
 
-  return !!window.indexedDB;
+	return !!window.indexedDB;
 };
 
 /**
@@ -675,31 +672,32 @@ npf.userAgent.Support.prototype._testInlineSvg = function() {
 	return (div.firstChild && div.firstChild.namespaceURI) == npf.userAgent.Support.Ns.SVG;
 };
 
-// Firefox has made these tests rather unfun.
-
-// In FF4, if disabled, window.localStorage should === null.
-
-// Normally, we could not test that directly and need to do a
-//   `('localStorage' in window) && ` test first because otherwise Firefox will
-//   throw http://bugzil.la/365772 if cookies are disabled
-
-// However, in Firefox 4 betas, if dom.storage.enabled == false, just mentioning
-//   the property will throw an exception. http://bugzil.la/599479
-// This looks to be fixed for FF4 Final.
-
-// Because we are forced to try/catch this, we'll go aggressive.
-
-// FWIW: IE8 Compat mode supports these features completely:
-//   http://www.quirksmode.org/dom/html5.html
-// But IE8 doesn't support either with local files
-
 /**
+ * In FF4, if disabled, window.localStorage should === null.
+ *
+ * Normally, we could not test that directly and need to do a
+ * 	`('localStorage' in window) && ` test first because otherwise Firefox will
+ * 	throw bugzil.la/365772 if cookies are disabled
+ *
+ * Also in iOS5 Private Browsing mode, attempting to use localStorage.setItem
+ * will throw the exception:
+ * 	QUOTA_EXCEEDED_ERRROR DOM Exception 22.
+ * Peculiarly, getItem and removeItem calls do not throw.
+ *
+ * Because we are forced to try/catch this, we'll go aggressive.
+ *
+ * Just FWIW: IE8 Compat mode supports these features completely:
+ * 	www.quirksmode.org/dom/html5.html
+ * But IE8 doesn't support either with local files
  * @return {boolean}
  * @private
  */
 npf.userAgent.Support.prototype._testLocalStorage = function() {
 	try {
-		return !!window.localStorage.getItem;
+		window.localStorage.setItem(npf.userAgent.Support.MOD, npf.userAgent.Support.MOD);
+		window.localStorage.removeItem(npf.userAgent.Support.MOD);
+
+		return true;
 	} catch(e) {
 		return false;
 	}
@@ -764,7 +762,10 @@ npf.userAgent.Support.prototype._testRgba = function() {
  */
 npf.userAgent.Support.prototype._testSessionStorage = function() {
 	try {
-		return !!window.sessionStorage.getItem;
+		window.sessionStorage.setItem(npf.userAgent.Support.MOD, npf.userAgent.Support.MOD);
+		window.sessionStorage.removeItem(npf.userAgent.Support.MOD);
+
+		return true;
 	} catch(e) {
 		return false;
 	}
@@ -775,7 +776,7 @@ npf.userAgent.Support.prototype._testSessionStorage = function() {
  * @private
  */
 npf.userAgent.Support.prototype._testSmil = function() {
-	return !!document.createElementNS && /SVG/.test(Object.prototype.toString.call(document.createElementNS(npf.userAgent.Support.Ns.SVG, 'animate')));
+	return !!document.createElementNS && /SVGAnimate/.test({}.toString.call(document.createElementNS(npf.userAgent.Support.Ns.SVG, 'animate')));
 };
 
 /**
@@ -791,8 +792,7 @@ npf.userAgent.Support.prototype._testSvg = function() {
  * @private
  */
 npf.userAgent.Support.prototype._testSvgClipPaths = function() {
-	// Possibly returns a false positive in Safari 3.2?
-	return !!document.createElementNS && /SVG/.test(Object.prototype.toString.call(document.createElementNS(npf.userAgent.Support.Ns.SVG, 'clipPath')));
+	return !!document.createElementNS && /SVGClipPath/.test({}.toString.call(document.createElementNS(npf.userAgent.Support.Ns.SVG, 'clipPath')));
 };
 
 /**
@@ -822,17 +822,22 @@ npf.userAgent.Support.prototype._testTextShadow = function() {
 npf.userAgent.Support.prototype._testTouch = function() {
 	/** @type {boolean} */
 	var isPropertySupported;
-	/** @type {string} */
-	var id = 'testTouch';
-	/** @type {string} */
-	var style = ['@media (', npf.userAgent.Support.prefixes.join('touch-enabled),('), npf.userAgent.Support.MOD, ')', '{#', id, '{top:9px;position:absolute}}'].join('');
 
-	this._testStyles(style, function(node, rule) {
-		// IE8 will bork if you create a custom build that excludes both fontface and generatedcontent tests.
-		// So we check for cssRules and that there is a rule available
-		// More here: https://github.com/Modernizr/Modernizr/issues/288 & https://github.com/Modernizr/Modernizr/issues/293
-		isPropertySupported = ('ontouchstart' in window) || node.childNodes[0].offsetTop === 9;
-	}, id);
+	if (('ontouchstart' in window) || window['DocumentTouch'] && document instanceof window['DocumentTouch']) {
+		isPropertySupported = true;
+	} else {
+		/** @type {string} */
+		var id = 'testTouch';
+		/** @type {string} */
+		var style = ['@media (', npf.userAgent.Support.prefixes.join('touch-enabled),('), npf.userAgent.Support.MOD, ')', '{#', id, '{top:9px;position:absolute}}'].join('');
+
+		this._testStyles(style, function(node, rule) {
+			// IE8 will bork if you create a custom build that excludes both fontface and generatedcontent tests.
+			// So we check for cssRules and that there is a rule available
+			// More here: https://github.com/Modernizr/Modernizr/issues/288 & https://github.com/Modernizr/Modernizr/issues/293
+			isPropertySupported = node.childNodes[0].offsetTop === 9;
+		}, id);
+	}
 
 	return isPropertySupported;
 };
@@ -866,13 +871,10 @@ npf.userAgent.Support.prototype._testVideo = function() {
 
 		if (bool) {
 			bool = new Boolean(bool);
-			bool.ogg = elem.canPlayType('video/ogg; codecs="theora"');
-
-			// Workaround required for IE9, which doesn't report video support without audio codec specified.
-			//   bug 599718 @ msft connect
-			var h264 = 'video/mp4; codecs="avc1.42E01E';
-			bool.h264 = elem.canPlayType(h264 + '"') || elem.canPlayType(h264 + ', mp4a.40.2"');
-			bool.webm = elem.canPlayType('video/webm; codecs="vp8, vorbis"');
+			bool.ogg = elem.canPlayType('video/ogg; codecs="theora"').replace(/^no$/, '');
+			// Without QuickTime, this value will be `undefined`. github.com/Modernizr/Modernizr/issues/546
+			bool.h264 = elem.canPlayType('video/mp4; codecs="avc1.42E01E"').replace(/^no$/, '');
+			bool.webm = elem.canPlayType('video/webm; codecs="vp8, vorbis"').replace(/^no$/, '');
 		}
 	} catch(e) { }
 
@@ -900,13 +902,7 @@ npf.userAgent.Support.prototype._testWebgl = function() {
  * @private
  */
 npf.userAgent.Support.prototype._testWebSockets = function() {
-	for (var i = -1, len = npf.userAgent.Support.domPrefixes.length; ++i < len;) {
-		if (window[npf.userAgent.Support.domPrefixes[i] + 'WebSocket']) {
-			return true;
-		}
-	}
-
-	return 'WebSocket' in window;
+	return 'WebSocket' in window || 'MozWebSocket' in window;
 };
 
 /**
@@ -922,9 +918,7 @@ npf.userAgent.Support.prototype._testWebSockets = function() {
  * @private
  */
 npf.userAgent.Support.prototype._testWebSqlDatabase = function() {
-	var result = !!window.openDatabase;
-
-	return result;
+	return !!window.openDatabase;
 };
 
 /**
@@ -960,6 +954,12 @@ npf.userAgent.Support.prototype._webforms = function() {
 
 		for (var i = 0, len = props.length; i < len; i++) {
 			attrs[props[i]] = !!(props[i] in inputElement);
+		}
+
+		if (attrs['list']) {
+			// safari false positive's on datalist: webk.it/74252
+			// see also github.com/Modernizr/Modernizr/issues/146
+			attrs['list'] = !!(goog.dom.createElement('datalist') && window['HTMLDataListElement']);
 		}
 
 		return attrs;
@@ -1006,13 +1006,6 @@ npf.userAgent.Support.prototype._webforms = function() {
 				} else if (/^(url|email)$/.test(inputElemType)) {
 					// Real url and email support comes with prebaked validation.
 					bool = inputElement.checkValidity && inputElement.checkValidity() === false;
-				} else if (/^color$/.test(inputElemType)) {
-					// chuck into DOM and force reflow for Opera bug in 11.00
-					// github.com/Modernizr/Modernizr/issues#issue/159
-					goog.dom.appendChild(document.documentElement, inputElement);
-					var t = document.documentElement.offsetWidth;
-					bool = inputElement.value != npf.userAgent.Support.SMILE;
-					goog.dom.removeNode(inputElement);
 				} else {
 					// If the upgraded input compontent rejects the :) text, we got a winner
 					bool = inputElement.value != npf.userAgent.Support.SMILE;
@@ -1084,7 +1077,7 @@ npf.userAgent.Support.prototype._contains = function(str, substr) {
  */
 npf.userAgent.Support.prototype._testPropsAll = function(prop) {
 	var ucProp = prop.charAt(0).toUpperCase() + prop.substr(1);
-	var props = (prop + ' ' + npf.userAgent.Support.domPrefixes.join(ucProp + ' ') + ucProp).split(' ');
+	var props = (prop + ' ' + npf.userAgent.Support.cssomPrefixes.join(ucProp + ' ') + ucProp).split(' ');
 
 	return this._testProps(props);
 };
@@ -1099,7 +1092,7 @@ npf.userAgent.Support.prototype._testPropsAll = function(prop) {
  */
 npf.userAgent.Support.prototype._testProps = function(props) {
 	for (var i in props) {
-		if (goog.isDef(this._mStyle[props[i]])) {
+		if (!this._contains(props[i], '-') && goog.isDef(this._mStyle[props[i]])) {
 			return true;
 		}
 	}
@@ -1321,6 +1314,13 @@ npf.userAgent.support.isDragAndDropSupported = function() {
  */
 npf.userAgent.support.isFlexBoxSupported = function() {
 	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.FLEX_BOX));
+};
+
+/**
+ * @return {boolean}
+ */
+npf.userAgent.support.isFlexBoxLegacySupported = function() {
+	return /** @type {boolean} */ (npf.userAgent.Support.getInstance().isPropertySupported(npf.userAgent.Support.Property.FLEX_BOX_LEGACY));
 };
 
 /**
