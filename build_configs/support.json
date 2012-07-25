@@ -1,0 +1,6 @@
+{
+  "id": "event_dispatcher",
+  "inherits": "base_config",
+  "inputs": "../lib/support/support.js",
+  "output-file": "../build/npf_support.js"
+}

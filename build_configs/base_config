@@ -1,0 +1,28 @@
+{
+	"paths": ["../source", "../lib"],
+	"mode": "ADVANCED",
+	"level": "VERBOSE",
+
+	"checks": {
+	  // Unfortunately, the Closure Library violates these in many places.
+	  // "accessControls": "ERROR",
+	  // "visibility": "ERROR"
+
+	  "checkRegExp": "ERROR",
+	  "checkTypes": "ERROR",
+	  "checkVars": "ERROR",
+	  "deprecated": "ERROR",
+	  "fileoverviewTags": "ERROR",
+	  "invalidCasts": "ERROR",
+	  "missingProperties": "ERROR",
+	  "nonStandardJsDocs": "ERROR",
+	  "undefinedVars": "ERROR"
+	},
+
+	"define": {
+	  "goog.DEBUG": false
+	},
+
+	"output-wrapper": "(function(){%output%})();",
+	"output-charset": "utf-8"
+}

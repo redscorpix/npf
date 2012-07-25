@@ -1,0 +1,6 @@
+{
+  "id": "transition",
+  "inherits": "base_config",
+  "inputs": "../lib/transition/transition.js",
+  "output-file": "../build/npf_animation.js"
+}
