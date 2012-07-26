@@ -62,6 +62,83 @@ boolean npfAnimation.isCssTransform3dSupported()
 Возвращает true, если браузер поддерживает CSS Transform 3D.
 
 
+class NpfAnimationQueue()
+Класс для последовательности анимаций.
+
+
+!NpfAnimationQueue NpfAnimationQueue.prototype.play(boolean= opt_restart)
+Запускает анимацию.
+opt_restart — начать анимацию с начала.
+
+
+!NpfAnimationQueue NpfAnimationQueue.prototype.pause()
+Ставит анимацию на паузу.
+
+
+!NpfAnimationQueue NpfAnimationQueue.prototype.stop(boolean= opt_gotoEnd)
+Останавливает анимацию.
+opt_gotoEnd — перейти на последний шаг анимации.
+
+
+NpfAnimationQueue.prototype.dispose()
+Деструктор.
+
+
+NpfAnimationQueue.prototype.disposeInternal()
+Деструктор (protected).
+
+
+!NpfAnimationQueue NpfAnimationQueue.prototype.add(Animation animation)
+Добавляет анимацию в очередь.
+
+
+NpfAnimationQueue.prototype.remove(Animation animation)
+Удаляет анимацию из очереди.
+
+
+?function() NpfAnimationQueue.prototype.onFinish
+Функция, выполняемая при окончании анимации.
+
+
+
+class NpfAnimationParallelQueue()
+Класс для параллельных анимаций.
+
+
+!NpfAnimationParallelQueue NpfAnimationParallelQueue.prototype.play(boolean= opt_restart)
+Запускает анимацию.
+opt_restart — начать анимацию с начала.
+
+
+!NpfAnimationParallelQueue NpfAnimationParallelQueue.prototype.pause()
+Ставит анимацию на паузу.
+
+
+!NpfAnimationParallelQueue NpfAnimationParallelQueue.prototype.stop(boolean= opt_gotoEnd)
+Останавливает анимацию.
+opt_gotoEnd — перейти на последний шаг анимации.
+
+
+NpfAnimationParallelQueue.prototype.dispose()
+Деструктор.
+
+
+NpfAnimationParallelQueue.prototype.disposeInternal()
+Деструктор (protected).
+
+
+!NpfAnimationParallelQueue NpfAnimationParallelQueue.prototype.add(Animation animation)
+Добавляет анимацию в очередь.
+
+
+!NpfAnimationParallelQueue NpfAnimationParallelQueue.prototype.remove(Animation animation)
+Удаляет анимацию из очереди.
+
+
+?function() NpfAnimationParallelQueue.prototype.onFinish
+Функция, выполняемая при окончании анимации.
+
+
 class NpfJsAnimation(Element element, number time, Array.<number>|string|function(number):number|null= opt_acc)
 Класс анимации с помощью JS.
 element — элемент, который будет анимироваться.
@@ -85,6 +162,9 @@ opt_gotoEnd — перейти на последний шаг анимации.
 
 NpfJsAnimation.prototype.dispose()
 Деструктор.
+
+NpfJsAnimation.prototype.disposeInternal()
+Деструктор (protected).
 
 
 !NpfJsAnimation NpfJsAnimation.prototype.addBgColorTransform(
@@ -337,6 +417,64 @@ opt_time — Length of animation in milliseconds.
 opt_acc — функция аселлерации.
 
 
+?function(number,number,Element) NpfJsAnimation.prototype.onBegin
+Функция, вызываемая в начале анимации.
+Первый аргумент — число от 0 до 1 — прогресс анимации.
+Второй аргумент — длительность анимации.
+Третий аргумент — элемент, который анимируется.
+
+
+?function(number,number,Element) NpfJsAnimation.prototype.onEnd
+Функция, вызываемая в конце анимации.
+Первый аргумент — число от 0 до 1 — прогресс анимации.
+Второй аргумент — длительность анимации.
+Третий аргумент — элемент, который анимируется.
+
+
+?function(number,number,Element) NpfJsAnimation.prototype.onFinish
+Функция, вызываемая, когда анимация выполнилась полностью.
+Первый аргумент — число от 0 до 1 — прогресс анимации.
+Второй аргумент — длительность анимации.
+Третий аргумент — элемент, который анимируется.
+
+
+?function(number,number,Element) NpfJsAnimation.prototype.onPause
+Функция, вызываемая при паузе анимации.
+Первый аргумент — число от 0 до 1 — прогресс анимации.
+Второй аргумент — длительность анимации.
+Третий аргумент — элемент, который анимируется.
+
+
+?function(number,number,Element) NpfJsAnimation.prototype.onPlay
+Функция, вызываемая при проигрывании анимации (начали анимацию или возобновили ее).
+Первый аргумент — число от 0 до 1 — прогресс анимации.
+Второй аргумент — длительность анимации.
+Третий аргумент — элемент, который анимируется.
+
+
+?function(number,number,Element) NpfJsAnimation.prototype.onResume
+Функция, вызываемая при возобновлении анимации.
+Первый аргумент — число от 0 до 1 — прогресс анимации.
+Второй аргумент — длительность анимации.
+Третий аргумент — элемент, который анимируется.
+
+
+?function(number,number,Element) NpfJsAnimation.prototype.onStop
+Функция, вызываемая при остановке анимации.
+Первый аргумент — число от 0 до 1 — прогресс анимации.
+Второй аргумент — длительность анимации.
+Третий аргумент — элемент, который анимируется.
+
+
+?function(number,number,Element) NpfJsAnimation.prototype.onProgress
+Функция, вызываемая на каждом шаге анимации.
+Первый аргумент — число от 0 до 1 — прогресс анимации.
+Второй аргумент — длительность анимации.
+Третий аргумент — элемент, который анимируется.
+
+
+
+
 class NpfCssAnimation(Element, element, number time, Array.<number>|string= opt_acc)
 Класс анимации с помощью CSS.
 element — элемент, который будет анимироваться.
@@ -360,6 +498,9 @@ opt_gotoEnd — перейти на последний шаг анимации.
 
 NpfCssAnimation.prototype.dispose()
 Деструктор.
+
+NpfCssAnimation.prototype.disposeInternal()
+Деструктор (protected).
 
 
 number NpfCssAnimation.prototype.getIterationCount()
@@ -470,3 +611,51 @@ opt_acc — функция акселлерации.
 
 !NpfCssAnimation NpfCssAnimation.prototype.setTransformOrigin(string|Array.<number|string> origin)
 origin — значения стиля transform-origin
+
+
+?function(number,Element) NpfCssAnimation.prototype.onBegin
+Функция, вызываемая в начале анимации.
+Первый аргумент — длительность анимации.
+Второй аргумент — элемент, который анимируется.
+
+
+?function(number,Element) NpfCssAnimation.prototype.onEnd
+Функция, вызываемая в конце анимации.
+Первый аргумент — длительность анимации.
+Второй аргумент — элемент, который анимируется.
+
+
+?function(number,Element) NpfCssAnimation.prototype.onFinish
+Функция, вызываемая, когда анимация выполнилась полностью.
+Первый аргумент — длительность анимации.
+Второй аргумент — элемент, который анимируется.
+
+
+?function(number,Element) NpfCssAnimation.prototype.onPause
+Функция, вызываемая при паузе анимации.
+Первый аргумент — длительность анимации.
+Второй аргумент — элемент, который анимируется.
+
+
+?function(number,Element) NpfCssAnimation.prototype.onPlay
+Функция, вызываемая при проигрывании анимации (начали анимацию или возобновили ее).
+Первый аргумент — длительность анимации.
+Второй аргумент — элемент, который анимируется.
+
+
+?function(number,Element) NpfCssAnimation.prototype.onResume
+Функция, вызываемая при возобновлении анимации.
+Первый аргумент — длительность анимации.
+Второй аргумент — элемент, который анимируется.
+
+
+?function(number,Element) NpfCssAnimation.prototype.onStop
+Функция, вызываемая при остановке анимации.
+Первый аргумент — длительность анимации.
+Второй аргумент — элемент, который анимируется.
+
+
+?function(number,Element) NpfCssAnimation.prototype.onIterate
+Функция, вызываемая в начале новой итерации.
+Первый аргумент — длительность анимации.
+Второй аргумент — элемент, который анимируется.
