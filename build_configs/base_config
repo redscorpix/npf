@@ -1,6 +1,7 @@
 {
 	"paths": ["../source", "../lib"],
 	"mode": "ADVANCED",
+	// "mode": "SIMPLE",
 	"level": "VERBOSE",
 
 	"checks": {
@@ -19,6 +20,12 @@
 	  "undefinedVars": "ERROR"
 	},
 
+	"externs": [
+	  "//jquery-1.5.js",
+	  "//google_maps_api_v3.js",
+	  "//chrome_extensions.js"
+	],
+	
 	"define": {
 	  "goog.DEBUG": false
 	},
