@@ -22,8 +22,8 @@ goog.addDependency('../../../source/fx/keyframe_animation/keyframe_animation.js'
 goog.addDependency('../../../source/history/history.js', ['npf.History'], ['goog.History', 'goog.Uri', 'goog.dom', 'goog.dom.TagName', 'goog.dom.classes', 'goog.events', 'goog.events.EventTarget', 'goog.history.EventType', 'goog.history.Html5History', 'npf.events.TapHandler', 'npf.history.TokenTransformer']);
 goog.addDependency('../../../source/history/token_transformer.js', ['npf.history.TokenTransformer'], ['goog.history.Html5History.TokenTransformer']);
 goog.addDependency('../../../source/net/xhr_io.js', ['npf.net.XhrIo'], ['goog.Uri', 'goog.Uri.QueryData', 'goog.net.XhrIo', 'goog.object', 'goog.structs']);
-goog.addDependency('../../../source/pages/manager.js', ['npf.pages.Manager'], ['goog.Uri', 'goog.array', 'goog.events', 'goog.events.EventHandler', 'goog.events.EventTarget', 'goog.net.HttpStatus', 'goog.object', 'npf.Router', 'npf.pages.Page', 'npf.pages.Request']);
-goog.addDependency('../../../source/pages/page.js', ['npf.pages.Page'], ['goog.events', 'goog.events.EventHandler', 'goog.events.EventTarget', 'goog.net.HttpStatus', 'goog.object', 'npf.Router', 'npf.pages.Request']);
+goog.addDependency('../../../source/pages/manager.js', ['npf.pages.Manager'], ['goog.Uri', 'goog.array', 'goog.events', 'goog.events.EventHandler', 'goog.events.EventTarget', 'goog.net.HttpStatus', 'goog.object', 'npf.Router', 'npf.pages.Page', 'npf.pages.Page.EventType', 'npf.pages.Request']);
+goog.addDependency('../../../source/pages/page.js', ['npf.pages.Page', 'npf.pages.Page.EventType'], ['goog.events', 'goog.events.EventHandler', 'goog.events.EventTarget', 'npf.Router', 'npf.pages.Request']);
 goog.addDependency('../../../source/pages/request.js', ['npf.pages.Request'], ['goog.object', 'npf.router.Route']);
 goog.addDependency('../../../source/reg_exp/reg_exp.js', ['npf.regExp'], ['goog.array', 'goog.object']);
 goog.addDependency('../../../source/router/route.js', ['npf.router.Route'], ['goog.Uri', 'goog.Uri.QueryData', 'goog.array', 'goog.object', 'goog.string', 'npf.string']);
