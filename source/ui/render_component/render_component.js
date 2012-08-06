@@ -7,7 +7,7 @@ goog.require('npf.ui.renderComponent.Renderer');
 
 
 /**
- * @param {npf.ui.renderComponent.Renderer=} opt_renderer Renderer used to render or decorate the release.
+ * @param {npf.ui.renderComponent.Renderer=} opt_renderer Renderer used to render or decorate the component.
  * @param {goog.dom.DomHelper=} opt_domHelper DOM helper, used for document interaction.
  * @constructor
  * @extends {npf.ui.Component}

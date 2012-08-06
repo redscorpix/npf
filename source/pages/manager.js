@@ -22,8 +22,8 @@ npf.pages.Manager = function(router) {
 	goog.base(this);
 
 	this._router = router;
-	this._pagesMap = {};
-	this._errorPagesMap = {};
+	this._pageCtrsMap = {};
+	this._errorPageCtrsMap = {};
 	this._routeNamesMap = {};
 	this._helpersMap = {};
 	this._requestHistory = [];
@@ -38,11 +38,13 @@ goog.inherits(npf.pages.Manager, goog.events.EventTarget);
  * @enum {string}
  */
 npf.pages.Manager.EventType = {
+
 	/**
 	 * request (npf.pages.Request)
 	 * page (npf.pages.Page)
 	 */
 	LOAD: goog.events.getUniqueId('load'),
+
 	/**
 	 * request (npf.pages.Request)
 	 * page (npf.pages.Page)
@@ -57,16 +59,16 @@ npf.pages.Manager.EventType = {
 npf.pages.Manager.prototype._router;
 
 /**
- * @type {!Object.<string,npf.pages.Page>}
+ * @type {!Object.<string,Function>}
  * @private
  */
-npf.pages.Manager.prototype._pagesMap;
+npf.pages.Manager.prototype._pageCtrsMap;
 
 /**
- * @type {!Object.<string,npf.pages.Page>}
+ * @type {!Object.<string,Function>}
  * @private
  */
-npf.pages.Manager.prototype._errorPagesMap;
+npf.pages.Manager.prototype._errorPageCtrsMap;
 
 /**
  * @type {!Object.<string,Array.<string>>}
@@ -91,6 +93,12 @@ npf.pages.Manager.prototype._handler;
  * @private
  */
 npf.pages.Manager.prototype._page = null;
+
+/**
+ * @type {?string}
+ * @private
+ */
+npf.pages.Manager.prototype._pageType = null;
 
 /**
  * @type {npf.pages.Request}
@@ -119,19 +127,13 @@ npf.pages.Manager.prototype._requestHistoryLimit = 1;
 
 /** @inheritDoc */
 npf.pages.Manager.prototype.disposeInternal = function() {
-	goog.object.forEach(this._pagesMap, function(page) {
-		page.dispose();
-	}, this);
-
-	goog.object.forEach(this._errorPagesMap, function(page) {
-		page.dispose();
-	}, this);
+	this.unloadPage(this.getCurrentPage());
 
 	goog.base(this, 'disposeInternal');
 
 	delete this._router;
-	delete this._pagesMap;
-	delete this._errorPagesMap;
+	delete this._pageCtrsMap;
+	delete this._errorPageCtrsMap;
 	delete this._routeNamesMap;
 	delete this._helpersMap;
 	delete this._handler;
@@ -157,7 +159,8 @@ npf.pages.Manager.prototype._onNavigate = function(evt) {
 	var options = /** @type {Object.<string,string>} */ (evt.options);
 
 	if (!this._request || this._request.uri.toString() != uri.toString()) {
-		this.loadInternal(uri, route, routeName, options);
+		var request = new npf.pages.Request(uri, route, routeName, options);
+		this.navigatePage(request);
 	}
 };
 
@@ -169,9 +172,9 @@ npf.pages.Manager.prototype.getHandler = function() {
 };
 
 /**
- * @param {string|!goog.Uri} token
+ * @param {string|goog.Uri} token
  */
-npf.pages.Manager.prototype.load = function(token) {
+npf.pages.Manager.prototype.navigate = function(token) {
 	var info = this._router.parseToken(token);
 	/** @type {!goog.Uri} */
 	var uri = info.uri;
@@ -183,79 +186,110 @@ npf.pages.Manager.prototype.load = function(token) {
 	var options = info.options;
 
 	if (!this._request || this._request.uri.toString() != uri.toString()) {
-		this.loadInternal(uri, route, routeName, options);
-	}
-};
-
-/**
- * @param {goog.Uri} uri
- * @param {npf.router.Route=} opt_route
- * @param {string=} opt_routeName
- * @param {Object.<string,string>=} opt_options
- * @protected
- */
-npf.pages.Manager.prototype.loadInternal = function(uri, opt_route, opt_routeName, opt_options) {
-	/** @type {npf.pages.Page} */
-	var page = opt_routeName ? this.getPageByRoute(opt_routeName) : null;
-
-	if (page) {
-		var request = new npf.pages.Request(uri, opt_route || null, goog.isDef(opt_routeName) ? opt_routeName : '', opt_options || null);
-
-		this._load(request, page);
-	} else {
-		this.loadError();
+		var request = new npf.pages.Request(uri, route, routeName, options);
+		this.navigatePage(request);
 	}
 };
 
 /**
  * @param {npf.pages.Request} request
- * @param {npf.pages.Page} page
- * @private
+ * @protected
  */
-npf.pages.Manager.prototype._load = function(request, page) {
+npf.pages.Manager.prototype.navigatePage = function(request) {
 	if (this._request) {
 		this.addRequestToHistory(this._request);
 	}
 
 	this._request = request;
 
-	/** @type {npf.pages.Page} */
-	var unloadPage = this._page && this._page !== page ? this._page : null;
-	this.loadPage(page, unloadPage);
+	/** @type {Function} */
+	var Page = '' == request.name ? null : this.getPageCtrByRoute(request.name);
+
+	if (Page) {
+		this.navigatePageInternal(request, Page);
+	} else {
+		this.navigateErrorInternal(goog.net.HttpStatus.NOT_FOUND, request);
+	}
 };
 
 /**
- * @param {npf.pages.Page} page
- * @param {npf.pages.Page=} opt_unloadedPage
+ * @param {goog.net.HttpStatus=} opt_status Default is goog.net.HttpStatus.NOT_FOUND.
+ */
+npf.pages.Manager.prototype.navigateError = function(opt_status) {
+	/** @type {goog.net.HttpStatus} */
+	var status = opt_status || goog.net.HttpStatus.NOT_FOUND;
+	/** @type {npf.pages.Request} */
+	var request = new npf.pages.Request(this._router.getUri(), null, '', null);
+	this.navigateErrorInternal(status, request);
+};
+
+/**
+ * @param {goog.net.HttpStatus} status
+ * @param {npf.pages.Request} request
  * @protected
  */
-npf.pages.Manager.prototype.loadPage = function(page, opt_unloadedPage) {
-	if (opt_unloadedPage) {
-		this.unloadPageInternal(opt_unloadedPage);
-	}
+npf.pages.Manager.prototype.navigateErrorInternal = function(status, request) {
+	/** @type {Function} */
+	var Page = this._errorPageCtrsMap[/** @type {string} */ (status)] || null;
 
+	if (Page) {
+		this.navigatePageInternal(request, Page);
+	}
+};
+
+/**
+ * @param {npf.pages.Request} request
+ * @param {Function} Page
+ * @protected
+ */
+npf.pages.Manager.prototype.navigatePageInternal = function(request, Page) {
+	this.unloadPage(this.getCurrentPage());
+	this.loadPage(request, Page);
+};
+
+/**
+ * @param {npf.pages.Request} request
+ * @param {Function} Page
+ * @return {!npf.pages.Page}
+ * @protected
+ */
+npf.pages.Manager.prototype.loadPage = function(request, Page) {
+	this._page = /** @type {npf.pages.Page} */ (new Page(this));
+	this._page.addEventListener(npf.pages.Page.EventType.ERROR, this._onPageError, false, this);
+	this._page.addEventListener(npf.pages.Page.EventType.TITLE_CHANGE, this._onPageTitleChange, false, this);
+	this.loadPageInternal(request, this._page);
+	this.dispatchLoadEvent();
+
+	return this._page;
+};
+
+/**
+ * @param {npf.pages.Request} request
+ * @param {npf.pages.Page} page
+ * @protected
+ */
+npf.pages.Manager.prototype.loadPageInternal = function(request, page) {
 	this._updateHelpers(page);
 	this.setTitle(page.getTitle());
-	this.loadPageInternal(page);
+	page.load(request);
 };
 
 /**
  * @param {npf.pages.Page} page
  * @protected
  */
-npf.pages.Manager.prototype.loadPageInternal = function(page) {
-	this._page = page;
-	page.load(this.getRequest());
-	this.dispatchLoadEvent();
+npf.pages.Manager.prototype.unloadPage = function(page) {
+	if (page) {
+		this.unloadPageInternal(page);
+		this.dispatchUnloadEvent(page);
+	}
 };
 
 /**
- * @param {npf.pages.Page} page
  * @protected
  */
 npf.pages.Manager.prototype.unloadPageInternal = function(page) {
-	page.unload();
-	this.dispatchUnloadEvent(page);
+	page.dispose();
 };
 
 /**
@@ -330,40 +364,15 @@ npf.pages.Manager.prototype.setTitleInternal = function(title) {
  */
 npf.pages.Manager.prototype._onPageError = function(evt) {
 	var status = /** @type {goog.net.HttpStatus} */ (evt.status);
-	this.loadError(status);
+	this.navigateError(status);
 };
 
 /**
- * @param {goog.net.HttpStatus=} opt_status
- */
-npf.pages.Manager.prototype.loadError = function(opt_status) {
-	/** @type {goog.net.HttpStatus} */
-	var status = opt_status || goog.net.HttpStatus.NOT_FOUND;
-	/** @type {npf.pages.Page} */
-	var page = this._errorPagesMap[/** @type {string} */ (status)] || null;
-
-	if (page) {
-		this.loadErrorInternal(status, this._router.getUri(), page);
-	}
-};
-
-/**
- * @param {number} status
- * @param {goog.Uri} uri
- * @param {npf.pages.Page} page
- * @protected
- */
-npf.pages.Manager.prototype.loadErrorInternal = function(status, uri, page) {
-	var request = new npf.pages.Request(uri, null, '', null);
-	this._load(request, page);
-};
-
-/**
- * @param {npf.pages.Page} page
+ * @param {Function} Page
  * @param {string} pageType
  * @param {string|Array.<string>=} opt_routeNames
  */
-npf.pages.Manager.prototype.addPage = function(page, pageType, opt_routeNames) {
+npf.pages.Manager.prototype.addPageCtr = function(Page, pageType, opt_routeNames) {
 	/** @type {!Array.<string>} */
 	var routeNames = [];
 
@@ -373,62 +382,31 @@ npf.pages.Manager.prototype.addPage = function(page, pageType, opt_routeNames) {
 		routeNames = opt_routeNames;
 	}
 
-	/** @type {npf.pages.Page} */
-	var existPage = this._pagesMap[pageType] || null;
-
-	if (existPage) {
-		existPage.dispose();
-	}
-
-	page.addEventListener(npf.pages.Page.EventType.ERROR, this._onPageError, false, this);
-	page.addEventListener(npf.pages.Page.EventType.TITLE_CHANGE, this._onPageTitleChange, false, this);
-
-	page.setManager(this);
-	this._pagesMap[pageType] = page;
+	this._pageCtrsMap[pageType] = Page;
 	this._routeNamesMap[pageType] = routeNames || [];
 };
 
 /**
  * @param {string} pageType
  */
-npf.pages.Manager.prototype.removePage = function(pageType) {
-	/** @type {npf.pages.Page} */
-	var page = this._pagesMap[pageType] || null;
-
-	if (page) {
-		page.dispose();
-		goog.object.remove(this._pagesMap, pageType);
-		goog.object.remove(this._routeNamesMap, pageType);
-	}
+npf.pages.Manager.prototype.removePageCtr = function(pageType) {
+	goog.object.remove(this._pageCtrsMap, pageType);
+	goog.object.remove(this._routeNamesMap, pageType);
 };
 
 /**
- * @param {npf.pages.Page} page
+ * @param {Function} Page
  * @param {goog.net.HttpStatus} httpStatus
  */
-npf.pages.Manager.prototype.addErrorPage = function(page, httpStatus) {
-	/** @type {npf.pages.Page} */
-	var existPage = this._errorPagesMap[/** @type {string} */ (httpStatus)] || null;
-
-	if (existPage) {
-		existPage.dispose();
-	}
-
-	page.setManager(this);
-	this._errorPagesMap[/** @type {string} */ (httpStatus)] = page;
+npf.pages.Manager.prototype.addErrorPageHandler = function(Page, httpStatus) {
+	this._errorPageCtrsMap[/** @type {string} */ (httpStatus)] = Page;
 };
 
 /**
  * @param {goog.net.HttpStatus} httpStatus
  */
-npf.pages.Manager.prototype.removeErrorPage = function(httpStatus) {
-	/** @type {npf.pages.Page} */
-	var page = this._errorPagesMap[/** @type {string} */ (httpStatus)] || null;
-
-	if (page) {
-		page.dispose();
-		goog.object.remove(this._errorPagesMap, /** @type {string} */ (httpStatus));
-	}
+npf.pages.Manager.prototype.removeErrorPageHandler = function(httpStatus) {
+	goog.object.remove(this._errorPageCtrsMap, /** @type {string} */ (httpStatus));
 };
 
 /**
@@ -436,7 +414,7 @@ npf.pages.Manager.prototype.removeErrorPage = function(httpStatus) {
  * @return {boolean}
  */
 npf.pages.Manager.prototype.hasErrorPage = function(httpStatus) {
-	return !!this._errorPagesMap[/** @type {string} */ (httpStatus)];
+	return !!this._errorPageCtrsMap[/** @type {string} */ (httpStatus)];
 };
 
 /**
@@ -549,14 +527,7 @@ npf.pages.Manager.prototype.getRouter = function() {
  * @return {string?}
  */
 npf.pages.Manager.prototype.getCurrentPageType = function() {
-	/** @type {npf.pages.Page} */
-	var page = this.getCurrentPage();
-
-	if (page) {
-		return this.getPageType(page);
-	}
-
-	return null;
+	return this._pageType;
 };
 
 /**
@@ -570,29 +541,52 @@ npf.pages.Manager.prototype.getCurrentPage = function() {
  * @param {string} pageType
  * @return {boolean}
  */
-npf.pages.Manager.prototype.hasPage = function(pageType) {
-	return !!this.getPage(pageType);
+npf.pages.Manager.prototype.hasPageCtr = function(pageType) {
+	return !!this.getPageCtr(pageType);
 };
 
 /**
  * @param {string} pageType
- * @return {npf.pages.Page}
+ * @return {Function}
  */
-npf.pages.Manager.prototype.getPage = function(pageType) {
-	return this._pagesMap[pageType] || null;
+npf.pages.Manager.prototype.getPageCtr = function(pageType) {
+	return this._pageCtrsMap[pageType] || null;
 };
 
 /**
  * @param {string} name
- * @return {npf.pages.Page}
+ * @return {string?}
  */
-npf.pages.Manager.prototype.getPageByRoute = function(name) {
-	/** @type {npf.pages.Page} */
-	var page = null;
+npf.pages.Manager.prototype.getPageTypeByRoute = function(name) {
+	/** @type {?string} */
+	var pageType = null;
 
-	goog.object.every(this._routeNamesMap, function(routeNames, pageType) {
+	if ('' != name) {
+		goog.object.every(this._routeNamesMap, function(routeNames, type) {
+			if (-1 < goog.array.indexOf(routeNames, name)) {
+				pageType = type;
+
+				return false;
+			}
+
+			return true;
+		}, this);
+	}
+
+	return pageType;
+};
+
+/**
+ * @param {string} name
+ * @return {Function}
+ */
+npf.pages.Manager.prototype.getPageCtrByRoute = function(name) {
+	/** @type {Function} */
+	var Page = null;
+
+	goog.object.every(this._routeNamesMap, function(routeNames, type) {
 		if (-1 < goog.array.indexOf(routeNames, name)) {
-			page = this.getPage(pageType);
+			Page = this.getPageCtr(type);
 
 			return false;
 		}
@@ -600,7 +594,7 @@ npf.pages.Manager.prototype.getPageByRoute = function(name) {
 		return true;
 	}, this);
 
-	return page;
+	return Page;
 };
 
 /**
@@ -642,22 +636,6 @@ npf.pages.Manager.prototype.getRoutesByPageType = function(pageType) {
  */
 npf.pages.Manager.prototype.getRouteNamesByPageType = function(pageType) {
 	return this._routeNamesMap[pageType] || [];
-};
-
-/**
- * @param {npf.pages.Page} page
- * @return {string?}
- */
-npf.pages.Manager.prototype.getPageType = function(page) {
-	if (page) {
-		for (var type in this._pagesMap) {
-			if (this._pagesMap[type] === page) {
-				return type;
-			}
-		}
-	}
-
-	return null;
 };
 
 /**

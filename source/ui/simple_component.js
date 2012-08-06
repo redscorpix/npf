@@ -2,17 +2,18 @@ goog.provide('npf.ui.SimpleComponent');
 
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
-goog.require('goog.ui.Component');
+goog.require('npf.ui.Component');
 
 
 /**
  * @param {string|Array.<string>=} opt_className
  * @param {string|Array.<string>=} opt_contentClassName
+ * @param {goog.dom.DomHelper=} opt_domHelper Optional DOM helper.
  * @constructor
- * @extends {goog.ui.Component}
+ * @extends {npf.ui.Component}
  */
-npf.ui.SimpleComponent = function(opt_className, opt_contentClassName) {
-	goog.base(this);
+npf.ui.SimpleComponent = function(opt_className, opt_contentClassName, opt_domHelper) {
+	goog.base(this, opt_domHelper);
 
 	if (goog.isArray(opt_className)) {
 		this._classNames = opt_className;
@@ -26,7 +27,7 @@ npf.ui.SimpleComponent = function(opt_className, opt_contentClassName) {
 		this._contentClassNames = [opt_contentClassName];
 	}
 };
-goog.inherits(npf.ui.SimpleComponent, goog.ui.Component);
+goog.inherits(npf.ui.SimpleComponent, npf.ui.Component);
 
 
 /**

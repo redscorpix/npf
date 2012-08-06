@@ -9,12 +9,14 @@ goog.require('npf.pages.Request');
 
 
 /**
+ * @param {npf.pages.Manager} manager
  * @constructor
  * @extends {goog.events.EventTarget}
  */
-npf.pages.Page = function() {
+npf.pages.Page = function(manager) {
 	goog.base(this);
 
+	this._manager = manager;
 	this._helpersMap = {};
 
 	this._handler = new goog.events.EventHandler();
@@ -38,6 +40,12 @@ npf.pages.Page.EventType = {
 };
 
 /**
+ * @type {npf.pages.Manager}
+ * @private
+ */
+npf.pages.Page.prototype._manager;
+
+/**
  * @type {!Object.<string,goog.Disposable>}
  * @private
  */
@@ -56,23 +64,10 @@ npf.pages.Page.prototype._handler;
 npf.pages.Page.prototype._isLoaded = false;
 
 /**
- * Флаг, была ли страница загружена до текущей загрузки.
- * @type {boolean}
- * @private
- */
-npf.pages.Page.prototype._wasLoaded = false;
-
-/**
  * @type {string}
  * @private
  */
 npf.pages.Page.prototype._title = '';
-
-/**
- * @type {npf.pages.Manager}
- * @private
- */
-npf.pages.Page.prototype._manager = null;
 
 
 /** @inheritDoc */
@@ -81,32 +76,29 @@ npf.pages.Page.prototype.disposeInternal = function() {
 
 	goog.base(this, 'disposeInternal');
 
+	delete this._manager;
 	delete this._helpersMap;
 	delete this._handler;
 	delete this._isLoaded;
-	delete this._wasLoaded;
 	delete this._title;
-	delete this._manager;
 };
 
 /**
  * @param {npf.pages.Request} request
  */
 npf.pages.Page.prototype.load = function(request) {
-	if (this._isLoaded) {
-		this._wasLoaded = true;
-	}
+	if (!this._isLoaded) {
+		this._isLoaded = true;
 
-	this._isLoaded = true;
+		try {
+			this.loadInternal(request);
+		} catch (e) {
+			if (goog.DEBUG && window.console) {
+	  		window.console.error(e.stack);
+	  	}
 
-	try {
-		this.loadInternal(request);
-	} catch (e) {
-		if (goog.DEBUG && window.console) {
-  		window.console.error(e.stack);
-  	}
-
-  	throw e;
+	  	throw e;
+		}
 	}
 };
 
@@ -124,10 +116,10 @@ npf.pages.Page.prototype.unload = function() {
 	}
 
 	this._isLoaded = false;
+	this._handler.removeAll();
 
 	try {
 		this.unloadInternal();
-		this._wasLoaded = false;
 	} catch (e) {
 		if (goog.DEBUG && window.console) {
   		window.console.error(e.stack);
@@ -149,13 +141,6 @@ npf.pages.Page.prototype.unloadInternal = function() {
  */
 npf.pages.Page.prototype.isLoaded = function() {
 	return this._isLoaded;
-};
-
-/**
- * @return {boolean}
- */
-npf.pages.Page.prototype.wasLoaded = function() {
-	return this._wasLoaded;
 };
 
 /**

@@ -67,7 +67,7 @@ goog.addDependency('../../../source/ui/scroll_bar/size_monitor.js', ['npf.ui.scr
 goog.addDependency('../../../source/ui/scroll_bar/vertical_scroller.js', ['npf.ui.scrollBar.VerticalScroller'], ['goog.math.Rect', 'goog.style', 'npf.ui.scrollBar.Scroller']);
 goog.addDependency('../../../source/ui/search_input/renderer.js', ['npf.ui.searchInput.Renderer'], ['goog.dom', 'goog.dom.TagName', 'goog.dom.forms', 'goog.style', 'npf.ui.renderComponent.Renderer']);
 goog.addDependency('../../../source/ui/search_input/search_input.js', ['npf.ui.SearchInput'], ['goog.events.InputHandler', 'npf.ui.RenderComponent', 'npf.ui.searchInput.Renderer']);
-goog.addDependency('../../../source/ui/simple_component.js', ['npf.ui.SimpleComponent'], ['goog.dom', 'goog.dom.TagName', 'goog.ui.Component']);
+goog.addDependency('../../../source/ui/simple_component.js', ['npf.ui.SimpleComponent'], ['goog.dom', 'goog.dom.TagName', 'npf.ui.Component']);
 goog.addDependency('../../../source/ui/sticky_head/body.js', ['npf.ui.stickyHead.Body'], ['npf.ui.RenderComponent', 'npf.ui.stickyHead.BodyRenderer']);
 goog.addDependency('../../../source/ui/sticky_head/body_renderer.js', ['npf.ui.stickyHead.BodyRenderer'], ['npf.ui.renderComponent.Renderer']);
 goog.addDependency('../../../source/ui/sticky_head/head.js', ['npf.ui.stickyHead.Head'], ['npf.ui.RenderComponent', 'npf.ui.stickyHead.HeadRenderer']);
