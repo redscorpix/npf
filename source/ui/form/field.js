@@ -17,10 +17,11 @@ goog.require('npf.ui.form.FieldRenderer');
  * @extends {npf.ui.RenderComponent}
  */
 npf.ui.form.Field = function(name, opt_renderer, opt_domHelper) {
-	goog.base(this, opt_renderer || npf.ui.form.FieldRenderer.getInstance(), opt_domHelper);
+  goog.base(this, opt_renderer || npf.ui.form.FieldRenderer.getInstance(),
+    opt_domHelper);
 
-	this._name = name;
-	this._validators = [];
+  this.name_ = name;
+  this.validators_ = [];
 };
 goog.inherits(npf.ui.form.Field, npf.ui.RenderComponent);
 
@@ -29,129 +30,129 @@ goog.inherits(npf.ui.form.Field, npf.ui.RenderComponent);
  * @enum {string}
  */
 npf.ui.form.Field.ErrorMessage = {
-	REQUIRED: 'Необходимо заполнить поле'
+  REQUIRED: 'Необходимо заполнить поле'
 };
 
 /**
  * @type {string}
  * @private
  */
-npf.ui.form.Field.prototype._name;
+npf.ui.form.Field.prototype.name_;
 
 /**
  * @type {*}
  * @private
  */
-npf.ui.form.Field.prototype._value;
+npf.ui.form.Field.prototype.value_;
 
 /**
  * @type {Array.<function(*):string>}
  * @private
  */
-npf.ui.form.Field.prototype._validators;
+npf.ui.form.Field.prototype.validators_;
 
 /**
  * @type {boolean}
  * @private
  */
-npf.ui.form.Field.prototype._required = false;
+npf.ui.form.Field.prototype.required_ = false;
 
 /**
  * @type {boolean}
  * @private
  */
-npf.ui.form.Field.prototype._isEnabled = true;
+npf.ui.form.Field.prototype.enabled_ = true;
 
 /**
  * @type {string}
  * @private
  */
-npf.ui.form.Field.prototype._label = '';
+npf.ui.form.Field.prototype.label_ = '';
 
 /**
  * @type {string}
  * @private
  */
-npf.ui.form.Field.prototype._notice = '';
+npf.ui.form.Field.prototype.notice_ = '';
 
 /**
  * @type {string}
  * @private
  */
-npf.ui.form.Field.prototype._error = '';
+npf.ui.form.Field.prototype.error_ = '';
 
 /**
  * @type {boolean}
  * @private
  */
-npf.ui.form.Field.prototype._errorVisible = false;
+npf.ui.form.Field.prototype.errorVisible_ = false;
 
 /**
  * @type {boolean}
  * @private
  */
-npf.ui.form.Field.prototype._hideErrorOnChange = true;
+npf.ui.form.Field.prototype.hideErrorOnChange_ = true;
 
 
 /** @inheritDoc */
 npf.ui.form.Field.prototype.disposeInternal = function() {
-	goog.base(this, 'disposeInternal');
+  goog.base(this, 'disposeInternal');
 
-	delete this._name;
-	delete this._value;
-	delete this._validators;
-	delete this._required;
-	delete this._isEnabled;
-	delete this._label;
-	delete this._notice;
-	delete this._error;
-	delete this._errorVisible;
-	delete this._hideErrorOnChange;
+  delete this.name_;
+  delete this.value_;
+  delete this.validators_;
+  delete this.required_;
+  delete this.enabled_;
+  delete this.label_;
+  delete this.notice_;
+  delete this.error_;
+  delete this.errorVisible_;
+  delete this.hideErrorOnChange_;
 };
 
 /**
  * @return {npf.ui.form.FieldRenderer}
  */
 npf.ui.form.Field.prototype.getRenderer = function() {
-	return /** @type {npf.ui.form.FieldRenderer} */ (goog.base(this, 'getRenderer'));
+  return /** @type {npf.ui.form.FieldRenderer} */ (goog.base(this, 'getRenderer'));
 };
 
 /**
  * @param {npf.ui.form.FieldRenderer} renderer
  */
 npf.ui.form.Field.prototype.setRenderer = function(renderer) {
-	goog.base(this, 'setRenderer', renderer);
+  goog.base(this, 'setRenderer', renderer);
 };
 
 /**
  * @protected
  */
 npf.ui.form.Field.prototype.initializeInternal = function() {
-	this.renderValueInternal(this.getValue());
-	this.setEnabledInternal(this._isEnabled);
-	this.setErrorInternal(this._error);
-	this.setErrorVisibleInternal(this._errorVisible);
+  this.renderValueInternal(this.getValue());
+  this.setEnabledInternal(this.enabled_);
+  this.setErrorInternal(this.error_);
+  this.setErrorVisibleInternal(this.errorVisible_);
 };
 
 /**
  * @return {string}
  */
 npf.ui.form.Field.prototype.getName = function() {
-	return this._name;
+  return this.name_;
 };
 
 /**
  * @return {*}
  */
 npf.ui.form.Field.prototype.getValue = function() {
-	return this._value;
+  return this.value_;
 };
 
 /**
  * @return {string}
  */
 npf.ui.form.Field.prototype.getRequestValue = function() {
-	return this._value + '';
+  return this.value_ + '';
 };
 
 /**
@@ -159,25 +160,25 @@ npf.ui.form.Field.prototype.getRequestValue = function() {
  * @param {boolean=} opt_noRender
  */
 npf.ui.form.Field.prototype.setValue = function(value, opt_noRender) {
-	var correctedValue = this.correctValueInternal(value);
+  var correctedValue = this.correctValueInternal(value);
 
-	if (this.isSameValue(correctedValue)) {
-		return;
-	}
+  if (this.isSameValue(correctedValue)) {
+    return;
+  }
 
-	this.setValueInternal(correctedValue);
-	this.renderValueInternal(this.getValue());
+  this.setValueInternal(correctedValue);
+  this.renderValueInternal(this.getValue());
 
-	this._error = this.validateInternal();
+  this.error_ = this.validateInternal();
 
-	if (!this._error && this._hideErrorOnChange) {
-		this.setErrorVisible(false);
-	}
+  if (!this.error_ && this.hideErrorOnChange_) {
+    this.setErrorVisible(false);
+  }
 
-	this.dispatchEvent({
-		type: npf.ui.form.EventType.CHANGE,
-		value: this.getValue()
-	});
+  this.dispatchEvent({
+    type: npf.ui.form.EventType.CHANGE,
+    value: this.getValue()
+  });
 };
 
 /**
@@ -185,7 +186,7 @@ npf.ui.form.Field.prototype.setValue = function(value, opt_noRender) {
  * @protected
  */
 npf.ui.form.Field.prototype.setValueInternal = function(value) {
-	this._value = value;
+  this.value_ = value;
 };
 
 /**
@@ -193,7 +194,7 @@ npf.ui.form.Field.prototype.setValueInternal = function(value) {
  * @return {boolean}
  */
 npf.ui.form.Field.prototype.isSameValue = function(value) {
-	return this.getValue() === value;
+  return this.getValue() === value;
 };
 
 /**
@@ -202,7 +203,7 @@ npf.ui.form.Field.prototype.isSameValue = function(value) {
  * @protected
  */
 npf.ui.form.Field.prototype.correctValueInternal = function(value) {
-	return value;
+  return value;
 };
 
 /**
@@ -210,7 +211,7 @@ npf.ui.form.Field.prototype.correctValueInternal = function(value) {
  * @protected
  */
 npf.ui.form.Field.prototype.renderValueInternal = function(value) {
-	this.getRenderer().setValue(this.getValueElement(), value);
+  this.getRenderer().setValue(this.getValueElement(), value);
 };
 
 /**
@@ -218,27 +219,27 @@ npf.ui.form.Field.prototype.renderValueInternal = function(value) {
  * @protected
  */
 npf.ui.form.Field.prototype.validateInternal = function() {
-	/** @type {string} */
-	var error = '';
+  /** @type {string} */
+  var error = '';
 
-	if (this.isRequired() && this.isEmpty()) {
-		error = this.getRequiredError();
-	} else {
-		goog.array.every(this._validators, function(validator) {
-			error = validator(this.getValue());
+  if (this.isRequired() && this.isEmpty()) {
+    error = this.getRequiredError();
+  } else {
+    goog.array.every(this.validators_, function(validator) {
+      error = validator(this.getValue());
 
-			return !error;
-		}, this);
-	}
+      return !error;
+    }, this);
+  }
 
-	return error;
+  return error;
 };
 
 /**
  * @return {boolean}
  */
 npf.ui.form.Field.prototype.isEmpty = function() {
-	return false;
+  return false;
 };
 
 /**
@@ -246,37 +247,37 @@ npf.ui.form.Field.prototype.isEmpty = function() {
  * @protected
  */
 npf.ui.form.Field.prototype.bindLabel = function(valueElement) {
-	if (!valueElement.id) {
-		valueElement.id = goog.ui.IdGenerator.getInstance().getNextUniqueId();
-	}
+  if (!valueElement.id) {
+    valueElement.id = goog.ui.IdGenerator.getInstance().getNextUniqueId();
+  }
 
-	/** @type {Element} */
-	var labelElement = this.getLabelElement();
+  /** @type {Element} */
+  var labelElement = this.getLabelElement();
 
-	if (labelElement) {
-		labelElement.setAttribute('for', valueElement.id);
-	}
+  if (labelElement) {
+    labelElement.setAttribute('for', valueElement.id);
+  }
 };
 
 /**
  * @return {boolean}
  */
 npf.ui.form.Field.prototype.isRequired = function() {
-	return this._required;
+  return this.required_;
 };
 
 /**
  * @param {boolean} require
  */
 npf.ui.form.Field.prototype.setRequired = function(require) {
-	this._required = require;
+  this.required_ = require;
 };
 
 /**
  * @return {string}
  */
 npf.ui.form.Field.prototype.getLabel = function() {
-	return this._label;
+  return this.label_;
 };
 
 /**
@@ -284,19 +285,19 @@ npf.ui.form.Field.prototype.getLabel = function() {
  * @throws {Error} If the block is already in the document.
  */
 npf.ui.form.Field.prototype.setLabel = function(label) {
-	if (this.isInDocument()) {
-		// Too late.
-		throw Error(goog.ui.Component.Error.ALREADY_RENDERED);
-	}
+  if (this.isInDocument()) {
+    // Too late.
+    throw Error(goog.ui.Component.Error.ALREADY_RENDERED);
+  }
 
-	this._label = label;
+  this.label_ = label;
 };
 
 /**
  * @return {string}
  */
 npf.ui.form.Field.prototype.getNotice = function() {
-	return this._notice;
+  return this.notice_;
 };
 
 /**
@@ -304,29 +305,29 @@ npf.ui.form.Field.prototype.getNotice = function() {
  * @throws {Error} If the block is already in the document.
  */
 npf.ui.form.Field.prototype.setNotice = function(notice) {
-	if (this.isInDocument()) {
-		// Too late.
-		throw Error(goog.ui.Component.Error.ALREADY_RENDERED);
-	}
+  if (this.isInDocument()) {
+    // Too late.
+    throw Error(goog.ui.Component.Error.ALREADY_RENDERED);
+  }
 
-	this._notice = notice;
+  this.notice_ = notice;
 };
 
 /**
  * @return {boolean}
  */
 npf.ui.form.Field.prototype.isEnabled = function() {
-	return this._isEnabled;
+  return this.enabled_;
 };
 
 /**
  * @param {boolean} enable
  */
 npf.ui.form.Field.prototype.setEnabled = function(enable) {
-	if (this._isEnabled != enable) {
-		this._isEnabled = enable;
-		this.setEnabledInternal(this._isEnabled);
-	}
+  if (this.enabled_ != enable) {
+    this.enabled_ = enable;
+    this.setEnabledInternal(this.enabled_);
+  }
 };
 
 /**
@@ -334,7 +335,7 @@ npf.ui.form.Field.prototype.setEnabled = function(enable) {
  * @protected
  */
 npf.ui.form.Field.prototype.setEnabledInternal = function(enable) {
-	this.getRenderer().setEnabled(this.getElement(), enable);
+  this.getRenderer().setEnabled(this.getElement(), enable);
 };
 
 /**
@@ -342,14 +343,14 @@ npf.ui.form.Field.prototype.setEnabledInternal = function(enable) {
  * @protected
  */
 npf.ui.form.Field.prototype.getRequiredError = function() {
-	return npf.ui.form.Field.ErrorMessage.REQUIRED;
+  return npf.ui.form.Field.ErrorMessage.REQUIRED;
 };
 
 /**
  * @param {function(*):string} validator
  */
 npf.ui.form.Field.prototype.addValidator = function(validator) {
-	this._validators.push(validator);
+  this.validators_.push(validator);
 };
 
 /**
@@ -357,27 +358,27 @@ npf.ui.form.Field.prototype.addValidator = function(validator) {
  * @param {string} error
  */
 npf.ui.form.Field.prototype.addRegExpValidator = function(regExp, error) {
-	this.addValidator(function(value) {
-		return goog.isString(value) && !regExp.test(value) ? error : '';
-	});
+  this.addValidator(function(value) {
+    return goog.isString(value) && !regExp.test(value) ? error : '';
+  });
 };
 
 npf.ui.form.Field.prototype.focusAndSelect = function() {
-	this.getRenderer().focusAndSelect(this.getValueElement());
+  this.getRenderer().focusAndSelect(this.getValueElement());
 };
 
 /**
  * @return {boolean}
  */
 npf.ui.form.Field.prototype.isHiddenErrorOnChange = function() {
-	return this._hideErrorOnChange;
+  return this.hideErrorOnChange_;
 };
 
 /**
  * @param {boolean} hide
  */
 npf.ui.form.Field.prototype.setHiddenErrorOnChange = function(hide) {
-	this._hideErrorOnChange = hide;
+  this.hideErrorOnChange_ = hide;
 };
 
 /**
@@ -385,77 +386,77 @@ npf.ui.form.Field.prototype.setHiddenErrorOnChange = function(hide) {
  * @param {string} error
  */
 npf.ui.form.Field.prototype.showError = function(error) {
-	this.setError(error);
-	this.setErrorVisible(true);
+  this.setError(error);
+  this.setErrorVisible(true);
 };
 
 npf.ui.form.Field.prototype.hideError = function() {
-	this.setError('');
-	this.setErrorVisible(false);
+  this.setError('');
+  this.setErrorVisible(false);
 };
 
 /**
  * @return {boolean}
  */
 npf.ui.form.Field.prototype.isErrorVisible = function() {
-	return this._errorVisible;
+  return this.errorVisible_;
 };
 
 /**
  * @param {boolean} visible
  */
 npf.ui.form.Field.prototype.setErrorVisible = function(visible) {
-	if (this._errorVisible != visible) {
-		this._errorVisible = visible;
-		this.setErrorVisibleInternal(this._errorVisible);
-	}
+  if (this.errorVisible_ != visible) {
+    this.errorVisible_ = visible;
+    this.setErrorVisibleInternal(this.errorVisible_);
+  }
 };
 
 /**
  * @param {boolean} visible
  */
 npf.ui.form.Field.prototype.setErrorVisibleInternal = function(visible) {
-	this.getRenderer().setErrorVisible(this.getElement(), visible);
+  this.getRenderer().setErrorVisible(this.getElement(), visible);
 };
 
 /**
  * @return {boolean}
  */
 npf.ui.form.Field.prototype.hasError = function() {
-	return '' != this._error;
+  return '' != this.error_;
 };
 
 /**
  * @return {string}
  */
 npf.ui.form.Field.prototype.getError = function() {
-	return this._error;
+  return this.error_;
 };
 
 /**
- * @param {?string=} opt_error
+ * @param {?string=} opterror_
  */
-npf.ui.form.Field.prototype.setError = function(opt_error) {
-	/** @type {string} */
-	var error = goog.isString(opt_error) ? opt_error : '';
+npf.ui.form.Field.prototype.setError = function(opterror_) {
+  /** @type {string} */
+  var error = goog.isString(opterror_) ? opterror_ : '';
 
-	if (this._error != error) {
-		this._error = error;
-		this.setErrorInternal(this._error);
+  if (this.error_ != error) {
+    this.error_ = error;
+    this.setErrorInternal(this.error_);
 
-		if (this._error) {
-			this.dispatchEvent({
-				type: npf.ui.form.EventType.ERROR,
-				value: this.getValue(),
-				error: this.getError()
-			});
-		} else {
-			this.dispatchEvent({
-				type: npf.ui.form.EventType.VALID,
-				value: this.getValue()
-			});
-		}
-	}
+    if (this.error_) {
+      this.dispatchEvent({
+        type: npf.ui.form.EventType.ERROR,
+        value: this.getValue(),
+        error: this.getError()
+      });
+    } else {
+      this.dispatchEvent({
+        type: npf.ui.form.EventType.VALID,
+        value: this.getValue()
+      });
+    }
+  }
 };
 
 /**
@@ -463,40 +464,40 @@ npf.ui.form.Field.prototype.setError = function(opt_error) {
  * @protected
  */
 npf.ui.form.Field.prototype.setErrorInternal = function(error) {
-	this.getRenderer().setContent(this.getErrorElement(), error);
+  this.getRenderer().setContent(this.getErrorElement(), error);
 };
 
 /**
  * @return {Element}
  */
 npf.ui.form.Field.prototype.getLabelContainerElement = function() {
-	return this.getRenderer().getLabelContainerElement(this.getElement());
+  return this.getRenderer().getLabelContainerElement(this.getElement());
 };
 
 /**
  * @return {Element}
  */
 npf.ui.form.Field.prototype.getLabelElement = function() {
-	return this.getRenderer().getLabelElement(this.getElement());
+  return this.getRenderer().getLabelElement(this.getElement());
 };
 
 /**
  * @return {Element}
  */
 npf.ui.form.Field.prototype.getNoticeElement = function() {
-	return this.getRenderer().getNoticeElement(this.getElement());
+  return this.getRenderer().getNoticeElement(this.getElement());
 };
 
 /**
  * @return {Element}
  */
 npf.ui.form.Field.prototype.getErrorElement = function() {
-	return this.getRenderer().getErrorElement(this.getElement());
+  return this.getRenderer().getErrorElement(this.getElement());
 };
 
 /**
  * @return {Element}
  */
 npf.ui.form.Field.prototype.getValueElement = function() {
-	return this.getRenderer().getValueElement(this.getElement());
+  return this.getRenderer().getValueElement(this.getElement());
 };

@@ -17,52 +17,55 @@ goog.require('npf.userAgent.support');
  * @extends {goog.events.EventTarget}
  */
 npf.events.TouchHandler = function(element) {
-	goog.base(this);
+  goog.base(this);
 
-	this.element = element;
-	this._prevTapPos = [new goog.math.Coordinate(0, 0)];
+  this.element = element;
+  this.prevTapPos_ = [new goog.math.Coordinate(0, 0)];
 
-	this._handler = new goog.events.EventHandler();
-	this.registerDisposable(this._handler);
+  this.handler_ = new goog.events.EventHandler();
+  this.registerDisposable(this.handler_);
 
-	if (this.cssHacks) {
-		var vendors = ['webkit', 'moz', 'ms', 'o', ''];
-		var cssProps = {
-			"userSelect": "none",
-			"touchCallout": "none",
-			"userDrag": "none",
-			"tapHighlightColor": "rgba(0,0,0,0)"
-		};
+  if (this.cssHacks) {
+    var vendors = ['webkit', 'moz', 'ms', 'o', ''];
+    var cssProps = {
+      "userSelect": "none",
+      "touchCallout": "none",
+      "userDrag": "none",
+      "tapHighlightColor": "rgba(0,0,0,0)"
+    };
 
-		for (var i = 0; i < vendors.length; i++) {
-			for (var p in cssProps) {
-				varprop = p;
+    for (var i = 0; i < vendors.length; i++) {
+      for (var p in cssProps) {
+        varprop = p;
 
-				if (vendors[i]) {
-					prop = vendors[i] + prop.substring(0, 1).toUpperCase() + prop.substring(1);
-				}
+        if (vendors[i]) {
+          prop = vendors[i] + prop.substring(0, 1).toUpperCase() +
+            prop.substring(1);
+        }
 
-				this.element.style[prop] = cssProps[p];
-			}
-		}
-	}
+        this.element.style[prop] = cssProps[p];
+      }
+    }
+  }
 
-	if (npf.userAgent.support.isTouchSupported()) {
-		// bind events for touch devices
-		// except for windows phone 7.5, it doesnt support touch events..!
-		this._handler
-			.listen(this.element, goog.events.EventType.TOUCHSTART, this._onStart, false, this)
-			.listen(this.element, goog.events.EventType.TOUCHMOVE, this._onProgress, false, this)
-			.listen(this.element, goog.events.EventType.TOUCHEND, this._onEnd, false, this)
-			.listen(this.element, goog.events.EventType.TOUCHCANCEL, this._onEnd, false, this);
-	} else {
-		// for non-touch
-		this._handler
-			.listen(this.element, goog.events.EventType.MOUSEDOWN, this._onStart, false, this)
-			.listen(this.element, goog.events.EventType.MOUSEMOVE, this._onProgress, false, this)
-			.listen(this.element, goog.events.EventType.MOUSEOUT, this._onMouseOut, false, this)
-			.listen(this.element, goog.events.EventType.MOUSEUP, this._onEnd, false, this);
-	}
+  var EventType = goog.events.EventType;
+
+  if (npf.userAgent.support.isTouchSupported()) {
+    // bind events for touch devices
+    // except for windows phone 7.5, it doesnt support touch events..!
+    this.handler_
+      .listen(this.element, EventType.TOUCHSTART, this.onStart_, false, this)
+      .listen(this.element, EventType.TOUCHMOVE, this.onProgress_, false, this)
+      .listen(this.element, EventType.TOUCHEND, this.onEnd_, false, this)
+      .listen(this.element, EventType.TOUCHCANCEL, this.onEnd_, false, this);
+  } else {
+    // for non-touch
+    this.handler_
+      .listen(this.element, EventType.MOUSEDOWN, this.onStart_, false, this)
+      .listen(this.element, EventType.MOUSEMOVE, this.onProgress_, false, this)
+      .listen(this.element, EventType.MOUSEOUT, this.onMouseOut_, false, this)
+      .listen(this.element, EventType.MOUSEUP, this.onEnd_, false, this);
+  }
 };
 goog.inherits(npf.events.TouchHandler, goog.events.EventTarget);
 
@@ -71,22 +74,22 @@ goog.inherits(npf.events.TouchHandler, goog.events.EventTarget);
  * @enum {string}
  */
 npf.events.TouchHandler.Direction = {
-	DOWN: 'down',
-	LEFT: 'left',
-	RIGHT: 'right',
-	UP: 'up'
+  DOWN: 'down',
+  LEFT: 'left',
+  RIGHT: 'right',
+  UP: 'up'
 };
 
 /**
  * @enum {string}
  */
 npf.events.TouchHandler.Gesture = {
-	DRAG: 'drag',
-	DOUBLETAP: 'doubletap',
-	HOLD: 'hold',
-	SWIPE: 'swipe',
-	TAP: 'tap',
-	TRANSFORM: 'transform'
+  DRAG: 'drag',
+  DOUBLETAP: 'doubletap',
+  HOLD: 'hold',
+  SWIPE: 'swipe',
+  TAP: 'tap',
+  TRANSFORM: 'transform'
 };
 
 /**
@@ -95,23 +98,23 @@ npf.events.TouchHandler.Gesture = {
  * @return {npf.events.TouchHandler.Direction|undefined} direction
  */
 npf.events.TouchHandler.getDirectionFromAngle = function(angle) {
-	var directions = goog.object.create(
-		npf.events.TouchHandler.Direction.DOWN, angle >= 45 && angle < 135, // 90
-		npf.events.TouchHandler.Direction.LEFT, angle >= 135 || angle <= -135, // 180
-		npf.events.TouchHandler.Direction.UP, angle < -45 && angle > -135, // 270
-		npf.events.TouchHandler.Direction.RIGHT, angle >= -45 && angle <= 45 // 0
-	);
+  var Direction = npf.events.TouchHandler;
+  var directions = goog.object.create(
+    Direction.DOWN, angle >= 45 && angle < 135, // 90
+    Direction.LEFT, angle >= 135 || angle <= -135, // 180
+    Direction.UP, angle < -45 && angle > -135, // 270
+    Direction.RIGHT, angle >= -45 && angle <= 45 // 0
+  );
+  var direction;
 
-	var direction;
+  for (var key in directions) {
+    if (directions[key]) {
+      direction = key;
+      break;
+    }
+  }
 
-	for (var key in directions) {
-		if (directions[key]) {
-			direction = key;
-			break;
-		}
-	}
-
-	return direction;
+  return direction;
 };
 
 /**
@@ -121,12 +124,12 @@ npf.events.TouchHandler.getDirectionFromAngle = function(angle) {
  * @return {number}
  */
 npf.events.TouchHandler.countFingers = function(event) {
-	/** @type {Event} */
-	var browserEvent = event.getBrowserEvent();
+  /** @type {Event} */
+  var browserEvent = event.getBrowserEvent();
 
-	// there is a bug on android (until v4?) that touches is always 1,
-	// so no multitouch is supported, e.g. no, zoom and rotation...
-	return browserEvent['touches'] ? browserEvent['touches'].length : 1;
+  // there is a bug on android (until v4?) that touches is always 1,
+  // so no multitouch is supported, e.g. no, zoom and rotation...
+  return browserEvent['touches'] ? browserEvent['touches'].length : 1;
 };
 
 /**
@@ -136,7 +139,7 @@ npf.events.TouchHandler.countFingers = function(event) {
  * @return {number}
  */
 npf.events.TouchHandler.getAngle = function(pos1, pos2) {
-	return Math.atan2(pos2.y - pos1.y, pos2.x - pos1.x) * 180 / Math.PI;
+  return Math.atan2(pos2.y - pos1.y, pos2.x - pos1.x) * 180 / Math.PI;
 };
 
 /**
@@ -246,170 +249,170 @@ npf.events.TouchHandler.prototype.holdTimeout = 500;
  * @type {number}
  * @private
  */
-npf.events.TouchHandler.prototype._distance = 0;
+npf.events.TouchHandler.prototype.distance_ = 0;
 
 /**
  * Holds the exact angle that has been moved.
  * @type {number}
  * @private
  */
-npf.events.TouchHandler.prototype._angle = 0;
+npf.events.TouchHandler.prototype.angle_ = 0;
 
 /**
  * Holds the diraction that has been moved.
  * @type {npf.events.TouchHandler.Direction}
  * @private
  */
-npf.events.TouchHandler.prototype._direction = 0;
+npf.events.TouchHandler.prototype.direction_ = 0;
 
 /**
  * How many fingers are on the screen.
  * @type {number}
  * @private
  */
-npf.events.TouchHandler.prototype._fingers = 0;
+npf.events.TouchHandler.prototype.fingers_ = 0;
 
 /**
  * @type {boolean}
  * @private
  */
-npf.events.TouchHandler.prototype._first = false;
+npf.events.TouchHandler.prototype.first_ = false;
 
 /**
  * @type {?npf.events.TouchHandler.Gesture}
  * @private
  */
-npf.events.TouchHandler.prototype._gesture = null;
+npf.events.TouchHandler.prototype.gesture_ = null;
 
 /**
  * @type {?npf.events.TouchHandler.Gesture}
  * @private
  */
-npf.events.TouchHandler.prototype._prevGesture = null;
+npf.events.TouchHandler.prototype.prevGesture_ = null;
 
 /**
  * @type {?number}
  * @private
  */
-npf.events.TouchHandler.prototype._touchStartTime = null;
+npf.events.TouchHandler.prototype.touchStartTime_ = null;
 
 /**
  * @type {Array.<goog.math.Coordinate>}
  * @private
  */
-npf.events.TouchHandler.prototype._prevTapPos;
+npf.events.TouchHandler.prototype.prevTapPos_;
 
 /**
  * @type {?number}
  * @private
  */
-npf.events.TouchHandler.prototype._prevTapEndTime = null;
+npf.events.TouchHandler.prototype.prevTapEndTime_ = null;
 
 /**
  * @type {?number}
  */
-npf.events.TouchHandler.prototype._holdTimer = null;
+npf.events.TouchHandler.prototype.holdTimer_ = null;
 
 /**
  * @type {goog.math.Coordinate}
  * @private
  */
-npf.events.TouchHandler.prototype._offset = null;
+npf.events.TouchHandler.prototype.offset_ = null;
 
 /**
  * Keep track of the mouse status.
  * @type {boolean}
  * @private
  */
-npf.events.TouchHandler.prototype._mousedown = false;
+npf.events.TouchHandler.prototype.mousedown_ = false;
 
 /**
  * @type {goog.events.BrowserEvent}
  * @private
  */
-npf.events.TouchHandler.prototype._startEvent = null;
+npf.events.TouchHandler.prototype.startEvent_ = null;
 
 /**
  * @type {goog.events.BrowserEvent}
  * @private
  */
-npf.events.TouchHandler.prototype._moveEvent = null;
+npf.events.TouchHandler.prototype.moveEvent_ = null;
 
 /**
  * @type {goog.events.BrowserEvent}
  * @private
  */
-npf.events.TouchHandler.prototype._endEvent = null;
+npf.events.TouchHandler.prototype.endEvent_ = null;
 
 /**
  * @type {goog.events.EventHandler}
  * @private
  */
-npf.events.TouchHandler.prototype._handler;
+npf.events.TouchHandler.prototype.handler_;
 
 /**
  * @type {Array.<goog.math.Coordinate>}
  * @private
  */
-npf.events.TouchHandler.prototype._startPos = null;
+npf.events.TouchHandler.prototype.startPos_ = null;
 
 /**
  * @type {Array.<goog.math.Coordinate>}
  * @private
  */
-npf.events.TouchHandler.prototype._movePos = null;
+npf.events.TouchHandler.prototype.movePos_ = null;
 
 /**
  * @type {goog.math.Coordinate}
  * @private
  */
-npf.events.TouchHandler.prototype._centerPos = null;
+npf.events.TouchHandler.prototype.centerPos_ = null;
 
 
 /** @inheritDoc */
 npf.events.TouchHandler.prototype.disposeInternal = function() {
-	goog.base(this, 'disposeInternal');
+  goog.base(this, 'disposeInternal');
 
-	delete this.element;
-	delete this.preventDefault;
-	delete this.cssHacks;
-	delete this.swipeEnabled;
-	delete this.swipeTime;
-	delete this.swipeMinDistance;
-	delete this.dragEnabled;
-	delete this.dragVertical;
-	delete this.dragHorizontal;
-	delete this.dragMinDistance;
-	delete this.transformEnabled;
-	delete this.scaleTreshold;
-	delete this.rotationTreshold;
-	delete this.tapEnabled;
-	delete this.tapDouble;
-	delete this.tapMaxInterval;
-	delete this.tapMaxDistance;
-	delete this.tapDoubleDistance;
-	delete this.holdEnabled;
-	delete this.holdTimeout;
-	delete this._distance;
-	delete this._angle;
-	delete this._direction;
-	delete this._fingers;
-	delete this._first;
-	delete this._gesture;
-	delete this._prevGesture;
-	delete this._touchStartTime;
-	delete this._prevTapPos;
-	delete this._prevTapEndTime;
-	delete this._holdTimer;
-	delete this._offset;
-	delete this._mousedown;
-	delete this._startEvent;
-	delete this._moveEvent;
-	delete this._endEvent;
-	delete this._handler;
-	delete this._startPos;
-	delete this._movePos;
-	delete this._centerPos;
+  delete this.element;
+  delete this.preventDefault;
+  delete this.cssHacks;
+  delete this.swipeEnabled;
+  delete this.swipeTime;
+  delete this.swipeMinDistance;
+  delete this.dragEnabled;
+  delete this.dragVertical;
+  delete this.dragHorizontal;
+  delete this.dragMinDistance;
+  delete this.transformEnabled;
+  delete this.scaleTreshold;
+  delete this.rotationTreshold;
+  delete this.tapEnabled;
+  delete this.tapDouble;
+  delete this.tapMaxInterval;
+  delete this.tapMaxDistance;
+  delete this.tapDoubleDistance;
+  delete this.holdEnabled;
+  delete this.holdTimeout;
+  delete this.distance_;
+  delete this.angle_;
+  delete this.direction_;
+  delete this.fingers_;
+  delete this.first_;
+  delete this.gesture_;
+  delete this.prevGesture_;
+  delete this.touchStartTime_;
+  delete this.prevTapPos_;
+  delete this.prevTapEndTime_;
+  delete this.holdTimer_;
+  delete this.offset_;
+  delete this.mousedown_;
+  delete this.startEvent_;
+  delete this.moveEvent_;
+  delete this.endEvent_;
+  delete this.handler_;
+  delete this.startPos_;
+  delete this.movePos_;
+  delete this.centerPos_;
 };
 
 /**
@@ -418,24 +421,26 @@ npf.events.TouchHandler.prototype.disposeInternal = function() {
  * @return {Array.<goog.math.Coordinate>}
  * @private
  */
-npf.events.TouchHandler.prototype._getPositionFromEvent = function(event) {
-	if (npf.userAgent.support.isTouchSupported()) {
-		// multitouch, return array with positions
+npf.events.TouchHandler.prototype.getPositionFromEvent_ = function(event) {
+  if (npf.userAgent.support.isTouchSupported()) {
+    // multitouch, return array with positions
 
-		var pos = [];
-		/** @type {Event} */
-		var browserEvent = event.getBrowserEvent();
-		var touches = browserEvent['touches'].length > 0 ? browserEvent['touches'] : browserEvent['changedTouches'];
+    var pos = [];
+    /** @type {Event} */
+    var browserEvent = event.getBrowserEvent();
+    var touches = browserEvent['touches'].length > 0
+      ? browserEvent['touches']
+      : browserEvent['changedTouches'];
 
-		for (var t = 0; t < touches.length; t++) {
-			pos.push(new goog.math.Coordinate(touches[t].pageX, touches[t].pageY));
-		}
+    for (var t = 0; t < touches.length; t++) {
+      pos.push(new goog.math.Coordinate(touches[t].pageX, touches[t].pageY));
+    }
 
-		return pos;
-	} else {
-		// no touches, use the event pageX and pageY
-		return [new goog.math.Coordinate(event.clientX, event.clientY)];
-	}
+    return pos;
+  } else {
+    // no touches, use the event pageX and pageY
+    return [new goog.math.Coordinate(event.clientX, event.clientY)];
+  }
 };
 
 /**
@@ -445,25 +450,26 @@ npf.events.TouchHandler.prototype._getPositionFromEvent = function(event) {
  * @return {number}
  * @private
  */
-npf.events.TouchHandler.prototype._calculateScale = function(posStart, posMove) {
-	if (posStart.length == 2 && posMove.length == 2) {
-		/** @type {number} */
-		var x = posStart[0].x - posStart[1].x;
-		/** @type {number} */
-		var y = posStart[0].y - posStart[1].y;
-		/** @type {number} */
-		var startDistance = Math.sqrt(x * x + y * y);
+npf.events.TouchHandler.prototype.calculateScale_ = function(posStart,
+                                                             posMove) {
+  if (posStart.length == 2 && posMove.length == 2) {
+    /** @type {number} */
+    var x = posStart[0].x - posStart[1].x;
+    /** @type {number} */
+    var y = posStart[0].y - posStart[1].y;
+    /** @type {number} */
+    var startDistance = Math.sqrt(x * x + y * y);
 
-		x = posMove[0].x - posMove[1].x;
-		y = posMove[0].y - posMove[1].y;
+    x = posMove[0].x - posMove[1].x;
+    y = posMove[0].y - posMove[1].y;
 
-		/** @type {number} */
-		var endDistance = Math.sqrt((x*x) + (y*y));
+    /** @type {number} */
+    var endDistance = Math.sqrt((x*x) + (y*y));
 
-		return endDistance / startDistance;
-	}
+    return endDistance / startDistance;
+  }
 
-	return 0;
+  return 0;
 };
 
 /**
@@ -473,25 +479,26 @@ npf.events.TouchHandler.prototype._calculateScale = function(posStart, posMove) 
  * @return {number}
  * @private
  */
-npf.events.TouchHandler.prototype._calculateRotation = function(posStart, posMove) {
-	if (posStart.length == 2 && posMove.length == 2) {
-		/** @type {number} */
-		var x = posStart[0].x - posStart[1].x;
-		/** @type {number} */
-		var y = posStart[0].y - posStart[1].y;
-		/** @type {number} */
-		var startRotation = Math.atan2(y, x) * 180 / Math.PI;
+npf.events.TouchHandler.prototype.calculateRotation_ = function(posStart,
+                                                                posMove) {
+  if (posStart.length == 2 && posMove.length == 2) {
+    /** @type {number} */
+    var x = posStart[0].x - posStart[1].x;
+    /** @type {number} */
+    var y = posStart[0].y - posStart[1].y;
+    /** @type {number} */
+    var startRotation = Math.atan2(y, x) * 180 / Math.PI;
 
-		x = posMove[0].x - posMove[1].x;
-		y = posMove[0].y - posMove[1].y;
+    x = posMove[0].x - posMove[1].x;
+    y = posMove[0].y - posMove[1].y;
 
-		/** @type {number} */
-		var endRotation = Math.atan2(y, x) * 180 / Math.PI;
+    /** @type {number} */
+    var endRotation = Math.atan2(y, x) * 180 / Math.PI;
 
-		return endRotation - startRotation;
-	}
+    return endRotation - startRotation;
+  }
 
-	return 0;
+  return 0;
 };
 
 /**
@@ -499,26 +506,26 @@ npf.events.TouchHandler.prototype._calculateRotation = function(posStart, posMov
  * @param {goog.events.BrowserEvent} event
  * @private
  */
-npf.events.TouchHandler.prototype._cancelEvent = function(event) {
-	if (event.preventDefault) {
-		event.preventDefault();
-		event.stopPropagation();
-	} else {
-		event.returnValue = false;
-		event.cancelBubble = true;
-	}
+npf.events.TouchHandler.prototype.cancelEvent_ = function(event) {
+  if (event.preventDefault) {
+    event.preventDefault();
+    event.stopPropagation();
+  } else {
+    event.returnValue = false;
+    event.cancelBubble = true;
+  }
 };
 
 /**
  * Reset the internal vars to the start values.
  * @private
  */
-npf.events.TouchHandler.prototype._reset = function() {
-	this._first = false;
-	this._fingers = 0;
-	this._distance = 0;
-	this._angle = 0;
-	this._gesture = null;
+npf.events.TouchHandler.prototype.reset_ = function() {
+  this.first_ = false;
+  this.fingers_ = 0;
+  this.distance_ = 0;
+  this.angle_ = 0;
+  this.gesture_ = null;
 };
 
 /**
@@ -527,20 +534,20 @@ npf.events.TouchHandler.prototype._reset = function() {
  * @param {goog.events.BrowserEvent} event
  * @private
  */
-npf.events.TouchHandler.prototype._gesturesHold = function(event) {
-	// only when one finger is on the screen
-	if (this.holdEnabled) {
-		this._gesture = npf.events.TouchHandler.Gesture.HOLD;
-		clearTimeout(this._holdTimer);
+npf.events.TouchHandler.prototype.gesturesHold_ = function(event) {
+  // only when one finger is on the screen
+  if (this.holdEnabled) {
+    this.gesture_ = npf.events.TouchHandler.Gesture.HOLD;
+    clearTimeout(this.holdTimer_);
 
-		this._holdTimer = setTimeout(function() {
-			if (this._gesture == npf.events.TouchHandler.Gesture.HOLD) {
-				this._dispatchAndDispose(npf.events.EventType.HOLD, event, {
-					position: this._startPos
-				});
-			}
-		}, this.holdTimeout);
-	}
+    this.holdTimer_ = setTimeout(function() {
+      if (this.gesture_ == npf.events.TouchHandler.Gesture.HOLD) {
+        this.dispatchAndDispose_(npf.events.EventType.HOLD, event, {
+          position: this.startPos_
+        });
+      }
+    }, this.holdTimeout);
+  }
 };
 
 /**
@@ -549,38 +556,53 @@ npf.events.TouchHandler.prototype._gesturesHold = function(event) {
  * @param {goog.events.BrowserEvent} event
  * @private
  */
-npf.events.TouchHandler.prototype._gesturesSwipe = function(event) {
-	if (!this._movePos) {
-		return;
-	}
+npf.events.TouchHandler.prototype.gesturesSwipe_ = function(event) {
+  if (!this.movePos_) {
+    return;
+  }
 
-	// get the distance we moved
-	var distanceX = this._movePos[0].x - this._startPos[0].x;
-	var distanceY = this._movePos[0].y - this._startPos[0].y;
-	this._distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+  // get the distance we moved
 
-	// compare the kind of gesture by time
-	var now = new Date().getTime();
-	var touch_time = now - this._touchStartTime;
+  /** @type {number} */
+  var distanceX = this.movePos_[0].x - this.startPos_[0].x;
+  /** @type {number} */
+  var distanceY = this.movePos_[0].y - this.startPos_[0].y;
+  this.distance_ = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
 
-	if (this.swipeEnabled && (this.swipeTime > touch_time) && (this._distance > this.swipeMinDistance)) {
-		// calculate the angle
-		this._angle = npf.events.TouchHandler.getAngle(new goog.math.Coordinate(this._startPos[0], this._movePos[0]));
-		this._direction = npf.events.TouchHandler.getDirectionFromAngle(this._angle);
+  // compare the kind of gesture by time
 
-		this._gesture = npf.events.TouchHandler.Gesture.SWIPE;
+  /** @type {number} */
+  var now = new Date().getTime();
+  /** @type {number} */
+  var touchTime = now - this.touchStartTime_;
 
-		var position = new goog.math.Coordinate(this._movePos[0].x - this._offset.x, this._movePos[0].y - this._offset.y);
+  if (
+    this.swipeEnabled &&
+    this.swipeTime > touchTime &&
+    this.distance_ > this.swipeMinDistance
+  ) {
+    var coord = new goog.math.Coordinate(this.startPos_[0], this.movePos_[0]);
 
-		this._dispatchAndDispose(npf.events.EventType.SWIPE, event, {
-			position: position,
-			direction: this._direction,
-			distance: this._distance,
-			distanceX: distanceX,
-			distanceY: distanceY,
-			angle: this._angle
-		});
-	}
+    // calculate the angle
+    this.angle_ = npf.events.TouchHandler.getAngle(coord);
+    this.direction_ =
+      npf.events.TouchHandler.getDirectionFromAngle(this.angle_);
+    this.gesture_ = npf.events.TouchHandler.Gesture.SWIPE;
+
+    /** @type {number} */
+    var x = this.movePos_[0].x - this.offset_.x;
+    /** @type {number} */
+    var y = this.movePos_[0].y - this.offset_.y;
+
+    this.dispatchAndDispose_(npf.events.EventType.SWIPE, event, {
+      position: new goog.math.Coordinate(x, y),
+      direction: this.direction_,
+      distance: this.distance_,
+      distanceX: distanceX,
+      distanceY: distanceY,
+      angle: this.angle_
+    });
+  }
 };
 
 /**
@@ -589,52 +611,69 @@ npf.events.TouchHandler.prototype._gesturesSwipe = function(event) {
  * @param {goog.events.BrowserEvent} event
  * @private
  */
-npf.events.TouchHandler.prototype._gesturesDrag = function(event) {
-	// get the distance we moved
-	var distanceX = this._movePos[0].x - this._startPos[0].x;
-	var distanceY = this._movePos[0].y - this._startPos[0].y;
+npf.events.TouchHandler.prototype.gesturesDrag_ = function(event) {
+  // get the distance we moved
 
-	this._distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+  /** @type {number} */
+  var distanceX = this.movePos_[0].x - this.startPos_[0].x;
+  /** @type {number} */
+  var distanceY = this.movePos_[0].y - this.startPos_[0].y;
 
-	// drag
-	// minimal movement required
-	if (this.dragEnabled && (this._distance > this.dragMinDistance) || this._gesture == npf.events.TouchHandler.Gesture.DRAG) {
-		// calculate the angle
-		this._angle = npf.events.TouchHandler.getAngle(new goog.math.Coordinate(this._startPos[0], this._movePos[0]));
-		this._direction = npf.events.TouchHandler.getDirectionFromAngle(this._angle);
+  this.distance_ = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
 
-		// check the movement and stop if we go in the wrong direction
-		var is_vertical = (this._direction == npf.events.TouchHandler.Direction.UP || this._direction == npf.events.TouchHandler.Direction.DOWN);
+  // drag
+  // minimal movement required
+  if (
+    this.dragEnabled &&
+    this.distance_ > this.dragMinDistance ||
+    this.gesture_ == npf.events.TouchHandler.Gesture.DRAG
+  ) {
+    var coord = new goog.math.Coordinate(this.startPos_[0], this.movePos_[0]);
+    // calculate the angle
+    this.angle_ = npf.events.TouchHandler.getAngle(coord);
+    this.direction_ =
+      npf.events.TouchHandler.getDirectionFromAngle(this.angle_);
 
-		if (
-			((is_vertical && !this.dragVertical) || (!is_vertical && !this.dragHorizontal)) &&
-			(this._distance > this.dragMinDistance)
-		) {
-			return;
-		}
+    var Direction = npf.events.TouchHandler.Direction;
+    // check the movement and stop if we go in the wrong direction
+    var is_vertical =
+      (this.direction_ == Direction.UP || this.direction_ == Direction.DOWN);
 
-		this._gesture = npf.events.TouchHandler.Gesture.DRAG;
+    if (
+      (
+        (is_vertical && !this.dragVertical) ||
+        (!is_vertical && !this.dragHorizontal)
+      ) &&
+      this.distance_ > this.dragMinDistance
+    ) {
+      return;
+    }
 
-		var position = new goog.math.Coordinate(this._movePos[0].x - this._offset.x, this._movePos[0].y - this._offset.y);
+    this.gesture_ = npf.events.TouchHandler.Gesture.DRAG;
 
-		var eventObj = {
-			angle: this._angle
-			direction: this._direction,
-			distance: this._distance,
-			distanceX: distanceX,
-			distanceY: distanceY,
-			position: position
-		};
+    /** @type {number} */
+    var x = this.movePos_[0].x - this.offset_.x;
+    /** @type {number} */
+    var y = this.movePos_[0].y - this.offset_.y;
 
-		// on the first time trigger the start event
-		if (this._first) {
-			this._dispatchAndDispose(npf.events.EventType.DRAGSTART, event, eventObj);
-			this._first = false;
-		}
+    var eventObj = {
+      angle: this.angle_,
+      direction: this.direction_,
+      distance: this.distance_,
+      distanceX: distanceX,
+      distanceY: distanceY,
+      position: new goog.math.Coordinate(x, y)
+    };
 
-		this._dispatchAndDispose(npf.events.EventType.DRAG, event, eventObj);
-		this._cancelEvent(event);
-	}
+    // on the first time trigger the start event
+    if (this.first_) {
+      this.dispatchAndDispose_(npf.events.EventType.DRAGSTART, event, eventObj);
+      this.first_ = false;
+    }
+
+    this.dispatchAndDispose_(npf.events.EventType.DRAG, event, eventObj);
+    this.cancelEvent_(event);
+  }
 };
 
 /**
@@ -643,45 +682,52 @@ npf.events.TouchHandler.prototype._gesturesDrag = function(event) {
  * @param {goog.events.BrowserEvent} event
  * @private
  */
-npf.events.TouchHandler.prototype._gesturesTransform = function(event) {
-	if (this.transformEnabled) {
-		if (npf.events.TouchHandler.countFingers(event) != 2) {
-			return false;
-		}
+npf.events.TouchHandler.prototype.gesturesTransform_ = function(event) {
+  if (this.transformEnabled) {
+    if (npf.events.TouchHandler.countFingers(event) != 2) {
+      return false;
+    }
 
-		var rotation = this._calculateRotation(this._startPos, this._movePos);
-		var scale = this._calculateScale(this._startPos, this._movePos);
+    var rotation = this.calculateRotation_(this.startPos_, this.movePos_);
+    var scale = this.calculateScale_(this.startPos_, this.movePos_);
 
-		if (
-			this._gesture != npf.events.TouchHandler.Gesture.DRAG &&
-			(this._gesture == npf.events.TouchHandler.Gesture.TRANSFORM || Math.abs(1-scale) > this.scaleTreshold || Math.abs(rotation) > this.rotationTreshold)
-		) {
-			this._gesture = npf.events.TouchHandler.Gesture.TRANSFORM;
+    if (
+      this.gesture_ != npf.events.TouchHandler.Gesture.DRAG &&
+      (
+        this.gesture_ == npf.events.TouchHandler.Gesture.TRANSFORM ||
+        Math.abs(1-scale) > this.scaleTreshold ||
+        Math.abs(rotation) > this.rotationTreshold
+      )
+    ) {
+      this.gesture_ = npf.events.TouchHandler.Gesture.TRANSFORM;
 
-		 var x = (this._movePos[0].x + this._movePos[1].x) / 2 - this._offset.x;
-		 var y = (this._movePos[0].y + this._movePos[1].y) / 2 - this._offset.y;
+      /** @type {number} */
+      var x = (this.movePos_[0].x + this.movePos_[1].x) / 2 - this.offset_.x;
+      /** @type {number} */
+      var y = (this.movePos_[0].y + this.movePos_[1].y) / 2 - this.offset_.y;
 
-			this._centerPos = new goog.math.Coordinate(x, y);
+      this.centerPos_ = new goog.math.Coordinate(x, y);
 
-			var eventObj = {
-				position: this._centerPos,
-				rotation: rotation,
-				scale: scale
-			};
+      var eventObj = {
+        position: this.centerPos_,
+        rotation: rotation,
+        scale: scale
+      };
 
-			if (this._first) {
-				this._dispatchAndDispose(npf.events.EventType.TRANSFORMSTART, event, eventObj);
-				this._first = false;
-			}
+      if (this.first_) {
+        this.dispatchAndDispose_(npf.events.EventType.TRANSFORMSTART,
+          event, eventObj);
+        this.first_ = false;
+      }
 
-			this._dispatchAndDispose(npf.events.EventType.TRANSFORM, event, eventObj);
-			this._cancelEvent(event);
+      this.dispatchAndDispose_(npf.events.EventType.TRANSFORM, event, eventObj);
+      this.cancelEvent_(event);
 
-			return true;
-		}
-	}
+      return true;
+    }
+  }
 
-	return false;
+  return false;
 };
 
 /**
@@ -690,168 +736,193 @@ npf.events.TouchHandler.prototype._gesturesTransform = function(event) {
  * @param {goog.events.BrowserEvent} event
  * @private
  */
-npf.events.TouchHandler.prototype._gesturesTap = function(event) {
-	// compare the kind of gesture by time
-	var now = goog.now();
-	var touchTime = now - this._touchStartTime;
+npf.events.TouchHandler.prototype.gesturesTap_ = function(event) {
+  // compare the kind of gesture by time
 
-	// dont fire when hold is fired
-	if (this.holdEnabled && !(this.holdEnabled && this.holdTimeout > touchTime)) {
-		return;
-	}
+  /** @type {number} */
+  var now = goog.now();
+  /** @type {number} */
+  var touchTime = now - this.touchStartTime_;
 
-	// when previous event was tap and the tap was max_interval ms ago
-	var isDoubleTap = (function() {
-		if (
-			this._prevTapPos &&
-			this.tapDouble &&
-			this._prevGesture == npf.events.TouchHandler.Gesture.TAP &&
-			this._touchStartTime - this._prevTapEndTime < this.tapMaxInterval
-		) {
-			var xDistance = Math.abs(this._prevTapPos[0].x - this._startPos[0].x);
-			var yDistance = Math.abs(this._prevTapPos[0].y - this._startPos[0].y);
+  // dont fire when hold is fired
+  if (this.holdEnabled && !(this.holdEnabled && this.holdTimeout > touchTime)) {
+    return;
+  }
 
-			return (this._prevTapPos && this._startPos && Math.max(xDistance, yDistance) < this.tapDoubleDistance);
-		}
+  // when previous event was tap and the tap was max_interval ms ago
+  var isDoubleTap = (function() {
+    if (
+      this.prevTapPos_ &&
+      this.tapDouble &&
+      this.prevGesture_ == npf.events.TouchHandler.Gesture.TAP &&
+      this.touchStartTime_ - this.prevTapEndTime_ < this.tapMaxInterval
+    ) {
+      /** @type {number} */
+      var xDistance = Math.abs(this.prevTapPos_[0].x - this.startPos_[0].x);
+      /** @type {number} */
+      var yDistance = Math.abs(this.prevTapPos_[0].y - this.startPos_[0].y);
 
-		return false;
-	})();
+      return (this.prevTapPos_ && this.startPos_ &&
+        Math.max(xDistance, yDistance) < this.tapDoubleDistance);
+    }
 
-	if (isDoubleTap) {
-		this._gesture = npf.events.TouchHandler.Gesture.DOUBLETAP;
-		this._prevTapEndTime = null;
+    return false;
+  })();
 
-		this._dispatchAndDispose(npf.events.EventType.DOUBLETAP, event, {
-			position: this._startPos
-		});
+  if (isDoubleTap) {
+    this.gesture_ = npf.events.TouchHandler.Gesture.DOUBLETAP;
+    this.prevTapEndTime_ = null;
 
-		this._cancelEvent(event);
-	} else {
-		// single tap is single touch
-		var xDistance = this._movePos ? Math.abs(this._movePos[0].x - this._startPos[0].x) : 0;
-		var yDistance = this._movePos ? Math.abs(this._movePos[0].y - this._startPos[0].y) : 0;
+    this.dispatchAndDispose_(npf.events.EventType.DOUBLETAP, event, {
+      position: this.startPos_
+    });
+    this.cancelEvent_(event);
+  } else {
+    // single tap is single touch
 
-		this._distance = Math.max(xDistance, yDistance);
+    /** @type {number} */
+    var xDistance = this.movePos_
+      ? Math.abs(this.movePos_[0].x - this.startPos_[0].x)
+      : 0;
+    /** @type {number} */
+    var yDistance = this.movePos_
+      ? Math.abs(this.movePos_[0].y - this.startPos_[0].y)
+      : 0;
 
-		if (this._distance < this.tapMaxDistance) {
-			this._gesture = npf.events.TouchHandler.Gesture.TAP;
-			this._prevTapEndTime = now;
-			this._prevTapPos = this._startPos;
+    this.distance_ = Math.max(xDistance, yDistance);
 
-			if (this.tapEnabled) {
-				this._dispatchAndDispose(npf.events.EventType.TAP, event, {
-					position: this._startPos
-				});
+    if (this.distance_ < this.tapMaxDistance) {
+      this.gesture_ = npf.events.TouchHandler.Gesture.TAP;
+      this.prevTapEndTime_ = now;
+      this.prevTapPos_ = this.startPos_;
 
-				this._cancelEvent(event);
-			}
-		}
-	}
+      if (this.tapEnabled) {
+        this.dispatchAndDispose_(npf.events.EventType.TAP, event, {
+          position: this.startPos_
+        });
+        this.cancelEvent_(event);
+      }
+    }
+  }
 };
 
 /**
  * @param {goog.events.BrowserEvent} evt
  * @private
  */
-npf.events.TouchHandler.prototype._onStart = function(evt) {
-	this._startPos = this._getPositionFromEvent(evt);
-	this._touchStartTime = goog.now();
-	this._fingers = npf.events.TouchHandler.countFingers(evt);
-	this._first = true;
-	this._startEvent = evt;
+npf.events.TouchHandler.prototype.onStart_ = function(evt) {
+  this.startPos_ = this.getPositionFromEvent_(evt);
+  this.touchStartTime_ = goog.now();
+  this.fingers_ = npf.events.TouchHandler.countFingers(evt);
+  this.first_ = true;
+  this.startEvent_ = evt;
 
-	// borrowed from jquery offset https://github.com/jquery/jquery/blob/master/src/offset.js
-	var box = this.element.getBoundingClientRect();
-	var clientTop  = this.element.clientTop  || document.body.clientTop  || 0;
-	var clientLeft = this.element.clientLeft || document.body.clientLeft || 0;
-	var scrollTop  = window.pageYOffset || this.element.scrollTop  || document.body.scrollTop;
-	var scrollLeft = window.pageXOffset || this.element.scrollLeft || document.body.scrollLeft;
+  // borrowed from jquery offset https://github.com/jquery/jquery/blob/master/src/offset.js
 
-	this._offset = new goog.math.Coordinate(box.left + scrollLeft - clientLeft, box.top + scrollTop - clientTop);
-	this._mousedown = true;
+  var box = this.element.getBoundingClientRect();
+  /** @type {number} */
+  var clientTop = this.element.clientTop  || document.body.clientTop  || 0;
+  /** @type {number} */
+  var clientLeft = this.element.clientLeft || document.body.clientLeft || 0;
+  /** @type {number} */
+  var scrollTop = window.pageYOffset || this.element.scrollTop ||
+    document.body.scrollTop;
+  /** @type {number} */
+  var scrollLeft = window.pageXOffset || this.element.scrollLeft ||
+    document.body.scrollLeft;
+  /** @type {number} */
+  var x = box.left + scrollLeft - clientLeft;
+  /** @type {number} */
+  var y = box.top + scrollTop - clientTop;
 
-	// hold gesture
-	this._gesturesHold(evt);
+  this.offset_ = new goog.math.Coordinate(x, y);
+  this.mousedown_ = true;
 
-	if (this.preventDefault) {
-		this._cancelEvent(evt);
-	}
+  // hold gesture
+  this.gesturesHold_(evt);
+
+  if (this.preventDefault) {
+    this.cancelEvent_(evt);
+  }
 };
 
 /**
  * @param {goog.events.BrowserEvent} evt
  * @private
  */
-npf.events.TouchHandler.prototype._onProgress = function(evt) {
-	if (!this._mousedown) {
-		return false;
-	}
+npf.events.TouchHandler.prototype.onProgress_ = function(evt) {
+  if (!this.mousedown_) {
+    return false;
+  }
 
-	this._moveEvent = evt;
-	this._movePos = this._getPositionFromEvent(evt);
+  this.moveEvent_ = evt;
+  this.movePos_ = this.getPositionFromEvent_(evt);
 
-	if (!this._gesturesTransform(evt)) {
-		this._gesturesDrag(evt);
-	}
+  if (!this.gesturesTransform_(evt)) {
+    this.gesturesDrag_(evt);
+  }
 };
 
 /**
  * @param {goog.events.BrowserEvent} evt
  * @private
  */
-npf.events.TouchHandler.prototype._onMouseOut = function(evt) {
-	if (!npf.events.isMouseEventWithinElement(evt, this.element)) {
-		this._onEnd(evt);
-	}
+npf.events.TouchHandler.prototype.onMouseOut_ = function(evt) {
+  if (!npf.events.isMouseEventWithinElement(evt, this.element)) {
+    this.onEnd_(evt);
+  }
 };
 
 /**
  * @param {goog.events.BrowserEvent} evt
  * @private
  */
-npf.events.TouchHandler.prototype._onEnd = function(evt) {
-	/** @type {Event} */
-	var browserEvent = evt.getBrowserEvent();
+npf.events.TouchHandler.prototype.onEnd_ = function(evt) {
+  /** @type {Event} */
+  var browserEvent = evt.getBrowserEvent();
 
-	if (
-		!this._mousedown ||
-		(this._gesture != npf.events.TouchHandler.Gesture.TRANSFORM && browserEvent['touches'] && browserEvent['touches'].length > 0)
-	) {
-		return false;
-	}
+  if (
+    !this.mousedown_ ||
+    (
+      this.gesture_ != npf.events.TouchHandler.Gesture.TRANSFORM &&
+      browserEvent['touches'] &&
+      browserEvent['touches'].length > 0
+    )
+  ) {
+    return false;
+  }
 
-	this._mousedown = false;
-	this._endEvent = evt;
+  this.mousedown_ = false;
+  this.endEvent_ = evt;
 
-	var dragging = this._gesture == npf.events.TouchHandler.Gesture.DRAG;
+  var dragging = this.gesture_ == npf.events.TouchHandler.Gesture.DRAG;
 
-	// swipe gesture
-	this._gesturesSwipe(evt);
+  // swipe gesture
+  this.gesturesSwipe_(evt);
 
-	if (dragging) {
-		this._dispatchAndDispose(npf.events.EventType.DRAGEND, evt, {
-			angle: this._angle,
-			direction: this._direction,
-			distance: this._distance
-		});
-	} else if (this._gesture == npf.events.TouchHandler.Gesture.TRANSFORM) {
-		this._dispatchAndDispose(npf.events.EventType.TRANSFORMEND, evt, {
-			position: this._centerPos,
-			rotation: this._calculateRotation(this._startPos, this._movePos),
-			scale: this._calculateScale(this._startPos, this._movePos)
-		});
-	} else {
-		this._gesturesTap(this._startEvent);
-	}
+  if (dragging) {
+    this.dispatchAndDispose_(npf.events.EventType.DRAGEND, evt, {
+      angle: this.angle_,
+      direction: this.direction_,
+      distance: this.distance_
+    });
+  } else if (this.gesture_ == npf.events.TouchHandler.Gesture.TRANSFORM) {
+    this.dispatchAndDispose_(npf.events.EventType.TRANSFORMEND, evt, {
+      position: this.centerPos_,
+      rotation: this.calculateRotation_(this.startPos_, this.movePos_),
+      scale: this.calculateScale_(this.startPos_, this.movePos_)
+    });
+  } else {
+    this.gesturesTap_(this.startEvent_);
+  }
 
-	this._prevGesture = this._gesture;
+  this.prevGesture_ = this.gesture_;
+  this.dispatchAndDispose_(npf.events.EventType.RELEASE, evt, {
+    gesture: this.gesture_
+  });
 
-	this._dispatchAndDispose(npf.events.EventType.RELEASE, evt, {
-		gesture: this._gesture
-	});
-
-	// reset vars
-	reset();
+  // reset vars
+  reset();
 };
 
 /**
@@ -860,18 +931,18 @@ npf.events.TouchHandler.prototype._onEnd = function(evt) {
  * @param {Object=} opt_params
  * @private
  */
-npf.events.TouchHandler.prototype._dispatchAndDispose = function(type, evt, opt_params) {
-	var event = new goog.events.BrowserEvent(evt.getBrowserEvent());
-	event.type = type;
-	event.touches = this._getPositionFromEvent(evt);
+npf.events.TouchHandler.prototype.dispatchAndDispose_ = function(type, evt, opt_params) {
+  var event = new goog.events.BrowserEvent(evt.getBrowserEvent());
+  event.type = type;
+  event.touches = this.getPositionFromEvent_(evt);
 
-	if (opt_params) {
-		goog.object.extend(event, opt_params);
-	}
+  if (opt_params) {
+    goog.object.extend(event, opt_params);
+  }
 
-	try {
-		this.dispatchEvent(event);
-	} finally {
-		event.dispose();
-	}
+  try {
+    this.dispatchEvent(event);
+  } finally {
+    event.dispose();
+  }
 };

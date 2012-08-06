@@ -10,19 +10,19 @@ goog.require('goog.string');
  * @return {string}
  */
 npf.string.declension = function(variants, count) {
-	count = Math.floor(count);
+  count = Math.floor(count);
 
-	if (/1[1-4]$/.test(count)) {
-		return variants[2];
-	}
-	if (/[2-4]$/.test(count)) {
-		return variants[1];
-	}
-	if (/1$/.test(count)) {
-		return variants[0];
-	}
+  if (/1[1-4]$/.test(count)) {
+    return variants[2];
+  }
+  if (/[2-4]$/.test(count)) {
+    return variants[1];
+  }
+  if (/1$/.test(count)) {
+    return variants[0];
+  }
 
-	return variants[2];
+  return variants[2];
 };
 
 /**
@@ -31,29 +31,29 @@ npf.string.declension = function(variants, count) {
  * @return {string}
  */
 npf.string.hisDuration = function(duration) {
-	/** @type {number} */
-	var hours = Math.floor(duration / 3600);
-	/** @type {number} */
-	var seconds = duration - hours * 3600;
-	/** @type {number} */
-	var minutes = Math.floor(seconds / 60);
-	/** @type {!Array.<string|number>} */
-	var result = [];
+  /** @type {number} */
+  var hours = Math.floor(duration / 3600);
+  /** @type {number} */
+  var seconds = duration - hours * 3600;
+  /** @type {number} */
+  var minutes = Math.floor(seconds / 60);
+  /** @type {!Array.<string|number>} */
+  var result = [];
 
-	seconds -= minutes * 60;
+  seconds -= minutes * 60;
 
-	if (hours) {
-		result.push(hours);
-		result.push(npf.string.pad(minutes, 2));
-	} else if (minutes) {
-		result.push(minutes);
-	} else {
-		result.push('0');
-	}
+  if (hours) {
+    result.push(hours);
+    result.push(npf.string.pad(minutes, 2));
+  } else if (minutes) {
+    result.push(minutes);
+  } else {
+    result.push('0');
+  }
 
-	result.push(npf.string.pad(seconds, 2));
+  result.push(npf.string.pad(seconds, 2));
 
-	return result.join(':');
+  return result.join(':');
 };
 
 /**
@@ -62,52 +62,55 @@ npf.string.hisDuration = function(duration) {
  * @return {string}
  */
 npf.string.supplant = function(template, opt_scope) {
-	if (!opt_scope) {
-		return template;
-	}
+  if (!opt_scope) {
+    return template;
+  }
 
-	/** @type {string} */
-	var result = '';
+  /** @type {string} */
+  var result = '';
 
-	/** @type {boolean} */
-	var isEscape = false;
-	/** @type {boolean} */
-	var isInserting = false;
-	/** @type {string} */
-	var insertName;
+  /** @type {boolean} */
+  var isEscape = false;
+  /** @type {boolean} */
+  var isInserting = false;
+  /** @type {string} */
+  var insertName;
 
-	for (var i = 0; i < template.length; i++) {
-		/** @type {string} */
-		var symbol = template[i];
+  for (var i = 0; i < template.length; i++) {
+    /** @type {string} */
+    var symbol = template[i];
 
-		if (isEscape) {
-			isEscape = false;
-		} else if ('\\' == symbol) {
-			symbol = '';
-			isEscape = true;
-		} else if (!isInserting && '{' == symbol) {
-			symbol = '';
-			isInserting = true;
-			insertName = '';
-		} else if (isInserting && '}' == symbol) {
-			symbol = '';
-			isInserting = false;
+    if (isEscape) {
+      isEscape = false;
+    } else if ('\\' == symbol) {
+      symbol = '';
+      isEscape = true;
+    } else if (!isInserting && '{' == symbol) {
+      symbol = '';
+      isInserting = true;
+      insertName = '';
+    } else if (isInserting && '}' == symbol) {
+      symbol = '';
+      isInserting = false;
 
-			if (goog.isNumber(opt_scope[insertName]) || goog.isString(opt_scope[insertName])) {
-				result += opt_scope[insertName] + '';
-			}
-		}
+      if (
+      	goog.isNumber(opt_scope[insertName]) ||
+      	goog.isString(opt_scope[insertName])
+      ) {
+        result += opt_scope[insertName] + '';
+      }
+    }
 
-		if (symbol) {
-			if (isInserting) {
-				insertName += symbol;
-			} else {
-				result += symbol;
-			}
-		}
-	}
+    if (symbol) {
+      if (isInserting) {
+        insertName += symbol;
+      } else {
+        result += symbol;
+      }
+    }
+  }
 
-	return result;
+  return result;
 };
 
 /**
@@ -115,42 +118,42 @@ npf.string.supplant = function(template, opt_scope) {
  * @return {!Array.<string>}
  */
 npf.string.getIdsFromTemplate = function(template) {
-	/** @type {!Array.<string>} */
-	var ids = [];
+  /** @type {!Array.<string>} */
+  var ids = [];
 
-	/** @type {boolean} */
-	var isEscape = false;
-	/** @type {boolean} */
-	var isInserting = false;
-	/** @type {string} */
-	var insertName;
+  /** @type {boolean} */
+  var isEscape = false;
+  /** @type {boolean} */
+  var isInserting = false;
+  /** @type {string} */
+  var insertName;
 
-	for (var i = 0; i < template.length; i++) {
-		/** @type {string} */
-		var symbol = template[i];
+  for (var i = 0; i < template.length; i++) {
+    /** @type {string} */
+    var symbol = template[i];
 
-		if (isEscape) {
-			isEscape = false;
-		} else if ('\\' == symbol) {
-			symbol = '';
-			isEscape = true;
-		} else if (!isInserting && '{' == symbol) {
-			symbol = '';
-			isInserting = true;
-			insertName = '';
-		} else if (isInserting && '}' == symbol) {
-			symbol = '';
-			isInserting = false;
+    if (isEscape) {
+      isEscape = false;
+    } else if ('\\' == symbol) {
+      symbol = '';
+      isEscape = true;
+    } else if (!isInserting && '{' == symbol) {
+      symbol = '';
+      isInserting = true;
+      insertName = '';
+    } else if (isInserting && '}' == symbol) {
+      symbol = '';
+      isInserting = false;
 
-			ids.push(insertName);
-		}
+      ids.push(insertName);
+    }
 
-		if (symbol && isInserting) {
-			insertName += symbol;
-		}
-	}
+    if (symbol && isInserting) {
+      insertName += symbol;
+    }
+  }
 
-	return ids;
+  return ids;
 };
 
 /**
@@ -159,7 +162,7 @@ npf.string.getIdsFromTemplate = function(template) {
  * @return {string}
  */
 npf.string.stripTags = function(source) {
-	return source.replace(/<\/?[^>]+>/gi, '');
+  return source.replace(/<\/?[^>]+>/gi, '');
 };
 
 /**
@@ -170,30 +173,30 @@ npf.string.stripTags = function(source) {
  * @return {string}
  */
 npf.string.trunctateEmail = function(email, opt_maxLength, opt_maxHostLength) {
-	/** @type {number} */
-	var atPos = email.indexOf('@');
+  /** @type {number} */
+  var atPos = email.indexOf('@');
 
-	if (-1 == atPos) {
-		return email;
-	}
+  if (-1 == atPos) {
+    return email;
+  }
 
-	/** @type {string} */
-	var emailName = email.substr(0, atPos);
-	/** @type {string} */
-	var emailHost = email.substr(atPos);
-	/** @type {number} */
-	var maxLength = opt_maxLength || 30;
-	/** @type {number} */
-	var maxHostLength = opt_maxHostLength || 23;
+  /** @type {string} */
+  var emailName = email.substr(0, atPos);
+  /** @type {string} */
+  var emailHost = email.substr(atPos);
+  /** @type {number} */
+  var maxLength = opt_maxLength || 30;
+  /** @type {number} */
+  var maxHostLength = opt_maxHostLength || 23;
 
-	if (maxHostLength < emailHost.length) {
-		return goog.string.truncate(email, maxLength);
-	}
+  if (maxHostLength < emailHost.length) {
+    return goog.string.truncate(email, maxLength);
+  }
 
-	/** @type {number} */
-	var maxNameLength = maxLength - emailHost.length;
+  /** @type {number} */
+  var maxNameLength = maxLength - emailHost.length;
 
-	return goog.string.truncateMiddle(emailName, maxNameLength) + emailHost;
+  return goog.string.truncateMiddle(emailName, maxNameLength) + emailHost;
 };
 
 /**
@@ -203,14 +206,14 @@ npf.string.trunctateEmail = function(email, opt_maxLength, opt_maxHostLength) {
  * @return {string}
  */
 npf.string.pad = function(number, length) {
-	/** @type {number} */
-	var numberLen = number.toString().length;
-	/** @type {string} */
-	var resultNumber = number.toString();
+  /** @type {number} */
+  var numberLen = number.toString().length;
+  /** @type {string} */
+  var resultNumber = number.toString();
 
-	while (numberLen++ < length) {
-		resultNumber = '0' + resultNumber;
-	}
+  while (numberLen++ < length) {
+    resultNumber = '0' + resultNumber;
+  }
 
-	return resultNumber;
+  return resultNumber;
 };

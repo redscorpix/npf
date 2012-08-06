@@ -1,4 +1,7 @@
 goog.provide('npf.fx.KeyframeAnimation');
+goog.provide('npf.fx.KeyframeAnimation.CssProperty');
+goog.provide('npf.fx.KeyframeAnimation.Direction');
+goog.provide('npf.fx.KeyframeAnimation.PlayState');
 goog.provide('npf.fx.KeyframeAnimation.PreferredTimingFunction');
 
 goog.require('goog.array');
@@ -22,23 +25,24 @@ goog.require('npf.userAgent.support');
 /**
  * @param {Element} element
  * @param {number} duration in ms
- * @param {Array.<number>=} opt_acc defaults to npf.fx.KeyframeAnimation.PreferredTimingFunction.LINEAR
+ * @param {Array.<number>=} opt_acc defaults to
+ *                                  npf.fx.KeyframeAnimation.PreferredTimingFunction.LINEAR
  * @constructor
  * @implements {goog.fx.Transition}
  * @extends {goog.fx.TransitionBase}
  */
 npf.fx.KeyframeAnimation = function(element, duration, opt_acc) {
-	goog.base(this);
+  goog.base(this);
 
-	this.element = element;
-	this.duration = duration;
-	this._accel = opt_acc || npf.fx.KeyframeAnimation.PreferredTimingFunction.LINEAR;
+  this.element = element;
+  this.duration = duration;
+  this.accel_ = opt_acc ||
+    npf.fx.KeyframeAnimation.PreferredTimingFunction.LINEAR;
+  this.name_ = npf.fx.KeyframeAnimation.getNextKeyframeName();
+  this.keyframesMap_ = {};
 
-	this._name = npf.fx.KeyframeAnimation.getNextKeyframeName();
-	this._keyframesMap = {};
-
-	this._handler = new goog.events.EventHandler();
-	this.registerDisposable(this._handler);
+  this.handler_ = new goog.events.EventHandler();
+  this.registerDisposable(this.handler_);
 };
 goog.inherits(npf.fx.KeyframeAnimation, goog.fx.TransitionBase);
 
@@ -47,30 +51,38 @@ goog.inherits(npf.fx.KeyframeAnimation, goog.fx.TransitionBase);
  * @enum {string}
  */
 npf.fx.KeyframeAnimation.Direction = {
-	NORMAL: 'normal',
-	ALTERNATE: 'alternate'
+  NORMAL: 'normal',
+  ALTERNATE: 'alternate'
 };
 
 /**
  * @enum {string}
  */
 npf.fx.KeyframeAnimation.PlayState = {
-	RUNNING: 'running',
-	PAUSED: 'paused'
+  RUNNING: 'running',
+  PAUSED: 'paused'
 };
 
 /**
  * @enum {string}
  */
 npf.fx.KeyframeAnimation.CssProperty = {
-	ANIMATION: npf.userAgent.support.getCssPropertyName('animation'),
-	ANIMATION_DELAY: npf.userAgent.support.getCssPropertyName('animation-delay'),
-	ANIMATION_DIRECTION: npf.userAgent.support.getCssPropertyName('animation-direction'),
-	ANIMATION_DURATION: npf.userAgent.support.getCssPropertyName('animation-duration'),
-	ANIMATION_ITERATION_COUNT: npf.userAgent.support.getCssPropertyName('animation-iteration-count'),
-	ANIMATION_NAME: npf.userAgent.support.getCssPropertyName('animation-name'),
-	ANIMATION_PLAY_STATE: npf.userAgent.support.getCssPropertyName('animation-play-state'),
-	ANIMATION_TIMING_FUNCTION: npf.userAgent.support.getCssPropertyName('animation-timing-function')
+  ANIMATION: npf.userAgent.support.getCssPropertyName(
+    'animation'),
+  ANIMATION_DELAY: npf.userAgent.support.getCssPropertyName(
+    'animation-delay'),
+  ANIMATION_DIRECTION: npf.userAgent.support.getCssPropertyName(
+    'animation-direction'),
+  ANIMATION_DURATION: npf.userAgent.support.getCssPropertyName(
+    'animation-duration'),
+  ANIMATION_ITERATION_COUNT: npf.userAgent.support.getCssPropertyName(
+    'animation-iteration-count'),
+  ANIMATION_NAME: npf.userAgent.support.getCssPropertyName(
+    'animation-name'),
+  ANIMATION_PLAY_STATE: npf.userAgent.support.getCssPropertyName(
+    'animation-play-state'),
+  ANIMATION_TIMING_FUNCTION: npf.userAgent.support.getCssPropertyName(
+    'animation-timing-function')
 };
 
 /**
@@ -83,30 +95,31 @@ npf.fx.KeyframeAnimation.KEYFRAME_NAME_PREFIX = 'kf_';
  * @enum {Array.<number>}
  */
 npf.fx.KeyframeAnimation.PreferredTimingFunction = {
-	EASE: [0.25, 0.1, 0.25, 1],
-	LINEAR: [0, 0, 1, 1],
-	EASE_IN: [0.42, 0, 1, 1],
-	EASE_OUT: [0, 0, 0.58, 1],
-	EASE_IN_OUT: [0.42, 0, 0.58, 1]
+  EASE: [0.25, 0.1, 0.25, 1],
+  LINEAR: [0, 0, 1, 1],
+  EASE_IN: [0.42, 0, 1, 1],
+  EASE_OUT: [0, 0, 0.58, 1],
+  EASE_IN_OUT: [0.42, 0, 0.58, 1]
 };
 
 /**
  * @return {boolean}
  */
 npf.fx.KeyframeAnimation.isSupported = function() {
-	return npf.userAgent.support.isCssAnimationSupported() && npf.fx.Animation.enabled;
+  return npf.userAgent.support.isCssAnimationSupported() &&
+    npf.fx.Animation.enabled;
 };
 
 /**
  * @return {string}
  */
 npf.fx.KeyframeAnimation.getNextKeyframeName = function() {
-	/** @type {number} */
-	var counter = 0;
+  /** @type {number} */
+  var counter = 0;
 
-	return function() {
-		return npf.fx.KeyframeAnimation.KEYFRAME_NAME_PREFIX + (++counter);
-	};
+  return function() {
+    return npf.fx.KeyframeAnimation.KEYFRAME_NAME_PREFIX + (++counter);
+  };
 }();
 
 
@@ -126,172 +139,175 @@ npf.fx.KeyframeAnimation.prototype.duration;
  * @type {!Object.<string,!Object>}
  * @private
  */
-npf.fx.KeyframeAnimation.prototype._keyframesMap;
+npf.fx.KeyframeAnimation.prototype.keyframesMap_;
 
 /**
  * @type {Array.<number>}
  * @private
  */
-npf.fx.KeyframeAnimation.prototype._accel;
+npf.fx.KeyframeAnimation.prototype.accel_;
 
 /**
  * @type {number}
  * @private
  */
-npf.fx.KeyframeAnimation.prototype._delay = 0;
+npf.fx.KeyframeAnimation.prototype.delay_ = 0;
 
 /**
  * 0 — infinite.
  * @type {number}
  * @private
  */
-npf.fx.KeyframeAnimation.prototype._iterationCount = 1;
+npf.fx.KeyframeAnimation.prototype.iterationCount_ = 1;
 
 /**
  * @type {npf.fx.KeyframeAnimation.Direction}
  * @private
  */
-npf.fx.KeyframeAnimation.prototype._direction = npf.fx.KeyframeAnimation.Direction.NORMAL;
+npf.fx.KeyframeAnimation.prototype.direction_ =
+  npf.fx.KeyframeAnimation.Direction.NORMAL;
 
 /**
  * @type {string}
  * @private
  */
-npf.fx.KeyframeAnimation.prototype._name;
+npf.fx.KeyframeAnimation.prototype.name_;
 
 /**
  * @type {goog.events.EventHandler}
  * @private
  */
-npf.fx.KeyframeAnimation.prototype._handler;
+npf.fx.KeyframeAnimation.prototype.handler_;
 
 /**
  * @type {Element}
  * @private
  */
-npf.fx.KeyframeAnimation.prototype._styleElement;
+npf.fx.KeyframeAnimation.prototype.styleElement_;
 
 /**
  * @type {boolean}
  * @private
  */
-npf.fx.KeyframeAnimation.prototype._domSet = false;
+npf.fx.KeyframeAnimation.prototype.domSet_ = false;
 
 /**
  * @type {boolean}
  * @private
  */
-npf.fx.KeyframeAnimation.prototype._isCleared = true;
+npf.fx.KeyframeAnimation.prototype.cleared_ = true;
 
 /**
  * @type {Object.<string,string>}
  * @private
  */
-npf.fx.KeyframeAnimation.prototype._endStyles = null;
+npf.fx.KeyframeAnimation.prototype.endStyles_ = null;
 
 /**
  * @type {npf.fx.KeyframeAnimation.PlayState}
+ * @private
  */
-npf.fx.KeyframeAnimation.prototype._playState = npf.fx.KeyframeAnimation.PlayState.PAUSED;
+npf.fx.KeyframeAnimation.prototype.playState_ =
+  npf.fx.KeyframeAnimation.PlayState.PAUSED;
 
 
 /** @inheritDoc */
 npf.fx.KeyframeAnimation.prototype.disposeInternal = function() {
-	if (!this.isStopped()) {
-		this.stop(false);
-	}
+  if (!this.isStopped()) {
+    this.stop(false);
+  }
 
-	goog.base(this, 'disposeInternal');
+  goog.base(this, 'disposeInternal');
 
-	delete this.element;
-	delete this.duration;
-	delete this._keyframesMap;
-	delete this._accel;
-	delete this._delay;
-	delete this._iterationCount;
-	delete this._direction;
-	delete this._name;
-	delete this._handler;
-	delete this._styleElement;
-	delete this._domSet;
-	delete this._isCleared;
-	delete this._endStyles;
-	delete this._playState;
+  delete this.element;
+  delete this.duration;
+  delete this.keyframesMap_;
+  delete this.accel_;
+  delete this.delay_;
+  delete this.iterationCount_;
+  delete this.direction_;
+  delete this.name_;
+  delete this.handler_;
+  delete this.styleElement_;
+  delete this.domSet_;
+  delete this.cleared_;
+  delete this.endStyles_;
+  delete this.playState_;
 };
 
 /**
  * @return {npf.fx.KeyframeAnimation.PlayState}
  */
 npf.fx.KeyframeAnimation.prototype.getState = function() {
-	return this._playState;
+  return this.playState_;
 };
 
 /**
  * @return {number} 0 — infinite
  */
 npf.fx.KeyframeAnimation.prototype.getIterationCount = function() {
-	return this._iterationCount;
+  return this.iterationCount_;
 };
 
 /**
  * @param {number} count 0 — infinite
  */
 npf.fx.KeyframeAnimation.prototype.setIterationCount = function(count) {
-	this._iterationCount = count;
+  this.iterationCount_ = count;
 
-	if (this._domSet) {
-		this._setAnimationIterationCount(this._iterationCount);
-	}
+  if (this.domSet_) {
+    this.setAnimationIterationCount_(this.iterationCount_);
+  }
 };
 
 /**
  * @return {number} in ms
  */
 npf.fx.KeyframeAnimation.prototype.getDuration = function() {
-	return this.duration;
+  return this.duration;
 };
 
 /**
  * @return {number} in ms
  */
 npf.fx.KeyframeAnimation.prototype.getDelay = function() {
-	return this._delay;
+  return this.delay_;
 };
 
 /**
  * @param {number} delay in ms
  */
 npf.fx.KeyframeAnimation.prototype.setDelay = function(delay) {
-	this._delay = delay;
+  this.delay_ = delay;
 
-	if (this._domSet) {
-		this._setAnimationDelay(this._delay);
-	}
+  if (this.domSet_) {
+    this.setAnimationDelay_(this.delay_);
+  }
 };
 
 /**
  * @return {npf.fx.KeyframeAnimation.Direction}
  */
 npf.fx.KeyframeAnimation.prototype.getDirection = function() {
-	return this._direction;
+  return this.direction_;
 };
 
 /**
  * @param {npf.fx.KeyframeAnimation.Direction} direction
  */
 npf.fx.KeyframeAnimation.prototype.setDirection = function(direction) {
-	this._direction = direction;
+  this.direction_ = direction;
 
-	if (this._domSet) {
-		this._setAnimationDirection(this._direction);
-	}
+  if (this.domSet_) {
+    this.setAnimationDirection_(this.direction_);
+  }
 };
 
 /**
  * @return {Array.<number>}
  */
 npf.fx.KeyframeAnimation.prototype.getAccel = function() {
-	return this._accel;
+  return this.accel_;
 };
 
 /**
@@ -301,7 +317,8 @@ npf.fx.KeyframeAnimation.prototype.getAccel = function() {
  * @param {Array.<number>=} opt_toAcc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.fromTo = function(fromRules, toRules, opt_fromAcc, opt_toAcc) {
+npf.fx.KeyframeAnimation.prototype.fromTo = function(fromRules, toRules,
+                                                     opt_fromAcc, opt_toAcc) {
   this.from(fromRules, opt_fromAcc);
 
   return this.to(toRules, opt_toAcc);
@@ -313,7 +330,7 @@ npf.fx.KeyframeAnimation.prototype.fromTo = function(fromRules, toRules, opt_fro
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.from = function(rules, opt_acc) {
-	return this.insertKeyframe(rules, 0, opt_acc);
+  return this.insertKeyframe(rules, 0, opt_acc);
 };
 
 /**
@@ -322,7 +339,7 @@ npf.fx.KeyframeAnimation.prototype.from = function(rules, opt_acc) {
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.to = function(rules, opt_acc) {
-	return this.insertKeyframe(rules, 100, opt_acc);
+  return this.insertKeyframe(rules, 100, opt_acc);
 };
 
 /**
@@ -331,29 +348,34 @@ npf.fx.KeyframeAnimation.prototype.to = function(rules, opt_acc) {
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.insertKeyframe = function(rules, position, opt_acc) {
-	position = parseInt(position, 10);
+npf.fx.KeyframeAnimation.prototype.insertKeyframe = function(rules, position,
+                                                             opt_acc) {
+  position = parseInt(position, 10);
 
-	if (0 <= position && position <= 100) {
-		/** @type {Object.<string,string>} */
-		var properties = goog.object.clone(rules);
+  if (0 <= position && position <= 100) {
+    /** @type {Object.<string,string>} */
+    var properties = goog.object.clone(rules);
 
-		if (opt_acc) {
-			properties[npf.fx.KeyframeAnimation.CssProperty.ANIMATION_TIMING_FUNCTION] = 'cubic-bezier(' + opt_acc.join(',') + ')';
-		}
+    if (opt_acc) {
+      /** @type {string} */
+      var timingFunc =
+        npf.fx.KeyframeAnimation.CssProperty.ANIMATION_TIMING_FUNCTION;
+      properties[timingFunc] = 'cubic-bezier(' + opt_acc.join(',') + ')';
+    }
 
-		if (100 == position) {
-			this._endStyles = goog.object.clone(rules);
-		}
+    if (100 == position) {
+      this.endStyles_ = goog.object.clone(rules);
+    }
 
-		if (!this._keyframesMap[/** @type {string} */ (position)]) {
-			this._keyframesMap[/** @type {string} */ (position)] = {};
-		}
+    if (!this.keyframesMap_[/** @type {string} */ (position)]) {
+      this.keyframesMap_[/** @type {string} */ (position)] = {};
+    }
 
-		goog.object.extend(this._keyframesMap[/** @type {string} */ (position)], properties);
-	}
+    goog.object.extend(this.keyframesMap_[/** @type {string} */ (position)],
+      properties);
+  }
 
-	return this;
+  return this;
 };
 
 /**
@@ -361,83 +383,87 @@ npf.fx.KeyframeAnimation.prototype.insertKeyframe = function(rules, position, op
  * @return {boolean}
  */
 npf.fx.KeyframeAnimation.prototype.play = function(opt_restart) {
-	if (opt_restart || this.isStopped()) {
-		this._isCleared = true;
+  if (opt_restart || this.isStopped()) {
+    this.cleared_ = true;
 
-		if (this._domSet) {
-			this.clearDom();
-		}
-	} else if (this.isPlaying()) {
-		return false;
-	}
+    if (this.domSet_) {
+      this.clearDom();
+    }
+  } else if (this.isPlaying()) {
+    return false;
+  }
 
-	if (this._isCleared) {
-		this.onBegin();
-	}
+  if (this.cleared_) {
+    this.onBegin();
+  }
 
-	this.onPlay();
+  this.onPlay();
 
-	if (this.isPaused()) {
-		this.onResume();
-	}
+  if (this.isPaused()) {
+    this.onResume();
+  }
 
-	if (this._isCleared) {
-		this._isCleared = false;
-		this.setDom();
-	}
+  if (this.cleared_) {
+    this.cleared_ = false;
+    this.setDom();
+  }
 
-	this.setStatePlaying();
+  this.setStatePlaying();
 
-	return true;
+  return true;
 };
 
 /**
  * @protected
  */
 npf.fx.KeyframeAnimation.prototype.setDom = function() {
-	var rules = [];
+  var rules = [];
 
-	goog.object.forEach(this._keyframesMap, function(properties, position) {
-		/** @type {string} */
-		var keyframeText = position + '% {';
+  goog.object.forEach(this.keyframesMap_, function(properties, position) {
+    /** @type {string} */
+    var keyframeText = position + '% {';
 
-		for (var key in properties) {
-			keyframeText += key + ':' + properties[key] + ';';
-		}
+    for (var key in properties) {
+      keyframeText += key + ':' + properties[key] + ';';
+    }
 
-		keyframeText += '}';
-		rules.push(keyframeText);
-	}, this);
+    keyframeText += '}';
+    rules.push(keyframeText);
+  }, this);
 
-	this._styleElement = /** @type {Element} */ (goog.dom.htmlToDocumentFragment('<style>@-' + npf.userAgent.Support.vendorPrefix + '-keyframes ' + this._name + ' {' + rules.join('') + '}</style>'));
-	goog.dom.appendChild(document.head, this._styleElement);
+  /** @type {string} */
+  var cssText = '<style>@-' + npf.userAgent.Support.vendorPrefix +
+    '-keyframes ' + this.name_ + ' {' + rules.join('') + '}</style>';
+  this.styleElement_ =
+    /** @type {Element} */ (goog.dom.htmlToDocumentFragment(cssText));
+  goog.dom.appendChild(document.head, this.styleElement_);
 
-	this._handler.listen(this.element, [
-		npf.userAgent.Support.vendorPrefix + 'AnimationStart',
-		'animationstart'
-	], this._onAnimationStart, false, this);
-	this._handler.listen(this.element, [
-		npf.userAgent.Support.vendorPrefix + 'AnimationEnd',
-		'animationend'
-	], this._onAnimationEnd, false, this);
-	this._handler.listen(this.element, [
-		npf.userAgent.Support.vendorPrefix + 'AnimationIteration',
-		'animationiteration'
-	], this._onAnimationIteration, false, this);
+  this.handler_.listen(this.element, [
+    npf.userAgent.Support.vendorPrefix + 'AnimationStart',
+    'animationstart'
+  ], this.onAnimationStart_, false, this);
+  this.handler_.listen(this.element, [
+    npf.userAgent.Support.vendorPrefix + 'AnimationEnd',
+    'animationend'
+  ], this.onAnimationEnd_, false, this);
+  this.handler_.listen(this.element, [
+    npf.userAgent.Support.vendorPrefix + 'AnimationIteration',
+    'animationiteration'
+  ], this.onAnimationIteration_, false, this);
 
-	this._setAnimationDelay(this._delay);
-	this._setAnimationDirection(this._direction);
-	this._setAnimationDuration(this.duration);
-	this._setAnimationIterationCount(this._iterationCount);
-	this._setAnimationName(this._name);
-	this._setAnimationTimingFunction(this._accel);
-	this._setAnimationPlayState(npf.fx.KeyframeAnimation.PlayState.RUNNING);
+  this.setAnimationDelay_(this.delay_);
+  this.setAnimationDirection_(this.direction_);
+  this.setAnimationDuration_(this.duration);
+  this.setAnimationIterationCount_(this.iterationCount_);
+  this.setAnimationName_(this.name_);
+  this.setAnimationTimingFunction_(this.accel_);
+  this.setAnimationPlayState_(npf.fx.KeyframeAnimation.PlayState.RUNNING);
 
-	if (this._endStyles) {
-		goog.style.setStyle(this.element, this._endStyles);
-	}
+  if (this.endStyles_) {
+    goog.style.setStyle(this.element, this.endStyles_);
+  }
 
-	this._domSet = true;
+  this.domSet_ = true;
 };
 
 /**
@@ -445,51 +471,52 @@ npf.fx.KeyframeAnimation.prototype.setDom = function() {
  * @param {boolean} gotoEnd If true the animation will move to the end coords.
  */
 npf.fx.KeyframeAnimation.prototype.stop = function(gotoEnd) {
-	this.setStateStopped();
+  this.setStateStopped();
+  this.setAnimationPlayState_(npf.fx.KeyframeAnimation.PlayState.PAUSED);
 
-	this._setAnimationPlayState(npf.fx.KeyframeAnimation.PlayState.PAUSED);
+  if (gotoEnd) {
+    this.clearDom();
+  }
 
-	if (gotoEnd) {
-		this.clearDom();
-	}
+  this.cleared_ = true;
 
-	this._isCleared = true;
-
-	this.onStop();
-	this.onEnd();
+  this.onStop();
+  this.onEnd();
 };
 
 npf.fx.KeyframeAnimation.prototype.pause = function() {
-	if (this.isPlaying()) {
-		this._setAnimationPlayState(npf.fx.KeyframeAnimation.PlayState.PAUSED);
-		this.setStatePaused();
-		this.onPause();
-	}
+  if (this.isPlaying()) {
+    this.setAnimationPlayState_(npf.fx.KeyframeAnimation.PlayState.PAUSED);
+    this.setStatePaused();
+    this.onPause();
+  }
 };
 
 /**
  * @protected
  */
 npf.fx.KeyframeAnimation.prototype.clearDom = function() {
-	this._handler.removeAll();
+  this.handler_.removeAll();
 
-	for (var name in npf.fx.KeyframeAnimation.CssProperty) {
-		goog.style.setStyle(this.element, npf.fx.KeyframeAnimation.CssProperty[name], '');
-	}
+  for (var name in npf.fx.KeyframeAnimation.CssProperty) {
+    /** @type {string} */
+    var key = npf.fx.KeyframeAnimation.CssProperty[name];
+    goog.style.setStyle(this.element, key, '');
+  }
 
-	if (this._styleElement) {
-		goog.dom.removeNode(this._styleElement);
-		this._styleElement = null;
-	}
+  if (this.styleElement_) {
+    goog.dom.removeNode(this.styleElement_);
+    this.styleElement_ = null;
+  }
 
-	this._domSet = false;
+  this.domSet_ = false;
 };
 
 /**
  * @param {goog.events.Event} evt
  * @private
  */
-npf.fx.KeyframeAnimation.prototype._onAnimationStart = function(evt) {
+npf.fx.KeyframeAnimation.prototype.onAnimationStart_ = function(evt) {
 
 };
 
@@ -497,21 +524,20 @@ npf.fx.KeyframeAnimation.prototype._onAnimationStart = function(evt) {
  * @param {goog.events.Event} evt
  * @private
  */
-npf.fx.KeyframeAnimation.prototype._onAnimationEnd = function(evt) {
-	this.clearDom();
-
-	this._isCleared = true;
-	this.setStateStopped();
-	this.onFinish();
-	this.onEnd();
+npf.fx.KeyframeAnimation.prototype.onAnimationEnd_ = function(evt) {
+  this.clearDom();
+  this.cleared_ = true;
+  this.setStateStopped();
+  this.onFinish();
+  this.onEnd();
 };
 
 /**
  * @param {goog.events.Event} evt
  * @private
  */
-npf.fx.KeyframeAnimation.prototype._onAnimationIteration = function(evt) {
-	this.onIteration();
+npf.fx.KeyframeAnimation.prototype.onAnimationIteration_ = function(evt) {
+  this.onIteration();
 };
 
 /**
@@ -533,59 +559,76 @@ npf.fx.KeyframeAnimation.prototype.dispatchAnimationEvent = function(type) {
  * @param {number} delay
  * @private
  */
-npf.fx.KeyframeAnimation.prototype._setAnimationDelay = function(delay) {
-	goog.style.setStyle(this.element, npf.fx.KeyframeAnimation.CssProperty.ANIMATION_DELAY, delay + 'ms');
+npf.fx.KeyframeAnimation.prototype.setAnimationDelay_ = function(delay) {
+  /** @type {string} */
+  var key = npf.fx.KeyframeAnimation.CssProperty.ANIMATION_DELAY;
+  goog.style.setStyle(this.element, key, delay + 'ms');
 };
 
 /**
  * @param {npf.fx.KeyframeAnimation.Direction} direction
  * @private
  */
-npf.fx.KeyframeAnimation.prototype._setAnimationDirection = function(direction) {
-	goog.style.setStyle(this.element, npf.fx.KeyframeAnimation.CssProperty.ANIMATION_DIRECTION, direction);
+npf.fx.KeyframeAnimation.prototype.setAnimationDirection_ = function(direction) {
+  /** @type {string} */
+  var key = npf.fx.KeyframeAnimation.CssProperty.ANIMATION_DIRECTION;
+  goog.style.setStyle(this.element, key, direction);
 };
 
 /**
  * @param {number} duration
  * @private
  */
-npf.fx.KeyframeAnimation.prototype._setAnimationDuration = function(duration) {
-	goog.style.setStyle(this.element, npf.fx.KeyframeAnimation.CssProperty.ANIMATION_DURATION, duration + 'ms');
+npf.fx.KeyframeAnimation.prototype.setAnimationDuration_ = function(duration) {
+  /** @type {string} */
+  var key = npf.fx.KeyframeAnimation.CssProperty.ANIMATION_DURATION;
+  goog.style.setStyle(this.element, key, duration + 'ms');
 };
 
 /**
  * @param {number} count 0 — infinite
  * @private
  */
-npf.fx.KeyframeAnimation.prototype._setAnimationIterationCount = function(count) {
-	/** @type {string} */
-	var value = count ? count + '' : 'infinite';
-	goog.style.setStyle(this.element, npf.fx.KeyframeAnimation.CssProperty.ANIMATION_ITERATION_COUNT, value);
+npf.fx.KeyframeAnimation.prototype.setAnimationIterationCount_ = function(count) {
+  /** @type {string} */
+  var key = npf.fx.KeyframeAnimation.CssProperty.ANIMATION_ITERATION_COUNT;
+  /** @type {string} */
+  var value = count ? count + '' : 'infinite';
+  goog.style.setStyle(this.element, key, value);
 };
 
 /**
  * @param {string} name
  * @private
  */
-npf.fx.KeyframeAnimation.prototype._setAnimationName = function(name) {
-	goog.style.setStyle(this.element, npf.fx.KeyframeAnimation.CssProperty.ANIMATION_NAME, name);
+npf.fx.KeyframeAnimation.prototype.setAnimationName_ = function(name) {
+  /** @type {string} */
+  var key = npf.fx.KeyframeAnimation.CssProperty.ANIMATION_NAME;
+  goog.style.setStyle(this.element, key, name);
 };
 
 /**
  * @param {Array.<string>} accel
  * @private
  */
-npf.fx.KeyframeAnimation.prototype._setAnimationTimingFunction = function(accel) {
-	goog.style.setStyle(this.element, npf.fx.KeyframeAnimation.CssProperty.ANIMATION_TIMING_FUNCTION, 'cubic-bezier(' + accel.join(',') + ')');
+npf.fx.KeyframeAnimation.prototype.setAnimationTimingFunction_ = function(accel) {
+  /** @type {string} */
+  var key = npf.fx.KeyframeAnimation.CssProperty.ANIMATION_TIMING_FUNCTION;
+  /** @type {string} */
+  var value = 'cubic-bezier(' + accel.join(',') + ')';
+  goog.style.setStyle(this.element, key, value);
 };
 
 /**
  * @param {npf.fx.KeyframeAnimation.PlayState} state
  * @private
  */
-npf.fx.KeyframeAnimation.prototype._setAnimationPlayState = function(state) {
-	this._playState = state;
-	goog.style.setStyle(this.element, npf.fx.KeyframeAnimation.CssProperty.ANIMATION_PLAY_STATE, state);
+npf.fx.KeyframeAnimation.prototype.setAnimationPlayState_ = function(state) {
+  this.playState_ = state;
+
+  /** @type {string} */
+  var key = npf.fx.KeyframeAnimation.CssProperty.ANIMATION_PLAY_STATE;
+  goog.style.setStyle(this.element, key, state);
 };
 
 /**
@@ -595,10 +638,13 @@ npf.fx.KeyframeAnimation.prototype._setAnimationPlayState = function(state) {
  * @param {Array.<number>=} opt_toAcc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.fromToOpacityRule = function(fromOpacity, toOpacity, opt_fromAcc, opt_toAcc) {
-	this.setOpacityRule(fromOpacity, 0, opt_fromAcc);
+npf.fx.KeyframeAnimation.prototype.fromToOpacityRule = function(fromOpacity,
+                                                                toOpacity,
+                                                                opt_fromAcc,
+                                                                opt_toAcc) {
+  this.setOpacityRule(fromOpacity, 0, opt_fromAcc);
 
-	return this.setOpacityRule(toOpacity, 100, opt_toAcc);
+  return this.setOpacityRule(toOpacity, 100, opt_toAcc);
 };
 
 /**
@@ -606,8 +652,9 @@ npf.fx.KeyframeAnimation.prototype.fromToOpacityRule = function(fromOpacity, toO
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.fromOpacityRule = function(opacity, opt_acc) {
-	return this.setOpacityRule(opacity, 0, opt_acc);
+npf.fx.KeyframeAnimation.prototype.fromOpacityRule = function(opacity,
+                                                              opt_acc) {
+  return this.setOpacityRule(opacity, 0, opt_acc);
 };
 
 /**
@@ -616,7 +663,7 @@ npf.fx.KeyframeAnimation.prototype.fromOpacityRule = function(opacity, opt_acc) 
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.toOpacityRule = function(opacity, opt_acc) {
-	return this.setOpacityRule(opacity, 100, opt_acc);
+  return this.setOpacityRule(opacity, 100, opt_acc);
 };
 
 /**
@@ -625,10 +672,11 @@ npf.fx.KeyframeAnimation.prototype.toOpacityRule = function(opacity, opt_acc) {
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.setOpacityRule = function(opacity, position, opt_acc) {
-	return this.insertKeyframe({
-		'opacity': opacity
-	}, position, opt_acc);
+npf.fx.KeyframeAnimation.prototype.setOpacityRule = function(opacity, position,
+                                                             opt_acc) {
+  return this.insertKeyframe({
+    'opacity': opacity
+  }, position, opt_acc);
 };
 
 /**
@@ -638,10 +686,13 @@ npf.fx.KeyframeAnimation.prototype.setOpacityRule = function(opacity, position, 
  * @param {Array.<number>=} opt_toAcc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.fromToPositionRule = function(fromCoords, toCoords, opt_fromAcc, opt_toAcc) {
-	this.setPositionRule(fromCoords, 0, opt_fromAcc);
+npf.fx.KeyframeAnimation.prototype.fromToPositionRule = function(fromCoords,
+                                                                 toCoords,
+                                                                 opt_fromAcc,
+                                                                 opt_toAcc) {
+  this.setPositionRule(fromCoords, 0, opt_fromAcc);
 
-	return this.setPositionRule(toCoords, 100, opt_toAcc);
+  return this.setPositionRule(toCoords, 100, opt_toAcc);
 };
 
 /**
@@ -649,8 +700,9 @@ npf.fx.KeyframeAnimation.prototype.fromToPositionRule = function(fromCoords, toC
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.fromPositionRule = function(coords, opt_acc) {
-	return this.setPositionRule(coords, 0, opt_acc);
+npf.fx.KeyframeAnimation.prototype.fromPositionRule = function(coords,
+                                                               opt_acc) {
+  return this.setPositionRule(coords, 0, opt_acc);
 };
 
 /**
@@ -659,7 +711,7 @@ npf.fx.KeyframeAnimation.prototype.fromPositionRule = function(coords, opt_acc) 
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.toPositionRule = function(coords, opt_acc) {
-	return this.setPositionRule(coords, 100, opt_acc);
+  return this.setPositionRule(coords, 100, opt_acc);
 };
 
 /**
@@ -668,28 +720,29 @@ npf.fx.KeyframeAnimation.prototype.toPositionRule = function(coords, opt_acc) {
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.setPositionRule = function(coords, position, opt_acc) {
-	/** @type {number} */
-	var left;
-	/** @type {number} */
-	var top;
+npf.fx.KeyframeAnimation.prototype.setPositionRule = function(coords, position,
+                                                              opt_acc) {
+  /** @type {number} */
+  var left;
+  /** @type {number} */
+  var top;
 
-	if (goog.isArray(coords)) {
-		if (2 == coords.length) {
-			left = coords[0];
-			top = coords[1];
-		} else {
-			throw Error('Position must be 2D');
-		}
-	} else {
-		left = coords.x;
-		top = coords.y;
-	}
+  if (goog.isArray(coords)) {
+    if (2 == coords.length) {
+      left = coords[0];
+      top = coords[1];
+    } else {
+      throw Error('Position must be 2D');
+    }
+  } else {
+    left = coords.x;
+    top = coords.y;
+  }
 
-	return this.insertKeyframe({
-		'left': goog.isNumber(left) ? left + 'px' : left,
-		'top': goog.isNumber(top) ? top + 'px' : top
-	}, position, opt_acc);
+  return this.insertKeyframe({
+    'left': goog.isNumber(left) ? left + 'px' : left,
+    'top': goog.isNumber(top) ? top + 'px' : top
+  }, position, opt_acc);
 };
 
 /**
@@ -699,10 +752,12 @@ npf.fx.KeyframeAnimation.prototype.setPositionRule = function(coords, position, 
  * @param {Array.<number>=} opt_toAcc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.fromToLeftRule = function(fromLeft, toLeft, opt_fromAcc, opt_toAcc) {
-	this.setLeftRule(fromLeft, 0, opt_fromAcc);
+npf.fx.KeyframeAnimation.prototype.fromToLeftRule = function(fromLeft, toLeft,
+                                                             opt_fromAcc,
+                                                             opt_toAcc) {
+  this.setLeftRule(fromLeft, 0, opt_fromAcc);
 
-	return this.setLeftRule(toLeft, 100, opt_toAcc);
+  return this.setLeftRule(toLeft, 100, opt_toAcc);
 };
 
 /**
@@ -711,7 +766,7 @@ npf.fx.KeyframeAnimation.prototype.fromToLeftRule = function(fromLeft, toLeft, o
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.fromLeftRule = function(left, opt_acc) {
-	return this.setLeftRule(left, 0, opt_acc);
+  return this.setLeftRule(left, 0, opt_acc);
 };
 
 /**
@@ -720,7 +775,7 @@ npf.fx.KeyframeAnimation.prototype.fromLeftRule = function(left, opt_acc) {
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.toLeftRule = function(left, opt_acc) {
-	return this.setLeftRule(left, 100, opt_acc);
+  return this.setLeftRule(left, 100, opt_acc);
 };
 
 /**
@@ -729,10 +784,11 @@ npf.fx.KeyframeAnimation.prototype.toLeftRule = function(left, opt_acc) {
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.setLeftRule = function(left, position, opt_acc) {
-	return this.insertKeyframe({
-		'left': goog.isNumber(left) ? left + 'px' : left
-	}, position, opt_acc);
+npf.fx.KeyframeAnimation.prototype.setLeftRule = function(left, position,
+                                                          opt_acc) {
+  return this.insertKeyframe({
+    'left': goog.isNumber(left) ? left + 'px' : left
+  }, position, opt_acc);
 };
 
 /**
@@ -742,10 +798,12 @@ npf.fx.KeyframeAnimation.prototype.setLeftRule = function(left, position, opt_ac
  * @param {Array.<number>=} opt_toAcc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.fromToTopRule = function(fromTop, toTop, opt_fromAcc, opt_toAcc) {
-	this.setTopRule(fromTop, 0, opt_fromAcc);
+npf.fx.KeyframeAnimation.prototype.fromToTopRule = function(fromTop, toTop,
+                                                            opt_fromAcc,
+                                                            opt_toAcc) {
+  this.setTopRule(fromTop, 0, opt_fromAcc);
 
-	return this.setTopRule(toTop, 100, opt_toAcc);
+  return this.setTopRule(toTop, 100, opt_toAcc);
 };
 
 /**
@@ -754,7 +812,7 @@ npf.fx.KeyframeAnimation.prototype.fromToTopRule = function(fromTop, toTop, opt_
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.fromTopRule = function(top, opt_acc) {
-	return this.setTopRule(top, 0, opt_acc);
+  return this.setTopRule(top, 0, opt_acc);
 };
 
 /**
@@ -763,7 +821,7 @@ npf.fx.KeyframeAnimation.prototype.fromTopRule = function(top, opt_acc) {
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.toTopRule = function(top, opt_acc) {
-	return this.setTopRule(top, 100, opt_acc);
+  return this.setTopRule(top, 100, opt_acc);
 };
 
 /**
@@ -772,10 +830,11 @@ npf.fx.KeyframeAnimation.prototype.toTopRule = function(top, opt_acc) {
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.setTopRule = function(top, position, opt_acc) {
-	return this.insertKeyframe({
-		'top': goog.isNumber(top) ? top + 'px' : top
-	}, position, opt_acc);
+npf.fx.KeyframeAnimation.prototype.setTopRule = function(top, position,
+                                                         opt_acc) {
+  return this.insertKeyframe({
+    'top': goog.isNumber(top) ? top + 'px' : top
+  }, position, opt_acc);
 };
 
 /**
@@ -785,10 +844,13 @@ npf.fx.KeyframeAnimation.prototype.setTopRule = function(top, position, opt_acc)
  * @param {Array.<number>=} opt_toAcc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.fromToRightRule = function(fromRight, toRight, opt_fromAcc, opt_toAcc) {
-	this.setRightRule(fromRight, 0, opt_fromAcc);
+npf.fx.KeyframeAnimation.prototype.fromToRightRule = function(fromRight,
+                                                              toRight,
+                                                              opt_fromAcc,
+                                                              opt_toAcc) {
+  this.setRightRule(fromRight, 0, opt_fromAcc);
 
-	return this.setRightRule(toRight, 100, opt_toAcc);
+  return this.setRightRule(toRight, 100, opt_toAcc);
 };
 
 /**
@@ -797,7 +859,7 @@ npf.fx.KeyframeAnimation.prototype.fromToRightRule = function(fromRight, toRight
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.fromRightRule = function(right, opt_acc) {
-	return this.setRightRule(right, 0, opt_acc);
+  return this.setRightRule(right, 0, opt_acc);
 };
 
 /**
@@ -806,7 +868,7 @@ npf.fx.KeyframeAnimation.prototype.fromRightRule = function(right, opt_acc) {
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.toRightRule = function(right, opt_acc) {
-	return this.setRightRule(right, 100, opt_acc);
+  return this.setRightRule(right, 100, opt_acc);
 };
 
 /**
@@ -815,10 +877,11 @@ npf.fx.KeyframeAnimation.prototype.toRightRule = function(right, opt_acc) {
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.setRightRule = function(right, position, opt_acc) {
-	return this.insertKeyframe({
-		'right': goog.isNumber(right) ? right + 'px' : right
-	}, position, opt_acc);
+npf.fx.KeyframeAnimation.prototype.setRightRule = function(right, position,
+                                                           opt_acc) {
+  return this.insertKeyframe({
+    'right': goog.isNumber(right) ? right + 'px' : right
+  }, position, opt_acc);
 };
 
 /**
@@ -828,10 +891,13 @@ npf.fx.KeyframeAnimation.prototype.setRightRule = function(right, position, opt_
  * @param {Array.<number>=} opt_toAcc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.fromToBottomRule = function(fromBottom, toBottom, opt_fromAcc, opt_toAcc) {
-	this.setBottomRule(fromBottom, 0, opt_fromAcc);
+npf.fx.KeyframeAnimation.prototype.fromToBottomRule = function(fromBottom,
+                                                               toBottom,
+                                                               opt_fromAcc,
+                                                               opt_toAcc) {
+  this.setBottomRule(fromBottom, 0, opt_fromAcc);
 
-	return this.setBottomRule(toBottom, 100, opt_toAcc);
+  return this.setBottomRule(toBottom, 100, opt_toAcc);
 };
 
 /**
@@ -840,7 +906,7 @@ npf.fx.KeyframeAnimation.prototype.fromToBottomRule = function(fromBottom, toBot
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.fromBottomRule = function(bottom, opt_acc) {
-	return this.setBottomRule(bottom, 0, opt_acc);
+  return this.setBottomRule(bottom, 0, opt_acc);
 };
 
 /**
@@ -849,7 +915,7 @@ npf.fx.KeyframeAnimation.prototype.fromBottomRule = function(bottom, opt_acc) {
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.toBottomRule = function(bottom, opt_acc) {
-	return this.setBottomRule(bottom, 100, opt_acc);
+  return this.setBottomRule(bottom, 100, opt_acc);
 };
 
 /**
@@ -858,10 +924,11 @@ npf.fx.KeyframeAnimation.prototype.toBottomRule = function(bottom, opt_acc) {
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.setBottomRule = function(bottom, position, opt_acc) {
-	return this.insertKeyframe({
-		'bottom': goog.isNumber(bottom) ? bottom + 'px' : bottom
-	}, position, opt_acc);
+npf.fx.KeyframeAnimation.prototype.setBottomRule = function(bottom, position,
+                                                            opt_acc) {
+  return this.insertKeyframe({
+    'bottom': goog.isNumber(bottom) ? bottom + 'px' : bottom
+  }, position, opt_acc);
 };
 
 /**
@@ -871,10 +938,13 @@ npf.fx.KeyframeAnimation.prototype.setBottomRule = function(bottom, position, op
  * @param {Array.<number>=} opt_toAcc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.fromToSizeRule = function(fromSize, toSize, opt_fromAcc, opt_toAcc) {
-	this.setSizeRule(fromSize, 0, opt_fromAcc);
+npf.fx.KeyframeAnimation.prototype.fromToSizeRule = function(fromSize,
+                                                             toSize,
+                                                             opt_fromAcc,
+                                                             opt_toAcc) {
+  this.setSizeRule(fromSize, 0, opt_fromAcc);
 
-	return this.setSizeRule(toSize, 100, opt_toAcc);
+  return this.setSizeRule(toSize, 100, opt_toAcc);
 };
 
 /**
@@ -883,7 +953,7 @@ npf.fx.KeyframeAnimation.prototype.fromToSizeRule = function(fromSize, toSize, o
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.fromSizeRule = function(size, opt_acc) {
-	return this.setSizeRule(size, 0, opt_acc);
+  return this.setSizeRule(size, 0, opt_acc);
 };
 
 /**
@@ -892,7 +962,7 @@ npf.fx.KeyframeAnimation.prototype.fromSizeRule = function(size, opt_acc) {
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.toSizeRule = function(size, opt_acc) {
-	return this.setSizeRule(size, 100, opt_acc);
+  return this.setSizeRule(size, 100, opt_acc);
 };
 
 /**
@@ -901,28 +971,29 @@ npf.fx.KeyframeAnimation.prototype.toSizeRule = function(size, opt_acc) {
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.setSizeRule = function(size, position, opt_acc) {
-	/** @type {number} */
-	var width;
-	/** @type {number} */
-	var height;
+npf.fx.KeyframeAnimation.prototype.setSizeRule = function(size, position,
+                                                          opt_acc) {
+  /** @type {number} */
+  var width;
+  /** @type {number} */
+  var height;
 
-	if (goog.isArray(size)) {
-		if (2 == size.length) {
-			width = size[0];
-			height = size[1];
-		} else {
-			throw Error('Size must be 2D');
-		}
-	} else {
-		width = size.width;
-		height = size.height;
-	}
+  if (goog.isArray(size)) {
+    if (2 == size.length) {
+      width = size[0];
+      height = size[1];
+    } else {
+      throw Error('Size must be 2D');
+    }
+  } else {
+    width = size.width;
+    height = size.height;
+  }
 
-	return this.insertKeyframe({
-		'width': goog.isNumber(width) ? width + 'px' : width,
-		'height': goog.isNumber(height) ? height + 'px' : height
-	}, position, opt_acc);
+  return this.insertKeyframe({
+    'width': goog.isNumber(width) ? width + 'px' : width,
+    'height': goog.isNumber(height) ? height + 'px' : height
+  }, position, opt_acc);
 };
 
 /**
@@ -932,10 +1003,13 @@ npf.fx.KeyframeAnimation.prototype.setSizeRule = function(size, position, opt_ac
  * @param {Array.<number>=} opt_toAcc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.fromToWidthRule = function(fromWidth, toWidth, opt_fromAcc, opt_toAcc) {
-	this.setWidthRule(fromWidth, 0, opt_fromAcc);
+npf.fx.KeyframeAnimation.prototype.fromToWidthRule = function(fromWidth,
+                                                              toWidth,
+                                                              opt_fromAcc,
+                                                              opt_toAcc) {
+  this.setWidthRule(fromWidth, 0, opt_fromAcc);
 
-	return this.setWidthRule(toWidth, 100, opt_toAcc);
+  return this.setWidthRule(toWidth, 100, opt_toAcc);
 };
 
 /**
@@ -944,7 +1018,7 @@ npf.fx.KeyframeAnimation.prototype.fromToWidthRule = function(fromWidth, toWidth
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.fromWidthRule = function(width, opt_acc) {
-	return this.setWidthRule(width, 0, opt_acc);
+  return this.setWidthRule(width, 0, opt_acc);
 };
 
 /**
@@ -953,7 +1027,7 @@ npf.fx.KeyframeAnimation.prototype.fromWidthRule = function(width, opt_acc) {
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.toWidthRule = function(width, opt_acc) {
-	return this.setWidthRule(width, 100, opt_acc);
+  return this.setWidthRule(width, 100, opt_acc);
 };
 
 /**
@@ -962,10 +1036,11 @@ npf.fx.KeyframeAnimation.prototype.toWidthRule = function(width, opt_acc) {
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.setWidthRule = function(width, position, opt_acc) {
-	return this.insertKeyframe({
-		'width': goog.isNumber(width) ? width + 'px' : width
-	}, position, opt_acc);
+npf.fx.KeyframeAnimation.prototype.setWidthRule = function(width, position,
+                                                           opt_acc) {
+  return this.insertKeyframe({
+    'width': goog.isNumber(width) ? width + 'px' : width
+  }, position, opt_acc);
 };
 
 /**
@@ -975,10 +1050,13 @@ npf.fx.KeyframeAnimation.prototype.setWidthRule = function(width, position, opt_
  * @param {Array.<number>=} opt_toAcc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.fromToHeightRule = function(fromHeight, toHeight, opt_fromAcc, opt_toAcc) {
-	this.setHeightRule(fromHeight, 0, opt_fromAcc);
+npf.fx.KeyframeAnimation.prototype.fromToHeightRule = function(fromHeight,
+                                                               toHeight,
+                                                               opt_fromAcc,
+                                                               opt_toAcc) {
+  this.setHeightRule(fromHeight, 0, opt_fromAcc);
 
-	return this.setHeightRule(toHeight, 100, opt_toAcc);
+  return this.setHeightRule(toHeight, 100, opt_toAcc);
 };
 
 /**
@@ -987,7 +1065,7 @@ npf.fx.KeyframeAnimation.prototype.fromToHeightRule = function(fromHeight, toHei
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.fromHeightRule = function(height, opt_acc) {
-	return this.setHeightRule(height, 0, opt_acc);
+  return this.setHeightRule(height, 0, opt_acc);
 };
 
 /**
@@ -996,7 +1074,7 @@ npf.fx.KeyframeAnimation.prototype.fromHeightRule = function(height, opt_acc) {
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.toHeightRule = function(height, opt_acc) {
-	return this.setHeightRule(height, 100, opt_acc);
+  return this.setHeightRule(height, 100, opt_acc);
 };
 
 /**
@@ -1005,10 +1083,11 @@ npf.fx.KeyframeAnimation.prototype.toHeightRule = function(height, opt_acc) {
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.setHeightRule = function(height, position, opt_acc) {
-	return this.insertKeyframe({
-		'height': goog.isNumber(height) ? height + 'px' : height
-	}, position, opt_acc);
+npf.fx.KeyframeAnimation.prototype.setHeightRule = function(height, position,
+                                                            opt_acc) {
+  return this.insertKeyframe({
+    'height': goog.isNumber(height) ? height + 'px' : height
+  }, position, opt_acc);
 };
 
 /**
@@ -1018,10 +1097,13 @@ npf.fx.KeyframeAnimation.prototype.setHeightRule = function(height, position, op
  * @param {Array.<number>=} opt_toAcc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.fromToColorRule = function(fromColor, toColor, opt_fromAcc, opt_toAcc) {
-	this.setColorRule(fromColor, 0, opt_fromAcc);
+npf.fx.KeyframeAnimation.prototype.fromToColorRule = function(fromColor,
+                                                              toColor,
+                                                              opt_fromAcc,
+                                                              opt_toAcc) {
+  this.setColorRule(fromColor, 0, opt_fromAcc);
 
-	return this.setColorRule(toColor, 100, opt_toAcc);
+  return this.setColorRule(toColor, 100, opt_toAcc);
 };
 
 /**
@@ -1030,7 +1112,7 @@ npf.fx.KeyframeAnimation.prototype.fromToColorRule = function(fromColor, toColor
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.fromColorRule = function(color, opt_acc) {
-	return this.setColorRule(color, 0, opt_acc);
+  return this.setColorRule(color, 0, opt_acc);
 };
 
 /**
@@ -1039,7 +1121,7 @@ npf.fx.KeyframeAnimation.prototype.fromColorRule = function(color, opt_acc) {
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.toColorRule = function(color, opt_acc) {
-	return this.setColorRule(color, 100, opt_acc);
+  return this.setColorRule(color, 100, opt_acc);
 };
 
 /**
@@ -1048,24 +1130,25 @@ npf.fx.KeyframeAnimation.prototype.toColorRule = function(color, opt_acc) {
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.setColorRule = function(color, position, opt_acc) {
-	var value = '';
+npf.fx.KeyframeAnimation.prototype.setColorRule = function(color, position,
+                                                           opt_acc) {
+  var value = '';
 
-	if (goog.isArray(color)) {
-		if (4 == color.length) {
-			value = 'rgba(' + color.join(',') + ')';
-		} else if (3 == color.length) {
-			value = 'rgb(' + color.join(',') + ')';
-		} else {
-			throw Error('Color must be 3D or 4D');
-		}
-	} else {
-		value = color;
-	}
+  if (goog.isArray(color)) {
+    if (4 == color.length) {
+      value = 'rgba(' + color.join(',') + ')';
+    } else if (3 == color.length) {
+      value = 'rgb(' + color.join(',') + ')';
+    } else {
+      throw Error('Color must be 3D or 4D');
+    }
+  } else {
+    value = color;
+  }
 
-	return this.insertKeyframe({
-		'color': value
-	}, position, opt_acc);
+  return this.insertKeyframe({
+    'color': value
+  }, position, opt_acc);
 };
 
 /**
@@ -1075,10 +1158,13 @@ npf.fx.KeyframeAnimation.prototype.setColorRule = function(color, position, opt_
  * @param {Array.<number>=} opt_toAcc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.fromToBgColorRule = function(fromBgColor, toBgColor, opt_fromAcc, opt_toAcc) {
-	this.setBgColorRule(fromBgColor, 0, opt_fromAcc);
+npf.fx.KeyframeAnimation.prototype.fromToBgColorRule = function(fromBgColor,
+                                                                toBgColor,
+                                                                opt_fromAcc,
+                                                                opt_toAcc) {
+  this.setBgColorRule(fromBgColor, 0, opt_fromAcc);
 
-	return this.setBgColorRule(toBgColor, 100, opt_toAcc);
+  return this.setBgColorRule(toBgColor, 100, opt_toAcc);
 };
 
 /**
@@ -1086,8 +1172,9 @@ npf.fx.KeyframeAnimation.prototype.fromToBgColorRule = function(fromBgColor, toB
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.fromBgColorRule = function(bgColor, opt_acc) {
-	return this.setBgColorRule(bgColor, 0, opt_acc);
+npf.fx.KeyframeAnimation.prototype.fromBgColorRule = function(bgColor,
+                                                              opt_acc) {
+  return this.setBgColorRule(bgColor, 0, opt_acc);
 };
 
 /**
@@ -1096,7 +1183,7 @@ npf.fx.KeyframeAnimation.prototype.fromBgColorRule = function(bgColor, opt_acc) 
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.toBgColorRule = function(bgColor, opt_acc) {
-	return this.setBgColorRule(bgColor, 100, opt_acc);
+  return this.setBgColorRule(bgColor, 100, opt_acc);
 };
 
 /**
@@ -1105,24 +1192,25 @@ npf.fx.KeyframeAnimation.prototype.toBgColorRule = function(bgColor, opt_acc) {
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.setBgColorRule = function(bgColor, position, opt_acc) {
-	var value = '';
+npf.fx.KeyframeAnimation.prototype.setBgColorRule = function(bgColor, position,
+                                                             opt_acc) {
+  var value = '';
 
-	if (goog.isArray(bgColor)) {
-		if (4 == bgColor.length) {
-			value = 'rgba(' + bgColor.join(',') + ')';
-		} else if (3 == bgColor.length) {
-			value = 'rgb(' + bgColor.join(',') + ')';
-		} else {
-			throw Error('Background Color must be 3D or 4D');
-		}
-	} else {
-		value = bgColor;
-	}
+  if (goog.isArray(bgColor)) {
+    if (4 == bgColor.length) {
+      value = 'rgba(' + bgColor.join(',') + ')';
+    } else if (3 == bgColor.length) {
+      value = 'rgb(' + bgColor.join(',') + ')';
+    } else {
+      throw Error('Background Color must be 3D or 4D');
+    }
+  } else {
+    value = bgColor;
+  }
 
-	return this.insertKeyframe({
-		'background-color': value
-	}, position, opt_acc);
+  return this.insertKeyframe({
+    'background-color': value
+  }, position, opt_acc);
 };
 
 /**
@@ -1132,10 +1220,13 @@ npf.fx.KeyframeAnimation.prototype.setBgColorRule = function(bgColor, position, 
  * @param {Array.<number>=} opt_toAcc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.fromToTransformRule = function(fromTransform, toTransform, opt_fromAcc, opt_toAcc) {
-	this.setTransformRule(fromTransform, 0, opt_fromAcc);
+npf.fx.KeyframeAnimation.prototype.fromToTransformRule = function(fromTransform,
+                                                                  toTransform,
+                                                                  opt_fromAcc,
+                                                                  opt_toAcc) {
+  this.setTransformRule(fromTransform, 0, opt_fromAcc);
 
-	return this.setTransformRule(toTransform, 100, opt_toAcc);
+  return this.setTransformRule(toTransform, 100, opt_toAcc);
 };
 
 /**
@@ -1143,8 +1234,9 @@ npf.fx.KeyframeAnimation.prototype.fromToTransformRule = function(fromTransform,
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.fromTransformRule = function(transform, opt_acc) {
-	return this.setTransformRule(transform, 0, opt_acc);
+npf.fx.KeyframeAnimation.prototype.fromTransformRule = function(transform,
+                                                                opt_acc) {
+  return this.setTransformRule(transform, 0, opt_acc);
 };
 
 /**
@@ -1152,8 +1244,9 @@ npf.fx.KeyframeAnimation.prototype.fromTransformRule = function(transform, opt_a
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.toTransformRule = function(transform, opt_acc) {
-	return this.setTransformRule(transform, 100, opt_acc);
+npf.fx.KeyframeAnimation.prototype.toTransformRule = function(transform,
+                                                              opt_acc) {
+  return this.setTransformRule(transform, 100, opt_acc);
 };
 
 /**
@@ -1162,10 +1255,12 @@ npf.fx.KeyframeAnimation.prototype.toTransformRule = function(transform, opt_acc
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.KeyframeAnimation}
  */
-npf.fx.KeyframeAnimation.prototype.setTransformRule = function(transform, position, opt_acc) {
-	return this.insertKeyframe(goog.object.create(
-		npf.userAgent.support.getCssPropertyName('transform'), transform
-	), position, opt_acc);
+npf.fx.KeyframeAnimation.prototype.setTransformRule = function(transform,
+                                                               position,
+                                                               opt_acc) {
+  return this.insertKeyframe(goog.object.create(
+    npf.userAgent.support.getCssPropertyName('transform'), transform
+  ), position, opt_acc);
 };
 
 /**
@@ -1173,19 +1268,19 @@ npf.fx.KeyframeAnimation.prototype.setTransformRule = function(transform, positi
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.setTransformOrigin = function(origin) {
-	var value;
+  var value;
 
-	if (goog.isArray(origin)) {
-		if (2 != origin.length || 3 != origin.length) {
-			throw Error('Transform Origin must be 2D or 3D');
-		}
+  if (goog.isArray(origin)) {
+    if (2 != origin.length || 3 != origin.length) {
+      throw Error('Transform Origin must be 2D or 3D');
+    }
 
-		value = origin.join(' ');
-	} else {
-		value = origin;
-	}
+    value = origin.join(' ');
+  } else {
+    value = origin;
+  }
 
-	goog.style.setStyle(this.element, npf.userAgent.support.getCssPropertyName('transform-origin'), /** @type {string} */ (value));
+  goog.style.setStyle(this.element, npf.userAgent.support.getCssPropertyName('transform-origin'), /** @type {string} */ (value));
 
-	return this;
+  return this;
 };

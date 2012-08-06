@@ -12,7 +12,7 @@ goog.require('npf.ui.renderComponent.Renderer');
  * @extends {npf.ui.renderComponent.Renderer}
  */
 npf.ui.searchInput.Renderer = function() {
-	goog.base(this);
+  goog.base(this);
 };
 goog.inherits(npf.ui.searchInput.Renderer, npf.ui.renderComponent.Renderer);
 goog.addSingletonGetter(npf.ui.searchInput.Renderer);
@@ -21,12 +21,12 @@ goog.addSingletonGetter(npf.ui.searchInput.Renderer);
 /**
  * @type {string}
  */
-npf.ui.searchInput.Renderer.CSS_CLASS = goog.getCssName('sx-searchInput');
+npf.ui.searchInput.Renderer.CSS_CLASS = goog.getCssName('npf-searchInput');
 
 
 /** @inheritDoc */
 npf.ui.searchInput.Renderer.prototype.getCssClass = function() {
-	return npf.ui.searchInput.Renderer.CSS_CLASS;
+  return npf.ui.searchInput.Renderer.CSS_CLASS;
 };
 
 /**
@@ -34,32 +34,32 @@ npf.ui.searchInput.Renderer.prototype.getCssClass = function() {
  * @return {!Element}
  */
 npf.ui.searchInput.Renderer.prototype.createDom = function(input) {
-	/** @type {!Element} */
-	var element = goog.base(this, 'createDom', input);
-	/** @type {Element} */
-	var placeholderElement = this.createPlaceholderElement(input);
-	/** @type {!Element} */
-	var queryElement = this.createQueryElement(input);
-	/** @type {Element} */
-	var clearElement = this.createClearElement(input);
-	/** @type {Element} */
-	var iconElement = this.createIconElement(input);
+  /** @type {!Element} */
+  var element = goog.base(this, 'createDom', input);
+  /** @type {Element} */
+  var placeholderElement = this.createPlaceholderElement(input);
+  /** @type {!Element} */
+  var queryElement = this.createQueryElement(input);
+  /** @type {Element} */
+  var clearElement = this.createClearElement(input);
+  /** @type {Element} */
+  var iconElement = this.createIconElement(input);
 
-	if (placeholderElement) {
-		goog.dom.appendChild(element, placeholderElement);
-	}
+  if (placeholderElement) {
+    goog.dom.appendChild(element, placeholderElement);
+  }
 
-	goog.dom.appendChild(element, queryElement);
+  goog.dom.appendChild(element, queryElement);
 
-	if (clearElement) {
-		goog.dom.appendChild(element, clearElement);
-	}
+  if (clearElement) {
+    goog.dom.appendChild(element, clearElement);
+  }
 
-	if (iconElement) {
-		goog.dom.appendChild(element, iconElement);
-	}
+  if (iconElement) {
+    goog.dom.appendChild(element, iconElement);
+  }
 
-	return element;
+  return element;
 };
 
 /**
@@ -68,17 +68,18 @@ npf.ui.searchInput.Renderer.prototype.createDom = function(input) {
  * @protected
  */
 npf.ui.searchInput.Renderer.prototype.createPlaceholderElement = function(input) {
-	/** @type {string} */
-	var placeholderValue = input.getPlaceholderValue();
-	/** @type {Element} */
-	var placeholderElement = null;
+  /** @type {string} */
+  var placeholderValue = input.getPlaceholderValue();
+  /** @type {Element} */
+  var placeholderElement = null;
 
-	if ('' != placeholderValue) {
-		placeholderElement = goog.dom.createDom(goog.dom.TagName.SPAN, this.getPlaceholderCssClass());
-		placeholderElement.innerHTML = placeholderValue;
-	}
+  if ('' != placeholderValue) {
+    placeholderElement = goog.dom.createDom(goog.dom.TagName.SPAN,
+      this.getPlaceholderCssClass());
+    placeholderElement.innerHTML = placeholderValue;
+  }
 
-	return placeholderElement;
+  return placeholderElement;
 };
 
 /**
@@ -87,11 +88,11 @@ npf.ui.searchInput.Renderer.prototype.createPlaceholderElement = function(input)
  * @protected
  */
 npf.ui.searchInput.Renderer.prototype.createQueryElement = function(input) {
-	return goog.dom.createDom(goog.dom.TagName.INPUT, {
-		'class': this.getQueryCssClass(),
-		'type': 'text',
-		'autocomplete': 'off'
-	});
+  return goog.dom.createDom(goog.dom.TagName.INPUT, {
+    'class': this.getQueryCssClass(),
+    'type': 'text',
+    'autocomplete': 'off'
+  });
 };
 
 /**
@@ -100,14 +101,15 @@ npf.ui.searchInput.Renderer.prototype.createQueryElement = function(input) {
  * @protected
  */
 npf.ui.searchInput.Renderer.prototype.createClearElement = function(input) {
-	/** @type {Element} */
-	var clearElement = null;
+  /** @type {Element} */
+  var clearElement = null;
 
-	if (input.isClearable()) {
-		clearElement = goog.dom.createDom(goog.dom.TagName.INS, this.getClearCssClass());
-	}
+  if (input.isClearable()) {
+    clearElement = goog.dom.createDom(goog.dom.TagName.INS,
+      this.getClearCssClass());
+  }
 
-	return clearElement;
+  return clearElement;
 };
 
 /**
@@ -116,14 +118,15 @@ npf.ui.searchInput.Renderer.prototype.createClearElement = function(input) {
  * @protected
  */
 npf.ui.searchInput.Renderer.prototype.createIconElement = function(input) {
-	/** @type {Element} */
-	var iconElement = null;
+  /** @type {Element} */
+  var iconElement = null;
 
-	if (input.hasIcon()) {
-		iconElement = goog.dom.createDom(goog.dom.TagName.INS, this.getIconCssClass());
-	}
+  if (input.hasIcon()) {
+    iconElement = goog.dom.createDom(goog.dom.TagName.INS,
+      this.getIconCssClass());
+  }
 
-	return iconElement;
+  return iconElement;
 };
 
 /**
@@ -131,11 +134,11 @@ npf.ui.searchInput.Renderer.prototype.createIconElement = function(input) {
  * @return {Element}
  */
 npf.ui.searchInput.Renderer.prototype.getPlaceholderElement = function(element) {
-	if (element) {
-		return goog.dom.getElementByClass(this.getPlaceholderCssClass(), element);
-	}
+  if (element) {
+    return goog.dom.getElementByClass(this.getPlaceholderCssClass(), element);
+  }
 
-	return element;
+  return element;
 };
 
 /**
@@ -143,11 +146,11 @@ npf.ui.searchInput.Renderer.prototype.getPlaceholderElement = function(element) 
  * @return {Element}
  */
 npf.ui.searchInput.Renderer.prototype.getQueryElement = function(element) {
-	if (element) {
-		return goog.dom.getElementByClass(this.getQueryCssClass(), element);
-	}
+  if (element) {
+    return goog.dom.getElementByClass(this.getQueryCssClass(), element);
+  }
 
-	return element;
+  return element;
 };
 
 /**
@@ -155,11 +158,11 @@ npf.ui.searchInput.Renderer.prototype.getQueryElement = function(element) {
  * @return {Element}
  */
 npf.ui.searchInput.Renderer.prototype.getIconElement = function(element) {
-	if (element) {
-		return goog.dom.getElementByClass(this.getIconCssClass(), element);
-	}
+  if (element) {
+    return goog.dom.getElementByClass(this.getIconCssClass(), element);
+  }
 
-	return element;
+  return element;
 };
 
 /**
@@ -167,57 +170,57 @@ npf.ui.searchInput.Renderer.prototype.getIconElement = function(element) {
  * @return {Element}
  */
 npf.ui.searchInput.Renderer.prototype.getClearElement = function(element) {
-	if (element) {
-		return goog.dom.getElementByClass(this.getClearCssClass(), element);
-	}
+  if (element) {
+    return goog.dom.getElementByClass(this.getClearCssClass(), element);
+  }
 
-	return element;
+  return element;
 };
 
 /**
  * @return {string}
  */
 npf.ui.searchInput.Renderer.prototype.getPlaceholderCssClass = function() {
-	return goog.getCssName(this.getStructuralCssClass(), 'placeholder');
+  return goog.getCssName(this.getStructuralCssClass(), 'placeholder');
 };
 
 /**
  * @return {string}
  */
 npf.ui.searchInput.Renderer.prototype.getQueryCssClass = function() {
-	return goog.getCssName(this.getStructuralCssClass(), 'query');
+  return goog.getCssName(this.getStructuralCssClass(), 'query');
 };
 
 /**
  * @return {string}
  */
 npf.ui.searchInput.Renderer.prototype.getIconCssClass = function() {
-	return goog.getCssName(this.getStructuralCssClass(), 'icon');
+  return goog.getCssName(this.getStructuralCssClass(), 'icon');
 };
 
 /**
  * @return {string}
  */
 npf.ui.searchInput.Renderer.prototype.getClearCssClass = function() {
-	return goog.getCssName(this.getStructuralCssClass(), 'clear');
+  return goog.getCssName(this.getStructuralCssClass(), 'clear');
 };
 
 /**
  * @param {Element} element
  */
 npf.ui.searchInput.Renderer.prototype.focusAndSelect = function(element) {
-	if (element) {
-		goog.dom.forms.focusAndSelect(element);
-	}
+  if (element) {
+    goog.dom.forms.focusAndSelect(element);
+  }
 };
 
 /**
  * @param {Element} element
  */
 npf.ui.searchInput.Renderer.prototype.focus = function(element) {
-	if (element) {
-		element.focus();
-	}
+  if (element) {
+    element.focus();
+  }
 };
 
 /**
@@ -225,9 +228,9 @@ npf.ui.searchInput.Renderer.prototype.focus = function(element) {
  * @param {string} value
  */
 npf.ui.searchInput.Renderer.prototype.setValue = function(element, value) {
-	if (element) {
-		goog.dom.forms.setValue(element, value);
-	}
+  if (element) {
+    goog.dom.forms.setValue(element, value);
+  }
 };
 
 /**
@@ -235,13 +238,13 @@ npf.ui.searchInput.Renderer.prototype.setValue = function(element, value) {
  * @return {string}
  */
 npf.ui.searchInput.Renderer.prototype.getValue = function(element) {
-	var value;
+  var value;
 
-	if (element) {
-		value = goog.dom.forms.getValue(element);
-	}
+  if (element) {
+    value = goog.dom.forms.getValue(element);
+  }
 
-	return goog.isString(value) ? value : '';
+  return goog.isString(value) ? value : '';
 };
 
 /**
@@ -249,7 +252,7 @@ npf.ui.searchInput.Renderer.prototype.getValue = function(element) {
  * @param {boolean} visible
  */
 npf.ui.searchInput.Renderer.prototype.setVisible = function(element, visible) {
-	if (element) {
-		goog.style.setStyle(element, 'display', visible ? '' : 'none');
-	}
+  if (element) {
+    goog.style.setStyle(element, 'display', visible ? '' : 'none');
+  }
 };

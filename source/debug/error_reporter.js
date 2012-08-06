@@ -19,8 +19,9 @@ goog.require('goog.debug.ErrorReporter');
  * @constructor
  * @extends {goog.debug.ErrorReporter}
  */
-npf.debug.ErrorReporter = function(handlerUrl, opt_contextProvider, opt_noAutoProtect) {
-	goog.base(this, handlerUrl, opt_contextProvider, opt_noAutoProtect);
+npf.debug.ErrorReporter = function(handlerUrl, opt_contextProvider,
+																   opt_noAutoProtect) {
+  goog.base(this, handlerUrl, opt_contextProvider, opt_noAutoProtect);
 };
 goog.inherits(npf.debug.ErrorReporter, goog.debug.ErrorReporter);
 
@@ -40,16 +41,18 @@ goog.inherits(npf.debug.ErrorReporter, goog.debug.ErrorReporter);
  *     the ErrorReporter just for transmission of reports.
  * @return {npf.debug.ErrorReporter} The error reporter.
  */
-npf.debug.ErrorReporter.install = function(loggingUrl, opt_contextProvider, opt_noAutoProtect) {
-  return new npf.debug.ErrorReporter(loggingUrl, opt_contextProvider, opt_noAutoProtect);
+npf.debug.ErrorReporter.install = function(loggingUrl, opt_contextProvider,
+                                           opt_noAutoProtect) {
+  return new npf.debug.ErrorReporter(loggingUrl, opt_contextProvider,
+     opt_noAutoProtect);
 };
 
 
 /** @inheritDoc */
 npf.debug.ErrorReporter.prototype.handleException = function(e, opt_context) {
-	if (goog.DEBUG && goog.global.console && e) {
-		goog.global.console.error(e.stack);
-	}
+  if (goog.DEBUG && goog.global.console && e) {
+    goog.global.console.error(e.stack);
+  }
 
-	goog.base(this, 'handleException', e, opt_context);
+  goog.base(this, 'handleException', e, opt_context);
 };

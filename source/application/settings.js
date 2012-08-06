@@ -12,14 +12,14 @@ goog.require('goog.object');
  * @extends {goog.Disposable}
  */
 npf.application.Settings = function(urlTypesMap, optionTypesMap) {
-	goog.base(this);
+  goog.base(this);
 
-	this._urlTypesMap = urlTypesMap;
-	this._optionTypesMap = optionTypesMap;
-	this._optionsMap = {};
-	this._urlsMap = {};
-	this._undefinedSettings = [];
-	this._defaultSettingsMap = {};
+  this.urlTypesMap_ = urlTypesMap;
+  this.optionTypesMap_ = optionTypesMap;
+  this.optionsMap_ = {};
+  this.urlsMap_ = {};
+  this.undefinedSettings_ = [];
+  this.defaultSettingsMap_ = {};
 };
 goog.inherits(npf.application.Settings, goog.Disposable);
 
@@ -40,49 +40,49 @@ npf.application.Settings.OPTIONS = 'options';
  * @type {Object}
  * @private
  */
-npf.application.Settings.prototype._urlTypesMap;
+npf.application.Settings.prototype.urlTypesMap_;
 
 /**
  * @type {Object}
  * @private
  */
-npf.application.Settings.prototype._optionTypesMap;
+npf.application.Settings.prototype.optionTypesMap_;
 
 /**
  * @type {!Object}
  * @private
  */
-npf.application.Settings.prototype._optionsMap;
+npf.application.Settings.prototype.optionsMap_;
 
 /**
  * @type {!Object}
  * @private
  */
-npf.application.Settings.prototype._urlsMap;
+npf.application.Settings.prototype.urlsMap_;
 
 /**
  * @type {!Array.<string>}
  * @private
  */
-npf.application.Settings.prototype._undefinedSettings;
+npf.application.Settings.prototype.undefinedSettings_;
 
 /**
  * @type {!Object.<string,*>}
  * @private
  */
-npf.application.Settings.prototype._defaultSettingsMap;
+npf.application.Settings.prototype.defaultSettingsMap_;
 
 
 /** @inheritDoc */
 npf.application.Settings.prototype.disposeInternal = function() {
-	goog.base(this, 'disposeInternal');
+  goog.base(this, 'disposeInternal');
 
-	delete this._urlTypesMap;
-	delete this._optionTypesMap;
-	delete this._undefinedSettings;
-	delete this._optionsMap;
-	delete this._urlsMap;
-	delete this._defaultSettingsMap;
+  delete this.urlTypesMap_;
+  delete this.optionTypesMap_;
+  delete this.undefinedSettings_;
+  delete this.optionsMap_;
+  delete this.urlsMap_;
+  delete this.defaultSettingsMap_;
 };
 
 /**
@@ -90,31 +90,32 @@ npf.application.Settings.prototype.disposeInternal = function() {
  * @return {boolean}
  */
 npf.application.Settings.prototype.parse = function(jsonSettings) {
-	goog.object.forEach(this._urlTypesMap, function(urlType) {
-		/** @type {Array.<string>} */
-		var parts = [npf.application.Settings.URLS].concat(urlType.split('.'));
-		var value = this._getValue(jsonSettings, parts);
+  goog.object.forEach(this.urlTypesMap_, function(urlType) {
+    /** @type {Array.<string>} */
+    var parts = [npf.application.Settings.URLS].concat(urlType.split('.'));
+    var value = this.getValue_(jsonSettings, parts);
 
-		if (goog.isDef(value)) {
-			this._urlsMap[urlType] = value;
-		} else {
-			this._undefinedSettings.push(parts.join('.'));
-		}
-	}, this);
+    if (goog.isDef(value)) {
+      this.urlsMap_[urlType] = value;
+    } else {
+      this.undefinedSettings_.push(parts.join('.'));
+    }
+  }, this);
 
-	goog.object.forEach(this._optionTypesMap, function(optionType) {
-		/** @type {Array.<string>} */
-		var parts = [npf.application.Settings.OPTIONS].concat(optionType.split('.'));
-		var value = this._getValue(jsonSettings, parts);
+  goog.object.forEach(this.optionTypesMap_, function(optionType) {
+    /** @type {Array.<string>} */
+    var parts = [npf.application.Settings.OPTIONS]
+      .concat(optionType.split('.'));
+    var value = this.getValue_(jsonSettings, parts);
 
-		if (goog.isDef(value)) {
-			this._optionsMap[optionType] = value;
-		} else {
-			this._undefinedSettings.push(parts.join('.'));
-		}
-	}, this);
+    if (goog.isDef(value)) {
+      this.optionsMap_[optionType] = value;
+    } else {
+      this.undefinedSettings_.push(parts.join('.'));
+    }
+  }, this);
 
-	return !this._undefinedSettings.length;
+  return !this.undefinedSettings_.length;
 };
 
 /**
@@ -123,22 +124,21 @@ npf.application.Settings.prototype.parse = function(jsonSettings) {
  * @return {*}
  * @private
  */
-npf.application.Settings.prototype._getValue = function(jsonSettings, keys) {
-	var checking = jsonSettings;
-	var i = 0;
+npf.application.Settings.prototype.getValue_ = function(jsonSettings, keys) {
+  var checking = jsonSettings;
+  var option = keys.join('.');
+  var i = 0;
 
-	while (goog.isDef(checking) && i < keys.length) {
-		checking = checking[keys[i]];
-		i++;
-	}
+  while (goog.isDef(checking) && i < keys.length) {
+    checking = checking[keys[i]];
+    i++;
+  }
 
-	var option = keys.join('.');
+  if (!goog.isDef(checking) && goog.isDef(this.defaultSettingsMap_[option])) {
+    checking = this.defaultSettingsMap_[option];
+  }
 
-	if (!goog.isDef(checking) && goog.isDef(this._defaultSettingsMap[option])) {
-		checking = this._defaultSettingsMap[option];
-	}
-
-	return checking;
+  return checking;
 };
 
 /**
@@ -147,14 +147,14 @@ npf.application.Settings.prototype._getValue = function(jsonSettings, keys) {
  * @return {string}
  */
 npf.application.Settings.prototype.getUrl = function(urlType, opt_params) {
-	/** @type {string} */
-	var url = this._urlsMap[urlType];
+  /** @type {string} */
+  var url = this.urlsMap_[urlType];
 
-	if (!goog.isDef(url)) {
-		throw Error('urlType "' + urlType + '" not found in settings.');
-	}
+  if (!goog.isDef(url)) {
+    throw Error('urlType "' + urlType + '" not found in settings.');
+  }
 
-	return npf.string.supplant(url, opt_params);
+  return npf.string.supplant(url, opt_params);
 };
 
 /**
@@ -162,11 +162,11 @@ npf.application.Settings.prototype.getUrl = function(urlType, opt_params) {
  * @return {*}
  */
 npf.application.Settings.prototype.getOption = function(optionType) {
-	var option = this._optionsMap[optionType];
+  var option = this.optionsMap_[optionType];
 
-	if (!goog.isDef(option)) {
-		throw Error('optionType "' + optionType + '" not found in settings.');
-	}
+  if (!goog.isDef(option)) {
+    throw Error('optionType "' + optionType + '" not found in settings.');
+  }
 
 	return option;
 };
@@ -175,7 +175,7 @@ npf.application.Settings.prototype.getOption = function(optionType) {
  * @return {!Array.<string>}
  */
 npf.application.Settings.prototype.getUndefinedSettings = function() {
-	return this._undefinedSettings;
+  return this.undefinedSettings_;
 };
 
 /**
@@ -184,9 +184,9 @@ npf.application.Settings.prototype.getUndefinedSettings = function() {
  * @return {npf.application.Settings}
  */
 npf.application.Settings.prototype.setDefaultUrl = function(urlType, url) {
-	this._defaultSettingsMap[npf.application.Settings.URLS + '.' + urlType] = url;
+  this.defaultSettingsMap_[npf.application.Settings.URLS + '.' + urlType] = url;
 
-	return this;
+  return this;
 };
 
 /**
@@ -195,7 +195,10 @@ npf.application.Settings.prototype.setDefaultUrl = function(urlType, url) {
  * @return {npf.application.Settings}
  */
 npf.application.Settings.prototype.setDefaultOption = function(optionType, value) {
-	this._defaultSettingsMap[npf.application.Settings.OPTIONS + '.' + optionType] = value;
+  /** @type {string} */
+  var key = npf.application.Settings.OPTIONS + '.' + optionType;
 
-	return this;
+  this.defaultSettingsMap_[key] = value;
+
+  return this;
 };

@@ -1,4 +1,5 @@
 goog.provide('npf.History');
+goog.provide('npf.History.EventType');
 
 goog.require('goog.History');
 goog.require('goog.Uri');
@@ -19,19 +20,20 @@ goog.require('npf.history.TokenTransformer');
  * @extends {goog.events.EventTarget}
  */
 npf.History = function() {
-	goog.base(this);
+  goog.base(this);
 
-	if (npf.History.isHtml5HistorySupported) {
-		this._html5History = new goog.history.Html5History(null, new npf.history.TokenTransformer());
-		this._html5History.setPathPrefix('');
-		this._html5History.setParentEventTarget(this);
-		this._html5History.setUseFragment(false);
-		this.registerDisposable(this._html5History);
-	} else {
-		this._history = new goog.History();
-		this._history.setParentEventTarget(this);
-		this.registerDisposable(this._history);
-	}
+  if (npf.History.isHtml5HistorySupported) {
+    this.html5History_ = new goog.history.Html5History(null,
+      new npf.history.TokenTransformer());
+    this.html5History_.setPathPrefix('');
+    this.html5History_.setParentEventTarget(this);
+    this.html5History_.setUseFragment(false);
+    this.registerDisposable(this.html5History_);
+  } else {
+    this.history_ = new goog.History();
+    this.history_.setParentEventTarget(this);
+    this.registerDisposable(this.history_);
+  }
 };
 goog.inherits(npf.History, goog.events.EventTarget);
 
@@ -45,7 +47,7 @@ npf.History.ASSUME_HTML5 = false;
  * @enum {string}
  */
 npf.History.EventType = {
-	NAVIGATE: goog.history.EventType.NAVIGATE
+  NAVIGATE: goog.history.EventType.NAVIGATE
 };
 
 /**
@@ -56,67 +58,68 @@ npf.History.EXTERNAL_CSS_CLASS = goog.getCssName('external');
 /**
  * @type {boolean}
  */
-npf.History.isHtml5HistorySupported = npf.History.ASSUME_HTML5 || goog.history.Html5History.isSupported();
+npf.History.isHtml5HistorySupported =
+  npf.History.ASSUME_HTML5 || goog.history.Html5History.isSupported();
 
 /**
  * @type {goog.History}
  * @private
  */
-npf.History.prototype._history = null;
+npf.History.prototype.history_ = null;
 
 /**
  * @type {goog.history.Html5History}
  * @private
  */
-npf.History.prototype._html5History = null;
+npf.History.prototype.html5History_ = null;
 
 /**
  * @type {boolean}
  * @private
  */
-npf.History.prototype._isLinksHandlerEnabled = false;
+npf.History.prototype.isLinksHandlerEnabled_ = false;
 
 /**
  * @type {npf.events.TapHandler}
  * @private
  */
-npf.History.prototype._tapHandler = null;
+npf.History.prototype.tapHandler_ = null;
 
 
 /** @inheritDoc */
 npf.History.prototype.disposeInternal = function() {
-	this.setLinksHandlerEnabled(false);
+  this.setLinksHandlerEnabled(false);
 
-	goog.base(this, 'disposeInternal');
+  goog.base(this, 'disposeInternal');
 
-	delete this._history;
-	delete this._html5History;
-	delete this._isLinksHandlerEnabled;
-	delete this._tapHandler;
+  delete this.history_;
+  delete this.html5History_;
+  delete this.isLinksHandlerEnabled_;
+  delete this.tapHandler_;
 };
 
 /**
  * @param {boolean} enable
  */
 npf.History.prototype.setEnabled = function(enable) {
-	if (this._history) {
-		this._history.setEnabled(enable);
-	} else if (this._html5History) {
-		this._html5History.setEnabled(enable);
-	}
+  if (this.history_) {
+    this.history_.setEnabled(enable);
+  } else if (this.html5History_) {
+    this.html5History_.setEnabled(enable);
+  }
 
-	this.setLinksHandlerEnabled(enable);
+  this.setLinksHandlerEnabled(enable);
 };
 
 /**
  * @return {string}
  */
 npf.History.prototype.getToken = function() {
-	if (this._history) {
-		return this._history.getToken();
-	}	else {
-		return this._html5History.getToken();
-	}
+  if (this.history_) {
+    return this.history_.getToken();
+  }  else {
+    return this.html5History_.getToken();
+  }
 };
 
 /**
@@ -124,11 +127,11 @@ npf.History.prototype.getToken = function() {
  * @param {string=} opt_title
  */
 npf.History.prototype.setToken = function(token, opt_title) {
-	if (this._history) {
-		return this._history.setToken(token, opt_title);
-	} else {
-		return this._html5History.setToken(token, opt_title);
-	}
+  if (this.history_) {
+    return this.history_.setToken(token, opt_title);
+  } else {
+    return this.html5History_.setToken(token, opt_title);
+  }
 };
 
 /**
@@ -136,72 +139,75 @@ npf.History.prototype.setToken = function(token, opt_title) {
  * @param {string=} opt_title
  */
 npf.History.prototype.replaceToken = function(token, opt_title) {
-	if (this._history) {
-		return this._history.replaceToken(token, opt_title);
-	} else {
-		return this._html5History.replaceToken(token, opt_title);
-	}
+  if (this.history_) {
+    return this.history_.replaceToken(token, opt_title);
+  } else {
+    return this.html5History_.replaceToken(token, opt_title);
+  }
 };
 
 /**
  * @return {boolean}
  */
 npf.History.prototype.isHtml5Used = function() {
-	return !this._history;
+  return !this.history_;
 };
 
 /**
  * @return {boolean}
  */
 npf.History.prototype.isLinksHandlerEnabled = function() {
-	return this._isLinksHandlerEnabled;
+  return this.isLinksHandlerEnabled_;
 };
 
 /**
  * @param {boolean} enable
  */
 npf.History.prototype.setLinksHandlerEnabled = function(enable) {
-	if (this._isLinksHandlerEnabled == enable) {
-		return;
-	}
+  if (this.isLinksHandlerEnabled_ == enable) {
+    return;
+  }
 
-	this._isLinksHandlerEnabled = enable;
+  this.isLinksHandlerEnabled_ = enable;
 
-	if (this._isLinksHandlerEnabled) {
-		this._tapHandler = new npf.events.TapHandler(document.body);
-		goog.events.listen(this._tapHandler, npf.events.TapHandler.EventType.TAP, this._onTap, false, this);
-	} else {
-		goog.events.unlisten(this._tapHandler, npf.events.TapHandler.EventType.TAP, this._onTap, false, this);
-		this._tapHandler.dispose();
-		this._tapHandler = null;
-	}
+  if (this.isLinksHandlerEnabled_) {
+    this.tapHandler_ = new npf.events.TapHandler(document.body);
+    goog.events.listen(this.tapHandler_, npf.events.TapHandler.EventType.TAP,
+      this.onTap_, false, this);
+  } else {
+    goog.events.unlisten(this.tapHandler_, npf.events.TapHandler.EventType.TAP,
+      this.onTap_, false, this);
+    this.tapHandler_.dispose();
+    this.tapHandler_ = null;
+  }
 };
 
 /**
  * @param {goog.events.BrowserEvent} evt
  * @private
  */
-npf.History.prototype._onTap = function(evt) {
-	/** @type {Node} */
-	var targetElement = evt ? evt.target : null;
+npf.History.prototype.onTap_ = function(evt) {
+  /** @type {Node} */
+  var targetElement = evt ? evt.target : null;
 
-	if (targetElement && !evt.getBrowserEvent()['defaultPrevented']) {
-		/** @type {Element} */
-		var element = /** @type {Element} */ (goog.dom.getAncestorByTagNameAndClass(targetElement, goog.dom.TagName.A));
+  if (targetElement && !evt.getBrowserEvent()['defaultPrevented']) {
+    var element =
+      /** @type {Element} */ (goog.dom.getAncestorByTagNameAndClass(targetElement,
+      goog.dom.TagName.A));
 
-		if (element && this.isInnerHandler(element)) {
-			var uri = goog.Uri.parse(element.href);
-			/** @type {string} */
-			var token = uri.getPath();
+    if (element && this.isInnerHandler(element)) {
+      var uri = goog.Uri.parse(element.href);
+      /** @type {string} */
+      var token = uri.getPath();
 
-			if (uri.hasQuery()) {
-				token += '?' + uri.getQuery();
-			}
+      if (uri.hasQuery()) {
+        token += '?' + uri.getQuery();
+      }
 
-			this.setToken(token);
-			evt.preventDefault();
-		}
-	}
+      this.setToken(token);
+      evt.preventDefault();
+    }
+  }
 };
 
 /**
@@ -210,5 +216,5 @@ npf.History.prototype._onTap = function(evt) {
  * @protected
  */
 npf.History.prototype.isInnerHandler = function(linkElement) {
-	return !goog.dom.classes.has(linkElement, npf.History.EXTERNAL_CSS_CLASS);
+  return !goog.dom.classes.has(linkElement, npf.History.EXTERNAL_CSS_CLASS);
 };

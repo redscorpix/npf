@@ -14,10 +14,10 @@ goog.require('goog.ui.Component');
  * @extends {goog.ui.Component}
  */
 npf.ui.Image = function(src, width, height) {
-	goog.base(this);
+  goog.base(this);
 
-	this._src = src;
-	this._size = new goog.math.Size(width, height);
+  this.src_ = src;
+  this.size_ = new goog.math.Size(width, height);
 };
 goog.inherits(npf.ui.Image, goog.ui.Component);
 
@@ -26,96 +26,96 @@ goog.inherits(npf.ui.Image, goog.ui.Component);
  * @type {string}
  * @private
  */
-npf.ui.Image.prototype._src;
+npf.ui.Image.prototype.src_;
 
 /**
  * @type {!goog.math.Size}
  * @private
  */
-npf.ui.Image.prototype._size;
+npf.ui.Image.prototype.size_;
 
 /**
  * @type {Array.<string>}
  * @private
  */
-npf.ui.Image.prototype._cssClass = null;
+npf.ui.Image.prototype.cssClass_ = null;
 
 /**
  * @type {?string}
  * @private
  */
-npf.ui.Image.prototype._caption = null;
+npf.ui.Image.prototype.caption_ = null;
 
 
 /** @inheritDoc */
 npf.ui.Image.prototype.createDom = function() {
-	/** @type {Element} */
-	var element = goog.dom.createDom(goog.dom.TagName.IMG, {
-		'alt': this._caption || '',
-		'src': this._src,
-		'width': this._size.width,
-		'height': this._size.height
-	});
+  /** @type {Element} */
+  var element = goog.dom.createDom(goog.dom.TagName.IMG, {
+    'alt': this.caption_ || '',
+    'src': this.src_,
+    'width': this.size_.width,
+    'height': this.size_.height
+  });
 
-	if (this._cssClass) {
-		goog.dom.classes.add(element, this._cssClass.join(' '));
-	}
+  if (this.cssClass_) {
+    goog.dom.classes.add(element, this.cssClass_.join(' '));
+  }
 
-	this.setElementInternal(element);
+  this.setElementInternal(element);
 };
 
 /** @inheritDoc */
 npf.ui.Image.prototype.disposeInternal = function() {
-	goog.base(this, 'disposeInternal');
+  goog.base(this, 'disposeInternal');
 
-	delete this._src;
-	delete this._size;
-	delete this._cssClass;
-	delete this._caption;
+  delete this.src_;
+  delete this.size_;
+  delete this.cssClass_;
+  delete this.caption_;
 };
 
 /**
  * @return {string}
  */
 npf.ui.Image.prototype.getSrc = function() {
-	return this._src;
+  return this.src_;
 };
 
 /**
  * @return {!goog.math.Size}
  */
 npf.ui.Image.prototype.getSize = function() {
-	return this._size;
+  return this.size_;
 };
 
 /**
  * @return {Array.<string>}
  */
 npf.ui.Image.prototype.getCssClass = function() {
-	return this._cssClass;
+  return this.cssClass_;
 };
 
 /**
  * @param {string|Array.<string>|null} cssClass
  */
 npf.ui.Image.prototype.setCssClass = function(cssClass) {
-	if (goog.isString(cssClass)) {
-		this._cssClass = [cssClass];
-	} else {
-		this._cssClass = cssClass;
-	}
+  if (goog.isString(cssClass)) {
+    this.cssClass_ = [cssClass];
+  } else {
+    this.cssClass_ = cssClass;
+  }
 };
 
 /**
  * @param {?string} caption
  */
 npf.ui.Image.prototype.setCaption = function(caption) {
-	this._caption = caption;
+  this.caption_ = caption;
 };
 
 /**
  * @return {?string}
  */
 npf.ui.Image.prototype.getCaption = function() {
-	return this._caption;
+  return this.caption_;
 };

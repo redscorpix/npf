@@ -19,17 +19,17 @@ goog.require('npf.pages.Request');
  * @extends {goog.events.EventTarget}
  */
 npf.pages.Manager = function(router) {
-	goog.base(this);
+  goog.base(this);
 
-	this._router = router;
-	this._pageCtrsMap = {};
-	this._errorPageCtrsMap = {};
-	this._routeNamesMap = {};
-	this._helpersMap = {};
-	this._requestHistory = [];
+  this.router_ = router;
+  this.pageCtorsMap_ = {};
+  this.errorPageCtorsMap_ = {};
+  this.routeNamesMap_ = {};
+  this.helpersMap_ = {};
+  this.requestHistory_ = [];
 
-	this._handler = new goog.events.EventHandler();
-	this.registerDisposable(this._handler);
+  this.handler_ = new goog.events.EventHandler();
+  this.registerDisposable(this.handler_);
 };
 goog.inherits(npf.pages.Manager, goog.events.EventTarget);
 
@@ -39,156 +39,157 @@ goog.inherits(npf.pages.Manager, goog.events.EventTarget);
  */
 npf.pages.Manager.EventType = {
 
-	/**
-	 * request (npf.pages.Request)
-	 * page (npf.pages.Page)
-	 */
-	LOAD: goog.events.getUniqueId('load'),
+  /**
+   * request (npf.pages.Request)
+   * page (npf.pages.Page)
+   */
+  LOAD: goog.events.getUniqueId('load'),
 
-	/**
-	 * request (npf.pages.Request)
-	 * page (npf.pages.Page)
-	 */
-	UNLOAD: goog.events.getUniqueId('unload')
+  /**
+   * request (npf.pages.Request)
+   * page (npf.pages.Page)
+   */
+  UNLOAD: goog.events.getUniqueId('unload')
 };
 
 /**
  * @type {npf.Router}
  * @private
  */
-npf.pages.Manager.prototype._router;
+npf.pages.Manager.prototype.router_;
 
 /**
  * @type {!Object.<string,Function>}
  * @private
  */
-npf.pages.Manager.prototype._pageCtrsMap;
+npf.pages.Manager.prototype.pageCtorsMap_;
 
 /**
  * @type {!Object.<string,Function>}
  * @private
  */
-npf.pages.Manager.prototype._errorPageCtrsMap;
+npf.pages.Manager.prototype.errorPageCtorsMap_;
 
 /**
  * @type {!Object.<string,Array.<string>>}
  * @private
  */
-npf.pages.Manager.prototype._routeNamesMap;
+npf.pages.Manager.prototype.routeNamesMap_;
 
 /**
  * @type {!Object.<string,goog.Disposable>}
  * @private
  */
-npf.pages.Manager.prototype._helpersMap;
+npf.pages.Manager.prototype.helpersMap_;
 
 /**
  * @type {!goog.events.EventHandler}
  * @private
  */
-npf.pages.Manager.prototype._handler;
+npf.pages.Manager.prototype.handler_;
 
 /**
  * @type {npf.pages.Page}
  * @private
  */
-npf.pages.Manager.prototype._page = null;
+npf.pages.Manager.prototype.page_ = null;
 
 /**
  * @type {?string}
  * @private
  */
-npf.pages.Manager.prototype._pageType = null;
+npf.pages.Manager.prototype.pageType_ = null;
 
 /**
  * @type {npf.pages.Request}
  * @private
  */
-npf.pages.Manager.prototype._request = null;
+npf.pages.Manager.prototype.request_ = null;
 
 /**
  * @type {Element|goog.ui.Component}
  * @private
  */
-npf.pages.Manager.prototype._parentContainer = null;
+npf.pages.Manager.prototype.parentContainer_ = null;
 
 /**
  * @type {!Array.<npf.pages.Request>}
  * @private
  */
-npf.pages.Manager.prototype._requestHistory;
+npf.pages.Manager.prototype.requestHistory_;
 
 /**
  * @type {number}
  * @private
  */
-npf.pages.Manager.prototype._requestHistoryLimit = 1;
+npf.pages.Manager.prototype.requestHistoryLimit_ = 1;
 
 
 /** @inheritDoc */
 npf.pages.Manager.prototype.disposeInternal = function() {
-	this.unloadPage(this.getCurrentPage());
+  this.unloadPage(this.getCurrentPage());
 
-	goog.base(this, 'disposeInternal');
+  goog.base(this, 'disposeInternal');
 
-	delete this._router;
-	delete this._pageCtrsMap;
-	delete this._errorPageCtrsMap;
-	delete this._routeNamesMap;
-	delete this._helpersMap;
-	delete this._handler;
-	delete this._page;
-	delete this._parentContainer;
-	delete this._requestHistory;
-	delete this._requestHistoryLimit;
+  delete this.router_;
+  delete this.pageCtorsMap_;
+  delete this.errorPageCtorsMap_;
+  delete this.routeNamesMap_;
+  delete this.helpersMap_;
+  delete this.handler_;
+  delete this.page_;
+  delete this.parentContainer_;
+  delete this.requestHistory_;
+  delete this.requestHistoryLimit_;
 };
 
 npf.pages.Manager.prototype.init = function() {
-	this._handler.listen(this._router, npf.Router.EventType.NAVIGATE, this._onNavigate, false, this);
-	this._router.setEnabled(true);
+  this.handler_.listen(this.router_, npf.Router.EventType.NAVIGATE,
+    this.onNavigate_, false, this);
+  this.router_.setEnabled(true);
 };
 
 /**
  * @param {goog.events.Event} evt
  * @private
  */
-npf.pages.Manager.prototype._onNavigate = function(evt) {
-	var uri = /** @type {!goog.Uri} */ (evt.uri);
-	var route = /** @type {npf.router.Route} */ (evt.route);
-	var routeName = /** @type {string} */ (evt.name);
-	var options = /** @type {Object.<string,string>} */ (evt.options);
+npf.pages.Manager.prototype.onNavigate_ = function(evt) {
+  var uri = /** @type {!goog.Uri} */ (evt.uri);
+  var route = /** @type {npf.router.Route} */ (evt.route);
+  var routeName = /** @type {string} */ (evt.name);
+  var options = /** @type {Object.<string,string>} */ (evt.options);
 
-	if (!this._request || this._request.uri.toString() != uri.toString()) {
-		var request = new npf.pages.Request(uri, route, routeName, options);
-		this.navigatePage(request);
-	}
+  if (!this.request_ || this.request_.uri.toString() != uri.toString()) {
+    var request = new npf.pages.Request(uri, route, routeName, options);
+    this.navigatePage(request);
+  }
 };
 
 /**
  * @return {!goog.events.EventHandler}
  */
 npf.pages.Manager.prototype.getHandler = function() {
-	return this._handler;
+  return this.handler_;
 };
 
 /**
  * @param {string|goog.Uri} token
  */
 npf.pages.Manager.prototype.navigate = function(token) {
-	var info = this._router.parseToken(token);
-	/** @type {!goog.Uri} */
-	var uri = info.uri;
-	/** @type {npf.router.Route} */
-	var route = info.route;
-	/** @type {string} */
-	var routeName = info.name;
-	/** @type {Object.<string,string>} */
-	var options = info.options;
+  var info = this.router_.parseToken(token);
+  /** @type {!goog.Uri} */
+  var uri = info.uri;
+  /** @type {npf.router.Route} */
+  var route = info.route;
+  /** @type {string} */
+  var routeName = info.name;
+  /** @type {Object.<string,string>} */
+  var options = info.options;
 
-	if (!this._request || this._request.uri.toString() != uri.toString()) {
-		var request = new npf.pages.Request(uri, route, routeName, options);
-		this.navigatePage(request);
-	}
+  if (!this.request_ || this.request_.uri.toString() != uri.toString()) {
+    var request = new npf.pages.Request(uri, route, routeName, options);
+    this.navigatePage(request);
+  }
 };
 
 /**
@@ -196,31 +197,31 @@ npf.pages.Manager.prototype.navigate = function(token) {
  * @protected
  */
 npf.pages.Manager.prototype.navigatePage = function(request) {
-	if (this._request) {
-		this.addRequestToHistory(this._request);
-	}
+  if (this.request_) {
+    this.addRequestToHistory(this.request_);
+  }
 
-	this._request = request;
+  this.request_ = request;
 
-	/** @type {Function} */
-	var Page = '' == request.name ? null : this.getPageCtrByRoute(request.name);
+  /** @type {Function} */
+  var Page = '' == request.name ? null : this.getPageCtorByRoute(request.name);
 
-	if (Page) {
-		this.navigatePageInternal(request, Page);
-	} else {
-		this.navigateErrorInternal(goog.net.HttpStatus.NOT_FOUND, request);
-	}
+  if (Page) {
+    this.navigatePageInternal(request, Page);
+  } else {
+    this.navigateErrorInternal(goog.net.HttpStatus.NOT_FOUND, request);
+  }
 };
 
 /**
  * @param {goog.net.HttpStatus=} opt_status Default is goog.net.HttpStatus.NOT_FOUND.
  */
 npf.pages.Manager.prototype.navigateError = function(opt_status) {
-	/** @type {goog.net.HttpStatus} */
-	var status = opt_status || goog.net.HttpStatus.NOT_FOUND;
-	/** @type {npf.pages.Request} */
-	var request = new npf.pages.Request(this._router.getUri(), null, '', null);
-	this.navigateErrorInternal(status, request);
+  /** @type {goog.net.HttpStatus} */
+  var status = opt_status || goog.net.HttpStatus.NOT_FOUND;
+  /** @type {npf.pages.Request} */
+  var request = new npf.pages.Request(this.router_.getUri(), null, '', null);
+  this.navigateErrorInternal(status, request);
 };
 
 /**
@@ -229,12 +230,12 @@ npf.pages.Manager.prototype.navigateError = function(opt_status) {
  * @protected
  */
 npf.pages.Manager.prototype.navigateErrorInternal = function(status, request) {
-	/** @type {Function} */
-	var Page = this._errorPageCtrsMap[/** @type {string} */ (status)] || null;
+  /** @type {Function} */
+  var Page = this.errorPageCtorsMap_[/** @type {string} */ (status)] || null;
 
-	if (Page) {
-		this.navigatePageInternal(request, Page);
-	}
+  if (Page) {
+    this.navigatePageInternal(request, Page);
+  }
 };
 
 /**
@@ -243,8 +244,8 @@ npf.pages.Manager.prototype.navigateErrorInternal = function(status, request) {
  * @protected
  */
 npf.pages.Manager.prototype.navigatePageInternal = function(request, Page) {
-	this.unloadPage(this.getCurrentPage());
-	this.loadPage(request, Page);
+  this.unloadPage(this.getCurrentPage());
+  this.loadPage(request, Page);
 };
 
 /**
@@ -254,13 +255,15 @@ npf.pages.Manager.prototype.navigatePageInternal = function(request, Page) {
  * @protected
  */
 npf.pages.Manager.prototype.loadPage = function(request, Page) {
-	this._page = /** @type {npf.pages.Page} */ (new Page(this));
-	this._page.addEventListener(npf.pages.Page.EventType.ERROR, this._onPageError, false, this);
-	this._page.addEventListener(npf.pages.Page.EventType.TITLE_CHANGE, this._onPageTitleChange, false, this);
-	this.loadPageInternal(request, this._page);
-	this.dispatchLoadEvent();
+  this.page_ = /** @type {npf.pages.Page} */ (new Page(this));
+  this.page_.addEventListener(npf.pages.Page.EventType.ERROR,
+    this.onPageError_, false, this);
+  this.page_.addEventListener(npf.pages.Page.EventType.TITLE_CHANGE,
+    this.onPageTitleChange_, false, this);
+  this.loadPageInternal(request, this.page_);
+  this.dispatchLoadEvent();
 
-	return this._page;
+  return this.page_;
 };
 
 /**
@@ -269,9 +272,9 @@ npf.pages.Manager.prototype.loadPage = function(request, Page) {
  * @protected
  */
 npf.pages.Manager.prototype.loadPageInternal = function(request, page) {
-	this._updateHelpers(page);
-	this.setTitle(page.getTitle());
-	page.load(request);
+  this.updateHelpers_(page);
+  this.setTitle(page.getTitle());
+  page.load(request);
 };
 
 /**
@@ -279,75 +282,75 @@ npf.pages.Manager.prototype.loadPageInternal = function(request, page) {
  * @protected
  */
 npf.pages.Manager.prototype.unloadPage = function(page) {
-	if (page) {
-		this.unloadPageInternal(page);
-		this.dispatchUnloadEvent(page);
-	}
+  if (page) {
+    this.unloadPageInternal(page);
+    this.dispatchUnloadEvent(page);
+  }
 };
 
 /**
  * @protected
  */
 npf.pages.Manager.prototype.unloadPageInternal = function(page) {
-	page.dispose();
+  page.dispose();
 };
 
 /**
  * @param {npf.pages.Page} page
  * @private
  */
-npf.pages.Manager.prototype._updateHelpers = function(page) {
-	/** @type {Array.<string>} */
-	var helperTypes = page.getUsingHelperTypes();
-	var helperTypesMap = {};
+npf.pages.Manager.prototype.updateHelpers_ = function(page) {
+  /** @type {Array.<string>} */
+  var helperTypes = page.getUsingHelperTypes();
+  var helperTypesMap = {};
 
-	if (helperTypes) {
-		goog.array.forEach(helperTypes, function(type) {
-			helperTypesMap[type] = 1;
+  if (helperTypes) {
+    goog.array.forEach(helperTypes, function(type) {
+      helperTypesMap[type] = 1;
 
-			if (!this._helpersMap[type]) {
-				/** @type {goog.Disposable} */
-				var helper = this.createHelper(type);
+      if (!this.helpersMap_[type]) {
+        /** @type {goog.Disposable} */
+        var helper = this.createHelper(type);
 
-				if (helper) {
-					this._helpersMap[type] = helper;
-				}
-			}
+        if (helper) {
+          this.helpersMap_[type] = helper;
+        }
+      }
 
-			if (this._helpersMap[type]) {
-				page.setHelper(this._helpersMap[type], type);
-			}
-		}, this);
-	}
+      if (this.helpersMap_[type]) {
+        page.setHelper(this.helpersMap_[type], type);
+      }
+    }, this);
+  }
 
-	var removeHelpersMap = {};
+  var removeHelpersMap = {};
 
-	goog.object.forEach(this._helpersMap, function(helper, type) {
-		if (!helperTypesMap[type]) {
-			removeHelpersMap[type] = helper;
-		}
-	}, this);
+  goog.object.forEach(this.helpersMap_, function(helper, type) {
+    if (!helperTypesMap[type]) {
+      removeHelpersMap[type] = helper;
+    }
+  }, this);
 
-	goog.object.forEach(removeHelpersMap, function(helper, type) {
-		goog.object.remove(this._helpersMap, type);
-		this.removeHelper(type, helper);
-	}, this);
+  goog.object.forEach(removeHelpersMap, function(helper, type) {
+    goog.object.remove(this.helpersMap_, type);
+    this.removeHelper(type, helper);
+  }, this);
 };
 
 /**
  * @param {goog.events.Event} evt
  * @private
  */
-npf.pages.Manager.prototype._onPageTitleChange = function(evt) {
-	var title = /** @type {string} */ (evt.title);
-	this.setTitle(title);
+npf.pages.Manager.prototype.onPageTitleChange_ = function(evt) {
+  var title = /** @type {string} */ (evt.title);
+  this.setTitle(title);
 };
 
 /**
  * @param {string} title
  */
 npf.pages.Manager.prototype.setTitle = function(title) {
-	this.setTitleInternal(title);
+  this.setTitleInternal(title);
 };
 
 /**
@@ -355,16 +358,16 @@ npf.pages.Manager.prototype.setTitle = function(title) {
  * @protected
  */
 npf.pages.Manager.prototype.setTitleInternal = function(title) {
-	document.title = title;
+  document.title = title;
 };
 
 /**
  * @param {goog.events.Event} evt
  * @private
  */
-npf.pages.Manager.prototype._onPageError = function(evt) {
-	var status = /** @type {goog.net.HttpStatus} */ (evt.status);
-	this.navigateError(status);
+npf.pages.Manager.prototype.onPageError_ = function(evt) {
+  var status = /** @type {goog.net.HttpStatus} */ (evt.status);
+  this.navigateError(status);
 };
 
 /**
@@ -372,26 +375,27 @@ npf.pages.Manager.prototype._onPageError = function(evt) {
  * @param {string} pageType
  * @param {string|Array.<string>=} opt_routeNames
  */
-npf.pages.Manager.prototype.addPageCtr = function(Page, pageType, opt_routeNames) {
-	/** @type {!Array.<string>} */
-	var routeNames = [];
+npf.pages.Manager.prototype.addPageCtor = function(Page, pageType,
+                                                  opt_routeNames) {
+  /** @type {!Array.<string>} */
+  var routeNames = [];
 
-	if (goog.isString(opt_routeNames)) {
-		routeNames.push(opt_routeNames);
-	} else if (goog.isArray(opt_routeNames)) {
-		routeNames = opt_routeNames;
-	}
+  if (goog.isString(opt_routeNames)) {
+    routeNames.push(opt_routeNames);
+  } else if (goog.isArray(opt_routeNames)) {
+    routeNames = opt_routeNames;
+  }
 
-	this._pageCtrsMap[pageType] = Page;
-	this._routeNamesMap[pageType] = routeNames || [];
+  this.pageCtorsMap_[pageType] = Page;
+  this.routeNamesMap_[pageType] = routeNames || [];
 };
 
 /**
  * @param {string} pageType
  */
-npf.pages.Manager.prototype.removePageCtr = function(pageType) {
-	goog.object.remove(this._pageCtrsMap, pageType);
-	goog.object.remove(this._routeNamesMap, pageType);
+npf.pages.Manager.prototype.removePageCtor = function(pageType) {
+  goog.object.remove(this.pageCtorsMap_, pageType);
+  goog.object.remove(this.routeNamesMap_, pageType);
 };
 
 /**
@@ -399,14 +403,15 @@ npf.pages.Manager.prototype.removePageCtr = function(pageType) {
  * @param {goog.net.HttpStatus} httpStatus
  */
 npf.pages.Manager.prototype.addErrorPageHandler = function(Page, httpStatus) {
-	this._errorPageCtrsMap[/** @type {string} */ (httpStatus)] = Page;
+  this.errorPageCtorsMap_[/** @type {string} */ (httpStatus)] = Page;
 };
 
 /**
  * @param {goog.net.HttpStatus} httpStatus
  */
 npf.pages.Manager.prototype.removeErrorPageHandler = function(httpStatus) {
-	goog.object.remove(this._errorPageCtrsMap, /** @type {string} */ (httpStatus));
+  goog.object.remove(this.errorPageCtorsMap_,
+    /** @type {string} */ (httpStatus));
 };
 
 /**
@@ -414,28 +419,28 @@ npf.pages.Manager.prototype.removeErrorPageHandler = function(httpStatus) {
  * @return {boolean}
  */
 npf.pages.Manager.prototype.hasErrorPage = function(httpStatus) {
-	return !!this._errorPageCtrsMap[/** @type {string} */ (httpStatus)];
+  return !!this.errorPageCtorsMap_[/** @type {string} */ (httpStatus)];
 };
 
 /**
  * @return {Element|goog.ui.Component}
  */
 npf.pages.Manager.prototype.getParentContainer = function() {
-	return this._parentContainer;
+  return this.parentContainer_;
 };
 
 /**
  * @param {Element|goog.ui.Component} parentContainer
  */
 npf.pages.Manager.prototype.setParentContainer = function(parentContainer) {
-	this._parentContainer = parentContainer;
+  this.parentContainer_ = parentContainer;
 };
 
 /**
  * @return {!Object.<string,goog.Disposable>}
  */
 npf.pages.Manager.prototype.getHelpersMap = function() {
-	return this._helpersMap;
+  return this.helpersMap_;
 };
 
 /**
@@ -443,7 +448,7 @@ npf.pages.Manager.prototype.getHelpersMap = function() {
  * @return {goog.Disposable}
  */
 npf.pages.Manager.prototype.getHelper = function(type) {
-	return this._helpersMap[type] || null;
+  return this.helpersMap_[type] || null;
 };
 
 /**
@@ -452,7 +457,7 @@ npf.pages.Manager.prototype.getHelper = function(type) {
  * @protected
  */
 npf.pages.Manager.prototype.createHelper = function(type) {
-	return null;
+  return null;
 };
 
 /**
@@ -461,29 +466,29 @@ npf.pages.Manager.prototype.createHelper = function(type) {
  * @protected
  */
 npf.pages.Manager.prototype.removeHelper = function(type, helper) {
-	helper.dispose();
+  helper.dispose();
 };
 
 /**
  * @return {number}
  */
 npf.pages.Manager.prototype.getRequestHistoryLimit = function() {
-	return this._requestHistoryLimit;
+  return this.requestHistoryLimit_;
 };
 
 /**
  * @param {number} limit
  */
 npf.pages.Manager.prototype.setRequestHistoryLimit = function(limit) {
-	if (0 > limit || this._requestHistoryLimit == limit) {
-		return;
-	}
+  if (0 > limit || this.requestHistoryLimit_ == limit) {
+    return;
+  }
 
-	if (limit < this._requestHistoryLimit) {
-		this._requestHistory = this._requestHistory.slice(0, limit - 1);
-	}
+  if (limit < this.requestHistoryLimit_) {
+    this.requestHistory_ = this.requestHistory_.slice(0, limit - 1);
+  }
 
-	this._requestHistoryLimit = limit;
+  this.requestHistoryLimit_ = limit;
 };
 
 /**
@@ -491,10 +496,10 @@ npf.pages.Manager.prototype.setRequestHistoryLimit = function(limit) {
  * @return {npf.pages.Request}
  */
 npf.pages.Manager.prototype.getRequestFromHistory = function(opt_index) {
-	/** @type {number} */
-	var index = opt_index || 0;
+  /** @type {number} */
+  var index = opt_index || 0;
 
-	return this._requestHistory[index] || null;
+  return this.requestHistory_[index] || null;
 };
 
 /**
@@ -502,55 +507,56 @@ npf.pages.Manager.prototype.getRequestFromHistory = function(opt_index) {
  * @protected
  */
 npf.pages.Manager.prototype.addRequestToHistory = function(request) {
-	this._requestHistory.unshift(request);
+  this.requestHistory_.unshift(request);
 
-	if (this._requestHistory.length > this._requestHistoryLimit) {
-		this._requestHistory = this._requestHistory.slice(0, this._requestHistoryLimit - 1);
-	}
+  if (this.requestHistory_.length > this.requestHistoryLimit_) {
+    this.requestHistory_ =
+      this.requestHistory_.slice(0, this.requestHistoryLimit_ - 1);
+  }
 };
 
 /**
  * @return {npf.pages.Request}
  */
 npf.pages.Manager.prototype.getRequest = function() {
-	return this._request;
+  return this.request_;
 };
 
 /**
  * @return {npf.Router}
  */
 npf.pages.Manager.prototype.getRouter = function() {
-	return this._router;
+  return this.router_;
 };
 
 /**
  * @return {string?}
  */
 npf.pages.Manager.prototype.getCurrentPageType = function() {
-	return this._pageType;
+  return this.pageType_;
 };
 
 /**
  * @return {npf.pages.Page}
  */
 npf.pages.Manager.prototype.getCurrentPage = function() {
-	return this._page;
+  return this.page_;
 };
 
 /**
  * @param {string} pageType
  * @return {boolean}
  */
-npf.pages.Manager.prototype.hasPageCtr = function(pageType) {
-	return !!this.getPageCtr(pageType);
+npf.pages.Manager.prototype.hasPageCtor = function(pageType) {
+  return !!this.getPageCtor(pageType);
 };
 
 /**
  * @param {string} pageType
  * @return {Function}
  */
-npf.pages.Manager.prototype.getPageCtr = function(pageType) {
-	return this._pageCtrsMap[pageType] || null;
+npf.pages.Manager.prototype.getPageCtor = function(pageType) {
+  return this.pageCtorsMap_[pageType] || null;
 };
 
 /**
@@ -558,43 +564,43 @@ npf.pages.Manager.prototype.getPageCtr = function(pageType) {
  * @return {string?}
  */
 npf.pages.Manager.prototype.getPageTypeByRoute = function(name) {
-	/** @type {?string} */
-	var pageType = null;
+  /** @type {?string} */
+  var pageType = null;
 
-	if ('' != name) {
-		goog.object.every(this._routeNamesMap, function(routeNames, type) {
-			if (-1 < goog.array.indexOf(routeNames, name)) {
-				pageType = type;
+  if ('' != name) {
+    goog.object.every(this.routeNamesMap_, function(routeNames, type) {
+      if (-1 < goog.array.indexOf(routeNames, name)) {
+        pageType = type;
 
-				return false;
-			}
+        return false;
+      }
 
-			return true;
-		}, this);
-	}
+      return true;
+    }, this);
+  }
 
-	return pageType;
+  return pageType;
 };
 
 /**
  * @param {string} name
  * @return {Function}
  */
-npf.pages.Manager.prototype.getPageCtrByRoute = function(name) {
-	/** @type {Function} */
-	var Page = null;
+npf.pages.Manager.prototype.getPageCtorByRoute = function(name) {
+  /** @type {Function} */
+  var Page = null;
 
-	goog.object.every(this._routeNamesMap, function(routeNames, type) {
-		if (-1 < goog.array.indexOf(routeNames, name)) {
-			Page = this.getPageCtr(type);
+  goog.object.every(this.routeNamesMap_, function(routeNames, type) {
+    if (-1 < goog.array.indexOf(routeNames, name)) {
+      Page = this.getPageCtor(type);
 
-			return false;
-		}
+      return false;
+    }
 
-		return true;
-	}, this);
+    return true;
+  }, this);
 
-	return Page;
+  return Page;
 };
 
 /**
@@ -602,10 +608,10 @@ npf.pages.Manager.prototype.getPageCtrByRoute = function(name) {
  * @return {npf.router.Route?}
  */
 npf.pages.Manager.prototype.getRouteByPageType = function(pageType) {
-	/** @type {!Array.<npf.router.Route>} */
-	var routes = this.getRoutesByPageType(pageType);
+  /** @type {!Array.<npf.router.Route>} */
+  var routes = this.getRoutesByPageType(pageType);
 
-	return routes[0] || null;
+  return routes[0] || null;
 };
 
 /**
@@ -613,21 +619,21 @@ npf.pages.Manager.prototype.getRouteByPageType = function(pageType) {
  * @return {!Array.<npf.router.Route>}
  */
 npf.pages.Manager.prototype.getRoutesByPageType = function(pageType) {
-	/** @type {!Array.<string>} */
-	var routeNames = this.getRouteNamesByPageType(pageType);
-	/** @type {!Array.<npf.router.Route>} */
-	var routes = [];
+  /** @type {!Array.<string>} */
+  var routeNames = this.getRouteNamesByPageType(pageType);
+  /** @type {!Array.<npf.router.Route>} */
+  var routes = [];
 
-	goog.array.forEach(routeNames, function(routeName) {
-		/** @type {npf.router.Route} */
-		var route = this._router.getRoute(routeName);
+  goog.array.forEach(routeNames, function(routeName) {
+    /** @type {npf.router.Route} */
+    var route = this.router_.getRoute(routeName);
 
-		if (route) {
-			routes.push(route);
-		}
-	}, this);
+    if (route) {
+      routes.push(route);
+    }
+  }, this);
 
-	return routes;
+  return routes;
 };
 
 /**
@@ -635,29 +641,29 @@ npf.pages.Manager.prototype.getRoutesByPageType = function(pageType) {
  * @return {!Array.<string>}
  */
 npf.pages.Manager.prototype.getRouteNamesByPageType = function(pageType) {
-	return this._routeNamesMap[pageType] || [];
+  return this.routeNamesMap_[pageType] || [];
 };
 
 /**
  * @protected
  */
 npf.pages.Manager.prototype.dispatchLoadEvent = function() {
-	this.dispatchEvent({
-		type: npf.pages.Manager.EventType.LOAD,
-		request: this._request,
-		page: this._page
-	});
+  this.dispatchEvent({
+    type: npf.pages.Manager.EventType.LOAD,
+    request: this.request_,
+    page: this.page_
+  });
 };
 
 /**
  * @param {npf.pages.Page} page
- * @param {npf.pages.Request=} opt_request
+ * @param {npf.pages.Request=} optrequest_
  * @protected
  */
-npf.pages.Manager.prototype.dispatchUnloadEvent = function(page, opt_request) {
-	this.dispatchEvent({
-		type: npf.pages.Manager.EventType.UNLOAD,
-		request: opt_request || this.getRequestFromHistory(),
-		page: page
-	});
+npf.pages.Manager.prototype.dispatchUnloadEvent = function(page, optrequest_) {
+  this.dispatchEvent({
+    type: npf.pages.Manager.EventType.UNLOAD,
+    request: optrequest_ || this.getRequestFromHistory(),
+    page: page
+  });
 };

@@ -13,7 +13,7 @@ goog.require('goog.Uri.QueryData');
  * @extends {goog.net.XhrIo}
  */
 npf.net.XhrIo = function(opt_xmlHttpFactory) {
-	goog.base(this, opt_xmlHttpFactory);
+  goog.base(this, opt_xmlHttpFactory);
 };
 goog.inherits(npf.net.XhrIo, goog.net.XhrIo);
 
@@ -47,22 +47,24 @@ npf.net.XhrIo.sendInstances_ = [];
  * @param {number=} opt_timeoutInterval Number of milliseconds after which an
  *     incomplete request will be aborted; 0 means no timeout is set.
  */
-npf.net.XhrIo.send = function(url, opt_callback, opt_method, opt_content, opt_headers, opt_timeoutInterval) {
-	/** @type {!npf.net.XhrIo} */
-	var x = new npf.net.XhrIo();
-	npf.net.XhrIo.sendInstances_.push(x);
+npf.net.XhrIo.send = function(url, opt_callback, opt_method, opt_content,
+                              opt_headers, opt_timeoutInterval) {
+  /** @type {!npf.net.XhrIo} */
+  var x = new npf.net.XhrIo();
+  npf.net.XhrIo.sendInstances_.push(x);
 
-	if (opt_callback) {
-		goog.events.listen(x, goog.net.EventType.COMPLETE, opt_callback);
-	}
+  if (opt_callback) {
+    goog.events.listen(x, goog.net.EventType.COMPLETE, opt_callback);
+  }
 
-	goog.events.listen(x, goog.net.EventType.READY, goog.partial(npf.net.XhrIo.cleanupSend_, x));
+  goog.events.listen(x, goog.net.EventType.READY,
+     goog.partial(npf.net.XhrIo.cleanupSend_, x));
 
-	if (opt_timeoutInterval) {
-		x.setTimeoutInterval(opt_timeoutInterval);
-	}
+  if (opt_timeoutInterval) {
+    x.setTimeoutInterval(opt_timeoutInterval);
+  }
 
-	x.send(url, opt_method, opt_content, opt_headers);
+  x.send(url, opt_method, opt_content, opt_headers);
 };
 
 /**
@@ -82,12 +84,12 @@ npf.net.XhrIo.send = function(url, opt_callback, opt_method, opt_content, opt_he
  * cleanup on window unload.
  */
 npf.net.XhrIo.cleanup = function() {
-	/** @type {!Array.<npf.net.XhrIo>} */
-	var instances = npf.net.XhrIo.sendInstances_;
+  /** @type {!Array.<npf.net.XhrIo>} */
+  var instances = npf.net.XhrIo.sendInstances_;
 
-	while (instances.length) {
-		instances.pop().dispose();
-	}
+  while (instances.length) {
+    instances.pop().dispose();
+  }
 };
 
 /**
@@ -101,7 +103,8 @@ npf.net.XhrIo.cleanup = function() {
  *     protect the entry point(s).
  */
 npf.net.XhrIo.protectEntryPoints = function(errorHandler) {
-	npf.net.XhrIo.prototype.onReadyStateChangeEntryPoint_ = errorHandler.protectEntryPoint(npf.net.XhrIo.prototype.onReadyStateChangeEntryPoint_);
+  npf.net.XhrIo.prototype.onReadyStateChangeEntryPoint_ =
+    errorHandler.protectEntryPoint(npf.net.XhrIo.prototype.onReadyStateChangeEntryPoint_);
 };
 
 /**
@@ -112,8 +115,8 @@ npf.net.XhrIo.protectEntryPoints = function(errorHandler) {
  * @private
  */
 npf.net.XhrIo.cleanupSend_ = function(XhrIo) {
-	XhrIo.dispose();
-	goog.array.remove(npf.net.XhrIo.sendInstances_, XhrIo);
+  XhrIo.dispose();
+  goog.array.remove(npf.net.XhrIo.sendInstances_, XhrIo);
 };
 
 /**
@@ -125,20 +128,24 @@ npf.net.XhrIo.cleanupSend_ = function(XhrIo) {
  * @override
  */
 npf.net.XhrIo.prototype.send = function(url, opt_method, opt_content, opt_headers) {
-	/** @type {!goog.Uri} */
-	var inputUri = goog.Uri.parse(url);
-	/** @type {string} */
-	var inputMethod = opt_method ? opt_method.toUpperCase() : 'GET';
-	/** @type {!goog.Uri} */
-	var uri = this.parseRequestUri(inputUri, inputMethod, opt_content, opt_headers);
-	/** @type {string} */
-	var method = this.parseRequestMethod(inputUri, inputMethod, opt_content, opt_headers);
-	/** @type {string} */
-	var content = this.parseRequestContent(inputUri, inputMethod, opt_content, opt_headers);
-	/** @type {!Object} */
-	var headers = this.parseRequestHeaders(inputUri, inputMethod, opt_content, opt_headers);
+  /** @type {!goog.Uri} */
+  var inputUri = goog.Uri.parse(url);
+  /** @type {string} */
+  var inputMethod = opt_method ? opt_method.toUpperCase() : 'GET';
+  /** @type {!goog.Uri} */
+  var uri = this.parseRequestUri(inputUri, inputMethod, opt_content,
+    opt_headers);
+  /** @type {string} */
+  var method = this.parseRequestMethod(inputUri, inputMethod, opt_content,
+    opt_headers);
+  /** @type {string} */
+  var content = this.parseRequestContent(inputUri, inputMethod, opt_content,
+    opt_headers);
+  /** @type {!Object} */
+  var headers = this.parseRequestHeaders(inputUri, inputMethod, opt_content,
+    opt_headers);
 
-	goog.base(this, 'send', uri, method, content, headers);
+  goog.base(this, 'send', uri, method, content, headers);
 };
 
 /**
@@ -149,25 +156,26 @@ npf.net.XhrIo.prototype.send = function(url, opt_method, opt_content, opt_header
  * @return {!goog.Uri}
  * @protected
  */
-npf.net.XhrIo.prototype.parseRequestUri = function(uri, method, opt_content, opt_headers) {
-	/** @type {!goog.Uri} */
-	var result = uri.clone();
+npf.net.XhrIo.prototype.parseRequestUri = function(uri, method, opt_content,
+                                                   opt_headers) {
+  /** @type {!goog.Uri} */
+  var result = uri.clone();
 
-	if ('DELETE' == method || 'PUT' == method) {
-		// Прячем метод в GET-параметр.
-		uri.getQueryData().set('_method', method);
-	} else if ('GET' == method) {
-		// Добавляем параметры в URI.
+  if ('DELETE' == method || 'PUT' == method) {
+    // Прячем метод в GET-параметр.
+    uri.getQueryData().set('_method', method);
+  } else if ('GET' == method) {
+    // Добавляем параметры в URI.
 
-		/** @type {goog.Uri.QueryData} */
-		var content = this.parseContent(uri, method, opt_content, opt_headers);
+    /** @type {goog.Uri.QueryData} */
+    var content = this.parseContent(uri, method, opt_content, opt_headers);
 
-		if (content) {
-			uri.getQueryData().extend(content);
-		}
-	}
+    if (content) {
+      uri.getQueryData().extend(content);
+    }
+  }
 
-	return uri;
+  return uri;
 };
 
 /**
@@ -178,12 +186,13 @@ npf.net.XhrIo.prototype.parseRequestUri = function(uri, method, opt_content, opt
  * @return {string}
  * @protected
  */
-npf.net.XhrIo.prototype.parseRequestMethod = function(uri, method, opt_content, opt_headers) {
-	if ('DELETE' == method || 'PUT' == method) {
-		method = 'POST';
-	}
+npf.net.XhrIo.prototype.parseRequestMethod = function(uri, method, opt_content,
+                                                      opt_headers) {
+  if ('DELETE' == method || 'PUT' == method) {
+    method = 'POST';
+  }
 
-	return method;
+  return method;
 };
 
 /**
@@ -194,20 +203,21 @@ npf.net.XhrIo.prototype.parseRequestMethod = function(uri, method, opt_content, 
  * @return {string}
  * @protected
  */
-npf.net.XhrIo.prototype.parseRequestContent = function(uri, method, opt_content, opt_headers) {
-	/** @type {string} */
-	var plainContent = '';
+npf.net.XhrIo.prototype.parseRequestContent = function(uri, method, opt_content,
+                                                       opt_headers) {
+  /** @type {string} */
+  var plainContent = '';
 
-	if ('GET' != method) {
-		/** @type {goog.Uri.QueryData} */
-		var content = this.parseContent(uri, method, opt_content, opt_headers);
+  if ('GET' != method) {
+    /** @type {goog.Uri.QueryData} */
+    var content = this.parseContent(uri, method, opt_content, opt_headers);
 
-		if (content) {
-			plainContent = content.toString();
-		}
-	}
+    if (content) {
+      plainContent = content.toString();
+    }
+  }
 
-	return plainContent;
+  return plainContent;
 };
 
 /**
@@ -218,23 +228,24 @@ npf.net.XhrIo.prototype.parseRequestContent = function(uri, method, opt_content,
  * @return {goog.Uri.QueryData?}
  * @protected
  */
-npf.net.XhrIo.prototype.parseContent = function(uri, method, opt_content, opt_headers) {
-	/** @type {goog.Uri.QueryData} */
-	var content = null;
+npf.net.XhrIo.prototype.parseContent = function(uri, method, opt_content,
+                                                opt_headers) {
+  /** @type {goog.Uri.QueryData} */
+  var content = null;
 
-	if (goog.isString(opt_content)) {
-		/** @type {goog.Uri.QueryData} */
-		var contentFromString = goog.Uri.parse('?' + opt_content).getQueryData();
+  if (goog.isString(opt_content)) {
+    /** @type {goog.Uri.QueryData} */
+    var contentFromString = goog.Uri.parse('?' + opt_content).getQueryData();
 
-		if (contentFromString) {
-			content = contentFromString;
-		}
-	} else if (goog.isObject(opt_content)) {
-		content = new goog.Uri.QueryData();
-		content.extend(opt_content);
-	}
+    if (contentFromString) {
+      content = contentFromString;
+    }
+  } else if (goog.isObject(opt_content)) {
+    content = new goog.Uri.QueryData();
+    content.extend(opt_content);
+  }
 
-	return content;
+  return content;
 };
 
 /**
@@ -245,67 +256,70 @@ npf.net.XhrIo.prototype.parseContent = function(uri, method, opt_content, opt_he
  * @return {!Object}
  * @protected
  */
-npf.net.XhrIo.prototype.parseRequestHeaders = function(uri, method, opt_content, opt_headers) {
-	/** @type {!Object} */
-	var headers = {};
+npf.net.XhrIo.prototype.parseRequestHeaders = function(uri, method, opt_content,
+                                                       opt_headers) {
+  /** @type {!Object} */
+  var headers = {};
 
-	if (opt_headers) {
-		goog.structs.forEach(opt_headers, function(value, key) {
-			headers[key] = value;
-		});
-	}
+  if (opt_headers) {
+    goog.structs.forEach(opt_headers, function(value, key) {
+      headers[key] = value;
+    });
+  }
 
-	if (!headers['X-Requested-With']) {
-		headers['X-Requested-With'] = 'XMLHttpRequest';
-	}
+  if (!headers['X-Requested-With']) {
+    headers['X-Requested-With'] = 'XMLHttpRequest';
+  }
 
-	return headers;
+  return headers;
 };
 
 /**
  * @return {boolean}
  */
 npf.net.XhrIo.prototype.isServerError = function() {
-	/** @type {number} */
-	var status = this.getStatus();
+  /** @type {number} */
+  var status = this.getStatus();
 
-	return status >= 500 && status < 600;
+  return status >= 500 && status < 600;
 };
 
 /** @inheritDoc */
 npf.net.XhrIo.prototype.dispatchEvent = function(e) {
-	var eventType = /** @type {goog.net.EventType|null|undefined} */ (goog.isString(e) ? e : e.type);
+  var eventType =
+    /** @type {goog.net.EventType|null|undefined} */ (goog.isString(e) ? e : e.type);
 
-	if (npf.net.XhrIo.preprocessHandle && eventType) {
-		npf.net.XhrIo.preprocessHandle(this, eventType);
-	}
+  if (npf.net.XhrIo.preprocessHandle && eventType) {
+    npf.net.XhrIo.preprocessHandle(this, eventType);
+  }
 
-	return goog.base(this, 'dispatchEvent', e);
+  return goog.base(this, 'dispatchEvent', e);
 };
 
 /**
  * @return {*|undefined}
  */
 npf.net.XhrIo.prototype.getResponseJsonResult = function() {
-	var jsonData = this.getResponseJson();
+  var jsonData = this.getResponseJson();
 
-	return goog.isObject(jsonData) ? jsonData['result'] : undefined;
+  return goog.isObject(jsonData) ? jsonData['result'] : undefined;
 };
 
 /**
  * @return {*|undefined}
  */
 npf.net.XhrIo.prototype.getResponseJsonErrors = function() {
-	var jsonData = this.getResponseJson();
+  var jsonData = this.getResponseJson();
 
-	return goog.isObject(jsonData) ? jsonData['errors'] : undefined;
+  return goog.isObject(jsonData) ? jsonData['errors'] : undefined;
 };
 
 // it can be monitored for exception handling, etc.
 goog.debug.entryPointRegistry.register(
-	/**
-	 * @param {function(!Function): !Function} transformer The transforming function.
-	 */
-	function(transformer) {
-		npf.net.XhrIo.prototype.onReadyStateChangeEntryPoint_ = transformer(npf.net.XhrIo.prototype.onReadyStateChangeEntryPoint_);
-	});
+  /**
+   * @param {function(!Function): !Function} transformer The transforming function.
+   */
+  function(transformer) {
+    npf.net.XhrIo.prototype.onReadyStateChangeEntryPoint_ =
+      transformer(npf.net.XhrIo.prototype.onReadyStateChangeEntryPoint_);
+  });
