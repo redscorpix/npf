@@ -24,9 +24,40 @@ goog.inherits(npf.Application, goog.events.EventTarget);
  */
 npf.Application.prototype.settings_;
 
+/**
+ * @type {boolean}
+ * @private
+ */
+npf.Application.prototype.inited_ = false;
+
+
+/** @inheritDoc */
+npf.Application.prototype.disposeInternal = function() {
+	goog.base(this, 'disposeInternal');
+
+	delete this.settings_;
+	delete this.inited_;
+};
 
 npf.Application.prototype.init = function() {
+	if (!this.inited_) {
+		this.inited_ = true;
+		this.initInternal();
+	}
+};
 
+/**
+ * @protected
+ */
+npf.Application.prototype.initInternal = function() {
+
+};
+
+/**
+ * @return {boolean}
+ */
+npf.Application.prototype.isInited = function() {
+	return this.inited_;
 };
 
 /**
