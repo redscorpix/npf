@@ -402,14 +402,14 @@ npf.pages.Manager.prototype.removePageCtor = function(pageType) {
  * @param {Function} Page
  * @param {goog.net.HttpStatus} httpStatus
  */
-npf.pages.Manager.prototype.addErrorPageHandler = function(Page, httpStatus) {
+npf.pages.Manager.prototype.addErrorPageCtor = function(Page, httpStatus) {
   this.errorPageCtorsMap_[/** @type {string} */ (httpStatus)] = Page;
 };
 
 /**
  * @param {goog.net.HttpStatus} httpStatus
  */
-npf.pages.Manager.prototype.removeErrorPageHandler = function(httpStatus) {
+npf.pages.Manager.prototype.removeErrorPageCtor = function(httpStatus) {
   goog.object.remove(this.errorPageCtorsMap_,
     /** @type {string} */ (httpStatus));
 };

@@ -145,7 +145,7 @@ npf.ui.Form.prototype.getRequestData = function() {
  * @return {*}
  */
 npf.ui.Form.prototype.getValue = function(name) {
-  /** @type {npf.ui.formField|undefined} */
+  /** @type {npf.ui.form.Field|undefined} */
   var field = this.fieldsMap_[name];
 
   return field ? field.getValue() : undefined;
@@ -156,7 +156,7 @@ npf.ui.Form.prototype.getValue = function(name) {
  * @return {string}
  */
 npf.ui.Form.prototype.getRequestValue = function(name) {
-  /** @type {npf.ui.formField|undefined} */
+  /** @type {npf.ui.form.Field|undefined} */
   var field = this.fieldsMap_[name];
 
   return field ? field.getRequestValue() : '';

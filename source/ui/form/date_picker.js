@@ -282,7 +282,7 @@ npf.ui.form.DatePicker.prototype.correctValueInternal = function(value) {
 
 /** @inheritDoc */
 npf.ui.form.DatePicker.prototype.renderValueInternal = function(value) {
-  this.getRenderer().updateCalendar(this, value);
+  this.getRenderer().updateCalendar(this, /** @type {!Array.<?number>} */ (value));
 };
 
 /** @inheritDoc */
