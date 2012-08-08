@@ -1,4 +1,5 @@
 goog.provide('npf.events.TapHandler');
+goog.provide('npf.events.TapHandler.EventType');
 
 goog.require('goog.events.BrowserEvent');
 goog.require('goog.events.EventHandler');
@@ -13,20 +14,21 @@ goog.require('npf.userAgent.support');
  * @extends {goog.events.EventTarget}
  */
 npf.events.TapHandler = function(element) {
-	goog.base(this);
+  goog.base(this);
 
-	var handler = new goog.events.EventHandler();
-	this.registerDisposable(handler);
+  var EventType = goog.events.EventType;
+  var handler = new goog.events.EventHandler();
+  this.registerDisposable(handler);
 
-	if (npf.userAgent.support.isTouchSupported()) {
-		handler
-			.listen(element, goog.events.EventType.TOUCHCANCEL, this._onTouchCancel, false, this)
-			.listen(element, goog.events.EventType.TOUCHEND, this._onTouchEnd, false, this)
-			.listen(element, goog.events.EventType.TOUCHMOVE, this._onTouchMove, false, this)
-			.listen(element, goog.events.EventType.TOUCHSTART, this._onTouchStart, false, this);
-	} else {
-		handler.listen(element, goog.events.EventType.CLICK, this._onClick, false, this);
-	}
+  if (npf.userAgent.support.isTouchSupported()) {
+    handler
+      .listen(element, EventType.TOUCHCANCEL, this.onTouchCancel_, false, this)
+      .listen(element, EventType.TOUCHEND, this.onTouchEnd_, false, this)
+      .listen(element, EventType.TOUCHMOVE, this.onTouchMove_, false, this)
+      .listen(element, EventType.TOUCHSTART, this.onTouchStart_, false, this);
+  } else {
+    handler.listen(element, EventType.CLICK, this.onClick_, false, this);
+  }
 };
 goog.inherits(npf.events.TapHandler, goog.events.EventTarget);
 
@@ -35,7 +37,7 @@ goog.inherits(npf.events.TapHandler, goog.events.EventTarget);
  * @enum {string}
  */
 npf.events.TapHandler.EventType = {
-	TAP: goog.events.getUniqueId('tap')
+  TAP: goog.events.getUniqueId('tap')
 };
 
 /**
@@ -48,104 +50,106 @@ npf.events.TapHandler.MAX_MOVING = 5;
  * @type {Node}
  * @private
  */
-npf.events.TapHandler.prototype._element;
+npf.events.TapHandler.prototype.element_;
 
 /**
  * @type {boolean}
  * @private
  */
-npf.events.TapHandler.prototype._started = false;
+npf.events.TapHandler.prototype.started_ = false;
 
 /**
  * @type {number}
  * @private
  */
-npf.events.TapHandler.prototype._startLeft;
+npf.events.TapHandler.prototype.startLeft_;
 
 /**
  * @type {number}
  * @private
  */
-npf.events.TapHandler.prototype._startTop;
+npf.events.TapHandler.prototype.startTop_;
 
 
 /** @inheritDoc */
 npf.events.TapHandler.prototype.disposeInternal = function() {
-	goog.base(this, 'disposeInternal');
+  goog.base(this, 'disposeInternal');
 
-	delete this._started;
-	delete this._startLeft;
-	delete this._startTop;
+  delete this.started_;
+  delete this.startLeft_;
+  delete this.startTop_;
 };
 
 /**
  * @param {goog.events.BrowserEvent} evt
  * @private
  */
-npf.events.TapHandler.prototype._onClick = function(evt) {
-	this._dispatchAndDispose(evt);
+npf.events.TapHandler.prototype.onClick_ = function(evt) {
+  this.dispatchAndDispose_(evt);
 };
 
 /**
  * @param {goog.events.BrowserEvent} evt
  * @private
  */
-npf.events.TapHandler.prototype._onTouchCancel = function(evt) {
-	this._started = false;
+npf.events.TapHandler.prototype.onTouchCancel_ = function(evt) {
+  this.started_ = false;
 };
 
 /**
  * @param {goog.events.BrowserEvent} evt
  * @private
  */
-npf.events.TapHandler.prototype._onTouchEnd = function(evt) {
-	if (this._started) {
-		this._dispatchAndDispose(evt);
-	}
+npf.events.TapHandler.prototype.onTouchEnd_ = function(evt) {
+  if (this.started_) {
+    this.dispatchAndDispose_(evt);
+  }
 };
 
 /**
  * @param {goog.events.BrowserEvent} evt
  * @private
  */
-npf.events.TapHandler.prototype._onTouchMove = function(evt) {
-	var touches = evt.getBrowserEvent()['touches'];
+npf.events.TapHandler.prototype.onTouchMove_ = function(evt) {
+  var touches = evt.getBrowserEvent()['touches'];
+  /** @type {number} */
+  var maxMoving = npf.events.TapHandler.MAX_MOVING;
 
-	if (this._started && touches && 1 == touches.length) {
-		if (
-			npf.events.TapHandler.MAX_MOVING < Math.abs(touches[0].pageX - this._startLeft) ||
-			npf.events.TapHandler.MAX_MOVING < Math.abs(touches[0].pageY - this._startTop)
-		) {
-			this._started = false;
-		}
-	}
+  if (this.started_ && touches && 1 == touches.length) {
+    if (
+      maxMoving < Math.abs(touches[0].pageX - this.startLeft_) ||
+      maxMoving < Math.abs(touches[0].pageY - this.startTop_)
+    ) {
+      this.started_ = false;
+    }
+  }
 };
 
 /**
  * @param {goog.events.BrowserEvent} evt
  * @private
  */
-npf.events.TapHandler.prototype._onTouchStart = function(evt) {
-	var touches = evt.getBrowserEvent()['touches'];
+npf.events.TapHandler.prototype.onTouchStart_ = function(evt) {
+  var touches = evt.getBrowserEvent()['touches'];
 
-	if (touches && 1 == touches.length) {
-		this._started = true;
-		this._startLeft = /** @type {number} */ (touches[0].pageX);
-		this._startTop = /** @type {number} */ (touches[0].pageY);
-	}
+  if (touches && 1 == touches.length) {
+    this.started_ = true;
+    this.startLeft_ = /** @type {number} */ (touches[0].pageX);
+    this.startTop_ = /** @type {number} */ (touches[0].pageY);
+  }
 };
 
 /**
  * @param {goog.events.BrowserEvent} evt
  * @private
  */
-npf.events.TapHandler.prototype._dispatchAndDispose = function(evt) {
-	var event = new goog.events.BrowserEvent(evt.getBrowserEvent());
-	event.type = npf.events.TapHandler.EventType.TAP;
+npf.events.TapHandler.prototype.dispatchAndDispose_ = function(evt) {
+  var event = new goog.events.BrowserEvent(evt.getBrowserEvent());
+  event.type = npf.events.TapHandler.EventType.TAP;
 
-	try {
-		this.dispatchEvent(event);
-	} finally {
-		event.dispose();
-	}
+  try {
+    this.dispatchEvent(event);
+  } finally {
+    event.dispose();
+  }
 };

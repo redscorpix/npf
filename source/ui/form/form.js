@@ -16,9 +16,10 @@ goog.require('npf.ui.form.SubmitButton');
  * @extends {npf.ui.RenderComponent}
  */
 npf.ui.Form = function(opt_renderer, opt_domHelper) {
-	goog.base(this, opt_renderer || npf.ui.form.Renderer.getInstance(), opt_domHelper);
+  goog.base(this, opt_renderer || npf.ui.form.Renderer.getInstance(),
+    opt_domHelper);
 
-	this._fieldsMap = {};
+  this.fieldsMap_ = {};
 };
 goog.inherits(npf.ui.Form, npf.ui.RenderComponent);
 
@@ -27,85 +28,87 @@ goog.inherits(npf.ui.Form, npf.ui.RenderComponent);
  * @type {!Object.<string,npf.ui.form.Field>}
  * @private
  */
-npf.ui.Form.prototype._fieldsMap;
+npf.ui.Form.prototype.fieldsMap_;
 
 /**
  * @type {npf.ui.form.SubmitButton}
  * @private
  */
-npf.ui.Form.prototype._submitButton = null;
+npf.ui.Form.prototype.submitButton_ = null;
 
 /**
  * @type {boolean}
  * @private
  */
-npf.ui.Form.prototype._prevented = true;
+npf.ui.Form.prototype.prevented_ = true;
 
 
 /** @inheritDoc */
 npf.ui.Form.prototype.enterDocument = function() {
-	goog.base(this, 'enterDocument');
+  goog.base(this, 'enterDocument');
 
-	this.getHandler().listen(this.getElement(), goog.events.EventType.SUBMIT, this._onSubmit, false, this);
+  this.getHandler()
+    .listen(this.getElement(), goog.events.EventType.SUBMIT,
+      this.onSubmit_, false, this);
 };
 
 /** @inheritDoc */
 npf.ui.Form.prototype.disposeInternal = function() {
-	goog.base(this, 'disposeInternal');
+  goog.base(this, 'disposeInternal');
 
-	delete this._fieldsMap;
-	delete this._submitButton;
-	delete this._prevented;
+  delete this.fieldsMap_;
+  delete this.submitButton_;
+  delete this.prevented_;
 };
 
 /** @inheritDoc */
 npf.ui.Form.prototype.addChildAt = function(child, index, opt_render) {
-	goog.base(this, 'addChildAt', child, index, opt_render);
+  goog.base(this, 'addChildAt', child, index, opt_render);
 
-	if (child instanceof npf.ui.form.Field) {
-		goog.object.add(this._fieldsMap, child.getName(), child);
-	}
+  if (child instanceof npf.ui.form.Field) {
+    goog.object.add(this.fieldsMap_, child.getName(), child);
+  }
 };
 
 /** @inheritDoc */
 npf.ui.Form.prototype.removeChild = function(child, opt_unrender) {
-	if (child) {
-		var id = goog.isString(child) ? child : child.getId();
-		child = this.getChild(id);
+  if (child) {
+    var id = goog.isString(child) ? child : child.getId();
+    child = this.getChild(id);
 
-		if (child && child instanceof npf.ui.form.Field) {
-			goog.object.remove(this._fieldsMap, child.getName());
-		}
-	}
+    if (child && child instanceof npf.ui.form.Field) {
+      goog.object.remove(this.fieldsMap_, child.getName());
+    }
+  }
 
-	return goog.base(this, 'removeChild', child, opt_unrender);
+  return goog.base(this, 'removeChild', child, opt_unrender);
 };
 
 /**
  * @return {npf.ui.form.Renderer}
  */
 npf.ui.Form.prototype.getRenderer = function() {
-	return /** @type {npf.ui.form.Renderer} */ (goog.base(this, 'getRenderer'));
+  return /** @type {npf.ui.form.Renderer} */ (goog.base(this, 'getRenderer'));
 };
 
 /**
  * @param {npf.ui.form.Renderer} renderer
  */
 npf.ui.Form.prototype.setRenderer = function(renderer) {
-	goog.base(this, 'setRenderer', renderer);
+  goog.base(this, 'setRenderer', renderer);
 };
 
 /**
- * @param {goog.events.Event} evt
+ * @param {goog.events.BrowserEvent} evt
  * @private
  */
-npf.ui.Form.prototype._onSubmit = function(evt) {
-	if (this._prevented && evt) {
-		evt.preventDefault();
-	}
+npf.ui.Form.prototype.onSubmit_ = function(evt) {
+  if (this.prevented_ && evt) {
+    evt.preventDefault();
+  }
 
-	this.onSubmit();
-	this.dispatchEvent(npf.ui.form.EventType.SUBMIT);
+  this.onSubmit();
+  this.dispatchEvent(npf.ui.form.EventType.SUBMIT);
 };
 
 /**
@@ -118,23 +121,23 @@ npf.ui.Form.prototype.onSubmit = function() {
  * @return {boolean}
  */
 npf.ui.Form.prototype.hasErrors = function() {
-	return !goog.object.every(this._fieldsMap, function(field) {
-		return !field.hasError();
-	}, this);
+  return !goog.object.every(this.fieldsMap_, function(field) {
+    return !field.hasError();
+  }, this);
 };
 
 /**
  * @return {!Object}
  */
 npf.ui.Form.prototype.getRequestData = function() {
-	/** @type {!Object} */
-	var result = {};
+  /** @type {!Object} */
+  var result = {};
 
-	goog.object.forEach(this._fieldsMap, function(field) {
-		result[field.getName()] = field.getRequestData();
-	}, this);
+  goog.object.forEach(this.fieldsMap_, function(field) {
+    result[field.getName()] = field.getRequestData();
+  }, this);
 
-	return result;
+  return result;
 };
 
 /**
@@ -142,9 +145,10 @@ npf.ui.Form.prototype.getRequestData = function() {
  * @return {*}
  */
 npf.ui.Form.prototype.getValue = function(name) {
-	var field = /** @type {npf.ui.form.Field} */ (goog.object.get(this._fieldsMap, name, null));
+  /** @type {npf.ui.formField|undefined} */
+  var field = this.fieldsMap_[name];
 
-	return field ? field.getValue() : undefined;
+  return field ? field.getValue() : undefined;
 };
 
 /**
@@ -152,9 +156,10 @@ npf.ui.Form.prototype.getValue = function(name) {
  * @return {string}
  */
 npf.ui.Form.prototype.getRequestValue = function(name) {
-	var field = /** @type {npf.ui.form.Field} */ (goog.object.get(this._fieldsMap, name, null));
+  /** @type {npf.ui.formField|undefined} */
+  var field = this.fieldsMap_[name];
 
-	return field ? field.getRequestValue() : '';
+  return field ? field.getRequestValue() : '';
 };
 
 /**
@@ -162,51 +167,51 @@ npf.ui.Form.prototype.getRequestValue = function(name) {
  * @return {npf.ui.form.Field}
  */
 npf.ui.Form.prototype.getField = function(name) {
-	return /** @type {npf.ui.form.Field} */ (goog.object.get(this._fieldsMap, name, null));
+  return this.fieldsMap_[name] || null;
 };
 
 /**
  * @return {npf.ui.form.SubmitButton}
  */
 npf.ui.Form.prototype.getSubmitButton = function() {
-	return this._submitButton;
+  return this.submitButton_;
 };
 
 /**
  * @param {npf.ui.form.SubmitButton} submitButton
  */
 npf.ui.Form.prototype.setSubmitButton = function(submitButton) {
-	this._submitButton = submitButton;
+  this.submitButton_ = submitButton;
 };
 
 /**
  * @return {boolean}
  */
 npf.ui.Form.prototype.isSubmitEnabled = function() {
-	return !!this._submitButton && this._submitButton.isEnabled();
+  return !!this.submitButton_ && this.submitButton_.isEnabled();
 };
 
 /**
  * @param {boolean} enable
  */
 npf.ui.Form.prototype.setSubmitButtonEnabled = function(enable) {
-	if (this._submitButton) {
-		this._submitButton.setEnabled(enable);
-	}
+  if (this.submitButton_) {
+    this.submitButton_.setEnabled(enable);
+  }
 };
 
 /**
  * @return {boolean}
  */
 npf.ui.Form.prototype.isPrevented = function() {
-	return this._prevented;
+  return this.prevented_;
 };
 
 /**
  * @param {boolean} prevent
  */
 npf.ui.Form.prototype.setPrevented = function(prevent) {
-	this._prevented = prevent;
+  this.prevented_ = prevent;
 };
 
 /**
@@ -214,11 +219,11 @@ npf.ui.Form.prototype.setPrevented = function(prevent) {
  * @param {Object=} opt_obj
  */
 npf.ui.Form.prototype.forEachField = function(f, opt_obj) {
-	var index = 0;
+  var index = 0;
 
-	this.forEachChild(function(child) {
-		if (child instanceof npf.ui.form.Field) {
-			f.call(opt_obj, child, index++);
-		}
-	}, this);
+  this.forEachChild(function(child) {
+    if (child instanceof npf.ui.form.Field) {
+      f.call(opt_obj, child, index++);
+    }
+  }, this);
 };

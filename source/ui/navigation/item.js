@@ -15,11 +15,12 @@ goog.require('npf.ui.navigation.ItemRenderer');
  * @extends {npf.ui.RenderComponent}
  */
 npf.ui.navigation.Item = function(type, url, caption, opt_renderer, opt_domHelper) {
-	goog.base(this, opt_renderer || npf.ui.navigation.ItemRenderer.getInstance(), opt_domHelper);
+  goog.base(this, opt_renderer ||
+    npf.ui.navigation.ItemRenderer.getInstance(), opt_domHelper);
 
-	this._type = type;
-	this._url = url;
-	this._caption = caption;
+  this.type_ = type;
+  this.url_ = url;
+  this.caption_ = caption;
 };
 goog.inherits(npf.ui.navigation.Item, npf.ui.RenderComponent);
 
@@ -28,100 +29,101 @@ goog.inherits(npf.ui.navigation.Item, npf.ui.RenderComponent);
  * @type {string}
  * @private
  */
-npf.ui.navigation.Item.prototype._type;
+npf.ui.navigation.Item.prototype.type_;
 
 /**
  * @type {string}
  * @private
  */
-npf.ui.navigation.Item.prototype._caption;
+npf.ui.navigation.Item.prototype.caption_;
 
 /**
  * @type {string}
  * @private
  */
-npf.ui.navigation.Item.prototype._url;
+npf.ui.navigation.Item.prototype.url_;
 
 /**
  * @type {boolean}
  * @private
  */
-npf.ui.navigation.Item.prototype._isSelected = false;
+npf.ui.navigation.Item.prototype.selected_ = false;
 
 /**
  * @type {boolean}
  * @private
  */
-npf.ui.navigation.Item.prototype._isEnabled = true;
+npf.ui.navigation.Item.prototype.enabled_ = true;
 
 
 /** @inheritDoc */
 npf.ui.navigation.Item.prototype.enterDocument = function() {
-	goog.base(this, 'enterDocument');
+  goog.base(this, 'enterDocument');
 
-	var tapHandler = new npf.events.TapHandler(this.getElement());
-	this.disposeOnExitDocument(tapHandler);
+  var tapHandler = new npf.events.TapHandler(this.getElement());
+  this.disposeOnExitDocument(tapHandler);
 
-	this.getHandler().listen(tapHandler, npf.events.TapHandler.EventType.TAP, this._onTap, false, this);
+  this.getHandler().listen(tapHandler, npf.events.TapHandler.EventType.TAP,
+    this.onTap_, false, this);
 };
 
 /** @inheritDoc */
 npf.ui.navigation.Item.prototype.disposeInternal = function() {
-	goog.base(this, 'disposeInternal');
+  goog.base(this, 'disposeInternal');
 
-	delete this._type;
-	delete this._caption;
-	delete this._url;
-	delete this._isSelected;
-	delete this._isEnabled;
+  delete this.type_;
+  delete this.caption_;
+  delete this.url_;
+  delete this.selected_;
+  delete this.enabled_;
 };
 
 /**
  * @return {npf.ui.navigation.ItemRenderer}
  */
 npf.ui.navigation.Item.prototype.getRenderer = function() {
-	return /** @type {npf.ui.navigation.ItemRenderer} */ (goog.base(this, 'getRenderer'));
+  return /** @type {npf.ui.navigation.ItemRenderer} */ (goog.base(this, 'getRenderer'));
 };
 
 /**
  * @param {npf.ui.navigation.ItemRenderer} renderer
  */
 npf.ui.navigation.Item.prototype.setRenderer = function(renderer) {
-	return goog.base(this, 'setRenderer', renderer);
+  return goog.base(this, 'setRenderer', renderer);
 };
 
 /**
  * @param {goog.events.BrowserEvent} evt
  * @private
  */
-npf.ui.navigation.Item.prototype._onTap = function(evt) {
-	if (evt && !this._isEnabled) {
-		evt.preventDefault();
-	}
+npf.ui.navigation.Item.prototype.onTap_ = function(evt) {
+  if (evt && !this.enabled_) {
+    evt.preventDefault();
+  }
 };
 
 /**
  * @return {string}
  */
 npf.ui.navigation.Item.prototype.getType = function() {
-	return this._type;
+  return this.type_;
 };
 
 /**
  * @return {string}
  */
 npf.ui.navigation.Item.prototype.getCaption = function() {
-	return this._caption;
+  return this.caption_;
 };
 
 /**
  * @param {string} caption
  */
 npf.ui.navigation.Item.prototype.setCaption = function(caption) {
-	if (this._caption != caption) {
-		this._caption = caption;
-		this.setCaptionInternal(this._caption);
-	}
+  if (this.caption_ != caption) {
+    this.caption_ = caption;
+    this.setCaptionInternal(this.caption_);
+  }
 };
 
 /**
@@ -129,28 +131,28 @@ npf.ui.navigation.Item.prototype.setCaption = function(caption) {
  * @protected
  */
 npf.ui.navigation.Item.prototype.setCaptionInternal = function(caption) {
-	/** @type {npf.ui.navigation.ItemRenderer} */
-	var renderer = this.getRenderer();
-	/** @type {Element} */
-	var captionElement = renderer.getCaptionElement(this.getElement());
-	renderer.setCaption(captionElement, caption);
+  /** @type {npf.ui.navigation.ItemRenderer} */
+  var renderer = this.getRenderer();
+  /** @type {Element} */
+  var captionElement = renderer.getCaptionElement(this.getElement());
+  renderer.setCaption(captionElement, caption);
 };
 
 /**
  * @return {string}
  */
 npf.ui.navigation.Item.prototype.getUrl = function() {
-	return this._url;
+  return this.url_;
 };
 
 /**
  * @param {string} url
  */
 npf.ui.navigation.Item.prototype.setUrl = function(url) {
-	if (this._url != url) {
-		this._url = url;
-		this.setUrlInternal(this._url);
-	}
+  if (this.url_ != url) {
+    this.url_ = url;
+    this.setUrlInternal(this.url_);
+  }
 };
 
 /**
@@ -158,28 +160,28 @@ npf.ui.navigation.Item.prototype.setUrl = function(url) {
  * @protected
  */
 npf.ui.navigation.Item.prototype.setUrlInternal = function(url) {
-	/** @type {npf.ui.navigation.ItemRenderer} */
-	var renderer = this.getRenderer();
-	/** @type {Element} */
-	var linkElement = renderer.getLinkElement(this.getElement());
-	renderer.setUrl(linkElement, url);
+  /** @type {npf.ui.navigation.ItemRenderer} */
+  var renderer = this.getRenderer();
+  /** @type {Element} */
+  var linkElement = renderer.getLinkElement(this.getElement());
+  renderer.setUrl(linkElement, url);
 };
 
 /**
  * @return {boolean}
  */
 npf.ui.navigation.Item.prototype.isSelected = function() {
-	return this._isSelected;
+  return this.selected_;
 };
 
 /**
  * @param {boolean} select
  */
 npf.ui.navigation.Item.prototype.setSelected = function(select) {
-	if (this._isSelected != select) {
-		this._isSelected = select;
-		this.setSelectedInternal(this._isSelected);
-	}
+  if (this.selected_ != select) {
+    this.selected_ = select;
+    this.setSelectedInternal(this.selected_);
+  }
 };
 
 /**
@@ -187,24 +189,24 @@ npf.ui.navigation.Item.prototype.setSelected = function(select) {
  * @protected
  */
 npf.ui.navigation.Item.prototype.setSelectedInternal = function(select) {
-	this.getRenderer().setSelected(this.getElement(), select);
+  this.getRenderer().setSelected(this.getElement(), select);
 };
 
 /**
  * @return {boolean}
  */
 npf.ui.navigation.Item.prototype.isEnabled = function() {
-	return this._isEnabled;
+  return this.enabled_;
 };
 
 /**
  * @param {boolean} enable
  */
 npf.ui.navigation.Item.prototype.setEnabled = function(enable) {
-	if (this._isEnabled != enable) {
-		this._isEnabled = enable;
-		this.setEnabledInternal(this._isEnabled);
-	}
+  if (this.enabled_ != enable) {
+    this.enabled_ = enable;
+    this.setEnabledInternal(this.enabled_);
+  }
 };
 
 /**
@@ -212,5 +214,5 @@ npf.ui.navigation.Item.prototype.setEnabled = function(enable) {
  * @protected
  */
 npf.ui.navigation.Item.prototype.setEnabledInternal = function(enable) {
-	this.getRenderer().setEnabled(this.getElement(), enable);
+  this.getRenderer().setEnabled(this.getElement(), enable);
 };

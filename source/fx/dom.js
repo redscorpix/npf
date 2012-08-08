@@ -31,8 +31,8 @@ goog.require('npf.userAgent.support');
 
 
 /**
- * Abstract class that provides reusable functionality for predefined animations that manipulate a
- * single DOM element
+ * Abstract class that provides reusable functionality for predefined animations
+ * that manipulate a single DOM element
  *
  * @param {Element} element Dom Node to be used in the animation.
  * @param {Array.<number>} start Array for start coordinates.
@@ -44,15 +44,16 @@ goog.require('npf.userAgent.support');
  * @constructor
  */
 npf.fx.dom.PredefinedEffect = function(element, start, end, time, opt_acc) {
-	goog.base(this, start, end, time, opt_acc);
+  goog.base(this, start, end, time, opt_acc);
 
-	/**
-	 * DOM Node that will be used in the animation
-	 * @type {Element}
-	 */
-	this.element = element;
+  /**
+   * DOM Node that will be used in the animation
+   * @type {Element}
+   */
+  this.element = element;
 };
 goog.inherits(npf.fx.dom.PredefinedEffect, npf.fx.Animation);
+
 
 /**
  * Called to update the style of the element.
@@ -62,24 +63,25 @@ npf.fx.dom.PredefinedEffect.prototype.updateStyle = goog.nullFunction;
 
 /** @override */
 npf.fx.dom.PredefinedEffect.prototype.onAnimate = function() {
-	this.updateStyle();
-	goog.base(this, 'onAnimate');
+  this.updateStyle();
+  goog.base(this, 'onAnimate');
 };
 
 /** @override */
 npf.fx.dom.PredefinedEffect.prototype.onEnd = function() {
-	this.updateStyle();
-	goog.base(this, 'onEnd');
+  this.updateStyle();
+  goog.base(this, 'onEnd');
 };
 
 /** @override */
 npf.fx.dom.PredefinedEffect.prototype.onBegin = function() {
-	this.updateStyle();
-	goog.base(this, 'onBegin');
+  this.updateStyle();
+  goog.base(this, 'onBegin');
 };
 
 /**
- * Creates an animation object that will slide an element from A to B. (This in effect automatically
+ * Creates an animation object that will slide an element from A to B.
+ * (This in effect automatically
  * sets up the onanimate event for an Animation object)
  * Start and End should be 2 dimensional arrays
  * @param {Element} element Dom Node to be used in the animation.
@@ -92,19 +94,21 @@ npf.fx.dom.PredefinedEffect.prototype.onBegin = function() {
  * @constructor
  */
 npf.fx.dom.Slide = function(element, start, end, time, opt_acc) {
-	if (start.length != 2 || end.length != 2) {
-		throw Error('Start and end points must be 2D');
-	}
+  if (start.length != 2 || end.length != 2) {
+    throw Error('Start and end points must be 2D');
+  }
 
-	goog.base(this, element, start, end, time, opt_acc);
+  goog.base(this, element, start, end, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.Slide, npf.fx.dom.PredefinedEffect);
 
+
 /** @override */
 npf.fx.dom.Slide.prototype.updateStyle = function() {
-	this.element.style.left = Math.round(this.coords[0]) + 'px';
-	this.element.style.top = Math.round(this.coords[1]) + 'px';
+  this.element.style.left = Math.round(this.coords[0]) + 'px';
+  this.element.style.top = Math.round(this.coords[1]) + 'px';
 };
+
 
 /**
  * @param {Element} element Dom Node to be used in the animation.
@@ -117,13 +121,13 @@ npf.fx.dom.Slide.prototype.updateStyle = function() {
  * @constructor
  */
 npf.fx.dom.SlideLeft = function(element, start, end, time, opt_acc) {
-	goog.base(this, element, [start], [end], time, opt_acc);
+  goog.base(this, element, [start], [end], time, opt_acc);
 };
 goog.inherits(npf.fx.dom.SlideLeft, npf.fx.dom.PredefinedEffect);
 
 /** @override */
 npf.fx.dom.SlideLeft.prototype.updateStyle = function() {
-	this.element.style.left = Math.round(this.coords[0]) + 'px';
+  this.element.style.left = Math.round(this.coords[0]) + 'px';
 };
 
 /**
@@ -137,13 +141,13 @@ npf.fx.dom.SlideLeft.prototype.updateStyle = function() {
  * @constructor
  */
 npf.fx.dom.SlideRight = function(element, start, end, time, opt_acc) {
-	goog.base(this, element, [start], [end], time, opt_acc);
+  goog.base(this, element, [start], [end], time, opt_acc);
 };
 goog.inherits(npf.fx.dom.SlideRight, npf.fx.dom.PredefinedEffect);
 
 /** @override */
 npf.fx.dom.SlideRight.prototype.updateStyle = function() {
-	this.element.style.right = Math.round(this.coords[0]) + 'px';
+  this.element.style.right = Math.round(this.coords[0]) + 'px';
 };
 
 /**
@@ -157,13 +161,13 @@ npf.fx.dom.SlideRight.prototype.updateStyle = function() {
  * @constructor
  */
 npf.fx.dom.SlideTop = function(element, start, end, time, opt_acc) {
-	goog.base(this, element, [start], [end], time, opt_acc);
+  goog.base(this, element, [start], [end], time, opt_acc);
 };
 goog.inherits(npf.fx.dom.SlideTop, npf.fx.dom.PredefinedEffect);
 
 /** @override */
 npf.fx.dom.SlideTop.prototype.updateStyle = function() {
-	this.element.style.top = Math.round(this.coords[0]) + 'px';
+  this.element.style.top = Math.round(this.coords[0]) + 'px';
 };
 
 /**
@@ -178,15 +182,15 @@ npf.fx.dom.SlideTop.prototype.updateStyle = function() {
  * @constructor
  */
 npf.fx.dom.SlideFrom = function(element, end, time, opt_acc) {
-	var start = [element.offsetLeft, element.offsetTop];
-	goog.base(this, element, start, end, time, opt_acc);
+  var start = [element.offsetLeft, element.offsetTop];
+  goog.base(this, element, start, end, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.SlideFrom, npf.fx.dom.Slide);
 
 /** @override */
 npf.fx.dom.SlideFrom.prototype.onBegin = function() {
-	this.startPoint = [this.element.offsetLeft, this.element.offsetTop];
-	goog.base(this, 'onBegin');
+  this.startPoint = [this.element.offsetLeft, this.element.offsetTop];
+  goog.base(this, 'onBegin');
 };
 
 /**
@@ -200,15 +204,15 @@ npf.fx.dom.SlideFrom.prototype.onBegin = function() {
  * @constructor
  */
 npf.fx.dom.SlideLeftFrom = function(element, end, time, opt_acc) {
-	var start = element.offsetLeft;
-	goog.base(this, element, start, end, time, opt_acc);
+  var start = element.offsetLeft;
+  goog.base(this, element, start, end, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.SlideLeftFrom, npf.fx.dom.SlideLeft);
 
 /** @override */
 npf.fx.dom.SlideLeftFrom.prototype.onBegin = function() {
-	this.startPoint = [this.element.offsetLeft];
-	goog.base(this, 'onBegin');
+  this.startPoint = [this.element.offsetLeft];
+  goog.base(this, 'onBegin');
 };
 
 /**
@@ -222,15 +226,15 @@ npf.fx.dom.SlideLeftFrom.prototype.onBegin = function() {
  * @constructor
  */
 npf.fx.dom.SlideTopFrom = function(element, end, time, opt_acc) {
-	var start = element.offsetTop;
-	goog.base(this, element, start, end, time, opt_acc);
+  var start = element.offsetTop;
+  goog.base(this, element, start, end, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.SlideTopFrom, npf.fx.dom.SlideTop);
 
 /** @override */
 npf.fx.dom.SlideTopFrom.prototype.onBegin = function() {
-	this.startPoint = [this.element.offsetTop];
-	goog.base(this, 'onBegin');
+  this.startPoint = [this.element.offsetTop];
+  goog.base(this, 'onBegin');
 };
 
 /**
@@ -246,23 +250,23 @@ npf.fx.dom.SlideTopFrom.prototype.onBegin = function() {
  * @constructor
  */
 npf.fx.dom.Swipe = function(element, start, end, time, opt_acc) {
-	if (start.length != 2 || end.length != 2) {
-		throw Error('Start and end points must be 2D');
-	}
+  if (start.length != 2 || end.length != 2) {
+    throw Error('Start and end points must be 2D');
+  }
 
-	goog.base(this, element, start, end, time, opt_acc);
+  goog.base(this, element, start, end, time, opt_acc);
 
-	/**
-	 * Maximum width for element.
-	 * @type {number} @private
-	 */
-	this.maxWidth_ = Math.max(this.endPoint[0], this.startPoint[0]);
+  /**
+   * Maximum width for element.
+   * @type {number} @private
+   */
+  this.maxWidth_ = Math.max(this.endPoint[0], this.startPoint[0]);
 
-	/**
-	 * Maximum height for element.
-	 * @type {number} @private
-	 */
-	this.maxHeight_ = Math.max(this.endPoint[1], this.startPoint[1]);
+  /**
+   * Maximum height for element.
+   * @type {number} @private
+   */
+  this.maxHeight_ = Math.max(this.endPoint[1], this.startPoint[1]);
 };
 goog.inherits(npf.fx.dom.Swipe, npf.fx.dom.PredefinedEffect);
 
@@ -272,12 +276,12 @@ goog.inherits(npf.fx.dom.Swipe, npf.fx.dom.PredefinedEffect);
  * @override
  */
 npf.fx.dom.Swipe.prototype.updateStyle = function() {
-	var x = this.coords[0];
-	var y = this.coords[1];
-	this.clip_(Math.round(x), Math.round(y), this.maxWidth_, this.maxHeight_);
-	this.element.style.width = Math.round(x) + 'px';
-	this.element.style.marginLeft = Math.round(x) - this.maxWidth_ + 'px';
-	this.element.style.marginTop = Math.round(y) - this.maxHeight_ + 'px';
+  var x = this.coords[0];
+  var y = this.coords[1];
+  this.clip_(Math.round(x), Math.round(y), this.maxWidth_, this.maxHeight_);
+  this.element.style.width = Math.round(x) + 'px';
+  this.element.style.marginLeft = Math.round(x) - this.maxWidth_ + 'px';
+  this.element.style.marginTop = Math.round(y) - this.maxHeight_ + 'px';
 };
 
 /**
@@ -289,7 +293,7 @@ npf.fx.dom.Swipe.prototype.updateStyle = function() {
  * @private
  */
 npf.fx.dom.Swipe.prototype.clip_ = function(x, y, w, h) {
-	this.element.style.clip = 'rect(' + (h - y) + 'px ' + w + 'px ' + h + 'px ' + (w - x) + 'px)';
+  this.element.style.clip = 'rect(' + (h - y) + 'px ' + w + 'px ' + h + 'px ' + (w - x) + 'px)';
 };
 
 /**
@@ -305,11 +309,11 @@ npf.fx.dom.Swipe.prototype.clip_ = function(x, y, w, h) {
  * @constructor
  */
 npf.fx.dom.Scroll = function(element, start, end, time, opt_acc) {
-	if (start.length != 2 || end.length != 2) {
-		throw Error('Start and end points must be 2D');
-	}
+  if (start.length != 2 || end.length != 2) {
+    throw Error('Start and end points must be 2D');
+  }
 
-	goog.base(this, element, start, end, time, opt_acc);
+  goog.base(this, element, start, end, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.Scroll, npf.fx.dom.PredefinedEffect);
 
@@ -319,8 +323,8 @@ goog.inherits(npf.fx.dom.Scroll, npf.fx.dom.PredefinedEffect);
  * @override
  */
 npf.fx.dom.Scroll.prototype.updateStyle = function() {
-	this.element.scrollLeft = Math.round(this.coords[0]);
-	this.element.scrollTop = Math.round(this.coords[1]);
+  this.element.scrollLeft = Math.round(this.coords[0]);
+  this.element.scrollTop = Math.round(this.coords[1]);
 };
 
 /**
@@ -336,11 +340,11 @@ npf.fx.dom.Scroll.prototype.updateStyle = function() {
  * @constructor
  */
 npf.fx.dom.Resize = function(element, start, end, time, opt_acc) {
-	if (start.length != 2 || end.length != 2) {
-		throw Error('Start and end points must be 2D');
-	}
+  if (start.length != 2 || end.length != 2) {
+    throw Error('Start and end points must be 2D');
+  }
 
-	goog.base(this, element, start, end, time, opt_acc);
+  goog.base(this, element, start, end, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.Resize, npf.fx.dom.PredefinedEffect);
 
@@ -350,8 +354,8 @@ goog.inherits(npf.fx.dom.Resize, npf.fx.dom.PredefinedEffect);
  * @override
  */
 npf.fx.dom.Resize.prototype.updateStyle = function() {
-	this.element.style.width = Math.round(this.coords[0]) + 'px';
-	this.element.style.height = Math.round(this.coords[1]) + 'px';
+  this.element.style.width = Math.round(this.coords[0]) + 'px';
+  this.element.style.height = Math.round(this.coords[1]) + 'px';
 };
 
 /**
@@ -367,7 +371,7 @@ npf.fx.dom.Resize.prototype.updateStyle = function() {
  * @constructor
  */
 npf.fx.dom.ResizeWidth = function(element, start, end, time, opt_acc) {
-	goog.base(this, element, [start], [end], time, opt_acc);
+  goog.base(this, element, [start], [end], time, opt_acc);
 };
 goog.inherits(npf.fx.dom.ResizeWidth, npf.fx.dom.PredefinedEffect);
 
@@ -377,7 +381,7 @@ goog.inherits(npf.fx.dom.ResizeWidth, npf.fx.dom.PredefinedEffect);
  * @override
  */
 npf.fx.dom.ResizeWidth.prototype.updateStyle = function() {
-	this.element.style.width = Math.round(this.coords[0]) + 'px';
+  this.element.style.width = Math.round(this.coords[0]) + 'px';
 };
 
 /**
@@ -393,7 +397,7 @@ npf.fx.dom.ResizeWidth.prototype.updateStyle = function() {
  * @constructor
  */
 npf.fx.dom.ResizeHeight = function(element, start, end, time, opt_acc) {
-	goog.base(this, element, [start], [end], time, opt_acc);
+  goog.base(this, element, [start], [end], time, opt_acc);
 };
 goog.inherits(npf.fx.dom.ResizeHeight, npf.fx.dom.PredefinedEffect);
 
@@ -403,7 +407,7 @@ goog.inherits(npf.fx.dom.ResizeHeight, npf.fx.dom.PredefinedEffect);
  * @override
  */
 npf.fx.dom.ResizeHeight.prototype.updateStyle = function() {
-	this.element.style.height = Math.round(this.coords[0]) + 'px';
+  this.element.style.height = Math.round(this.coords[0]) + 'px';
 };
 
 /**
@@ -419,14 +423,19 @@ npf.fx.dom.ResizeHeight.prototype.updateStyle = function() {
  * @constructor
  */
 npf.fx.dom.Fade = function(element, start, end, time, opt_acc) {
-	if (goog.isNumber(start)) start = [start];
-	if (goog.isNumber(end)) end = [end];
+  if (goog.isNumber(start)) {
+    start = [start];
+  }
 
-	goog.base(this, element, start, end, time, opt_acc);
+  if (goog.isNumber(end)) {
+    end = [end];
+  }
 
-	if (start.length != 1 || end.length != 1) {
-		throw Error('Start and end points must be 1D');
-	}
+  goog.base(this, element, start, end, time, opt_acc);
+
+  if (start.length != 1 || end.length != 1) {
+    throw Error('Start and end points must be 1D');
+  }
 };
 goog.inherits(npf.fx.dom.Fade, npf.fx.dom.PredefinedEffect);
 
@@ -436,21 +445,21 @@ goog.inherits(npf.fx.dom.Fade, npf.fx.dom.PredefinedEffect);
  * @override
  */
 npf.fx.dom.Fade.prototype.updateStyle = function() {
-	goog.style.setOpacity(this.element, this.coords[0]);
+  goog.style.setOpacity(this.element, this.coords[0]);
 };
 
 /**
  * Animation event handler that will show the element.
  */
 npf.fx.dom.Fade.prototype.show = function() {
-	this.element.style.display = '';
+  this.element.style.display = '';
 };
 
 /**
  * Animation event handler that will hide the element
  */
 npf.fx.dom.Fade.prototype.hide = function() {
-	this.element.style.display = 'none';
+  this.element.style.display = 'none';
 };
 
 /**
@@ -464,7 +473,7 @@ npf.fx.dom.Fade.prototype.hide = function() {
  * @constructor
  */
 npf.fx.dom.FadeOut = function(element, time, opt_acc) {
-	goog.base(this, element, 1, 0, time, opt_acc);
+  goog.base(this, element, 1, 0, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.FadeOut, npf.fx.dom.Fade);
 
@@ -478,7 +487,7 @@ goog.inherits(npf.fx.dom.FadeOut, npf.fx.dom.Fade);
  * @constructor
  */
 npf.fx.dom.FadeIn = function(element, time, opt_acc) {
-	goog.base(this, element, 0, 1, time, opt_acc);
+  goog.base(this, element, 0, 1, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.FadeIn, npf.fx.dom.Fade);
 
@@ -493,20 +502,20 @@ goog.inherits(npf.fx.dom.FadeIn, npf.fx.dom.Fade);
  * @constructor
  */
 npf.fx.dom.FadeOutAndHide = function(element, time, opt_acc) {
-	goog.base(this, element, 1, 0, time, opt_acc);
+  goog.base(this, element, 1, 0, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.FadeOutAndHide, npf.fx.dom.Fade);
 
 /** @override */
 npf.fx.dom.FadeOutAndHide.prototype.onBegin = function() {
-	this.show();
-	goog.base(this, 'onBegin');
+  this.show();
+  goog.base(this, 'onBegin');
 };
 
 /** @override */
 npf.fx.dom.FadeOutAndHide.prototype.onEnd = function() {
-	this.hide();
-	goog.base(this, 'onEnd');
+  this.hide();
+  goog.base(this, 'onEnd');
 };
 
 /**
@@ -520,14 +529,14 @@ npf.fx.dom.FadeOutAndHide.prototype.onEnd = function() {
  * @constructor
  */
 npf.fx.dom.FadeInAndShow = function(element, time, opt_acc) {
-	goog.base(this, element, 0, 1, time, opt_acc);
+  goog.base(this, element, 0, 1, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.FadeInAndShow, npf.fx.dom.Fade);
 
 /** @override */
 npf.fx.dom.FadeInAndShow.prototype.onBegin = function() {
-	this.show();
-	goog.base(this, 'onBegin');
+  this.show();
+  goog.base(this, 'onBegin');
 };
 
 /**
@@ -543,11 +552,11 @@ npf.fx.dom.FadeInAndShow.prototype.onBegin = function() {
  * @constructor
  */
 npf.fx.dom.BgColorTransform = function(element, start, end, time, opt_acc) {
-	if (start.length != 3 || end.length != 3) {
-		throw Error('Start and end points must be 3D');
-	}
+  if (start.length != 3 || end.length != 3) {
+    throw Error('Start and end points must be 3D');
+  }
 
-	goog.base(this, element, start, end, time, opt_acc);
+  goog.base(this, element, start, end, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.BgColorTransform, npf.fx.dom.PredefinedEffect);
 
@@ -555,19 +564,19 @@ goog.inherits(npf.fx.dom.BgColorTransform, npf.fx.dom.PredefinedEffect);
  * Animation event handler that will set the background-color of an element
  */
 npf.fx.dom.BgColorTransform.prototype.setColor = function() {
-	var coordsAsInts = [];
+  var coordsAsInts = [];
 
-	for (var i = 0; i < this.coords.length; i++) {
-		coordsAsInts[i] = Math.round(this.coords[i]);
-	}
+  for (var i = 0; i < this.coords.length; i++) {
+    coordsAsInts[i] = Math.round(this.coords[i]);
+  }
 
-	var color = 'rgb(' + coordsAsInts.join(',') + ')';
-	this.element.style.backgroundColor = color;
+  var color = 'rgb(' + coordsAsInts.join(',') + ')';
+  this.element.style.backgroundColor = color;
 };
 
 /** @override */
 npf.fx.dom.BgColorTransform.prototype.updateStyle = function() {
-	this.setColor();
+  this.setColor();
 };
 
 /**
@@ -579,30 +588,33 @@ npf.fx.dom.BgColorTransform.prototype.updateStyle = function() {
  * @param {goog.events.EventHandler=} opt_eventHandler Optional event handler to use when listening for events.
  */
 npf.fx.dom.bgColorFadeIn = function(element, start, time, opt_eventHandler) {
-	var initialBgColor = element.style.backgroundColor || '';
-	var computedBgColor = goog.style.getBackgroundColor(element);
-	var end;
+  var initialBgColor = element.style.backgroundColor || '';
+  var computedBgColor = goog.style.getBackgroundColor(element);
+  var end;
 
-	if (computedBgColor && computedBgColor != 'transparent'
-			&& computedBgColor != 'rgba(0, 0, 0, 0)') {
-		end = goog.color.hexToRgb(goog.color.parse(computedBgColor).hex);
-	} else {
-		end = [255, 255, 255];
-	}
+  if (
+    computedBgColor &&
+    computedBgColor != 'transparent' &&
+    computedBgColor != 'rgba(0, 0, 0, 0)'
+   ) {
+    end = goog.color.hexToRgb(goog.color.parse(computedBgColor).hex);
+  } else {
+    end = [255, 255, 255];
+  }
 
-	var anim = new npf.fx.dom.BgColorTransform(element, start, end, time);
+  var anim = new npf.fx.dom.BgColorTransform(element, start, end, time);
 
-	function setBgColor() {
-		element.style.backgroundColor = initialBgColor;
-	}
+  function setBgColor() {
+    element.style.backgroundColor = initialBgColor;
+  }
 
-	if (opt_eventHandler) {
-		opt_eventHandler.listen(anim, goog.fx.Transition.EventType.END, setBgColor);
-	} else {
-		goog.events.listen(anim, goog.fx.Transition.EventType.END, setBgColor);
-	}
+  if (opt_eventHandler) {
+    opt_eventHandler.listen(anim, goog.fx.Transition.EventType.END, setBgColor);
+  } else {
+    goog.events.listen(anim, goog.fx.Transition.EventType.END, setBgColor);
+  }
 
-	anim.play();
+  anim.play();
 };
 
 /**
@@ -617,11 +629,11 @@ npf.fx.dom.bgColorFadeIn = function(element, start, time, opt_eventHandler) {
  * @extends {npf.fx.dom.PredefinedEffect}
  */
 npf.fx.dom.ColorTransform = function(element, start, end, time, opt_acc) {
-	if (start.length != 3 || end.length != 3) {
-		throw Error('Start and end points must be 3D');
-	}
+  if (start.length != 3 || end.length != 3) {
+    throw Error('Start and end points must be 3D');
+  }
 
-	goog.base(this, element, start, end, time, opt_acc);
+  goog.base(this, element, start, end, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.ColorTransform, npf.fx.dom.PredefinedEffect);
 
@@ -631,14 +643,14 @@ goog.inherits(npf.fx.dom.ColorTransform, npf.fx.dom.PredefinedEffect);
  * @override
  */
 npf.fx.dom.ColorTransform.prototype.updateStyle = function() {
-	var coordsAsInts = [];
+  var coordsAsInts = [];
 
-	for (var i = 0; i < this.coords.length; i++) {
-		coordsAsInts[i] = Math.round(this.coords[i]);
-	}
+  for (var i = 0; i < this.coords.length; i++) {
+    coordsAsInts[i] = Math.round(this.coords[i]);
+  }
 
-	var color = 'rgb(' + coordsAsInts.join(',') + ')';
-	this.element.style.color = color;
+  var color = 'rgb(' + coordsAsInts.join(',') + ')';
+  this.element.style.color = color;
 };
 
 
@@ -652,10 +664,10 @@ npf.fx.dom.ColorTransform.prototype.updateStyle = function() {
  * @extends {npf.fx.dom.PredefinedEffect}
  */
 npf.fx.dom.Transform = function(element, time, opt_acc) {
-	goog.base(this, element, [0], [1], time, opt_acc);
+  goog.base(this, element, [0], [1], time, opt_acc);
 
-	this._startParameters = {};
-	this._endParameters = {};
+  this._startParameters = {};
+  this._endParameters = {};
 };
 goog.inherits(npf.fx.dom.Transform, npf.fx.dom.PredefinedEffect);
 
@@ -673,10 +685,10 @@ npf.fx.dom.Transform.prototype._endParameters;
 
 /** @inheritDoc */
 npf.fx.dom.Transform.prototype.disposeInternal = function() {
-	goog.base(this, 'disposeInternal');
+  goog.base(this, 'disposeInternal');
 
-	delete this._startParameters;
-	delete this._endParameters;
+  delete this._startParameters;
+  delete this._endParameters;
 };
 
 /**
@@ -684,15 +696,15 @@ npf.fx.dom.Transform.prototype.disposeInternal = function() {
  * @param {Array.<number>} end 6D Array
  */
 npf.fx.dom.Transform.prototype.setMatrix = function(start, end) {
-	if (6 != start.length) {
-		throw Error('Start matrix parameters must be 2D');
-	}
+  if (6 != start.length) {
+    throw Error('Start matrix parameters must be 2D');
+  }
 
-	if (6 != end.length) {
-		throw Error('End matrix parameters must be 2D');
-	}
+  if (6 != end.length) {
+    throw Error('End matrix parameters must be 2D');
+  }
 
-	this._setProperties('matrix', start, end);
+  this._setProperties('matrix', start, end);
 };
 
 /**
@@ -700,15 +712,15 @@ npf.fx.dom.Transform.prototype.setMatrix = function(start, end) {
  * @param {Array.<number>} end 16D Array
  */
 npf.fx.dom.Transform.prototype.setMatrix3d = function(start, end) {
-	if (16 != start.length) {
-		throw Error('Start matrix3d parameters must be 2D');
-	}
+  if (16 != start.length) {
+    throw Error('Start matrix3d parameters must be 2D');
+  }
 
-	if (16 != end.length) {
-		throw Error('End matrix3d parameters must be 2D');
-	}
+  if (16 != end.length) {
+    throw Error('End matrix3d parameters must be 2D');
+  }
 
-	this._setProperties('matrix3d', start, end);
+  this._setProperties('matrix3d', start, end);
 };
 
 /**
@@ -716,20 +728,20 @@ npf.fx.dom.Transform.prototype.setMatrix3d = function(start, end) {
  * @param {number|Array.<number>} end 1D or 2D Array or Number
  */
 npf.fx.dom.Transform.prototype.setTranslate = function(start, end) {
-	/** @type {Array.<number>} */
-	var from = goog.isArray(start) ? start : [start];
-	/** @type {Array.<number>} */
-	var to = goog.isArray(end) ? end : [end];
+  /** @type {Array.<number>} */
+  var from = goog.isArray(start) ? start : [start];
+  /** @type {Array.<number>} */
+  var to = goog.isArray(end) ? end : [end];
 
-	if (1 > from.length || 2 < from.length) {
-		throw Error('Start translate parameters must be 1D or 2D');
-	}
+  if (1 > from.length || 2 < from.length) {
+    throw Error('Start translate parameters must be 1D or 2D');
+  }
 
-	if (1 > to.length || 2 < to.length) {
-		throw Error('End translate parameters must be 1D or 2D');
-	}
+  if (1 > to.length || 2 < to.length) {
+    throw Error('End translate parameters must be 1D or 2D');
+  }
 
-	this._setProperties('translate', from, to);
+  this._setProperties('translate', from, to);
 };
 
 /**
@@ -737,15 +749,15 @@ npf.fx.dom.Transform.prototype.setTranslate = function(start, end) {
  * @param {Array.<number>} end 3D Array
  */
 npf.fx.dom.Transform.prototype.setTranslate3d = function(start, end) {
-	if (3 != start.length) {
-		throw Error('Start translate3d parameters must be 3D');
-	}
+  if (3 != start.length) {
+    throw Error('Start translate3d parameters must be 3D');
+  }
 
-	if (3 != end.length) {
-		throw Error('End translate3d parameters must be 3D');
-	}
+  if (3 != end.length) {
+    throw Error('End translate3d parameters must be 3D');
+  }
 
-	this._setProperties('translate3d', start, end);
+  this._setProperties('translate3d', start, end);
 };
 
 /**
@@ -753,7 +765,7 @@ npf.fx.dom.Transform.prototype.setTranslate3d = function(start, end) {
  * @param {number} end
  */
 npf.fx.dom.Transform.prototype.setTranslateX = function(start, end) {
-	this._setProperties('translateX', [start], [end]);
+  this._setProperties('translateX', [start], [end]);
 };
 
 /**
@@ -761,7 +773,7 @@ npf.fx.dom.Transform.prototype.setTranslateX = function(start, end) {
  * @param {number} end
  */
 npf.fx.dom.Transform.prototype.setTranslateY = function(start, end) {
-	this._setProperties('translateY', [start], [end]);
+  this._setProperties('translateY', [start], [end]);
 };
 
 /**
@@ -769,7 +781,7 @@ npf.fx.dom.Transform.prototype.setTranslateY = function(start, end) {
  * @param {number} end
  */
 npf.fx.dom.Transform.prototype.setTranslateZ = function(start, end) {
-	this._setProperties('translateZ', [start], [end]);
+  this._setProperties('translateZ', [start], [end]);
 };
 
 /**
@@ -777,20 +789,20 @@ npf.fx.dom.Transform.prototype.setTranslateZ = function(start, end) {
  * @param {number|Array.<number>} end 1D or 2D Array or Number
  */
 npf.fx.dom.Transform.prototype.setScale = function(start, end) {
-	/** @type {Array.<number>} */
-	var from = goog.isArray(start) ? start : [start];
-	/** @type {Array.<number>} */
-	var to = goog.isArray(end) ? end : [end];
+  /** @type {Array.<number>} */
+  var from = goog.isArray(start) ? start : [start];
+  /** @type {Array.<number>} */
+  var to = goog.isArray(end) ? end : [end];
 
-	if (1 > from.length || 2 < from.length) {
-		throw Error('Start scale parameters must be 1D or 2D');
-	}
+  if (1 > from.length || 2 < from.length) {
+    throw Error('Start scale parameters must be 1D or 2D');
+  }
 
-	if (1 > to.length || 2 < to.length) {
-		throw Error('End scale parameters must be 1D or 2D');
-	}
+  if (1 > to.length || 2 < to.length) {
+    throw Error('End scale parameters must be 1D or 2D');
+  }
 
-	this._setProperties('scale', from, to);
+  this._setProperties('scale', from, to);
 };
 
 /**
@@ -798,15 +810,15 @@ npf.fx.dom.Transform.prototype.setScale = function(start, end) {
  * @param {Array.<number>} end 3D Array
  */
 npf.fx.dom.Transform.prototype.setScale3d = function(start, end) {
-	if (3 != start.length) {
-		throw Error('Start scale3d parameters must be 3D');
-	}
+  if (3 != start.length) {
+    throw Error('Start scale3d parameters must be 3D');
+  }
 
-	if (3 != end.length) {
-		throw Error('End scale3d parameters must be 3D');
-	}
+  if (3 != end.length) {
+    throw Error('End scale3d parameters must be 3D');
+  }
 
-	this._setProperties('scale3d', start, end);
+  this._setProperties('scale3d', start, end);
 };
 
 /**
@@ -814,7 +826,7 @@ npf.fx.dom.Transform.prototype.setScale3d = function(start, end) {
  * @param {number} end
  */
 npf.fx.dom.Transform.prototype.setScaleX = function(start, end) {
-	this._setProperties('scaleX', [start], [end]);
+  this._setProperties('scaleX', [start], [end]);
 };
 
 /**
@@ -822,7 +834,7 @@ npf.fx.dom.Transform.prototype.setScaleX = function(start, end) {
  * @param {number} end
  */
 npf.fx.dom.Transform.prototype.setScaleY = function(start, end) {
-	this._setProperties('scaleY', [start], [end]);
+  this._setProperties('scaleY', [start], [end]);
 };
 
 /**
@@ -830,7 +842,7 @@ npf.fx.dom.Transform.prototype.setScaleY = function(start, end) {
  * @param {number} end
  */
 npf.fx.dom.Transform.prototype.setScaleZ = function(start, end) {
-	this._setProperties('scaleZ', [start], [end]);
+  this._setProperties('scaleZ', [start], [end]);
 };
 
 /**
@@ -838,7 +850,7 @@ npf.fx.dom.Transform.prototype.setScaleZ = function(start, end) {
  * @param {number} end
  */
 npf.fx.dom.Transform.prototype.setRotate = function(start, end) {
-	this._setProperties('rotate', [start], [end]);
+  this._setProperties('rotate', [start], [end]);
 };
 
 /**
@@ -846,15 +858,15 @@ npf.fx.dom.Transform.prototype.setRotate = function(start, end) {
  * @param {Array.<number>} end 4D Array
  */
 npf.fx.dom.Transform.prototype.setRotate3d = function(start, end) {
-	if (4 != start.length) {
-		throw Error('Start rotate3d parameters must be 4D');
-	}
+  if (4 != start.length) {
+    throw Error('Start rotate3d parameters must be 4D');
+  }
 
-	if (4 != end.length) {
-		throw Error('End rotate3d parameters must be 4D');
-	}
+  if (4 != end.length) {
+    throw Error('End rotate3d parameters must be 4D');
+  }
 
-	this._setProperties('rotate3d', start, end);
+  this._setProperties('rotate3d', start, end);
 };
 
 /**
@@ -862,7 +874,7 @@ npf.fx.dom.Transform.prototype.setRotate3d = function(start, end) {
  * @param {number} end
  */
 npf.fx.dom.Transform.prototype.setRotateX = function(start, end) {
-	this._setProperties('rotateX', [start], [end]);
+  this._setProperties('rotateX', [start], [end]);
 };
 
 /**
@@ -870,7 +882,7 @@ npf.fx.dom.Transform.prototype.setRotateX = function(start, end) {
  * @param {number} end
  */
 npf.fx.dom.Transform.prototype.setRotateY = function(start, end) {
-	this._setProperties('rotateY', [start], [end]);
+  this._setProperties('rotateY', [start], [end]);
 };
 
 /**
@@ -878,7 +890,7 @@ npf.fx.dom.Transform.prototype.setRotateY = function(start, end) {
  * @param {number} end
  */
 npf.fx.dom.Transform.prototype.setRotateZ = function(start, end) {
-	this._setProperties('rotateZ', [start], [end]);
+  this._setProperties('rotateZ', [start], [end]);
 };
 
 /**
@@ -886,20 +898,20 @@ npf.fx.dom.Transform.prototype.setRotateZ = function(start, end) {
  * @param {number|Array.<number>} end 1D or 2D Array or Number
  */
 npf.fx.dom.Transform.prototype.setSkew = function(start, end) {
-	/** @type {Array.<number>} */
-	var from = goog.isArray(start) ? start : [start];
-	/** @type {Array.<number>} */
-	var to = goog.isArray(end) ? end : [end];
+  /** @type {Array.<number>} */
+  var from = goog.isArray(start) ? start : [start];
+  /** @type {Array.<number>} */
+  var to = goog.isArray(end) ? end : [end];
 
-	if (1 > from.length || 2 < from.length) {
-		throw Error('Start skew parameters must be 1D or 2D');
-	}
+  if (1 > from.length || 2 < from.length) {
+    throw Error('Start skew parameters must be 1D or 2D');
+  }
 
-	if (1 > to.length || 2 < to.length) {
-		throw Error('End skew parameters must be 1D or 2D');
-	}
+  if (1 > to.length || 2 < to.length) {
+    throw Error('End skew parameters must be 1D or 2D');
+  }
 
-	this._setProperties('skew', from, to);
+  this._setProperties('skew', from, to);
 };
 
 /**
@@ -907,7 +919,7 @@ npf.fx.dom.Transform.prototype.setSkew = function(start, end) {
  * @param {number} end
  */
 npf.fx.dom.Transform.prototype.setSkewX = function(start, end) {
-	this._setProperties('skewX', [start], [end]);
+  this._setProperties('skewX', [start], [end]);
 };
 
 /**
@@ -915,7 +927,7 @@ npf.fx.dom.Transform.prototype.setSkewX = function(start, end) {
  * @param {number} end
  */
 npf.fx.dom.Transform.prototype.setSkewY = function(start, end) {
-	this._setProperties('skewY', [start], [end]);
+  this._setProperties('skewY', [start], [end]);
 };
 
 /**
@@ -925,27 +937,27 @@ npf.fx.dom.Transform.prototype.setSkewY = function(start, end) {
  * @private
  */
 npf.fx.dom.Transform.prototype._setProperties = function(key, start, end) {
-	this._startParameters[key] = start;
-	this._endParameters[key] = end;
+  this._startParameters[key] = start;
+  this._endParameters[key] = end;
 };
 
 /**
  * @param {string|Array.<number|string>} origin
  */
 npf.fx.dom.Transform.prototype.setTransformOrigin = function(origin) {
-	var value;
+  var value;
 
-	if (goog.isArray(origin)) {
-		if (2 != origin.length || 3 != origin.length) {
-			throw Error('Transform Origin must be 2D or 3D');
-		}
+  if (goog.isArray(origin)) {
+    if (2 != origin.length || 3 != origin.length) {
+      throw Error('Transform Origin must be 2D or 3D');
+    }
 
-		value = origin.join(' ');
-	} else {
-		value = origin;
-	}
+    value = origin.join(' ');
+  } else {
+    value = origin;
+  }
 
-	goog.style.setStyle(this.element, npf.userAgent.support.getCssPropertyName('transform-origin'), /** @type {string} */ (value));
+  goog.style.setStyle(this.element, npf.userAgent.support.getCssPropertyName('transform-origin'), /** @type {string} */ (value));
 };
 
 /**
@@ -954,45 +966,45 @@ npf.fx.dom.Transform.prototype.setTransformOrigin = function(origin) {
  * @override
  */
 npf.fx.dom.Transform.prototype.updateStyle = function() {
-	/** @type {number} */
-	var position = this.coords[0];
-	/** @type {Array.<string>} */
-	var styles = [];
+  /** @type {number} */
+  var position = this.coords[0];
+  /** @type {Array.<string>} */
+  var styles = [];
 
-	goog.object.forEach(this._startParameters, function(startValues, key) {
-		/** @type {Array.<number>} */
-		var endValues = this._endParameters[key];
-		/** @type {Array} */
-		var values = [];
+  goog.object.forEach(this._startParameters, function(startValues, key) {
+    /** @type {Array.<number>} */
+    var endValues = this._endParameters[key];
+    /** @type {Array} */
+    var values = [];
 
-		goog.array.forEach(startValues, function(startValue, i) {
-			var value = startValue + (endValues[i] - startValue) * position;
+    goog.array.forEach(startValues, function(startValue, i) {
+      var value = startValue + (endValues[i] - startValue) * position;
 
-			if (
-				'translate' == key ||
-				'translate3d' == key ||
-				'translateX' == key ||
-				'translateY' == key ||
-				'translateZ' == key
-			) {
-				value += 'px';
-			}
+      if (
+        'translate' == key ||
+        'translate3d' == key ||
+        'translateX' == key ||
+        'translateY' == key ||
+        'translateZ' == key
+      ) {
+        value += 'px';
+      }
 
-			if (
-				'rotate' == key ||
-				('rotate3d' == key && 3 == i) ||
-				'skew' == key ||
-				'skewX' == key ||
-				'skewY' == key
-			) {
-				value += 'deg';
-			}
+      if (
+        'rotate' == key ||
+        ('rotate3d' == key && 3 == i) ||
+        'skew' == key ||
+        'skewX' == key ||
+        'skewY' == key
+      ) {
+        value += 'deg';
+      }
 
-			values.push(value);
-		}, this);
+      values.push(value);
+    }, this);
 
-		styles.push(key + '(' + values.join(',') + ')');
-	});
+    styles.push(key + '(' + values.join(',') + ')');
+  });
 
-	goog.style.setStyle(this.element, npf.userAgent.support.getCssPropertyName('transform'), styles.join(' '));
+  goog.style.setStyle(this.element, npf.userAgent.support.getCssPropertyName('transform'), styles.join(' '));
 };

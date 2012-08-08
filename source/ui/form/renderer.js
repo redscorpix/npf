@@ -10,7 +10,7 @@ goog.require('npf.ui.renderComponent.Renderer');
  * @extends {npf.ui.renderComponent.Renderer}
  */
 npf.ui.form.Renderer = function() {
-	goog.base(this);
+  goog.base(this);
 };
 goog.inherits(npf.ui.form.Renderer, npf.ui.renderComponent.Renderer);
 goog.addSingletonGetter(npf.ui.form.Renderer);
@@ -21,11 +21,11 @@ goog.addSingletonGetter(npf.ui.form.Renderer);
  * by this renderer.
  * @type {string}
  */
-npf.ui.form.Renderer.CSS_CLASS = goog.getCssName('sx-form');
+npf.ui.form.Renderer.CSS_CLASS = goog.getCssName('npf-form');
 
 /** @inheritDoc */
 npf.ui.form.Renderer.prototype.getCssClass = function() {
-	return npf.ui.form.Renderer.CSS_CLASS;
+  return npf.ui.form.Renderer.CSS_CLASS;
 };
 
 /**
@@ -33,8 +33,9 @@ npf.ui.form.Renderer.prototype.getCssClass = function() {
  * @return {!Element}
  */
 npf.ui.form.Renderer.prototype.createDom = function(form) {
-	/** @type {!Element} */
-	var element = goog.dom.createDom(goog.dom.TagName.FORM, this.getClassNames(form).join(' '));
+  /** @type {!Element} */
+  var element = goog.dom.createDom(goog.dom.TagName.FORM,
+    this.getClassNames(form).join(' '));
 
-	return element;
+  return element;
 };

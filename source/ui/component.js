@@ -10,7 +10,7 @@ goog.require('goog.ui.Component');
  * @extends {goog.ui.Component}
  */
 npf.ui.Component = function(opt_domHelper) {
-	goog.base(this, opt_domHelper);
+  goog.base(this, opt_domHelper);
 };
 goog.inherits(npf.ui.Component, goog.ui.Component);
 
@@ -19,50 +19,50 @@ goog.inherits(npf.ui.Component, goog.ui.Component);
  * @type {Array.<goog.Disposable>}
  * @private
  */
-npf.ui.Component.prototype._disposableOnExitDocument = null;
+npf.ui.Component.prototype.disposableOnExitDocument_ = null;
 
 /**
  * @type {goog.events.EventTarget}
  * @private
  */
-npf.ui.Component.prototype._dataManager = null;
+npf.ui.Component.prototype.dataManager_ = null;
 
 
 /** @inheritDoc */
 npf.ui.Component.prototype.exitDocument = function() {
-	goog.base(this, 'exitDocument');
+  goog.base(this, 'exitDocument');
 
-	if (this._disposableOnExitDocument) {
-		goog.array.forEach(this._disposableOnExitDocument, function(obj) {
-			obj.dispose();
-		}, this);
-	}
+  if (this.disposableOnExitDocument_) {
+    goog.array.forEach(this.disposableOnExitDocument_, function(obj) {
+      obj.dispose();
+    }, this);
+  }
 
-	this._disposableOnExitDocument = null;
+  this.disposableOnExitDocument_ = null;
 };
 
 /** @inheritDoc */
 npf.ui.Component.prototype.disposeInternal = function() {
-	goog.dispose(this._dataManager);
+  goog.dispose(this.dataManager_);
 
-	goog.base(this, 'disposeInternal');
+  goog.base(this, 'disposeInternal');
 
-	delete this._disposableOnExitDocument;
-	delete this._dataManager;
+  delete this.disposableOnExitDocument_;
+  delete this.dataManager_;
 };
 
 /**
  * @return {goog.events.EventTarget}
  */
 npf.ui.Component.prototype.getDataManager = function() {
-	return this._dataManager;
+  return this.dataManager_;
 };
 
 /**
  * @param {goog.events.EventTarget} dataManager
  */
 npf.ui.Component.prototype.setDataManager = function(dataManager) {
-	this._dataManager = dataManager;
+  this.dataManager_ = dataManager;
 };
 
 /**
@@ -70,9 +70,9 @@ npf.ui.Component.prototype.setDataManager = function(dataManager) {
  * @protected
  */
 npf.ui.Component.prototype.disposeOnExitDocument = function(obj) {
-	if (!this._disposableOnExitDocument) {
-		this._disposableOnExitDocument = [];
-	}
+  if (!this.disposableOnExitDocument_) {
+    this.disposableOnExitDocument_ = [];
+  }
 
-	this._disposableOnExitDocument.push(obj);
+  this.disposableOnExitDocument_.push(obj);
 };

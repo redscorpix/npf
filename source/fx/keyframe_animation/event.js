@@ -10,31 +10,31 @@ goog.require('goog.events.Event');
  * @extends {goog.events.Event}
  */
 npf.fx.keyframeAnimation.Event = function(type, animation) {
-	goog.base(this, type);
+  goog.base(this, type);
 
-	/**
-	 * @type {number}
-	 */
-	this.duration = animation.getDuration();
+  /**
+   * @type {number}
+   */
+  this.duration = animation.getDuration();
 
-	/**
-	 * @type {npf.fx.KeyframeAnimation.PlayState}
-	 */
-	this.state = animation.getState();
+  /**
+   * @type {npf.fx.KeyframeAnimation.PlayState}
+   */
+  this.state = animation.getState();
 
-	/**
-	 * @type {number}
-	 */
-	this.iterationCount = animation.getIterationCount();
+  /**
+   * @type {number}
+   */
+  this.iterationCount = animation.getIterationCount();
 
-	/**
-	 * @type {number}
-	 */
-	this.delay = animation.getDelay();
+  /**
+   * @type {number}
+   */
+  this.delay = animation.getDelay();
 
-	/**
-	 * @type {npf.fx.KeyframeAnimation.Direction}
-	 */
-	this.direction = animation.getDirection();
+  /**
+   * @type {npf.fx.KeyframeAnimation.Direction}
+   */
+  this.direction = animation.getDirection();
 };
 goog.inherits(npf.fx.keyframeAnimation.Event, goog.events.Event);

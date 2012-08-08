@@ -7,15 +7,15 @@ goog.require('npf.ui.renderComponent.Renderer');
 
 
 /**
- * @param {npf.ui.renderComponent.Renderer=} opt_renderer Renderer used to render or decorate the release.
+ * @param {npf.ui.renderComponent.Renderer=} opt_renderer Renderer used to render or decorate the component.
  * @param {goog.dom.DomHelper=} opt_domHelper DOM helper, used for document interaction.
  * @constructor
  * @extends {npf.ui.Component}
  */
 npf.ui.RenderComponent = function(opt_renderer, opt_domHelper) {
-	goog.base(this, opt_domHelper);
+  goog.base(this, opt_domHelper);
 
-	this._renderer = opt_renderer || npf.ui.renderComponent.Renderer.getInstance();
+  this.renderer_ = opt_renderer || npf.ui.renderComponent.Renderer.getInstance();
 };
 goog.inherits(npf.ui.RenderComponent, npf.ui.Component);
 
@@ -24,14 +24,14 @@ goog.inherits(npf.ui.RenderComponent, npf.ui.Component);
  * @type {npf.ui.renderComponent.Renderer}
  * @private
  */
-npf.ui.RenderComponent.prototype._renderer;
+npf.ui.RenderComponent.prototype.renderer_;
 
 /**
  * Additional class name(s) to apply to the block's root element, if any.
  * @type {Array.<string>?}
  * @private
  */
-npf.ui.RenderComponent.prototype._extraClassNames = null;
+npf.ui.RenderComponent.prototype.extraClassNames_ = null;
 
 
 /**
@@ -40,9 +40,9 @@ npf.ui.RenderComponent.prototype._extraClassNames = null;
  * @override
  */
 npf.ui.RenderComponent.prototype.createDom = function() {
-	/** @type {Element} */
-	var element = this._renderer.createDom(this);
-	this.setElementInternal(element);
+  /** @type {Element} */
+  var element = this.renderer_.createDom(this);
+  this.setElementInternal(element);
 };
 
 /**
@@ -54,16 +54,16 @@ npf.ui.RenderComponent.prototype.createDom = function() {
  * @override
  */
 npf.ui.RenderComponent.prototype.decorateInternal = function(element) {
-	element = this._renderer.decorate(this, element);
-	this.setElementInternal(element);
+  element = this.renderer_.decorate(this, element);
+  this.setElementInternal(element);
 };
 
 /** @inheritDoc */
 npf.ui.RenderComponent.prototype.disposeInternal = function() {
-	goog.base(this, 'disposeInternal');
+  goog.base(this, 'disposeInternal');
 
-	delete this._renderer;
-	delete this._extraClassNames;
+  delete this.renderer_;
+  delete this.extraClassNames_;
 };
 
 /**
@@ -73,8 +73,8 @@ npf.ui.RenderComponent.prototype.disposeInternal = function() {
  * @return {Element} Element to contain child elements (null if none).
  */
 npf.ui.RenderComponent.prototype.getContentElement = function() {
-	// Delegate to renderer.
-	return this._renderer.getContentElement(this.getElement());
+  // Delegate to renderer.
+  return this.renderer_.getContentElement(this.getElement());
 };
 
 /**
@@ -84,15 +84,15 @@ npf.ui.RenderComponent.prototype.getContentElement = function() {
  * @return {boolean} Whether the element can be decorated by this component.
  */
 npf.ui.RenderComponent.prototype.canDecorate = function(element) {
-	// Blocks support pluggable renderers; delegate to the renderer.
-	return this._renderer.canDecorate(element);
+  // Blocks support pluggable renderers; delegate to the renderer.
+  return this.renderer_.canDecorate(element);
 };
 
 /**
  * @return {npf.ui.renderComponent.Renderer}
  */
 npf.ui.RenderComponent.prototype.getRenderer = function() {
-	return this._renderer;
+  return this.renderer_;
 };
 
 /**
@@ -102,19 +102,19 @@ npf.ui.RenderComponent.prototype.getRenderer = function() {
  * @throws {Error} If the block is already in the document.
  */
 npf.ui.RenderComponent.prototype.setRenderer = function(renderer) {
-	if (this.isInDocument()) {
-		// Too late.
-		throw Error(goog.ui.Component.Error.ALREADY_RENDERED);
-	}
+  if (this.isInDocument()) {
+    // Too late.
+    throw Error(goog.ui.Component.Error.ALREADY_RENDERED);
+  }
 
-	if (this.getElement()) {
-		// The component has already been rendered, but isn't yet in the document.
-		// Replace the renderer and delete the current DOM, so it can be re-rendered
-		// using the new renderer the next time someone calls render().
-		this.setElementInternal(null);
-	}
+  if (this.getElement()) {
+    // The component has already been rendered, but isn't yet in the document.
+    // Replace the renderer and delete the current DOM, so it can be re-rendered
+    // using the new renderer the next time someone calls render().
+    this.setElementInternal(null);
+  }
 
-	this._renderer = renderer;
+  this.renderer_ = renderer;
 };
 
 /**
@@ -124,7 +124,7 @@ npf.ui.RenderComponent.prototype.setRenderer = function(renderer) {
  *     the component's root element (null if none).
  */
 npf.ui.RenderComponent.prototype.getExtraClassNames = function() {
-	return this._extraClassNames;
+  return this.extraClassNames_;
 };
 
 /**
@@ -133,17 +133,17 @@ npf.ui.RenderComponent.prototype.getExtraClassNames = function() {
  * @param {string} className Additional class name to be applied to the component's root element.
  */
 npf.ui.RenderComponent.prototype.addClassName = function(className) {
-	if (className) {
-		if (this._extraClassNames) {
-			if (!goog.array.contains(this._extraClassNames, className)) {
-				this._extraClassNames.push(className);
-			}
-		} else {
-			this._extraClassNames = [className];
-		}
+  if (className) {
+    if (this.extraClassNames_) {
+      if (!goog.array.contains(this.extraClassNames_, className)) {
+        this.extraClassNames_.push(className);
+      }
+    } else {
+      this.extraClassNames_ = [className];
+    }
 
-		this._renderer.enableExtraClassName(this, className, true);
-	}
+    this.renderer_.enableExtraClassName(this, className, true);
+  }
 };
 
 
@@ -153,15 +153,15 @@ npf.ui.RenderComponent.prototype.addClassName = function(className) {
  * @param {string} className Class name to be removed from the component's root element.
  */
 npf.ui.RenderComponent.prototype.removeClassName = function(className) {
-	if (className && this._extraClassNames) {
-		goog.array.remove(this._extraClassNames, className);
+  if (className && this.extraClassNames_) {
+    goog.array.remove(this.extraClassNames_, className);
 
-		if (!this._extraClassNames.length) {
-			this._extraClassNames = null;
-		}
+    if (!this.extraClassNames_.length) {
+      this.extraClassNames_ = null;
+    }
 
-		this._renderer.enableExtraClassName(this, className, false);
-	}
+    this.renderer_.enableExtraClassName(this, className, false);
+  }
 };
 
 
@@ -172,9 +172,9 @@ npf.ui.RenderComponent.prototype.removeClassName = function(className) {
  * @param {boolean} enable Whether to add or remove the class name.
  */
 npf.ui.RenderComponent.prototype.enableClassName = function(className, enable) {
-	if (enable) {
-		this.addClassName(className);
-	} else {
-		this.removeClassName(className);
-	}
+  if (enable) {
+    this.addClassName(className);
+  } else {
+    this.removeClassName(className);
+  }
 };

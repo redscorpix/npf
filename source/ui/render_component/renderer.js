@@ -23,21 +23,22 @@ goog.addSingletonGetter(npf.ui.renderComponent.Renderer);
  * @param {Function} ctor The constructor of the renderer you are trying to create.
  * @param {string} cssClassName The name of the CSS class for this renderer.
  * @return {npf.ui.renderComponent.Renderer} An instance of the desired renderer with its
- * 	getCssClass() method overridden to return the supplied custom CSS class name.
+ *   getCssClass() method overridden to return the supplied custom CSS class name.
  */
-npf.ui.renderComponent.Renderer.getCustomRenderer = function(ctor, cssClassName) {
-	var renderer = new ctor();
+npf.ui.renderComponent.Renderer.getCustomRenderer = function(ctor,
+                                                             cssClassName) {
+  var renderer = new ctor();
 
-	/**
-	 * Returns the CSS class to be applied to the root element of components
-	 * rendered using this renderer.
-	 * @return {string} Renderer-specific CSS class.
-	 */
-	renderer.getCssClass = function() {
-		return cssClassName;
-	};
+  /**
+   * Returns the CSS class to be applied to the root element of components
+   * rendered using this renderer.
+   * @return {string} Renderer-specific CSS class.
+   */
+  renderer.getCssClass = function() {
+    return cssClassName;
+  };
 
-	return renderer;
+  return renderer;
 };
 
 /**
@@ -52,10 +53,11 @@ npf.ui.renderComponent.Renderer.CSS_CLASS = goog.getCssName('block');
  * @return {!Element}
  */
 npf.ui.renderComponent.Renderer.prototype.createDom = function(block) {
-	/** @type {!Element} */
-	var element = goog.dom.createDom(goog.dom.TagName.DIV, this.getClassNames(block).join(' '));
+  /** @type {!Element} */
+  var element = goog.dom.createDom(goog.dom.TagName.DIV,
+    this.getClassNames(block).join(' '));
 
-	return element;
+  return element;
 };
 
 /**
@@ -68,7 +70,7 @@ npf.ui.renderComponent.Renderer.prototype.createDom = function(block) {
  * @return {Element} The block's content element.
  */
 npf.ui.renderComponent.Renderer.prototype.getContentElement = function(element) {
-	return element;
+  return element;
 };
 
 /**
@@ -79,12 +81,15 @@ npf.ui.renderComponent.Renderer.prototype.getContentElement = function(element) 
  * @param {string} className CSS class name to add or remove.
  * @param {boolean} enable Whether to add or remove the class name.
  */
-npf.ui.renderComponent.Renderer.prototype.enableClassName = function(block, className, enable) {
-	var element = (/** @type {Element} */ block.getElement ? block.getElement() : block);
+npf.ui.renderComponent.Renderer.prototype.enableClassName = function(block,
+                                                                     className,
+                                                                     enable) {
+  var element = (/** @type {Element} */ block.getElement ? block.getElement() :
+    block);
 
-	if (element) {
-		goog.dom.classes.enable(element, className, enable);
-	}
+  if (element) {
+    goog.dom.classes.enable(element, className, enable);
+  }
 };
 
 
@@ -95,9 +100,11 @@ npf.ui.renderComponent.Renderer.prototype.enableClassName = function(block, clas
  * @param {string} className CSS class name to add or remove.
  * @param {boolean} enable Whether to add or remove the class name.
  */
-npf.ui.renderComponent.Renderer.prototype.enableExtraClassName = function(block, className, enable) {
-	// The base class implementation is trivial; subclasses should override as needed.
-	this.enableClassName(block, className, enable);
+npf.ui.renderComponent.Renderer.prototype.enableExtraClassName = function(block,
+                                                                          className,
+                                                                          enable) {
+  // The base class implementation is trivial; subclasses should override as needed.
+  this.enableClassName(block, className, enable);
 };
 
 /**
@@ -107,7 +114,7 @@ npf.ui.renderComponent.Renderer.prototype.enableExtraClassName = function(block,
  * @return {boolean} Whether the renderer can decorate the element.
  */
 npf.ui.renderComponent.Renderer.prototype.canDecorate = function(element) {
-	return true;
+  return true;
 };
 
 /**
@@ -120,58 +127,59 @@ npf.ui.renderComponent.Renderer.prototype.canDecorate = function(element) {
  * @return {Element} Decorated element.
  */
 npf.ui.renderComponent.Renderer.prototype.decorate = function(block, element) {
-	// Set the block's ID to the decorated element's DOM ID, if any.
-	if (element.id) {
-		block.setId(element.id);
-	}
+  // Set the block's ID to the decorated element's DOM ID, if any.
+  if (element.id) {
+    block.setId(element.id);
+  }
 
-	// Initialize the block's state based on the decorated element's CSS class.
-	// This implementation is optimized to minimize object allocations, string
-	// comparisons, and DOM access.
-	var rendererClassName = this.getCssClass();
-	var structuralClassName = this.getStructuralCssClass();
-	var hasRendererClassName = false;
-	var hasStructuralClassName = false;
-	var hasCombinedClassName = false;
-	var classNames = goog.dom.classes.get(element);
-	var extraClassNames = block.getExtraClassNames();
+  // Initialize the block's state based on the decorated element's CSS class.
+  // This implementation is optimized to minimize object allocations, string
+  // comparisons, and DOM access.
+  var rendererClassName = this.getCssClass();
+  var structuralClassName = this.getStructuralCssClass();
+  var hasRendererClassName = false;
+  var hasStructuralClassName = false;
+  var hasCombinedClassName = false;
+  var classNames = goog.dom.classes.get(element);
+  var extraClassNames = block.getExtraClassNames();
 
-	goog.array.forEach(classNames, function(className) {
-		if (!hasRendererClassName && className == rendererClassName) {
-			hasRendererClassName = true;
+  goog.array.forEach(classNames, function(className) {
+    if (!hasRendererClassName && className == rendererClassName) {
+      hasRendererClassName = true;
 
-			if (structuralClassName == rendererClassName) {
-				hasStructuralClassName = true;
-			}
-		} else if (!hasStructuralClassName && className == structuralClassName) {
-			hasStructuralClassName = true;
-		}
-	}, this);
+      if (structuralClassName == rendererClassName) {
+        hasStructuralClassName = true;
+      }
+    } else if (!hasStructuralClassName && className == structuralClassName) {
+      hasStructuralClassName = true;
+    }
+  }, this);
 
-	// Make sure the element has the renderer's CSS classes applied, as well as
-	// any extra class names set on the block.
-	if (!hasRendererClassName) {
-		classNames.push(rendererClassName);
+  // Make sure the element has the renderer's CSS classes applied, as well as
+  // any extra class names set on the block.
+  if (!hasRendererClassName) {
+    classNames.push(rendererClassName);
 
-		if (structuralClassName == rendererClassName) {
-			hasStructuralClassName = true;
-		}
-	}
+    if (structuralClassName == rendererClassName) {
+      hasStructuralClassName = true;
+    }
+  }
 
-	if (!hasStructuralClassName) {
-		classNames.push(structuralClassName);
-	}
+  if (!hasStructuralClassName) {
+    classNames.push(structuralClassName);
+  }
 
-	if (extraClassNames) {
-		classNames.push.apply(classNames, extraClassNames);
-	}
+  if (extraClassNames) {
+    classNames.push.apply(classNames, extraClassNames);
+  }
 
-	// Only write to the DOM if new class names had to be added to the element.
-	if (!hasRendererClassName || !hasStructuralClassName || extraClassNames || hasCombinedClassName) {
-		goog.dom.classes.set(element, classNames.join(' '));
-	}
+  // Only write to the DOM if new class names had to be added to the element.
+  if (!hasRendererClassName || !hasStructuralClassName || extraClassNames ||
+    hasCombinedClassName) {
+    goog.dom.classes.set(element, classNames.join(' '));
+  }
 
-	return element;
+  return element;
 };
 
 /**
@@ -182,7 +190,7 @@ npf.ui.renderComponent.Renderer.prototype.decorate = function(block, element) {
  * @return {string} Renderer-specific CSS class name.
  */
 npf.ui.renderComponent.Renderer.prototype.getCssClass = function() {
-	return npf.ui.renderComponent.Renderer.CSS_CLASS;
+  return npf.ui.renderComponent.Renderer.CSS_CLASS;
 };
 
 /**
@@ -199,7 +207,7 @@ npf.ui.renderComponent.Renderer.prototype.getCssClass = function() {
  *     specific CSS class name by default).
  */
 npf.ui.renderComponent.Renderer.prototype.getStructuralCssClass = function() {
-	return this.getCssClass();
+  return this.getCssClass();
 };
 
 /**
@@ -220,22 +228,22 @@ npf.ui.renderComponent.Renderer.prototype.getStructuralCssClass = function() {
  * @protected
  */
 npf.ui.renderComponent.Renderer.prototype.getClassNames = function(block) {
-	var cssClass = this.getCssClass();
-	// Start with the renderer-specific class name.
-	var classNames = [cssClass];
-	// Add structural class name, if different.
-	var structuralCssClass = this.getStructuralCssClass();
+  var cssClass = this.getCssClass();
+  // Start with the renderer-specific class name.
+  var classNames = [cssClass];
+  // Add structural class name, if different.
+  var structuralCssClass = this.getStructuralCssClass();
 
-	if (structuralCssClass != cssClass) {
-		classNames.push(structuralCssClass);
-	}
+  if (structuralCssClass != cssClass) {
+    classNames.push(structuralCssClass);
+  }
 
-	// Add extra class names, if any.
-	var extraClassNames = block.getExtraClassNames();
+  // Add extra class names, if any.
+  var extraClassNames = block.getExtraClassNames();
 
-	if (extraClassNames) {
-		classNames.push.apply(classNames, extraClassNames);
-	}
+  if (extraClassNames) {
+    classNames.push.apply(classNames, extraClassNames);
+  }
 
-	return classNames;
+  return classNames;
 };

@@ -9,16 +9,18 @@ goog.require('npf.pages.Request');
 
 
 /**
+ * @param {npf.pages.Manager} manager
  * @constructor
  * @extends {goog.events.EventTarget}
  */
-npf.pages.Page = function() {
-	goog.base(this);
+npf.pages.Page = function(manager) {
+  goog.base(this);
 
-	this._helpersMap = {};
+  this.manager_ = manager;
+  this.helpersMap_ = {};
 
-	this._handler = new goog.events.EventHandler();
-	this.registerDisposable(this._handler);
+  this.handler_ = new goog.events.EventHandler();
+  this.registerDisposable(this.handler_);
 };
 goog.inherits(npf.pages.Page, goog.events.EventTarget);
 
@@ -27,87 +29,77 @@ goog.inherits(npf.pages.Page, goog.events.EventTarget);
  * @enum {string}
  */
 npf.pages.Page.EventType = {
-	/**
-	 * status (goog.net.HttpStatus)
-	 */
-	ERROR: goog.events.getUniqueId('error'),
-	/**
-	 * title (string)
-	 */
-	TITLE_CHANGE: goog.events.getUniqueId('titleChange')
+  /**
+   * status (goog.net.HttpStatus)
+   */
+  ERROR: goog.events.getUniqueId('error'),
+  /**
+   * title (string)
+   */
+  TITLE_CHANGE: goog.events.getUniqueId('titleChange')
 };
-
-/**
- * @type {!Object.<string,goog.Disposable>}
- * @private
- */
-npf.pages.Page.prototype._helpersMap;
-
-/**
- * @type {!goog.events.EventHandler}
- * @private
- */
-npf.pages.Page.prototype._handler;
-
-/**
- * @type {boolean}
- * @private
- */
-npf.pages.Page.prototype._isLoaded = false;
-
-/**
- * Флаг, была ли страница загружена до текущей загрузки.
- * @type {boolean}
- * @private
- */
-npf.pages.Page.prototype._wasLoaded = false;
-
-/**
- * @type {string}
- * @private
- */
-npf.pages.Page.prototype._title = '';
 
 /**
  * @type {npf.pages.Manager}
  * @private
  */
-npf.pages.Page.prototype._manager = null;
+npf.pages.Page.prototype.manager_;
+
+/**
+ * @type {!Object.<string,goog.Disposable>}
+ * @private
+ */
+npf.pages.Page.prototype.helpersMap_;
+
+/**
+ * @type {!goog.events.EventHandler}
+ * @private
+ */
+npf.pages.Page.prototype.handler_;
+
+/**
+ * @type {boolean}
+ * @private
+ */
+npf.pages.Page.prototype.loaded_ = false;
+
+/**
+ * @type {string}
+ * @private
+ */
+npf.pages.Page.prototype.title_ = '';
 
 
 /** @inheritDoc */
 npf.pages.Page.prototype.disposeInternal = function() {
-	this.unload();
+  this.unload();
 
-	goog.base(this, 'disposeInternal');
+  goog.base(this, 'disposeInternal');
 
-	delete this._helpersMap;
-	delete this._handler;
-	delete this._isLoaded;
-	delete this._wasLoaded;
-	delete this._title;
-	delete this._manager;
+  delete this.manager_;
+  delete this.helpersMap_;
+  delete this.handler_;
+  delete this.loaded_;
+  delete this.title_;
 };
 
 /**
  * @param {npf.pages.Request} request
  */
 npf.pages.Page.prototype.load = function(request) {
-	if (this._isLoaded) {
-		this._wasLoaded = true;
-	}
+  if (!this.loaded_) {
+    this.loaded_ = true;
 
-	this._isLoaded = true;
+    try {
+      this.loadInternal(request);
+    } catch (e) {
+      if (goog.DEBUG && window.console) {
+        window.console.error(e.stack);
+      }
 
-	try {
-		this.loadInternal(request);
-	} catch (e) {
-		if (goog.DEBUG && window.console) {
-  		window.console.error(e.stack);
-  	}
-
-  	throw e;
-	}
+      throw e;
+    }
+  }
 };
 
 /**
@@ -115,122 +107,117 @@ npf.pages.Page.prototype.load = function(request) {
  * @protected
  */
 npf.pages.Page.prototype.loadInternal = function(request) {
-	this.initHelpers(request);
+  this.initHelpers(request);
 };
 
 npf.pages.Page.prototype.unload = function() {
-	if (!this._isLoaded) {
-		return;
-	}
+  if (!this.loaded_) {
+    return;
+  }
 
-	this._isLoaded = false;
+  this.loaded_ = false;
+  this.handler_.removeAll();
 
-	try {
-		this.unloadInternal();
-		this._wasLoaded = false;
-	} catch (e) {
-		if (goog.DEBUG && window.console) {
-  		window.console.error(e.stack);
-  	}
+  try {
+    this.unloadInternal();
+  } catch (e) {
+    if (goog.DEBUG && window.console) {
+      window.console.error(e.stack);
+    }
 
-  	throw e;
-	}
+    throw e;
+  }
 };
 
 /**
  * @protected
  */
 npf.pages.Page.prototype.unloadInternal = function() {
-	this.removeHelpers();
+  this.removeHelpers();
 };
 
 /**
  * @return {boolean}
  */
 npf.pages.Page.prototype.isLoaded = function() {
-	return this._isLoaded;
-};
-
-/**
- * @return {boolean}
- */
-npf.pages.Page.prototype.wasLoaded = function() {
-	return this._wasLoaded;
+  return this.loaded_;
 };
 
 /**
  * @return {!goog.events.EventHandler}
  */
 npf.pages.Page.prototype.getHandler = function() {
-	return this._handler;
+  return this.handler_;
 };
 
 /**
  * @return {Element|goog.ui.Component}
  */
 npf.pages.Page.prototype.getParentContainer = function() {
-	return this._manager ? this._manager.getParentContainer() : null;
+  return this.manager_ ? this.manager_.getParentContainer() : null;
 };
 
 /**
  * @param {goog.ui.Component} container
  * @param {boolean=} opt_render only for container-component
  */
-npf.pages.Page.prototype.appendToParentContainer = function(container, opt_render) {
-	var parentContainer = this._manager.getParentContainer() || document.body;
+npf.pages.Page.prototype.appendToParentContainer = function(container,
+                                                            opt_render) {
+  var parentContainer = this.manager_.getParentContainer() || document.body;
 
-	if (parentContainer.getElement) {
-		parentContainer.addChild(container, opt_render);
-	} else {
-		container.render(/** @type {Element} */ (parentContainer));
-	}
+  if (parentContainer.getElement) {
+    parentContainer.addChild(container, opt_render);
+  } else {
+    container.render(/** @type {Element} */ (parentContainer));
+  }
 };
 
 /**
  * @param {goog.ui.Component} container
  * @param {boolean=} opt_unrender only for container-component
  */
-npf.pages.Page.prototype.removeFromParentContainer = function(container, opt_unrender) {
-	var parentContainer = this._manager.getParentContainer();
+npf.pages.Page.prototype.removeFromParentContainer = function(container,
+                                                              opt_unrender) {
+  var parentContainer = this.manager_.getParentContainer();
 
-	if (parentContainer && parentContainer.getElement) {
-		parentContainer.removeChild(container, opt_unrender);
-	} else {
-		goog.dom.removeNode(container.getElement());
-	}
+  if (parentContainer && parentContainer.getElement) {
+    parentContainer.removeChild(container, opt_unrender);
+  } else {
+    goog.dom.removeNode(container.getElement());
+  }
 };
 
 /**
  * @return {string}
  */
 npf.pages.Page.prototype.getTitle = function() {
-	return this._title;
+  return this.title_;
 };
 
 /**
  * @param {string} title
  */
 npf.pages.Page.prototype.setTitle = function(title) {
-	if (this._title == title) {
-		return;
-	}
+  if (this.title_ == title) {
+    return;
+  }
 
-	this._title = title;
-	this.dispatchTitleChangeEvent(this._title);
+  this.title_ = title;
+  this.dispatchTitleChangeEvent(this.title_);
 };
 
 /**
  * @return {Array.<string>}
  */
 npf.pages.Page.prototype.getUsingHelperTypes = function() {
-	return null;
+  return null;
 };
 
 /**
  * @return {!Object.<string,goog.Disposable>}
  */
 npf.pages.Page.prototype.getHelpersMap = function() {
-	return this._helpersMap;
+  return this.helpersMap_;
 };
 
 /**
@@ -238,7 +225,7 @@ npf.pages.Page.prototype.getHelpersMap = function() {
  * @return {goog.Disposable}
  */
 npf.pages.Page.prototype.getHelper = function(type) {
-	return this._helpersMap[type] || null;
+  return this.helpersMap_[type] || null;
 };
 
 /**
@@ -246,7 +233,7 @@ npf.pages.Page.prototype.getHelper = function(type) {
  * @param {string} type
  */
 npf.pages.Page.prototype.setHelper = function(helper, type) {
-	this._helpersMap[type] = helper;
+  this.helpersMap_[type] = helper;
 };
 
 /**
@@ -259,41 +246,41 @@ npf.pages.Page.prototype.initHelpers = function(request) {};
  * @protected
  */
 npf.pages.Page.prototype.removeHelpers = function() {
-	this._helpersMap = {};
+  this.helpersMap_ = {};
 };
 
 /**
  * @return {npf.pages.Manager}
  */
 npf.pages.Page.prototype.getManager = function() {
-	return this._manager;
+  return this.manager_;
 };
 
 /**
  * @param {npf.pages.Manager} manager
  */
 npf.pages.Page.prototype.setManager = function(manager) {
-	this._manager = manager;
+  this.manager_ = manager;
 };
 
 /**
  * @return {Array.<npf.router.Route>}
  */
 npf.pages.Page.prototype.getRoutes = function() {
-	/** @type {npf.Router} */
-	var router = this.getRouter();
+  /** @type {npf.Router} */
+  var router = this.getRouter();
 
-	return router ? router.getRoutes() : null;
+  return router ? router.getRoutes() : null;
 };
 
 /**
  * @return {Array.<string>}
  */
 npf.pages.Page.prototype.getRouteNames = function() {
-	/** @type {npf.Router} */
-	var router = this.getRouter();
+  /** @type {npf.Router} */
+  var router = this.getRouter();
 
-	return router ? router.getRouteNames() : null;
+  return router ? router.getRouteNames() : null;
 };
 
 /**
@@ -301,10 +288,10 @@ npf.pages.Page.prototype.getRouteNames = function() {
  * @return {npf.router.Route}
  */
 npf.pages.Page.prototype.getRoute = function(name) {
-	/** @type {npf.Router} */
-	var router = this.getRouter();
+  /** @type {npf.Router} */
+  var router = this.getRouter();
 
-	return router ? router.getRoute(name) : null;
+  return router ? router.getRoute(name) : null;
 };
 
 /**
@@ -312,10 +299,10 @@ npf.pages.Page.prototype.getRoute = function(name) {
  * @return {npf.router.Route}
  */
 npf.pages.Page.prototype.getRouteAt = function(index) {
-	/** @type {npf.Router} */
-	var router = this.getRouter();
+  /** @type {npf.Router} */
+  var router = this.getRouter();
 
-	return router ? router.getRouteAt(index) : null;
+  return router ? router.getRouteAt(index) : null;
 };
 
 /**
@@ -323,10 +310,10 @@ npf.pages.Page.prototype.getRouteAt = function(index) {
  * @return {string?}
  */
 npf.pages.Page.prototype.getRouteNameAt = function(index) {
-	/** @type {npf.Router} */
-	var router = this.getRouter();
+  /** @type {npf.Router} */
+  var router = this.getRouter();
 
-	return router ? router.getRouteNameAt(index) : null;
+  return router ? router.getRouteNameAt(index) : null;
 };
 
 /**
@@ -335,13 +322,14 @@ npf.pages.Page.prototype.getRouteNameAt = function(index) {
  * @param {string|goog.Uri.QueryData|Object.<string,string>=} opt_query
  * @param {boolean=} opt_replace
  */
-npf.pages.Page.prototype.navigateRoute = function(routeName, opt_optionsMap, opt_query, opt_replace) {
-	/** @type {npf.Router} */
-	var router = this.getRouter();
+npf.pages.Page.prototype.navigateRoute = function(routeName, opt_optionsMap,
+                                                  opt_query, opt_replace) {
+  /** @type {npf.Router} */
+  var router = this.getRouter();
 
-	if (router) {
-		router.navigateRoute(routeName, opt_optionsMap, opt_query, opt_replace);
-	}
+  if (router) {
+    router.navigateRoute(routeName, opt_optionsMap, opt_query, opt_replace);
+  }
 };
 
 /**
@@ -349,26 +337,26 @@ npf.pages.Page.prototype.navigateRoute = function(routeName, opt_optionsMap, opt
  * @param {boolean=} opt_replace
  */
 npf.pages.Page.prototype.navigate = function(token, opt_replace) {
-	/** @type {npf.Router} */
-	var router = this.getRouter();
+  /** @type {npf.Router} */
+  var router = this.getRouter();
 
-	if (router) {
-		router.navigate(token, opt_replace);
-	}
+  if (router) {
+    router.navigate(token, opt_replace);
+  }
 };
 
 /**
  * @return {npf.Router}
  */
 npf.pages.Page.prototype.getRouter = function() {
-	return this._manager ? this._manager.getRouter() : null;
+  return this.manager_ ? this.manager_.getRouter() : null;
 };
 
 /**
  * @return {npf.pages.Request}
  */
 npf.pages.Page.prototype.getRequest = function() {
-	return this._manager ? this._manager.getRequest() : null;
+  return this.manager_ ? this.manager_.getRequest() : null;
 };
 
 /**
@@ -376,7 +364,7 @@ npf.pages.Page.prototype.getRequest = function() {
  * @return {npf.pages.Request}
  */
 npf.pages.Page.prototype.getRequestFromHistory = function(opt_index) {
-	return this._manager ? this._manager.getRequestFromHistory(opt_index) : null;
+  return this.manager_ ? this.manager_.getRequestFromHistory(opt_index) : null;
 };
 
 /**
@@ -384,10 +372,10 @@ npf.pages.Page.prototype.getRequestFromHistory = function(opt_index) {
  * @protected
  */
 npf.pages.Page.prototype.dispatchErrorEvent = function(status) {
-	this.dispatchEvent({
-		type: npf.pages.Page.EventType.ERROR,
-		status: status
-	});
+  this.dispatchEvent({
+    type: npf.pages.Page.EventType.ERROR,
+    status: status
+  });
 };
 
 /**
@@ -395,8 +383,8 @@ npf.pages.Page.prototype.dispatchErrorEvent = function(status) {
  * @protected
  */
 npf.pages.Page.prototype.dispatchTitleChangeEvent = function(title) {
-	this.dispatchEvent({
-		type: npf.pages.Page.EventType.TITLE_CHANGE,
-		title: title
-	});
+  this.dispatchEvent({
+    type: npf.pages.Page.EventType.TITLE_CHANGE,
+    title: title
+  });
 };

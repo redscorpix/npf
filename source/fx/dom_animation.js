@@ -34,11 +34,11 @@ goog.require('npf.fx.dom.Transform');
  * @extends {goog.fx.AnimationParallelQueue}
  */
 npf.fx.DomAnimation = function(element, time, opt_acc) {
-	goog.base(this);
+  goog.base(this);
 
-	this.element = element;
-	this.time = time;
-	this.accel = opt_acc || null;
+  this.element = element;
+  this.time = time;
+  this.accel = opt_acc || null;
 };
 goog.inherits(npf.fx.DomAnimation, goog.fx.AnimationParallelQueue);
 
@@ -61,11 +61,11 @@ npf.fx.DomAnimation.prototype.accel;
 
 /** @inheritDoc */
 npf.fx.DomAnimation.prototype.disposeInternal = function() {
-	goog.base(this, 'disposeInternal');
+  goog.base(this, 'disposeInternal');
 
-	delete this.element;
-	delete this.time;
-	delete this.accel;
+  delete this.element;
+  delete this.time;
+  delete this.accel;
 };
 
 /**
@@ -76,13 +76,17 @@ npf.fx.DomAnimation.prototype.disposeInternal = function() {
  *          function, returns 0-1 for inputs 0-1.
  * @return {!npf.fx.dom.BgColorTransform}
  */
-npf.fx.DomAnimation.prototype.addBgColorTransform = function(start, end, opt_time, opt_acc) {
-	var time = goog.isDef(opt_time) ? opt_time : this.time;
-	var accel = opt_acc ? opt_acc : this.accel;
-	var animation = new npf.fx.dom.BgColorTransform(this.element, start, end, time, accel);
-	this.add(animation);
+npf.fx.DomAnimation.prototype.addBgColorTransform = function(start,
+                                                             end,
+                                                             opt_time,
+                                                             opt_acc) {
+  var time = goog.isDef(opt_time) ? opt_time : this.time;
+  var accel = opt_acc ? opt_acc : this.accel;
+  var animation = new npf.fx.dom.BgColorTransform(this.element, start, end,
+    time, accel);
+  this.add(animation);
 
-	return animation;
+  return animation;
 };
 
 /**
@@ -93,13 +97,17 @@ npf.fx.DomAnimation.prototype.addBgColorTransform = function(start, end, opt_tim
  *          function, returns 0-1 for inputs 0-1.
  * @return {!npf.fx.dom.ColorTransform}
  */
-npf.fx.DomAnimation.prototype.addColorTransform = function(start, end, opt_time, opt_acc) {
-	var time = goog.isDef(opt_time) ? opt_time : this.time;
-	var accel = opt_acc ? opt_acc : this.accel;
-	var animation = new npf.fx.dom.ColorTransform(this.element, start, end, time, accel);
-	this.add(animation);
+npf.fx.DomAnimation.prototype.addColorTransform = function(start,
+                                                           end,
+                                                           opt_time,
+                                                           opt_acc) {
+  var time = goog.isDef(opt_time) ? opt_time : this.time;
+  var accel = opt_acc ? opt_acc : this.accel;
+  var animation = new npf.fx.dom.ColorTransform(this.element, start, end, time,
+    accel);
+  this.add(animation);
 
-	return animation;
+  return animation;
 };
 
 /**
@@ -110,13 +118,14 @@ npf.fx.DomAnimation.prototype.addColorTransform = function(start, end, opt_time,
  *          function, returns 0-1 for inputs 0-1.
  * @return {!npf.fx.dom.Fade}
  */
-npf.fx.DomAnimation.prototype.addFade = function(start, end, opt_time, opt_acc) {
-	var time = goog.isDef(opt_time) ? opt_time : this.time;
-	var accel = opt_acc ? opt_acc : this.accel;
-	var animation = new npf.fx.dom.Fade(this.element, start, end, time, accel);
-	this.add(animation);
+npf.fx.DomAnimation.prototype.addFade = function(start, end, opt_time,
+                                                 opt_acc) {
+  var time = goog.isDef(opt_time) ? opt_time : this.time;
+  var accel = opt_acc ? opt_acc : this.accel;
+  var animation = new npf.fx.dom.Fade(this.element, start, end, time, accel);
+  this.add(animation);
 
-	return animation;
+  return animation;
 };
 
 /**
@@ -126,12 +135,12 @@ npf.fx.DomAnimation.prototype.addFade = function(start, end, opt_time, opt_acc) 
  * @return {!npf.fx.dom.FadeIn}
  */
 npf.fx.DomAnimation.prototype.addFadeIn = function(opt_time, opt_acc) {
-	var time = goog.isDef(opt_time) ? opt_time : this.time;
-	var accel = opt_acc ? opt_acc : this.accel;
-	var animation = new npf.fx.dom.FadeIn(this.element, time, accel);
-	this.add(animation);
+  var time = goog.isDef(opt_time) ? opt_time : this.time;
+  var accel = opt_acc ? opt_acc : this.accel;
+  var animation = new npf.fx.dom.FadeIn(this.element, time, accel);
+  this.add(animation);
 
-	return animation;
+  return animation;
 };
 
 /**
@@ -141,12 +150,12 @@ npf.fx.DomAnimation.prototype.addFadeIn = function(opt_time, opt_acc) {
  * @return {!npf.fx.dom.FadeInAndShow}
  */
 npf.fx.DomAnimation.prototype.addFadeInAndShow = function(opt_time, opt_acc) {
-	var time = goog.isDef(opt_time) ? opt_time : this.time;
-	var accel = opt_acc ? opt_acc : this.accel;
-	var animation = new npf.fx.dom.FadeInAndShow(this.element, time, accel);
-	this.add(animation);
+  var time = goog.isDef(opt_time) ? opt_time : this.time;
+  var accel = opt_acc ? opt_acc : this.accel;
+  var animation = new npf.fx.dom.FadeInAndShow(this.element, time, accel);
+  this.add(animation);
 
-	return animation;
+  return animation;
 };
 
 /**
@@ -156,12 +165,12 @@ npf.fx.DomAnimation.prototype.addFadeInAndShow = function(opt_time, opt_acc) {
  * @return {!npf.fx.dom.FadeOut}
  */
 npf.fx.DomAnimation.prototype.addFadeOut = function(opt_time, opt_acc) {
-	var time = goog.isDef(opt_time) ? opt_time : this.time;
-	var accel = opt_acc ? opt_acc : this.accel;
-	var animation = new npf.fx.dom.FadeOut(this.element, time, accel);
-	this.add(animation);
+  var time = goog.isDef(opt_time) ? opt_time : this.time;
+  var accel = opt_acc ? opt_acc : this.accel;
+  var animation = new npf.fx.dom.FadeOut(this.element, time, accel);
+  this.add(animation);
 
-	return animation;
+  return animation;
 };
 
 /**
@@ -171,12 +180,12 @@ npf.fx.DomAnimation.prototype.addFadeOut = function(opt_time, opt_acc) {
  * @return {!npf.fx.dom.FadeOutAndHide}
  */
 npf.fx.DomAnimation.prototype.addFadeOutAndHide = function(opt_time, opt_acc) {
-	var time = goog.isDef(opt_time) ? opt_time : this.time;
-	var accel = opt_acc ? opt_acc : this.accel;
-	var animation = new npf.fx.dom.FadeOutAndHide(this.element, time, accel);
-	this.add(animation);
+  var time = goog.isDef(opt_time) ? opt_time : this.time;
+  var accel = opt_acc ? opt_acc : this.accel;
+  var animation = new npf.fx.dom.FadeOutAndHide(this.element, time, accel);
+  this.add(animation);
 
-	return animation;
+  return animation;
 };
 
 /**
@@ -187,13 +196,14 @@ npf.fx.DomAnimation.prototype.addFadeOutAndHide = function(opt_time, opt_acc) {
  *          function, returns 0-1 for inputs 0-1.
  * @return {!npf.fx.dom.Resize}
  */
-npf.fx.DomAnimation.prototype.addResize = function(start, end, opt_time, opt_acc) {
-	var time = goog.isDef(opt_time) ? opt_time : this.time;
-	var accel = opt_acc ? opt_acc : this.accel;
-	var animation = new npf.fx.dom.Resize(this.element, start, end, time, accel);
-	this.add(animation);
+npf.fx.DomAnimation.prototype.addResize = function(start, end, opt_time,
+                                                   opt_acc) {
+  var time = goog.isDef(opt_time) ? opt_time : this.time;
+  var accel = opt_acc ? opt_acc : this.accel;
+  var animation = new npf.fx.dom.Resize(this.element, start, end, time, accel);
+  this.add(animation);
 
-	return animation;
+  return animation;
 };
 
 /**
@@ -204,13 +214,15 @@ npf.fx.DomAnimation.prototype.addResize = function(start, end, opt_time, opt_acc
  *          function, returns 0-1 for inputs 0-1.
  * @return {!npf.fx.dom.ResizeWidth}
  */
-npf.fx.DomAnimation.prototype.addResizeWidth = function(start, end, opt_time, opt_acc) {
-	var time = goog.isDef(opt_time) ? opt_time : this.time;
-	var accel = opt_acc ? opt_acc : this.accel;
-	var animation = new npf.fx.dom.ResizeWidth(this.element, start, end, time, accel);
-	this.add(animation);
+npf.fx.DomAnimation.prototype.addResizeWidth = function(start, end, opt_time,
+                                                        opt_acc) {
+  var time = goog.isDef(opt_time) ? opt_time : this.time;
+  var accel = opt_acc ? opt_acc : this.accel;
+  var animation = new npf.fx.dom.ResizeWidth(this.element, start, end, time,
+    accel);
+  this.add(animation);
 
-	return animation;
+  return animation;
 };
 
 /**
@@ -221,13 +233,15 @@ npf.fx.DomAnimation.prototype.addResizeWidth = function(start, end, opt_time, op
  *          function, returns 0-1 for inputs 0-1.
  * @return {!npf.fx.dom.ResizeHeight}
  */
-npf.fx.DomAnimation.prototype.addResizeHeight = function(start, end, opt_time, opt_acc) {
-	var time = goog.isDef(opt_time) ? opt_time : this.time;
-	var accel = opt_acc ? opt_acc : this.accel;
-	var animation = new npf.fx.dom.ResizeHeight(this.element, start, end, time, accel);
-	this.add(animation);
+npf.fx.DomAnimation.prototype.addResizeHeight = function(start, end, opt_time,
+                                                         opt_acc) {
+  var time = goog.isDef(opt_time) ? opt_time : this.time;
+  var accel = opt_acc ? opt_acc : this.accel;
+  var animation = new npf.fx.dom.ResizeHeight(this.element, start, end, time,
+    accel);
+  this.add(animation);
 
-	return animation;
+  return animation;
 };
 
 /**
@@ -238,13 +252,14 @@ npf.fx.DomAnimation.prototype.addResizeHeight = function(start, end, opt_time, o
  *          function, returns 0-1 for inputs 0-1.
  * @return {!npf.fx.dom.Scroll}
  */
-npf.fx.DomAnimation.prototype.addScroll = function(start, end, opt_time, opt_acc) {
-	var time = goog.isDef(opt_time) ? opt_time : this.time;
-	var accel = opt_acc ? opt_acc : this.accel;
-	var animation = new npf.fx.dom.Scroll(this.element, start, end, time, accel);
-	this.add(animation);
+npf.fx.DomAnimation.prototype.addScroll = function(start, end, opt_time,
+                                                   opt_acc) {
+  var time = goog.isDef(opt_time) ? opt_time : this.time;
+  var accel = opt_acc ? opt_acc : this.accel;
+  var animation = new npf.fx.dom.Scroll(this.element, start, end, time, accel);
+  this.add(animation);
 
-	return animation;
+  return animation;
 };
 
 /**
@@ -255,13 +270,14 @@ npf.fx.DomAnimation.prototype.addScroll = function(start, end, opt_time, opt_acc
  *          function, returns 0-1 for inputs 0-1.
  * @return {!npf.fx.dom.Slide}
  */
-npf.fx.DomAnimation.prototype.addSlide = function(start, end, opt_time, opt_acc) {
-	var time = goog.isDef(opt_time) ? opt_time : this.time;
-	var accel = opt_acc ? opt_acc : this.accel;
-	var animation = new npf.fx.dom.Slide(this.element, start, end, time, accel);
-	this.add(animation);
+npf.fx.DomAnimation.prototype.addSlide = function(start, end, opt_time,
+                                                  opt_acc) {
+  var time = goog.isDef(opt_time) ? opt_time : this.time;
+  var accel = opt_acc ? opt_acc : this.accel;
+  var animation = new npf.fx.dom.Slide(this.element, start, end, time, accel);
+  this.add(animation);
 
-	return animation;
+  return animation;
 };
 
 /**
@@ -272,13 +288,15 @@ npf.fx.DomAnimation.prototype.addSlide = function(start, end, opt_time, opt_acc)
  *          function, returns 0-1 for inputs 0-1.
  * @return {!npf.fx.dom.SlideLeft}
  */
-npf.fx.DomAnimation.prototype.addSlideLeft = function(start, end, opt_time, opt_acc) {
-	var time = goog.isDef(opt_time) ? opt_time : this.time;
-	var accel = opt_acc ? opt_acc : this.accel;
-	var animation = new npf.fx.dom.SlideLeft(this.element, start, end, time, accel);
-	this.add(animation);
+npf.fx.DomAnimation.prototype.addSlideLeft = function(start, end, opt_time,
+                                                      opt_acc) {
+  var time = goog.isDef(opt_time) ? opt_time : this.time;
+  var accel = opt_acc ? opt_acc : this.accel;
+  var animation = new npf.fx.dom.SlideLeft(this.element, start, end, time,
+    accel);
+  this.add(animation);
 
-	return animation;
+  return animation;
 };
 
 /**
@@ -289,13 +307,15 @@ npf.fx.DomAnimation.prototype.addSlideLeft = function(start, end, opt_time, opt_
  *          function, returns 0-1 for inputs 0-1.
  * @return {!npf.fx.dom.SlideRight}
  */
-npf.fx.DomAnimation.prototype.addSlideRight = function(start, end, opt_time, opt_acc) {
-	var time = goog.isDef(opt_time) ? opt_time : this.time;
-	var accel = opt_acc ? opt_acc : this.accel;
-	var animation = new npf.fx.dom.SlideRight(this.element, start, end, time, accel);
-	this.add(animation);
+npf.fx.DomAnimation.prototype.addSlideRight = function(start, end, opt_time,
+                                                       opt_acc) {
+  var time = goog.isDef(opt_time) ? opt_time : this.time;
+  var accel = opt_acc ? opt_acc : this.accel;
+  var animation = new npf.fx.dom.SlideRight(this.element, start, end, time,
+    accel);
+  this.add(animation);
 
-	return animation;
+  return animation;
 };
 
 /**
@@ -306,13 +326,14 @@ npf.fx.DomAnimation.prototype.addSlideRight = function(start, end, opt_time, opt
  *          function, returns 0-1 for inputs 0-1.
  * @return {!npf.fx.dom.SlideTop}
  */
-npf.fx.DomAnimation.prototype.addSlideTop = function(start, end, opt_time, opt_acc) {
-	var time = goog.isDef(opt_time) ? opt_time : this.time;
-	var accel = opt_acc ? opt_acc : this.accel;
-	var animation = new npf.fx.dom.SlideTop(this.element, start, end, time, accel);
-	this.add(animation);
+npf.fx.DomAnimation.prototype.addSlideTop = function(start, end, opt_time,
+                                                     opt_acc) {
+  var time = goog.isDef(opt_time) ? opt_time : this.time;
+  var accel = opt_acc ? opt_acc : this.accel;
+  var animation = new npf.fx.dom.SlideTop(this.element, start, end, time, accel);
+  this.add(animation);
 
-	return animation;
+  return animation;
 };
 
 /**
@@ -323,12 +344,12 @@ npf.fx.DomAnimation.prototype.addSlideTop = function(start, end, opt_time, opt_a
  * @return {!npf.fx.dom.SlideFrom}
  */
 npf.fx.DomAnimation.prototype.addSlideFrom = function(end, opt_time, opt_acc) {
-	var time = goog.isDef(opt_time) ? opt_time : this.time;
-	var accel = opt_acc ? opt_acc : this.accel;
-	var animation = new npf.fx.dom.SlideFrom(this.element, end, time, accel);
-	this.add(animation);
+  var time = goog.isDef(opt_time) ? opt_time : this.time;
+  var accel = opt_acc ? opt_acc : this.accel;
+  var animation = new npf.fx.dom.SlideFrom(this.element, end, time, accel);
+  this.add(animation);
 
-	return animation;
+  return animation;
 };
 
 /**
@@ -338,13 +359,14 @@ npf.fx.DomAnimation.prototype.addSlideFrom = function(end, opt_time, opt_acc) {
  *          function, returns 0-1 for inputs 0-1.
  * @return {!npf.fx.dom.SlideLeftFrom}
  */
-npf.fx.DomAnimation.prototype.addSlideLeftFrom = function(end, opt_time, opt_acc) {
-	var time = goog.isDef(opt_time) ? opt_time : this.time;
-	var accel = opt_acc ? opt_acc : this.accel;
-	var animation = new npf.fx.dom.SlideLeftFrom(this.element, end, time, accel);
-	this.add(animation);
+npf.fx.DomAnimation.prototype.addSlideLeftFrom = function(end, opt_time,
+                                                          opt_acc) {
+  var time = goog.isDef(opt_time) ? opt_time : this.time;
+  var accel = opt_acc ? opt_acc : this.accel;
+  var animation = new npf.fx.dom.SlideLeftFrom(this.element, end, time, accel);
+  this.add(animation);
 
-	return animation;
+  return animation;
 };
 
 /**
@@ -354,13 +376,14 @@ npf.fx.DomAnimation.prototype.addSlideLeftFrom = function(end, opt_time, opt_acc
  *          function, returns 0-1 for inputs 0-1.
  * @return {!npf.fx.dom.SlideTopFrom}
  */
-npf.fx.DomAnimation.prototype.addSlideTopFrom = function(end, opt_time, opt_acc) {
-	var time = goog.isDef(opt_time) ? opt_time : this.time;
-	var accel = opt_acc ? opt_acc : this.accel;
-	var animation = new npf.fx.dom.SlideTopFrom(this.element, end, time, accel);
-	this.add(animation);
+npf.fx.DomAnimation.prototype.addSlideTopFrom = function(end, opt_time,
+                                                         opt_acc) {
+  var time = goog.isDef(opt_time) ? opt_time : this.time;
+  var accel = opt_acc ? opt_acc : this.accel;
+  var animation = new npf.fx.dom.SlideTopFrom(this.element, end, time, accel);
+  this.add(animation);
 
-	return animation;
+  return animation;
 };
 
 /**
@@ -371,13 +394,14 @@ npf.fx.DomAnimation.prototype.addSlideTopFrom = function(end, opt_time, opt_acc)
  *          function, returns 0-1 for inputs 0-1.
  * @return {!npf.fx.dom.Swipe}
  */
-npf.fx.DomAnimation.prototype.addSwipe = function(start, end, opt_time, opt_acc) {
-	var time = goog.isDef(opt_time) ? opt_time : this.time;
-	var accel = opt_acc ? opt_acc : this.accel;
-	var animation = new npf.fx.dom.Swipe(this.element, start, end, time, accel);
-	this.add(animation);
+npf.fx.DomAnimation.prototype.addSwipe = function(start, end, opt_time,
+                                                  opt_acc) {
+  var time = goog.isDef(opt_time) ? opt_time : this.time;
+  var accel = opt_acc ? opt_acc : this.accel;
+  var animation = new npf.fx.dom.Swipe(this.element, start, end, time, accel);
+  this.add(animation);
 
-	return animation;
+  return animation;
 };
 
 /**
@@ -387,12 +411,12 @@ npf.fx.DomAnimation.prototype.addSwipe = function(start, end, opt_time, opt_acc)
  * @return {!npf.fx.dom.Transform}
  */
 npf.fx.DomAnimation.prototype.addTransform = function(opt_time, opt_acc) {
-	var time = goog.isDef(opt_time) ? opt_time : this.time;
-	var accel = opt_acc ? opt_acc : this.accel;
-	var animation = new npf.fx.dom.Transform(this.element, time, accel);
-	this.add(animation);
+  var time = goog.isDef(opt_time) ? opt_time : this.time;
+  var accel = opt_acc ? opt_acc : this.accel;
+  var animation = new npf.fx.dom.Transform(this.element, time, accel);
+  this.add(animation);
 
-	return animation;
+  return animation;
 };
 
 /**
@@ -402,10 +426,10 @@ npf.fx.DomAnimation.prototype.addTransform = function(opt_time, opt_acc) {
  * @return {!npf.fx.Animation}
  */
 npf.fx.DomAnimation.prototype.addCustom = function(opt_time, opt_acc) {
-	var time = goog.isDef(opt_time) ? opt_time : this.time;
-	var accel = opt_acc ? opt_acc : this.accel;
-	var animation = new npf.fx.Animation([0], [1], time, accel);
-	this.add(animation);
+  var time = goog.isDef(opt_time) ? opt_time : this.time;
+  var accel = opt_acc ? opt_acc : this.accel;
+  var animation = new npf.fx.Animation([0], [1], time, accel);
+  this.add(animation);
 
-	return animation;
+  return animation;
 };

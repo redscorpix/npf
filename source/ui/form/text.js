@@ -14,10 +14,11 @@ goog.require('npf.ui.form.TextRenderer');
  * @extends {npf.ui.form.Field}
  */
 npf.ui.form.Text = function(name, opt_renderer, opt_domHelper) {
-	goog.base(this, name, opt_renderer || npf.ui.form.TextRenderer.getInstance(), opt_domHelper);
+  goog.base(this, name, opt_renderer ||
+    npf.ui.form.TextRenderer.getInstance(), opt_domHelper);
 
-	this.addClassName(this.getRenderer().getTextCssClass());
-	this.setValueInternal('');
+  this.addClassName(this.getRenderer().getTextCssClass());
+  this.setValueInternal('');
 };
 goog.inherits(npf.ui.form.Text, npf.ui.form.Field);
 
@@ -26,121 +27,124 @@ goog.inherits(npf.ui.form.Text, npf.ui.form.Field);
  * @enum {string}
  */
 npf.ui.form.Text.ErrorMessage = {
-	EMAIL: 'Неправильный формат электронной почты.'
+  EMAIL: 'Неправильный формат электронной почты.'
 };
 
 /**
  * @type {boolean}
  * @private
  */
-npf.ui.form.Text.prototype._autoComplete = true;
+npf.ui.form.Text.prototype.autoComplete_ = true;
 
 /**
  * @type {goog.events.InputHandler}
  * @private
  */
-npf.ui.form.Text.prototype._inputHandler = null;
+npf.ui.form.Text.prototype.inputHandler_ = null;
 
 /**
  * @type {number}
  * @private
  */
-npf.ui.form.Text.prototype._maxLength = 0;
+npf.ui.form.Text.prototype.maxLength_ = 0;
 
 
 /** @inheritDoc */
 npf.ui.form.Text.prototype.createDom = function() {
-	goog.base(this, 'createDom');
+  goog.base(this, 'createDom');
 
-	this.initializeInternal();
+  this.initializeInternal();
 };
 
 /** @inheritDoc */
 npf.ui.form.Text.prototype.decorateInternal = function(element) {
-	goog.base(this, 'decorateInternal', element);
+  goog.base(this, 'decorateInternal', element);
 
-	this.initializeInternal();
+  this.initializeInternal();
 };
 
 /** @inheritDoc */
 npf.ui.form.Text.prototype.enterDocument = function() {
-	goog.base(this, 'enterDocument');
+  goog.base(this, 'enterDocument');
 
-	this._inputHandler = new goog.events.InputHandler(this.getValueElement());
-	this._inputHandler.addEventListener(goog.events.InputHandler.EventType.INPUT, this._onInput, false, this);
+  this.inputHandler_ = new goog.events.InputHandler(this.getValueElement());
+  this.inputHandler_.addEventListener(goog.events.InputHandler.EventType.INPUT,
+    this.onInput_, false, this);
 };
 
 /** @inheritDoc */
 npf.ui.form.Text.prototype.exitDocument = function() {
-	goog.base(this, 'exitDocument');
+  goog.base(this, 'exitDocument');
 
-	this._inputHandler.dispose();
-	this._inputHandler = null;
+  this.inputHandler_.dispose();
+  this.inputHandler_ = null;
 };
 
 /** @inheritDoc */
 npf.ui.form.Text.prototype.disposeInternal = function() {
-	goog.base(this, 'disposeInternal');
+  goog.base(this, 'disposeInternal');
 
-	delete this._autoComplete;
-	delete this._inputHandler;
-	delete this._maxLength;
+  delete this.autoComplete_;
+  delete this.inputHandler_;
+  delete this.maxLength_;
 };
 
 /**
  * @param {goog.events.BrowserEvent} evt
  * @private
  */
-npf.ui.form.Text.prototype._onInput = function(evt) {
-	/** @type {string} */
-	var value = goog.string.trim(/** @type {string} */ (this.getRenderer().getValue(this.getValueElement())));
+npf.ui.form.Text.prototype.onInput_ = function(evt) {
+  var renderer = this.getRenderer();
+  /** @type {string} */
+  var value = /** @type {string} */ (renderer.getValue(this.getValueElement()));
+  value = goog.string.trim(value);
 
-	this.setValue(value);
+  this.setValue(value);
 };
 
 /** @inheritDoc */
 npf.ui.form.Text.prototype.initializeInternal = function() {
-	this.setMaxLengthInternal(this._maxLength);
-	this.setAutoCompleteInternal(this._autoComplete);
-	this.bindLabel(this.getValueElement());
+  this.setMaxLengthInternal(this.maxLength_);
+  this.setAutoCompleteInternal(this.autoComplete_);
+  this.bindLabel(this.getValueElement());
 
-	goog.base(this, 'initializeInternal');
+  goog.base(this, 'initializeInternal');
 };
 
 /**
  * @return {string}
  */
 npf.ui.form.Text.prototype.getValue = function() {
-	return /** @type {string} */ (goog.base(this, 'getValue'));
+  return /** @type {string} */ (goog.base(this, 'getValue'));
 };
 
 /**
  * @param {string} value
  */
 npf.ui.form.Text.prototype.setValue = function(value) {
-	goog.base(this, 'setValue', value);
+  goog.base(this, 'setValue', value);
 };
 
 /** @inheritDoc */
 npf.ui.form.Text.prototype.isEmpty = function() {
-	return '' == this.getValue();
+  return '' == this.getValue();
 };
 
 /**
  * @return {boolean}
  */
 npf.ui.form.Text.prototype.isAutoComplete = function() {
-	return this._autoComplete;
+  return this.autoComplete_;
 };
 
 /**
  * @param {boolean} autoComplete
  */
 npf.ui.form.Text.prototype.setAutoComplete = function(autoComplete) {
-	if (this._autoComplete != autoComplete) {
-		this._autoComplete = autoComplete;
-		this.setAutoCompleteInternal(this._autoComplete);
-	}
+  if (this.autoComplete_ != autoComplete) {
+    this.autoComplete_ = autoComplete;
+    this.setAutoCompleteInternal(this.autoComplete_);
+  }
 };
 
 /**
@@ -148,24 +152,24 @@ npf.ui.form.Text.prototype.setAutoComplete = function(autoComplete) {
  * @protected
  */
 npf.ui.form.Text.prototype.setAutoCompleteInternal = function(autoComplete) {
-	this.getRenderer().setAutoComplete(this.getValueElement(), autoComplete);
+  this.getRenderer().setAutoComplete(this.getValueElement(), autoComplete);
 };
 
 /**
  * @return {number}
  */
 npf.ui.form.Text.prototype.getMaxLength = function() {
-	return this._maxLength;
+  return this.maxLength_;
 };
 
 /**
  * @param {number} maxLength
  */
 npf.ui.form.Text.prototype.setMaxLength = function(maxLength) {
-	if (this._maxLength != maxLength) {
-		this._maxLength = maxLength;
-		this.setMaxLengthInternal(this._maxLength);
-	}
+  if (this.maxLength_ != maxLength) {
+    this.maxLength_ = maxLength;
+    this.setMaxLengthInternal(this.maxLength_);
+  }
 };
 
 /**
@@ -173,28 +177,28 @@ npf.ui.form.Text.prototype.setMaxLength = function(maxLength) {
  * @protected
  */
 npf.ui.form.Text.prototype.setMaxLengthInternal = function(maxLength) {
-	this.getRenderer().setMaxLength(this.getValueElement(), maxLength);
+  this.getRenderer().setMaxLength(this.getValueElement(), maxLength);
 };
 
 /**
  * @param {string=} opt_error
  */
 npf.ui.form.Text.prototype.addEmailValidator = function(opt_error) {
-	/** @type {function(string):string} */
-	var validator = function(/** @type {string} */ value) {
-		if (goog.format.EmailAddress.isValidAddress(value)) {
-			return '';
-		} else {
-			return opt_error || this.getEmailError();
-		}
-	};
+  /** @type {function(string):string} */
+  var validator = function(/** @type {string} */ value) {
+    if (goog.format.EmailAddress.isValidAddress(value)) {
+      return '';
+    } else {
+      return opt_error || this.getEmailError();
+    }
+  };
 
-	this.addValidator(goog.bind(validator, this));
+  this.addValidator(goog.bind(validator, this));
 };
 
 /**
  * @return {string}
  */
 npf.ui.form.Text.prototype.getEmailError = function() {
-	return npf.ui.form.Text.ErrorMessage.EMAIL;
+  return npf.ui.form.Text.ErrorMessage.EMAIL;
 };

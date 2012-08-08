@@ -13,11 +13,13 @@ npf.history.TokenTransformer = function() {
 
 
 /** @inheritDoc */
-npf.history.TokenTransformer.prototype.retrieveToken = function(pathPrefix, location) {
-	return location.pathname.substr(pathPrefix.length) + location.search;
+npf.history.TokenTransformer.prototype.retrieveToken = function(pathPrefix,
+                                                                location) {
+  return location.pathname.substr(pathPrefix.length) + location.search;
 };
 
 /** @inheritDoc */
-npf.history.TokenTransformer.prototype.createUrl = function(token, pathPrefix, location) {
-	return pathPrefix + token;
+npf.history.TokenTransformer.prototype.createUrl = function(token, pathPrefix,
+                                                            location) {
+  return pathPrefix + token;
 };
