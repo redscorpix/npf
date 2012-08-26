@@ -8,10 +8,10 @@ goog.require('goog.object');
  * @enum {string}
  */
 npf.dom.svg.Ns = {
-  SVG: 'http://www.w3.org/2000/svg', // SVG namespace
-  XLINK: 'http://www.w3.org/1999/xlink', // XLink namespace
-  EV: 'http://www.w3.org/2001/xml-events', // XML Events namespace
-  XML: 'http://www.w3.org/XML/1998/namespace' // XML namespace
+  SVG: 'http://www.w3.org/2000/svg',
+  XLINK: 'http://www.w3.org/1999/xlink',
+  EV: 'http://www.w3.org/2001/xml-events',
+  XML: 'http://www.w3.org/XML/1998/namespace'
 };
 
 /**
