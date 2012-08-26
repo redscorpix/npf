@@ -23,11 +23,12 @@ goog.addSingletonGetter(npf.ui.form.PasswordRenderer);
  */
 npf.ui.form.PasswordRenderer.prototype.appendFieldElement = function(component,
                                                                      element) {
-  /** @type {Element} */
-  var valueElement = goog.dom.createDom(goog.dom.TagName.INPUT, {
-    'class': this.getValueCssClass(),
-    'name': component.getName(),
-    'type': 'password'
-  });
+  /** @type {!Element} */
+  var valueElement = component.getDomHelper().createDom(
+    goog.dom.TagName.INPUT, {
+      'class': this.getValueCssClass(),
+      'name': component.getName(),
+      'type': 'password'
+    });
   goog.dom.appendChild(this.getContentElement(element), valueElement);
 };

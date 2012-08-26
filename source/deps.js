@@ -3,6 +3,8 @@
 goog.addDependency('../../../source/application/application.js', ['npf.Application'], ['goog.events.EventTarget', 'goog.userAgent']);
 goog.addDependency('../../../source/application/settings.js', ['npf.application.Settings'], ['goog.Disposable', 'goog.object', 'npf.string']);
 goog.addDependency('../../../source/debug/error_reporter.js', ['npf.debug.ErrorReporter'], ['goog.debug.ErrorReporter']);
+goog.addDependency('../../../source/dom/svg.js', ['npf.dom.svg'], ['goog.array', 'goog.object']);
+goog.addDependency('../../../source/dom/tag_name.js', ['npf.dom.TagName'], []);
 goog.addDependency('../../../source/events/event_type.js', ['npf.events.EventType'], []);
 goog.addDependency('../../../source/events/events.js', ['npf.events'], ['goog.dom']);
 goog.addDependency('../../../source/events/resize_handler.js', ['npf.events.ResizeHandler', 'npf.events.ResizeHandler.EventType'], ['goog.dom.FontSizeMonitor', 'goog.events', 'goog.events.EventHandler', 'goog.events.EventTarget']);
@@ -19,7 +21,8 @@ goog.addDependency('../../../source/fx/easing.js', ['npf.fx.easing'], []);
 goog.addDependency('../../../source/fx/keyframe_animation/event.js', ['npf.fx.keyframeAnimation.Event'], ['goog.events.Event']);
 goog.addDependency('../../../source/fx/keyframe_animation/event_type.js', ['npf.fx.keyframeAnimation.EventType'], ['goog.events', 'goog.fx.Transition.EventType']);
 goog.addDependency('../../../source/fx/keyframe_animation/keyframe_animation.js', ['npf.fx.KeyframeAnimation', 'npf.fx.KeyframeAnimation.CssProperty', 'npf.fx.KeyframeAnimation.Direction', 'npf.fx.KeyframeAnimation.PlayState', 'npf.fx.KeyframeAnimation.PreferredTimingFunction'], ['goog.array', 'goog.dom', 'goog.dom.TagName', 'goog.events.EventHandler', 'goog.fx.Transition', 'goog.fx.TransitionBase', 'goog.math.Coordinate', 'goog.math.Rect', 'goog.math.Size', 'goog.object', 'goog.style', 'npf.fx.Animation', 'npf.fx.keyframeAnimation.Event', 'npf.fx.keyframeAnimation.EventType', 'npf.userAgent.Support', 'npf.userAgent.support']);
-goog.addDependency('../../../source/history/history.js', ['npf.History', 'npf.History.EventType'], ['goog.History', 'goog.Uri', 'goog.dom', 'goog.dom.TagName', 'goog.dom.classes', 'goog.events', 'goog.events.EventTarget', 'goog.history.EventType', 'goog.history.Html5History', 'npf.events.TapHandler', 'npf.history.TokenTransformer']);
+goog.addDependency('../../../source/fx/transition_helper.js', ['npf.fx.TransitionHelper'], ['goog.Disposable', 'goog.fx.Transition.EventType', 'goog.fx.TransitionBase', 'goog.object']);
+goog.addDependency('../../../source/history/history.js', ['npf.History', 'npf.History.EventType'], ['goog.History', 'goog.Uri', 'goog.dom', 'goog.dom.TagName', 'goog.dom.classes', 'goog.events', 'goog.events.EventTarget', 'goog.history.EventType', 'goog.history.Html5History', 'npf.events.TouchHandler', 'npf.history.TokenTransformer']);
 goog.addDependency('../../../source/history/token_transformer.js', ['npf.history.TokenTransformer'], ['goog.history.Html5History.TokenTransformer']);
 goog.addDependency('../../../source/net/xhr_io.js', ['npf.net.XhrIo'], ['goog.Uri', 'goog.Uri.QueryData', 'goog.net.XhrIo', 'goog.object', 'goog.structs']);
 goog.addDependency('../../../source/pages/manager.js', ['npf.pages.Manager'], ['goog.Uri', 'goog.array', 'goog.events', 'goog.events.EventHandler', 'goog.events.EventTarget', 'goog.net.HttpStatus', 'goog.object', 'npf.Router', 'npf.pages.Page', 'npf.pages.Page.EventType', 'npf.pages.Request']);
@@ -40,7 +43,7 @@ goog.addDependency('../../../source/ui/form/field_renderer.js', ['npf.ui.form.Fi
 goog.addDependency('../../../source/ui/form/form.js', ['npf.ui.Form'], ['goog.events', 'goog.object', 'npf.ui.RenderComponent', 'npf.ui.form.EventType', 'npf.ui.form.Field', 'npf.ui.form.Renderer', 'npf.ui.form.SubmitButton']);
 goog.addDependency('../../../source/ui/form/password.js', ['npf.ui.form.Password'], ['npf.ui.form.PasswordRenderer', 'npf.ui.form.Text']);
 goog.addDependency('../../../source/ui/form/password_renderer.js', ['npf.ui.form.PasswordRenderer'], ['goog.dom', 'goog.dom.TagName', 'npf.ui.form.TextRenderer']);
-goog.addDependency('../../../source/ui/form/renderer.js', ['npf.ui.form.Renderer'], ['goog.dom', 'goog.dom.TagName', 'npf.ui.renderComponent.Renderer']);
+goog.addDependency('../../../source/ui/form/renderer.js', ['npf.ui.form.Renderer'], ['goog.dom.TagName', 'npf.ui.renderComponent.Renderer']);
 goog.addDependency('../../../source/ui/form/submit_button.js', ['npf.ui.form.SubmitButton'], []);
 goog.addDependency('../../../source/ui/form/text.js', ['npf.ui.form.Text'], ['goog.events.InputHandler', 'goog.format.EmailAddress', 'goog.string', 'npf.ui.form.Field', 'npf.ui.form.TextRenderer']);
 goog.addDependency('../../../source/ui/form/text_renderer.js', ['npf.ui.form.TextRenderer'], ['goog.dom', 'goog.dom.TagName', 'npf.ui.form.FieldRenderer']);
@@ -55,7 +58,7 @@ goog.addDependency('../../../source/ui/page_paginator/dragger.js', ['npf.ui.page
 goog.addDependency('../../../source/ui/page_paginator/page_paginator.js', ['npf.ui.PagePaginator', 'npf.ui.PagePaginator.EventType'], ['goog.events', 'npf.events.TapHandler', 'npf.ui.RenderComponent', 'npf.ui.pagePaginator.Changer', 'npf.ui.pagePaginator.Renderer']);
 goog.addDependency('../../../source/ui/page_paginator/renderer.js', ['npf.ui.pagePaginator.Renderer'], ['goog.dom', 'goog.dom.TagName', 'goog.dom.classes', 'npf.ui.renderComponent.Renderer']);
 goog.addDependency('../../../source/ui/render_component/render_component.js', ['npf.ui.RenderComponent'], ['goog.array', 'goog.ui.Component.Error', 'npf.ui.Component', 'npf.ui.renderComponent.Renderer']);
-goog.addDependency('../../../source/ui/render_component/renderer.js', ['npf.ui.renderComponent.Renderer'], ['goog.array', 'goog.dom', 'goog.dom.TagName', 'goog.dom.classes']);
+goog.addDependency('../../../source/ui/render_component/renderer.js', ['npf.ui.renderComponent.Renderer'], ['goog.array', 'goog.dom.TagName', 'goog.dom.classes']);
 goog.addDependency('../../../source/ui/scroll_bar/animation.js', ['npf.ui.scrollBar.Animation'], ['npf.fx.Animation']);
 goog.addDependency('../../../source/ui/scroll_bar/button_animation.js', ['npf.ui.scrollBar.ButtonAnimation'], ['goog.async.Delay', 'goog.events', 'goog.events.EventTarget', 'goog.fx.anim']);
 goog.addDependency('../../../source/ui/scroll_bar/horizontal_scroller.js', ['npf.ui.scrollBar.HorizontalScroller'], ['goog.math.Rect', 'goog.style', 'npf.ui.scrollBar.Scroller']);

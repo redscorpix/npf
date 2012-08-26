@@ -49,8 +49,8 @@ npf.ui.Image.prototype.caption_ = null;
 
 /** @inheritDoc */
 npf.ui.Image.prototype.createDom = function() {
-  /** @type {Element} */
-  var element = goog.dom.createDom(goog.dom.TagName.IMG, {
+  /** @type {!Element} */
+  var element = this.getDomHelper().createDom(goog.dom.TagName.IMG, {
     'alt': this.caption_ || '',
     'src': this.src_,
     'width': this.size_.width,

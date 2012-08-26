@@ -30,11 +30,11 @@ npf.ui.stickyHead.HeadRenderer.CssClass = {
 
 
 /** @inheritDoc */
-npf.ui.stickyHead.HeadRenderer.prototype.createDom = function(block) {
-	/** @type {!Element} */
-	var element = goog.base(this, 'createDom', block);
+npf.ui.stickyHead.HeadRenderer.prototype.createDom = function(component) {
+	/** @type {Element} */
+	var element = goog.base(this, 'createDom', component);
 
-	if (block.isSticky()) {
+	if (component.isSticky()) {
 		goog.dom.classes.add(element, this.getStickyCssClass());
 	}
 
@@ -54,12 +54,12 @@ npf.ui.stickyHead.HeadRenderer.prototype.getStickyCssClass = function() {
 };
 
 /**
- * @param {!npf.ui.stickyHead.Head} block
+ * @param {!npf.ui.stickyHead.Head} component
  * @param {boolean} visible
  */
-npf.ui.stickyHead.HeadRenderer.prototype.setVisible = function(block, visible) {
+npf.ui.stickyHead.HeadRenderer.prototype.setVisible = function(component, visible) {
 	/** @type {Element} */
-	var element = block.getElement();
+	var element = component.getElement();
 
 	if (element) {
 		goog.style.setStyle(element, 'display', visible ? '' : 'none');

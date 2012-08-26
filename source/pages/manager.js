@@ -244,8 +244,13 @@ npf.pages.Manager.prototype.navigateErrorInternal = function(status, request) {
  * @protected
  */
 npf.pages.Manager.prototype.navigatePageInternal = function(request, Page) {
-  this.unloadPage(this.getCurrentPage());
-  this.loadPage(request, Page);
+  /** @type {npf.pages.Page} */
+  var currentPage = this.getCurrentPage();
+
+  if (!(currentPage && currentPage.processUrl(request))) {
+    this.unloadPage(this.getCurrentPage());
+    this.loadPage(request, Page);
+  }
 };
 
 /**

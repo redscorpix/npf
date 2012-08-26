@@ -32,39 +32,38 @@ npf.ui.form.FieldRenderer.prototype.getCssClass = function() {
 npf.ui.form.FieldRenderer.prototype.createDom = function(component) {
   /** @type {!Element} */
   var element = goog.base(this, 'createDom', component);
-
-  /** @type {Element} */
-  var labelContainerElement = goog.dom.createDom(goog.dom.TagName.DIV,
-    this.getLabelContainerCssClass());
+  /** @type {!Element} */
+  var labelContainerElement = component.getDomHelper().createDom(
+    goog.dom.TagName.DIV, this.getLabelContainerCssClass());
   /** @type {string} */
   var labelContent = component.getLabel();
 
   if (labelContent) {
-    /** @type {Element} */
-    var labelElement = goog.dom.createDom(goog.dom.TagName.DIV,
-      this.getLabelCssClass(), labelContent);
+    /** @type {!Element} */
+    var labelElement = component.getDomHelper().createDom(
+      goog.dom.TagName.DIV, this.getLabelCssClass(), labelContent);
     goog.dom.appendChild(labelContainerElement, labelElement);
   }
 
   goog.dom.appendChild(element, labelContainerElement);
 
-  /** @type {Element} */
-  var contentElement = goog.dom.createDom(goog.dom.TagName.DIV,
-    this.getContentCssClass());
+  /** @type {!Element} */
+  var contentElement = component.getDomHelper().createDom(
+    goog.dom.TagName.DIV, this.getContentCssClass());
   goog.dom.appendChild(element, contentElement);
 
-  /** @type {Element} */
-  var errorElement = goog.dom.createDom(goog.dom.TagName.DIV,
-    this.getErrorCssClass(), component.getError());
+  /** @type {!Element} */
+  var errorElement = component.getDomHelper().createDom(
+    goog.dom.TagName.DIV, this.getErrorCssClass(), component.getError());
   goog.dom.appendChild(element, errorElement);
 
   /** @type {string} */
   var notice = component.getNotice();
 
   if (notice) {
-    /** @type {Element} */
-    var noticeElement = goog.dom.createDom(goog.dom.TagName.DIV,
-      this.getNoticeCssClass(), notice);
+    /** @type {!Element} */
+    var noticeElement = component.getDomHelper().createDom(
+      goog.dom.TagName.DIV, this.getNoticeCssClass(), notice);
     goog.dom.appendChild(element, noticeElement);
   }
 

@@ -49,8 +49,8 @@ npf.ui.form.DatePickerRenderer.prototype.appendDayElement = function(component) 
     this.getValueCssClass(),
     this.getDayCssClass()
   ].join(' ');
-  /** @type {Element} */
-  var dayElement = goog.dom.createDom(goog.dom.TagName.SELECT, {
+  /** @type {!Element} */
+  var dayElement = component.getDomHelper().createDom(goog.dom.TagName.SELECT, {
     'class': className,
     'name': component.getName() + npf.ui.form.DatePickerRenderer.NameSuffix.DAY
   });
@@ -67,8 +67,8 @@ npf.ui.form.DatePickerRenderer.prototype.appendMonthElement = function(component
     this.getValueCssClass(),
     this.getMonthCssClass()
   ].join(' ');
-  /** @type {Element} */
-  var monthElement = goog.dom.createDom(goog.dom.TagName.SELECT, {
+  /** @type {!Element} */
+  var monthElement = component.getDomHelper().createDom(goog.dom.TagName.SELECT, {
     'class': className,
     'name': component.getName() + npf.ui.form.DatePickerRenderer.NameSuffix.MONTH
   });
@@ -85,8 +85,8 @@ npf.ui.form.DatePickerRenderer.prototype.appendYearElement = function(component)
     this.getValueCssClass(),
     this.getYearCssClass()
   ].join(' ');
-  /** @type {Element} */
-  var yearElement = goog.dom.createDom(goog.dom.TagName.SELECT, {
+  /** @type {!Element} */
+  var yearElement = component.getDomHelper().createDom(goog.dom.TagName.SELECT, {
     'class': className,
     'name': component.getName() + npf.ui.form.DatePickerRenderer.NameSuffix.YEAR
   });

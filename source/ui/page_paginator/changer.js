@@ -364,9 +364,13 @@ npf.ui.pagePaginator.Changer.prototype.onDragEnd_ = function(evt) {
     }
   }
 
+  goog.dispose(this.animation_);
+  this.animation_ = null;
+
   goog.style.setStyle(this.contentElement_, 'left', '');
   goog.dom.removeNode(this.emptyElement_);
   this.emptyElement_ = null;
+
   this.animateReturn_(left, direction ? timing : null);
 };
 
@@ -462,8 +466,6 @@ npf.ui.pagePaginator.Changer.prototype.onAnimationFinish_ = function(evt) {
  */
 npf.ui.pagePaginator.Changer.prototype.animateReturn_ = function(fromX,
                                                                  opt_timing) {
-  goog.dispose(this.animation_);
-
   /** @type {!Array.<number>} */
   var timing = opt_timing || [0.25, 0.1, 0.25, 1];
   /** @type {!Object} */

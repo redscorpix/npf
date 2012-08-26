@@ -132,6 +132,7 @@ npf.ui.SearchInput.prototype.disposeInternal = function() {
 
 /**
  * @return {npf.ui.searchInput.Renderer}
+ * @override
  */
 npf.ui.SearchInput.prototype.getRenderer = function() {
   return /** @type {npf.ui.searchInput.Renderer} */ (goog.base(this, 'getRenderer'));
@@ -139,6 +140,7 @@ npf.ui.SearchInput.prototype.getRenderer = function() {
 
 /**
  * @param {npf.ui.searchInput.Renderer} renderer
+ * @override
  */
 npf.ui.SearchInput.prototype.setRenderer = function(renderer) {
   goog.base(this, 'setRenderer', renderer);

@@ -47,8 +47,9 @@ npf.ui.form.TextRenderer.prototype.appendValueElement = function(component,
     properties['autocomplete'] = 'off';
   }
 
-  /** @type {Element} */
-  var valueElement = goog.dom.createDom(goog.dom.TagName.INPUT, properties);
+  /** @type {!Element} */
+  var valueElement = component.getDomHelper().createDom(
+    goog.dom.TagName.INPUT, properties);
   goog.dom.appendChild(this.getContentElement(element), valueElement);
 };
 

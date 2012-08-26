@@ -7,7 +7,7 @@ goog.require('npf.ui.navigation.Renderer');
 
 
 /**
- * @param {npf.ui.navigation.Renderer=} opt_renderer Renderer used to render or decorate the release.
+ * @param {npf.ui.navigation.Renderer=} opt_renderer Renderer used to render or decorate the component.
  * @param {goog.dom.DomHelper=} opt_domHelper DOM helper, used for document interaction.
  * @constructor
  * @extends {npf.ui.RenderComponent}
@@ -45,7 +45,7 @@ npf.ui.Navigation.prototype.selectedItem_ = null;
 npf.ui.Navigation.prototype.createDom = function() {
   /** @type {npf.ui.navigation.Renderer} */
   var renderer = this.getRenderer();
-  /** @type {!Element} */
+  /** @type {Element} */
   var element = renderer.createDom(this);
   this.setElementInternal(element);
 };
@@ -61,6 +61,7 @@ npf.ui.Navigation.prototype.disposeInternal = function() {
 
 /**
  * @return {npf.ui.navigation.Renderer}
+ * @override
  */
 npf.ui.Navigation.prototype.getRenderer = function() {
   return /** @type {npf.ui.navigation.Renderer} */ (goog.base(this, 'getRenderer'));

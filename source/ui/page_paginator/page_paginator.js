@@ -10,21 +10,21 @@ goog.require('npf.ui.pagePaginator.Renderer');
 
 /**
  * @param {number} pageCount
- * @param {number=} optpage_
- * @param {npf.ui.pagePaginator.Renderer=} opt_renderer Renderer used to render or decorate the release.
+ * @param {number=} opt_page
+ * @param {npf.ui.pagePaginator.Renderer=} opt_renderer Renderer used to render or decorate the component.
  * @param {goog.dom.DomHelper=} opt_domHelper DOM helper, used for document interaction.
  * @constructor
  * @extends {npf.ui.RenderComponent}
  */
-npf.ui.PagePaginator = function(pageCount, optpage_, opt_renderer,
+npf.ui.PagePaginator = function(pageCount, opt_page, opt_renderer,
                                 opt_domHelper) {
   goog.base(this, opt_renderer ||
     npf.ui.pagePaginator.Renderer.getInstance(), opt_domHelper);
 
   this.pageCount_ = pageCount;
 
-  if (goog.isNumber(optpage_)) {
-    this.pageIndex_ = optpage_ % this.pageCount_;
+  if (goog.isNumber(opt_page)) {
+    this.pageIndex_ = opt_page % this.pageCount_;
   }
 };
 goog.inherits(npf.ui.PagePaginator, npf.ui.RenderComponent);
@@ -180,6 +180,7 @@ npf.ui.PagePaginator.prototype.disposeInternal = function() {
 
 /**
  * @return {npf.ui.pagePaginator.Renderer}
+ * @override
  */
 npf.ui.PagePaginator.prototype.getRenderer = function() {
   return /** @type {npf.ui.pagePaginator.Renderer} */ (goog.base(this, 'getRenderer'));
@@ -251,6 +252,14 @@ npf.ui.PagePaginator.prototype.onPageChange_ = function(evt) {
   this.pageIndex_ = pageIndex;
 
   this.updateContent_();
+  this.onChange(this.pageIndex_);
+};
+
+/**
+ * @param {number} index
+ * @protected
+ */
+npf.ui.PagePaginator.prototype.onChange = function(index) {
   this.dispatchEvent({
     type: npf.ui.PagePaginator.EventType.CHANGE,
     pageIndex: this.pageIndex_

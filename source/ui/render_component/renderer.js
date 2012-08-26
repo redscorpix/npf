@@ -1,9 +1,8 @@
 goog.provide('npf.ui.renderComponent.Renderer');
 
 goog.require('goog.array');
-goog.require('goog.dom');
-goog.require('goog.dom.classes');
 goog.require('goog.dom.TagName');
+goog.require('goog.dom.classes');
 
 
 /**
@@ -46,46 +45,46 @@ npf.ui.renderComponent.Renderer.getCustomRenderer = function(ctor,
  * by this renderer.
  * @type {string}
  */
-npf.ui.renderComponent.Renderer.CSS_CLASS = goog.getCssName('block');
+npf.ui.renderComponent.Renderer.CSS_CLASS = goog.getCssName('npf-block');
 
 /**
- * @param {npf.ui.RenderComponent} block
- * @return {!Element}
+ * @param {npf.ui.RenderComponent} component
+ * @return {Element}
  */
-npf.ui.renderComponent.Renderer.prototype.createDom = function(block) {
+npf.ui.renderComponent.Renderer.prototype.createDom = function(component) {
   /** @type {!Element} */
-  var element = goog.dom.createDom(goog.dom.TagName.DIV,
-    this.getClassNames(block).join(' '));
+  var element = component.getDomHelper().createDom(goog.dom.TagName.DIV,
+    this.getClassNames(component).join(' '));
 
   return element;
 };
 
 /**
- * Takes the block's root element and returns the parent element of the
- * block's contents.  Since by default blocks are rendered as a single
+ * Takes the component's root element and returns the parent element of the
+ * component's contents.  Since by default components are rendered as a single
  * DIV, the default implementation returns the element itself.  Subclasses
  * with more complex DOM structures must override this method as needed.
- * @param {Element} element Root element of the block whose content element
+ * @param {Element} element Root element of the component whose content element
  *     is to be returned.
- * @return {Element} The block's content element.
+ * @return {Element} The component's content element.
  */
 npf.ui.renderComponent.Renderer.prototype.getContentElement = function(element) {
   return element;
 };
 
 /**
- * Updates the block's DOM by adding or removing the specified class name
+ * Updates the component's DOM by adding or removing the specified class name
  * to/from its root element. Because of this, subclasses should use this method when
- * modifying class names on the block's root element.
- * @param {npf.ui.RenderComponent|Element} block Block instance (or root element) to be updated.
+ * modifying class names on the component's root element.
+ * @param {npf.ui.RenderComponent|Element} component Component instance (or root element) to be updated.
  * @param {string} className CSS class name to add or remove.
  * @param {boolean} enable Whether to add or remove the class name.
  */
-npf.ui.renderComponent.Renderer.prototype.enableClassName = function(block,
+npf.ui.renderComponent.Renderer.prototype.enableClassName = function(component,
                                                                      className,
                                                                      enable) {
-  var element = (/** @type {Element} */ block.getElement ? block.getElement() :
-    block);
+  var element = (/** @type {Element} */ component.getElement ?
+    component.getElement() : component);
 
   if (element) {
     goog.dom.classes.enable(element, className, enable);
@@ -94,17 +93,17 @@ npf.ui.renderComponent.Renderer.prototype.enableClassName = function(block,
 
 
 /**
- * Updates the block's DOM by adding or removing the specified extra class
+ * Updates the component's DOM by adding or removing the specified extra class
  * name to/from its element.
- * @param {npf.ui.RenderComponent} block
+ * @param {npf.ui.RenderComponent} component
  * @param {string} className CSS class name to add or remove.
  * @param {boolean} enable Whether to add or remove the class name.
  */
-npf.ui.renderComponent.Renderer.prototype.enableExtraClassName = function(block,
+npf.ui.renderComponent.Renderer.prototype.enableExtraClassName = function(component,
                                                                           className,
                                                                           enable) {
   // The base class implementation is trivial; subclasses should override as needed.
-  this.enableClassName(block, className, enable);
+  this.enableClassName(component, className, enable);
 };
 
 /**
@@ -119,20 +118,20 @@ npf.ui.renderComponent.Renderer.prototype.canDecorate = function(element) {
 
 /**
  * Default implementation of {@code decorate} for {@link npf.ui.RenderComponent}s.
- * Initializes the block's ID, content, and state based on the ID of the
+ * Initializes the component's ID, content, and state based on the ID of the
  * element, its child nodes, and its CSS classes, respectively. Returns the
  * element.
- * @param {npf.ui.RenderComponent} block Block instance to decorate the element.
+ * @param {npf.ui.RenderComponent} component Component instance to decorate the element.
  * @param {Element} element Element to decorate.
  * @return {Element} Decorated element.
  */
-npf.ui.renderComponent.Renderer.prototype.decorate = function(block, element) {
-  // Set the block's ID to the decorated element's DOM ID, if any.
+npf.ui.renderComponent.Renderer.prototype.decorate = function(component, element) {
+  // Set the component's ID to the decorated element's DOM ID, if any.
   if (element.id) {
-    block.setId(element.id);
+    component.setId(element.id);
   }
 
-  // Initialize the block's state based on the decorated element's CSS class.
+  // Initialize the component's state based on the decorated element's CSS class.
   // This implementation is optimized to minimize object allocations, string
   // comparisons, and DOM access.
   var rendererClassName = this.getCssClass();
@@ -141,7 +140,7 @@ npf.ui.renderComponent.Renderer.prototype.decorate = function(block, element) {
   var hasStructuralClassName = false;
   var hasCombinedClassName = false;
   var classNames = goog.dom.classes.get(element);
-  var extraClassNames = block.getExtraClassNames();
+  var extraClassNames = component.getExtraClassNames();
 
   goog.array.forEach(classNames, function(className) {
     if (!hasRendererClassName && className == rendererClassName) {
@@ -156,7 +155,7 @@ npf.ui.renderComponent.Renderer.prototype.decorate = function(block, element) {
   }, this);
 
   // Make sure the element has the renderer's CSS classes applied, as well as
-  // any extra class names set on the block.
+  // any extra class names set on the component.
   if (!hasRendererClassName) {
     classNames.push(rendererClassName);
 
@@ -199,7 +198,7 @@ npf.ui.renderComponent.Renderer.prototype.getCssClass = function() {
  * Unlike the class name returned by {@link #getCssClass}, the structural class
  * name may be shared among different renderers that generate similar DOM
  * structures.  The structural class name also serves as the basis of derived
- * class names used to identify and style structural elements of the block's
+ * class names used to identify and style structural elements of the component's
  * DOM, as well as the basis for state-specific class names.  The default
  * implementation returns the same class name as {@link #getCssClass}, but
  * subclasses are expected to override this method as needed.
@@ -211,23 +210,23 @@ npf.ui.renderComponent.Renderer.prototype.getStructuralCssClass = function() {
 };
 
 /**
- * Returns all CSS class names applicable to the given block, based on its
+ * Returns all CSS class names applicable to the given component, based on its
  * state.  The return value is an array of strings containing
  * <ol>
  *   <li>the renderer-specific CSS class returned by {@link #getCssClass},
  *       followed by
  *   <li>the structural CSS class returned by {@link getStructuralCssClass} (if
  *       different from the renderer-specific CSS class), followed by
- *   <li>any extra classes returned by the block's {@code getExtraClassNames}
+ *   <li>any extra classes returned by the component's {@code getExtraClassNames}
  *       method and
  * </ol>
- * Since all blocks have at least one renderer-specific CSS class name, this
+ * Since all components have at least one renderer-specific CSS class name, this
  * method is guaranteed to return an array of at least one element.
- * @param {npf.ui.RenderComponent} block Block whose CSS classes are to be returned.
- * @return {Array.<string>} Array of CSS class names applicable to the block.
+ * @param {npf.ui.RenderComponent} component Component whose CSS classes are to be returned.
+ * @return {Array.<string>} Array of CSS class names applicable to the component.
  * @protected
  */
-npf.ui.renderComponent.Renderer.prototype.getClassNames = function(block) {
+npf.ui.renderComponent.Renderer.prototype.getClassNames = function(component) {
   var cssClass = this.getCssClass();
   // Start with the renderer-specific class name.
   var classNames = [cssClass];
@@ -239,7 +238,7 @@ npf.ui.renderComponent.Renderer.prototype.getClassNames = function(block) {
   }
 
   // Add extra class names, if any.
-  var extraClassNames = block.getExtraClassNames();
+  var extraClassNames = component.getExtraClassNames();
 
   if (extraClassNames) {
     classNames.push.apply(classNames, extraClassNames);

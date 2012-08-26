@@ -25,57 +25,79 @@ npf.ui.pagePaginator.Renderer.CSS_CLASS = goog.getCssName('pagePaginator');
 
 /**
  * @param {npf.ui.PagePaginator} component
- * @return {!Element}
+ * @return {Element}
  */
 npf.ui.pagePaginator.Renderer.prototype.createDom = function(component) {
-  /** @type {!Element} */
+  /** @type {Element} */
   var element = goog.base(this, 'createDom', component);
   /** @type {Element} */
-  var prevElement = this.createPrevElement();
+  var prevElement = this.createPrevElement(component);
   /** @type {Element} */
-  var nextElement = this.createNextElement();
+  var nextElement = this.createNextElement(component);
   /** @type {Element} */
-  var containerElement = this.createContainerElement();
+  var containerElement = this.createContainerElement(component);
   /** @type {Element} */
-  var contentElement = this.createContentElement();
+  var contentElement = this.createContentElement(component);
   /** @type {Element} */
   var indicatorsElement = this.createPageIndicatorsElement(component);
 
-  goog.dom.appendChild(element, prevElement);
-  goog.dom.appendChild(element, nextElement);
-  goog.dom.appendChild(element, indicatorsElement);
-  goog.dom.appendChild(containerElement, contentElement);
-  goog.dom.appendChild(element, containerElement);
+  if (prevElement) {
+    goog.dom.appendChild(element, prevElement);
+  }
+
+  if (nextElement) {
+    goog.dom.appendChild(element, nextElement);
+  }
+
+  if (indicatorsElement) {
+    goog.dom.appendChild(element, indicatorsElement);
+  }
+
+  if (contentElement) {
+    goog.dom.appendChild(containerElement, contentElement);
+  }
+
+  if (containerElement) {
+    goog.dom.appendChild(element, containerElement);
+  }
 
   return element;
 };
 
 /**
- * @return {!Element}
+ * @param {npf.ui.PagePaginator} component
+ * @return {Element}
  */
-npf.ui.pagePaginator.Renderer.prototype.createPrevElement = function() {
-  return goog.dom.createDom(goog.dom.TagName.INS, this.getPrevCssClass());
+npf.ui.pagePaginator.Renderer.prototype.createPrevElement = function(component) {
+  return component.getDomHelper().createDom(goog.dom.TagName.INS,
+    this.getPrevCssClass());
 };
 
 /**
- * @return {!Element}
+ * @param {npf.ui.PagePaginator} component
+ * @return {Element}
  */
-npf.ui.pagePaginator.Renderer.prototype.createNextElement = function() {
-  return goog.dom.createDom(goog.dom.TagName.INS, this.getNextCssClass());
+npf.ui.pagePaginator.Renderer.prototype.createNextElement = function(component) {
+  return component.getDomHelper().createDom(goog.dom.TagName.INS,
+    this.getNextCssClass());
 };
 
 /**
- * @return {!Element}
+ * @param {npf.ui.PagePaginator} component
+ * @return {Element}
  */
-npf.ui.pagePaginator.Renderer.prototype.createContainerElement = function() {
-  return goog.dom.createDom(goog.dom.TagName.DIV, this.getContainerCssClass());
+npf.ui.pagePaginator.Renderer.prototype.createContainerElement = function(component) {
+  return component.getDomHelper().createDom(goog.dom.TagName.DIV,
+    this.getContainerCssClass());
 };
 
 /**
- * @return {!Element}
+ * @param {npf.ui.PagePaginator} component
+ * @return {Element}
  */
-npf.ui.pagePaginator.Renderer.prototype.createContentElement = function() {
-  return goog.dom.createDom(goog.dom.TagName.DIV, this.getContentCssClass());
+npf.ui.pagePaginator.Renderer.prototype.createContentElement = function(component) {
+  return component.getDomHelper().createDom(goog.dom.TagName.DIV,
+    this.getContentCssClass());
 };
 
 /**
@@ -83,15 +105,15 @@ npf.ui.pagePaginator.Renderer.prototype.createContentElement = function() {
  * @return {Element}
  */
 npf.ui.pagePaginator.Renderer.prototype.createPageIndicatorsElement = function(component) {
-  /** @type {Element} */
-  var element = goog.dom.createDom(goog.dom.TagName.INS,
+  /** @type {!Element} */
+  var element = component.getDomHelper().createDom(goog.dom.TagName.INS,
     this.getPageIndicatorsCssClass());
   /** @type {number} */
   var pageCount = component.getPageCount();
 
   for (var i = 0; i < pageCount; i++) {
-    /** @type {Element} */
-    var subElement = goog.dom.createDom(goog.dom.TagName.INS,
+    /** @type {!Element} */
+    var subElement = component.getDomHelper().createDom(goog.dom.TagName.INS,
       this.getPageIndicatorCssClass());
     goog.dom.appendChild(element, subElement);
   }
