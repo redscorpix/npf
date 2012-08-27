@@ -27,7 +27,7 @@ goog.inherits(npf.ui.RenderComponent, npf.ui.Component);
 npf.ui.RenderComponent.prototype.renderer_;
 
 /**
- * Additional class name(s) to apply to the block's root element, if any.
+ * Additional class name(s) to apply to the component's root element, if any.
  * @type {Array.<string>?}
  * @private
  */
@@ -35,8 +35,8 @@ npf.ui.RenderComponent.prototype.extraClassNames_ = null;
 
 
 /**
- * Creates the block's DOM.  Overrides {@link goog.ui.Component#createDom} by
- * delegating DOM manipulation to the block's renderer.
+ * Creates the component's DOM.  Overrides {@link goog.ui.Component#createDom} by
+ * delegating DOM manipulation to the component's renderer.
  * @override
  */
 npf.ui.RenderComponent.prototype.createDom = function() {
@@ -48,7 +48,7 @@ npf.ui.RenderComponent.prototype.createDom = function() {
 /**
  * Decorates the given element with this component. Overrides {@link
  * goog.ui.Component#decorateInternal} by delegating DOM manipulation
- * to the block's renderer.
+ * to the component's renderer.
  * @param {Element} element Element to decorate.
  * @protected
  * @override
@@ -68,7 +68,7 @@ npf.ui.RenderComponent.prototype.disposeInternal = function() {
 
 /**
  * Returns the DOM element into which child components are to be rendered,
- * or null if the block itself hasn't been rendered yet.  Overrides
+ * or null if the component itself hasn't been rendered yet.  Overrides
  * {@link goog.ui.Component#getContentElement} by delegating to the renderer.
  * @return {Element} Element to contain child elements (null if none).
  */
@@ -99,7 +99,7 @@ npf.ui.RenderComponent.prototype.getRenderer = function() {
  * Registers the given renderer with the component.  Changing renderers after
  * the component has entered the document is an error.
  * @param {npf.ui.renderComponent.Renderer} renderer Renderer used by the component.
- * @throws {Error} If the block is already in the document.
+ * @throws {Error} If the component is already in the document.
  */
 npf.ui.RenderComponent.prototype.setRenderer = function(renderer) {
   if (this.isInDocument()) {

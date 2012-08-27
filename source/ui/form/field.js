@@ -112,6 +112,7 @@ npf.ui.form.Field.prototype.disposeInternal = function() {
 
 /**
  * @return {npf.ui.form.FieldRenderer}
+ * @override
  */
 npf.ui.form.Field.prototype.getRenderer = function() {
   return /** @type {npf.ui.form.FieldRenderer} */ (goog.base(this, 'getRenderer'));
@@ -119,6 +120,7 @@ npf.ui.form.Field.prototype.getRenderer = function() {
 
 /**
  * @param {npf.ui.form.FieldRenderer} renderer
+ * @override
  */
 npf.ui.form.Field.prototype.setRenderer = function(renderer) {
   goog.base(this, 'setRenderer', renderer);
@@ -282,7 +284,7 @@ npf.ui.form.Field.prototype.getLabel = function() {
 
 /**
  * @param {string} label
- * @throws {Error} If the block is already in the document.
+ * @throws {Error} If the component is already in the document.
  */
 npf.ui.form.Field.prototype.setLabel = function(label) {
   if (this.isInDocument()) {
@@ -302,7 +304,7 @@ npf.ui.form.Field.prototype.getNotice = function() {
 
 /**
  * @param {string} notice
- * @throws {Error} If the block is already in the document.
+ * @throws {Error} If the component is already in the document.
  */
 npf.ui.form.Field.prototype.setNotice = function(notice) {
   if (this.isInDocument()) {

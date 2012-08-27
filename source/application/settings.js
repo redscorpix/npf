@@ -86,7 +86,7 @@ npf.application.Settings.prototype.disposeInternal = function() {
 };
 
 /**
- * @param {Object} jsonSettings
+ * @param {!Object} jsonSettings
  * @return {boolean}
  */
 npf.application.Settings.prototype.parse = function(jsonSettings) {

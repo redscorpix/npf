@@ -7,7 +7,7 @@ goog.require('goog.dom');
  * Checks if a mouse event (mouseover or mouseout) occured below an element.
  * @param {goog.events.BrowserEvent} evt Mouse event (should be mouseover or
  *                                       mouseout).
- * @param {Element} element The ancestor element.
+ * @param {Node} element The ancestor element.
  * @return {boolean} Whether the event has a relatedTarget (the element the
  *                   mouse is coming from) and it's a descendent of elem.
  */

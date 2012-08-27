@@ -9,7 +9,7 @@ goog.require('npf.ui.stickyHead.Renderer');
 
 
 /**
- * @param {npf.ui.stickyHead.Renderer=} opt_renderer Renderer used to render or decorate the release.
+ * @param {npf.ui.stickyHead.Renderer=} opt_renderer Renderer used to render or decorate the component.
  * @param {goog.dom.DomHelper=} opt_domHelper DOM helper, used for document interaction.
  * @constructor
  * @extends {npf.ui.RenderComponent}

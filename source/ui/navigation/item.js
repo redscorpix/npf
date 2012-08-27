@@ -9,7 +9,7 @@ goog.require('npf.ui.navigation.ItemRenderer');
  * @param {string} type
  * @param {string} url
  * @param {string} caption
- * @param {npf.ui.navigation.ItemRenderer=} opt_renderer Renderer used to render or decorate the release.
+ * @param {npf.ui.navigation.ItemRenderer=} opt_renderer Renderer used to render or decorate the component.
  * @param {goog.dom.DomHelper=} opt_domHelper DOM helper, used for document interaction.
  * @constructor
  * @extends {npf.ui.RenderComponent}
@@ -80,6 +80,7 @@ npf.ui.navigation.Item.prototype.disposeInternal = function() {
 
 /**
  * @return {npf.ui.navigation.ItemRenderer}
+ * @override
  */
 npf.ui.navigation.Item.prototype.getRenderer = function() {
   return /** @type {npf.ui.navigation.ItemRenderer} */ (goog.base(this, 'getRenderer'));

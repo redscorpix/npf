@@ -26,7 +26,7 @@ goog.require('npf.userAgent.support');
  * @param {Element} element
  * @param {number} duration in ms
  * @param {Array.<number>=} opt_acc defaults to
- *                                  npf.fx.KeyframeAnimation.PreferredTimingFunction.LINEAR
+ *                      npf.fx.KeyframeAnimation.PreferredTimingFunction.LINEAR
  * @constructor
  * @implements {goog.fx.Transition}
  * @extends {goog.fx.TransitionBase}
@@ -36,6 +36,10 @@ npf.fx.KeyframeAnimation = function(element, duration, opt_acc) {
 
   this.element = element;
   this.duration = duration;
+
+  this.styleElement_ = goog.dom.createDom(goog.dom.TagName.STYLE);
+  goog.dom.appendChild(document.head, this.styleElement_);
+
   this.accel_ = opt_acc ||
     npf.fx.KeyframeAnimation.PreferredTimingFunction.LINEAR;
   this.name_ = npf.fx.KeyframeAnimation.getNextKeyframeName();
@@ -216,6 +220,8 @@ npf.fx.KeyframeAnimation.prototype.disposeInternal = function() {
   if (!this.isStopped()) {
     this.stop(false);
   }
+
+  goog.dom.removeNode(this.styleElement_);
 
   goog.base(this, 'disposeInternal');
 
@@ -431,12 +437,8 @@ npf.fx.KeyframeAnimation.prototype.setDom = function() {
     rules.push(keyframeText);
   }, this);
 
-  /** @type {string} */
-  var cssText = '<style>@-' + npf.userAgent.Support.vendorPrefix +
-    '-keyframes ' + this.name_ + ' {' + rules.join('') + '}</style>';
-  this.styleElement_ =
-    /** @type {Element} */ (goog.dom.htmlToDocumentFragment(cssText));
-  goog.dom.appendChild(document.head, this.styleElement_);
+  this.styleElement_.innerHTML = '@-' + npf.userAgent.Support.vendorPrefix +
+    '-keyframes ' + this.name_ + ' {' + rules.join('') + '}';
 
   this.handler_.listen(this.element, [
     npf.userAgent.Support.vendorPrefix + 'AnimationStart',
@@ -459,9 +461,9 @@ npf.fx.KeyframeAnimation.prototype.setDom = function() {
   this.setAnimationTimingFunction_(this.accel_);
   this.setAnimationPlayState_(npf.fx.KeyframeAnimation.PlayState.RUNNING);
 
-  if (this.endStyles_) {
+  /*if (this.endStyles_) {
     goog.style.setStyle(this.element, this.endStyles_);
-  }
+  }*/
 
   this.domSet_ = true;
 };
@@ -504,11 +506,6 @@ npf.fx.KeyframeAnimation.prototype.clearDom = function() {
     goog.style.setStyle(this.element, key, '');
   }
 
-  if (this.styleElement_) {
-    goog.dom.removeNode(this.styleElement_);
-    this.styleElement_ = null;
-  }
-
   this.domSet_ = false;
 };
 
@@ -525,6 +522,7 @@ npf.fx.KeyframeAnimation.prototype.onAnimationStart_ = function(evt) {
  * @private
  */
 npf.fx.KeyframeAnimation.prototype.onAnimationEnd_ = function(evt) {
+  this.setAnimationPlayState_(npf.fx.KeyframeAnimation.PlayState.PAUSED);
   this.clearDom();
   this.cleared_ = true;
   this.setStateStopped();
@@ -1271,7 +1269,7 @@ npf.fx.KeyframeAnimation.prototype.setTransformOrigin = function(origin) {
   var value;
 
   if (goog.isArray(origin)) {
-    if (2 != origin.length || 3 != origin.length) {
+    if (2 != origin.length && 3 != origin.length) {
       throw Error('Transform Origin must be 2D or 3D');
     }
 

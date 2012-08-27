@@ -55,8 +55,8 @@ npf.ui.Link.prototype.createDom = function() {
     };
   }
 
-  /** @type {Element} */
-  var element = goog.dom.createDom(tagName, attrs, this.caption_);
+  /** @type {!Element} */
+  var element = this.getDomHelper().createDom(tagName, attrs, this.caption_);
 
   if (this.cssClass_) {
     goog.dom.classes.add(element, this.cssClass_.join(' '));

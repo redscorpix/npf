@@ -10,7 +10,7 @@ goog.require('npf.ui.form.SubmitButton');
 
 
 /**
- * @param {npf.ui.form.Renderer=} opt_renderer Renderer used to render or decorate the release.
+ * @param {npf.ui.form.Renderer=} opt_renderer Renderer used to render or decorate the component.
  * @param {goog.dom.DomHelper=} opt_domHelper DOM helper, used for document interaction.
  * @constructor
  * @extends {npf.ui.RenderComponent}
@@ -86,6 +86,7 @@ npf.ui.Form.prototype.removeChild = function(child, opt_unrender) {
 
 /**
  * @return {npf.ui.form.Renderer}
+ * @override
  */
 npf.ui.Form.prototype.getRenderer = function() {
   return /** @type {npf.ui.form.Renderer} */ (goog.base(this, 'getRenderer'));
@@ -93,6 +94,7 @@ npf.ui.Form.prototype.getRenderer = function() {
 
 /**
  * @param {npf.ui.form.Renderer} renderer
+ * @override
  */
 npf.ui.Form.prototype.setRenderer = function(renderer) {
   goog.base(this, 'setRenderer', renderer);
@@ -145,7 +147,7 @@ npf.ui.Form.prototype.getRequestData = function() {
  * @return {*}
  */
 npf.ui.Form.prototype.getValue = function(name) {
-  /** @type {npf.ui.formField|undefined} */
+  /** @type {npf.ui.form.Field|undefined} */
   var field = this.fieldsMap_[name];
 
   return field ? field.getValue() : undefined;
@@ -156,7 +158,7 @@ npf.ui.Form.prototype.getValue = function(name) {
  * @return {string}
  */
 npf.ui.Form.prototype.getRequestValue = function(name) {
-  /** @type {npf.ui.formField|undefined} */
+  /** @type {npf.ui.form.Field|undefined} */
   var field = this.fieldsMap_[name];
 
   return field ? field.getRequestValue() : '';

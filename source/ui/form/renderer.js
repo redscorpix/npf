@@ -1,6 +1,5 @@
 goog.provide('npf.ui.form.Renderer');
 
-goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('npf.ui.renderComponent.Renderer');
 
@@ -34,7 +33,7 @@ npf.ui.form.Renderer.prototype.getCssClass = function() {
  */
 npf.ui.form.Renderer.prototype.createDom = function(form) {
   /** @type {!Element} */
-  var element = goog.dom.createDom(goog.dom.TagName.FORM,
+  var element = component.getDomHelper().createDom(goog.dom.TagName.FORM,
     this.getClassNames(form).join(' '));
 
   return element;

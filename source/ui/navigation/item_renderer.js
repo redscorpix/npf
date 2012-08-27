@@ -31,11 +31,11 @@ npf.ui.navigation.ItemRenderer.prototype.getCssClass = function() {
 
 /**
  * @param {npf.ui.navigation.Item} item
- * @return {!Element}
+ * @return {Element}
  */
 npf.ui.navigation.ItemRenderer.prototype.createDom = function(item) {
   /** @type {!Element} */
-  var element = goog.dom.createDom(goog.dom.TagName.A, {
+  var element = item.getDomHelper().createDom(goog.dom.TagName.A, {
     'class': this.getClassNames(item).join(' '),
     'href': item.getUrl()
   });

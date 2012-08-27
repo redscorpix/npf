@@ -10,7 +10,7 @@ goog.require('npf.ui.scrollBar.ScrollerRenderer');
 
 
 /**
- * @param {npf.ui.scrollBar.ScrollerRenderer=} opt_renderer Renderer used to render or decorate the release.
+ * @param {npf.ui.scrollBar.ScrollerRenderer=} opt_renderer Renderer used to render or decorate the component.
  * @param {goog.dom.DomHelper=} opt_domHelper DOM helper, used for document interaction.
  * @constructor
  * @extends {npf.ui.RenderComponent}
@@ -133,6 +133,7 @@ npf.ui.scrollBar.Scroller.prototype.disposeInternal = function() {
 
 /**
  * @return {npf.ui.scrollBar.ScrollerRenderer}
+ * @override
  */
 npf.ui.scrollBar.Scroller.prototype.getRenderer = function() {
   return /** @type {npf.ui.scrollBar.ScrollerRenderer} */ (goog.base(this, 'getRenderer'));

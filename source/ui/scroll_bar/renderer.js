@@ -21,7 +21,7 @@ goog.addSingletonGetter(npf.ui.scrollBar.Renderer);
 /**
  * @type {string}
  */
-npf.ui.scrollBar.Renderer.CSS_CLASS = goog.getCssName('scrollBar');
+npf.ui.scrollBar.Renderer.CSS_CLASS = goog.getCssName('npf-scrollBar');
 
 /**
  * @type {number}
@@ -47,21 +47,21 @@ npf.ui.scrollBar.Renderer.prototype.getCssClass = function() {
 };
 
 /**
- * @param {npf.ui.ScrollBar} container
- * @return {!Element}
+ * @param {npf.ui.ScrollBar} component
+ * @return {Element}
  */
-npf.ui.scrollBar.Renderer.prototype.createDom = function(container) {
+npf.ui.scrollBar.Renderer.prototype.createDom = function(component) {
+  /** @type {Element} */
+  var element = goog.base(this, 'createDom', component);
   /** @type {!Element} */
-  var element = goog.base(this, 'createDom', container);
+  var containerElement = component.getDomHelper().createDom(
+    goog.dom.TagName.DIV, this.getContainerCssClass());
   /** @type {!Element} */
-  var containerElement = goog.dom.createDom(goog.dom.TagName.DIV,
-    this.getContainerCssClass());
+  var contentWrapperElement = component.getDomHelper().createDom(
+    goog.dom.TagName.DIV, this.getContentWrapperCssClass());
   /** @type {!Element} */
-  var contentWrapperElement = goog.dom.createDom(goog.dom.TagName.DIV,
-    this.getContentWrapperCssClass());
-  /** @type {!Element} */
-  var contentElement = goog.dom.createDom(goog.dom.TagName.DIV,
-    this.getContentCssClass());
+  var contentElement = component.getDomHelper().createDom(
+    goog.dom.TagName.DIV, this.getContentCssClass());
   /** @type {number} */
   var scrollBarWidth = npf.ui.scrollBar.Renderer.getScrollBarWidth();
 

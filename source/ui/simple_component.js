@@ -64,11 +64,12 @@ npf.ui.SimpleComponent.prototype.contentTagName_ = goog.dom.TagName.DIV;
 
 /** @inheritDoc */
 npf.ui.SimpleComponent.prototype.createDom = function() {
-  var element = goog.dom.createDom(this.tagName_, this.classNames_);
+  /** @type {!Element} */
+  var element = this.getDomHelper().createDom(this.tagName_, this.classNames_);
   this.setElementInternal(element);
 
   if (this.contentClassNames_) {
-    this.contentElement_ = goog.dom.createDom(this.contentTagName_,
+    this.contentElement_ = this.getDomHelper().createDom(this.contentTagName_,
       this.contentClassNames_);
     goog.dom.appendChild(element, this.contentElement_);
   } else {

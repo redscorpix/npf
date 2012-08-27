@@ -244,8 +244,13 @@ npf.pages.Manager.prototype.navigateErrorInternal = function(status, request) {
  * @protected
  */
 npf.pages.Manager.prototype.navigatePageInternal = function(request, Page) {
-  this.unloadPage(this.getCurrentPage());
-  this.loadPage(request, Page);
+  /** @type {npf.pages.Page} */
+  var currentPage = this.getCurrentPage();
+
+  if (!(currentPage && currentPage.processUrl(request))) {
+    this.unloadPage(this.getCurrentPage());
+    this.loadPage(request, Page);
+  }
 };
 
 /**
@@ -402,14 +407,14 @@ npf.pages.Manager.prototype.removePageCtor = function(pageType) {
  * @param {Function} Page
  * @param {goog.net.HttpStatus} httpStatus
  */
-npf.pages.Manager.prototype.addErrorPageHandler = function(Page, httpStatus) {
+npf.pages.Manager.prototype.addErrorPageCtor = function(Page, httpStatus) {
   this.errorPageCtorsMap_[/** @type {string} */ (httpStatus)] = Page;
 };
 
 /**
  * @param {goog.net.HttpStatus} httpStatus
  */
-npf.pages.Manager.prototype.removeErrorPageHandler = function(httpStatus) {
+npf.pages.Manager.prototype.removeErrorPageCtor = function(httpStatus) {
   goog.object.remove(this.errorPageCtorsMap_,
     /** @type {string} */ (httpStatus));
 };

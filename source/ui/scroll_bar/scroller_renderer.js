@@ -20,7 +20,7 @@ goog.addSingletonGetter(npf.ui.scrollBar.ScrollerRenderer);
  * @type {string}
  */
 npf.ui.scrollBar.ScrollerRenderer.CSS_CLASS =
-  goog.getCssName('scrollBar-scroller');
+  goog.getCssName('npf-scrollBar-scroller');
 
 
 /** @inheritDoc */
@@ -30,16 +30,16 @@ npf.ui.scrollBar.ScrollerRenderer.prototype.getCssClass = function() {
 
 /**
  * @param {npf.ui.scrollBar.Scroller} scroller
- * @return {!Element}
+ * @return {Element}
  */
 npf.ui.scrollBar.ScrollerRenderer.prototype.createDom = function(scroller) {
-  /** @type {!Element} */
+  /** @type {Element} */
   var element = goog.base(this, 'createDom', scroller);
   /** @type {!Element} */
-  var backgroundElement = goog.dom.createDom(goog.dom.TagName.DIV,
-    this.getBackgroundCssClass());
+  var backgroundElement = scroller.getDomHelper().createDom(
+    goog.dom.TagName.DIV, this.getBackgroundCssClass());
   /** @type {!Element} */
-  var runnerElement = goog.dom.createDom(goog.dom.TagName.DIV,
+  var runnerElement = scroller.getDomHelper().createDom(goog.dom.TagName.DIV,
     this.getRunnerCssClass());
 
   goog.dom.appendChild(element, backgroundElement);

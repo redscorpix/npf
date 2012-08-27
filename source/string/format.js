@@ -2,15 +2,15 @@ goog.provide('npf.string.format');
 
 
 /**
- * @param {string|number} var_source
+ * @param {string|number} sourceNumber
  * @param {string=} opt_groupSeparator default is space.
  * @param {string=} opt_fractionSeparator default is ",".
  * @return {string}
  */
-npf.string.format.number = function(var_source, opt_groupSeparator,
+npf.string.format.number = function(sourceNumber, opt_groupSeparator,
                                     opt_fractionSeparator) {
   /** @type {string} */
-  var source = String(var_source);
+  var source = sourceNumber + '';
   /** @type {string} */
   var groupSeparator = opt_groupSeparator || ' ';
   /** @type {string} */

@@ -74,7 +74,7 @@ npf.ui.searchInput.Renderer.prototype.createPlaceholderElement = function(input)
   var placeholderElement = null;
 
   if ('' != placeholderValue) {
-    placeholderElement = goog.dom.createDom(goog.dom.TagName.SPAN,
+    placeholderElement = input.getDomHelper().createDom(goog.dom.TagName.SPAN,
       this.getPlaceholderCssClass());
     placeholderElement.innerHTML = placeholderValue;
   }
@@ -88,7 +88,7 @@ npf.ui.searchInput.Renderer.prototype.createPlaceholderElement = function(input)
  * @protected
  */
 npf.ui.searchInput.Renderer.prototype.createQueryElement = function(input) {
-  return goog.dom.createDom(goog.dom.TagName.INPUT, {
+  return input.getDomHelper().createDom(goog.dom.TagName.INPUT, {
     'class': this.getQueryCssClass(),
     'type': 'text',
     'autocomplete': 'off'
@@ -105,7 +105,7 @@ npf.ui.searchInput.Renderer.prototype.createClearElement = function(input) {
   var clearElement = null;
 
   if (input.isClearable()) {
-    clearElement = goog.dom.createDom(goog.dom.TagName.INS,
+    clearElement = input.getDomHelper().createDom(goog.dom.TagName.INS,
       this.getClearCssClass());
   }
 
@@ -122,7 +122,7 @@ npf.ui.searchInput.Renderer.prototype.createIconElement = function(input) {
   var iconElement = null;
 
   if (input.hasIcon()) {
-    iconElement = goog.dom.createDom(goog.dom.TagName.INS,
+    iconElement = input.getDomHelper().createDom(goog.dom.TagName.INS,
       this.getIconCssClass());
   }
 

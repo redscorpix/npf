@@ -1,0 +1,8 @@
+boolean npfBlur(HTMLImageElement img, HTMLCanvasElement canvas, number radius, boolean= opt_blurAlphaChannel)
+Блюрит изображение. Если получилось, возвращает true.
+img — картинка.
+canvas — элемент, куда заблюрится картинка.
+radius — радиус блюра.
+opt_blurAlphaChannel — что-то с альфа-каналом.
+
+Source: StackBlur, http://www.quasimondo.com, author: Mario Klingemann

@@ -137,6 +137,14 @@ npf.pages.Page.prototype.unloadInternal = function() {
 };
 
 /**
+ * @param {npf.pages.Request} request
+ * @return {boolean}
+ */
+npf.pages.Page.prototype.processUrl = function(request) {
+  return false;
+};
+
+/**
  * @return {boolean}
  */
 npf.pages.Page.prototype.isLoaded = function() {
