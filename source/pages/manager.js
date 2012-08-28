@@ -207,7 +207,7 @@ npf.pages.Manager.prototype.navigatePage = function(request) {
   var Page = '' == request.name ? null : this.getPageCtorByRoute(request.name);
 
   if (Page) {
-    this.navigatePageInternal(request, Page);
+    this._navigatePage(request, Page);
   } else {
     this.navigateErrorInternal(goog.net.HttpStatus.NOT_FOUND, request);
   }
@@ -234,6 +234,20 @@ npf.pages.Manager.prototype.navigateErrorInternal = function(status, request) {
   var Page = this.errorPageCtorsMap_[/** @type {string} */ (status)] || null;
 
   if (Page) {
+    this._navigatePage(request, Page);
+  }
+};
+
+/**
+ * @param {npf.pages.Request} request
+ * @param {Function} Page
+ * @private
+ */
+npf.pages.Manager.prototype._navigatePage = function(request, Page) {
+  /** @type {npf.pages.Page} */
+  var currentPage = this.getCurrentPage();
+
+  if (!(currentPage && currentPage.processUrl(request))) {
     this.navigatePageInternal(request, Page);
   }
 };
@@ -244,13 +258,8 @@ npf.pages.Manager.prototype.navigateErrorInternal = function(status, request) {
  * @protected
  */
 npf.pages.Manager.prototype.navigatePageInternal = function(request, Page) {
-  /** @type {npf.pages.Page} */
-  var currentPage = this.getCurrentPage();
-
-  if (!(currentPage && currentPage.processUrl(request))) {
-    this.unloadPage(this.getCurrentPage());
-    this.loadPage(request, Page);
-  }
+  this.unloadPage(this.getCurrentPage());
+  this.loadPage(request, Page);
 };
 
 /**
@@ -516,7 +525,7 @@ npf.pages.Manager.prototype.addRequestToHistory = function(request) {
 
   if (this.requestHistory_.length > this.requestHistoryLimit_) {
     this.requestHistory_ =
-      this.requestHistory_.slice(0, this.requestHistoryLimit_ - 1);
+      this.requestHistory_.slice(0, this.requestHistoryLimit_);
   }
 };
 
