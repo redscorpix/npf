@@ -69,9 +69,6 @@ npf.events.TouchHandler = function(element) {
       .listen(this.element, EventType.MOUSEMOVE, this.onProgress_, false, this)
       .listen(this.element, EventType.MOUSEOUT, this.onMouseOut_, false, this)
       .listen(this.element, EventType.MOUSEUP, this.onEnd_, false, this)
-      .listen(this.element, goog.events.EventType.CLICK, function(evt) {
-        evt.preventDefault();
-      }, false, this);
   }
 };
 goog.inherits(npf.events.TouchHandler, goog.events.EventTarget);

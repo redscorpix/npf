@@ -8,9 +8,9 @@ goog.require('goog.dom.TagName');
 goog.require('goog.dom.classes');
 goog.require('goog.events');
 goog.require('goog.events.EventTarget');
+goog.require('goog.events.EventType');
 goog.require('goog.history.EventType');
 goog.require('goog.history.Html5History');
-goog.require('npf.events.TouchHandler');
 goog.require('npf.history.TokenTransformer');
 
 
@@ -79,12 +79,6 @@ npf.History.prototype.html5History_ = null;
  */
 npf.History.prototype.isLinksHandlerEnabled_ = false;
 
-/**
- * @type {npf.events.TouchHandler}
- * @private
- */
-npf.History.prototype.touchHandler_ = null;
-
 
 /** @inheritDoc */
 npf.History.prototype.disposeInternal = function() {
@@ -95,7 +89,6 @@ npf.History.prototype.disposeInternal = function() {
   delete this.history_;
   delete this.html5History_;
   delete this.isLinksHandlerEnabled_;
-  delete this.touchHandler_;
 };
 
 /**
@@ -171,14 +164,11 @@ npf.History.prototype.setLinksHandlerEnabled = function(enable) {
   this.isLinksHandlerEnabled_ = enable;
 
   if (this.isLinksHandlerEnabled_) {
-    this.touchHandler_ = new npf.events.TouchHandler(document.body);
-    goog.events.listen(this.touchHandler_, npf.events.EventType.TAP,
-      this.onTap_, false, this);
+    goog.events.listen(document.body, goog.events.EventType.CLICK,
+      this.onClick_, false, this);
   } else {
-    goog.events.unlisten(this.touchHandler_, npf.events.EventType.TAP,
-      this.onTap_, false, this);
-    this.touchHandler_.dispose();
-    this.touchHandler_ = null;
+    goog.events.unlisten(document.body, goog.events.EventType.CLICK,
+      this.onClick_, false, this);
   }
 };
 
@@ -186,7 +176,7 @@ npf.History.prototype.setLinksHandlerEnabled = function(enable) {
  * @param {goog.events.BrowserEvent} evt
  * @private
  */
-npf.History.prototype.onTap_ = function(evt) {
+npf.History.prototype.onClick_ = function(evt) {
   /** @type {Node} */
   var targetElement = evt ? evt.target : null;
 
