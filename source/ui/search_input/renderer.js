@@ -29,21 +29,18 @@ npf.ui.searchInput.Renderer.prototype.getCssClass = function() {
   return npf.ui.searchInput.Renderer.CSS_CLASS;
 };
 
-/**
- * @param {npf.ui.SearchInput} input
- * @return {!Element}
- */
+/** @override */
 npf.ui.searchInput.Renderer.prototype.createDom = function(input) {
-  /** @type {!Element} */
+  /** @type {Element} */
   var element = goog.base(this, 'createDom', input);
   /** @type {Element} */
-  var placeholderElement = this.createPlaceholderElement(input);
+  var placeholderElement = this.createPlaceholderElement(/** @type {npf.ui.SearchInput} */ (input));
   /** @type {!Element} */
-  var queryElement = this.createQueryElement(input);
+  var queryElement = this.createQueryElement(/** @type {npf.ui.SearchInput} */ (input));
   /** @type {Element} */
-  var clearElement = this.createClearElement(input);
+  var clearElement = this.createClearElement(/** @type {npf.ui.SearchInput} */ (input));
   /** @type {Element} */
-  var iconElement = this.createIconElement(input);
+  var iconElement = this.createIconElement(/** @type {npf.ui.SearchInput} */ (input));
 
   if (placeholderElement) {
     goog.dom.appendChild(element, placeholderElement);

@@ -4,71 +4,49 @@ goog.provide('npf.fx.KeyframeAnimation.Direction');
 goog.provide('npf.fx.KeyframeAnimation.PlayState');
 goog.provide('npf.fx.KeyframeAnimation.PreferredTimingFunction');
 
-goog.require('goog.array');
-goog.require('goog.dom');
-goog.require('goog.dom.TagName');
-goog.require('goog.events.EventHandler');
-goog.require('goog.fx.Transition');
-goog.require('goog.fx.TransitionBase');
-goog.require('goog.math.Coordinate');
-goog.require('goog.math.Rect');
-goog.require('goog.math.Size');
-goog.require('goog.object');
-goog.require('goog.style');
-goog.require('npf.fx.Animation');
-goog.require('npf.fx.keyframeAnimation.Event');
-goog.require('npf.fx.keyframeAnimation.EventType');
-goog.require('npf.userAgent.Support');
+goog.require('npf.fx.CssAnimation');
+goog.require('npf.fx.cssAnimation.Keyframes');
+goog.require('npf.style.animation.Direction');
+goog.require('npf.style.animation.PlayState');
 goog.require('npf.userAgent.support');
 
 
 /**
  * @param {Element} element
  * @param {number} duration in ms
- * @param {Array.<number>=} opt_acc defaults to
- *                      npf.fx.KeyframeAnimation.PreferredTimingFunction.LINEAR
+ * @param {Array.<number>=} opt_acc defaults to npf.fx.css3.easing.LINEAR
  * @constructor
- * @implements {goog.fx.Transition}
- * @extends {goog.fx.TransitionBase}
+ * @extends {npf.fx.CssAnimation}
  */
 npf.fx.KeyframeAnimation = function(element, duration, opt_acc) {
-  goog.base(this);
+  var keyframes = new npf.fx.cssAnimation.Keyframes();
 
-  this.element = element;
-  this.duration = duration;
-
-  this.styleElement_ = goog.dom.createDom(goog.dom.TagName.STYLE);
-  goog.dom.appendChild(document.head, this.styleElement_);
-
-  this.accel_ = opt_acc ||
-    npf.fx.KeyframeAnimation.PreferredTimingFunction.LINEAR;
-  this.name_ = npf.fx.KeyframeAnimation.getNextKeyframeName();
-  this.keyframesMap_ = {};
-
-  this.handler_ = new goog.events.EventHandler();
-  this.registerDisposable(this.handler_);
+  goog.base(this, keyframes, element, duration, opt_acc);
 };
-goog.inherits(npf.fx.KeyframeAnimation, goog.fx.TransitionBase);
+goog.inherits(npf.fx.KeyframeAnimation, npf.fx.CssAnimation);
 
 
 /**
  * @enum {string}
+ * @deprecated Use npf.style.animation.Direction
  */
 npf.fx.KeyframeAnimation.Direction = {
-  NORMAL: 'normal',
-  ALTERNATE: 'alternate'
+  NORMAL: npf.style.animation.Direction.NORMAL,
+  ALTERNATE: npf.style.animation.Direction.ALTERNATE
 };
 
 /**
  * @enum {string}
+ * @deprecated Use npf.style.animation.PlayState
  */
 npf.fx.KeyframeAnimation.PlayState = {
-  RUNNING: 'running',
-  PAUSED: 'paused'
+  RUNNING: npf.style.animation.PlayState.RUNNING,
+  PAUSED: npf.style.animation.PlayState.PAUSED
 };
 
 /**
  * @enum {string}
+ * @deprecated
  */
 npf.fx.KeyframeAnimation.CssProperty = {
   ANIMATION: npf.userAgent.support.getCssPropertyName(
@@ -90,13 +68,8 @@ npf.fx.KeyframeAnimation.CssProperty = {
 };
 
 /**
- * @type {string}
- * @const
- */
-npf.fx.KeyframeAnimation.KEYFRAME_NAME_PREFIX = 'kf_';
-
-/**
  * @enum {Array.<number>}
+ * @deprecated Use npf.fx.CssAnimation.PreferredTimingFunction.
  */
 npf.fx.KeyframeAnimation.PreferredTimingFunction = {
   EASE: [0.25, 0.1, 0.25, 1],
@@ -108,212 +81,1039 @@ npf.fx.KeyframeAnimation.PreferredTimingFunction = {
 
 /**
  * @return {boolean}
+ * @deprecated Use npf.fx.CssAnimation.isSupported.
  */
-npf.fx.KeyframeAnimation.isSupported = function() {
-  return npf.userAgent.support.isCssAnimationSupported() &&
-    npf.fx.Animation.enabled;
-};
-
-/**
- * @return {string}
- */
-npf.fx.KeyframeAnimation.getNextKeyframeName = function() {
-  /** @type {number} */
-  var counter = 0;
-
-  return function() {
-    return npf.fx.KeyframeAnimation.KEYFRAME_NAME_PREFIX + (++counter);
-  };
-}();
-
-
-/**
- * @type {Element}
- * @protected
- */
-npf.fx.KeyframeAnimation.prototype.element;
-
-/**
- * @type {number}
- * @protected
- */
-npf.fx.KeyframeAnimation.prototype.duration;
-
-/**
- * @type {!Object.<string,!Object>}
- * @private
- */
-npf.fx.KeyframeAnimation.prototype.keyframesMap_;
-
-/**
- * @type {Array.<number>}
- * @private
- */
-npf.fx.KeyframeAnimation.prototype.accel_;
-
-/**
- * @type {number}
- * @private
- */
-npf.fx.KeyframeAnimation.prototype.delay_ = 0;
-
-/**
- * 0 — infinite.
- * @type {number}
- * @private
- */
-npf.fx.KeyframeAnimation.prototype.iterationCount_ = 1;
-
-/**
- * @type {npf.fx.KeyframeAnimation.Direction}
- * @private
- */
-npf.fx.KeyframeAnimation.prototype.direction_ =
-  npf.fx.KeyframeAnimation.Direction.NORMAL;
-
-/**
- * @type {string}
- * @private
- */
-npf.fx.KeyframeAnimation.prototype.name_;
-
-/**
- * @type {goog.events.EventHandler}
- * @private
- */
-npf.fx.KeyframeAnimation.prototype.handler_;
-
-/**
- * @type {Element}
- * @private
- */
-npf.fx.KeyframeAnimation.prototype.styleElement_;
-
-/**
- * @type {boolean}
- * @private
- */
-npf.fx.KeyframeAnimation.prototype.domSet_ = false;
-
-/**
- * @type {boolean}
- * @private
- */
-npf.fx.KeyframeAnimation.prototype.cleared_ = true;
-
-/**
- * @type {Object.<string,string>}
- * @private
- */
-npf.fx.KeyframeAnimation.prototype.endStyles_ = null;
-
-/**
- * @type {npf.fx.KeyframeAnimation.PlayState}
- * @private
- */
-npf.fx.KeyframeAnimation.prototype.playState_ =
-  npf.fx.KeyframeAnimation.PlayState.PAUSED;
+npf.fx.KeyframeAnimation.isSupported = npf.fx.CssAnimation.isSupported;
 
 
 /** @inheritDoc */
 npf.fx.KeyframeAnimation.prototype.disposeInternal = function() {
-  if (!this.isStopped()) {
-    this.stop(false);
-  }
-
-  goog.dom.removeNode(this.styleElement_);
+  this.getKeyframes().dispose();
 
   goog.base(this, 'disposeInternal');
-
-  delete this.element;
-  delete this.duration;
-  delete this.keyframesMap_;
-  delete this.accel_;
-  delete this.delay_;
-  delete this.iterationCount_;
-  delete this.direction_;
-  delete this.name_;
-  delete this.handler_;
-  delete this.styleElement_;
-  delete this.domSet_;
-  delete this.cleared_;
-  delete this.endStyles_;
-  delete this.playState_;
 };
 
 /**
- * @return {npf.fx.KeyframeAnimation.PlayState}
+ * @param {number|string} fromOpacity
+ * @param {number|string} toOpacity
+ * @param {Array.<number>=} opt_fromAcc
+ * @param {Array.<number>=} opt_toAcc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.fromToOpacity.
  */
-npf.fx.KeyframeAnimation.prototype.getState = function() {
-  return this.playState_;
+npf.fx.KeyframeAnimation.prototype.fromToOpacityRule =
+  npf.fx.KeyframeAnimation.prototype.fromToOpacity;
+
+/**
+ * @param {number|string} fromOpacity
+ * @param {number|string} toOpacity
+ * @param {Array.<number>=} opt_fromAcc
+ * @param {Array.<number>=} opt_toAcc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.fromToOpacity = function(fromOpacity,
+                                                            toOpacity,
+                                                            opt_fromAcc,
+                                                            opt_toAcc) {
+  this.setOpacity(fromOpacity, 0, opt_fromAcc);
+
+  return this.setOpacity(toOpacity, 100, opt_toAcc);
 };
 
 /**
- * @return {number} 0 — infinite
+ * @param {number|string} opacity
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.fromOpacity.
  */
-npf.fx.KeyframeAnimation.prototype.getIterationCount = function() {
-  return this.iterationCount_;
+npf.fx.KeyframeAnimation.prototype.fromOpacityRule =
+  npf.fx.KeyframeAnimation.prototype.fromOpacity;
+
+/**
+ * @param {number|string} opacity
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.fromOpacity = function(opacity, opt_acc) {
+  return this.setOpacity(opacity, 0, opt_acc);
 };
 
 /**
- * @param {number} count 0 — infinite
+ * @param {number|string} opacity
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.toOpacity.
  */
-npf.fx.KeyframeAnimation.prototype.setIterationCount = function(count) {
-  this.iterationCount_ = count;
+npf.fx.KeyframeAnimation.prototype.toOpacityRule =
+  npf.fx.KeyframeAnimation.prototype.toOpacity;
 
-  if (this.domSet_) {
-    this.setAnimationIterationCount_(this.iterationCount_);
-  }
+/**
+ * @param {number|string} opacity
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.toOpacity = function(opacity, opt_acc) {
+  return this.setOpacity(opacity, 100, opt_acc);
 };
 
 /**
- * @return {number} in ms
+ * @param {number|string} opacity
+ * @param {number} position
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.setOpacity.
  */
-npf.fx.KeyframeAnimation.prototype.getDuration = function() {
-  return this.duration;
+npf.fx.KeyframeAnimation.prototype.setOpacityRule =
+  npf.fx.KeyframeAnimation.prototype.setOpacity;
+
+/**
+ * @param {number|string} opacity
+ * @param {number} position
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.setOpacity = function(opacity, position,
+                                                         opt_acc) {
+  this.getKeyframes().setOpacity(opacity, position, opt_acc);
+
+  return this;
 };
 
 /**
- * @return {number} in ms
+ * @param {Array.<number|string>|goog.math.Coordinate} fromCoords
+ * @param {Array.<number|string>|goog.math.Coordinate} toCoords
+ * @param {Array.<number>=} opt_fromAcc
+ * @param {Array.<number>=} opt_toAcc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.fromToPosition.
  */
-npf.fx.KeyframeAnimation.prototype.getDelay = function() {
-  return this.delay_;
+npf.fx.KeyframeAnimation.prototype.fromToPositionRule =
+  npf.fx.KeyframeAnimation.prototype.fromToPosition;
+
+/**
+ * @param {Array.<number|string>|goog.math.Coordinate} fromCoords
+ * @param {Array.<number|string>|goog.math.Coordinate} toCoords
+ * @param {Array.<number>=} opt_fromAcc
+ * @param {Array.<number>=} opt_toAcc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.fromToPosition = function(fromCoords,
+                                                             toCoords,
+                                                             opt_fromAcc,
+                                                             opt_toAcc) {
+  this.setPosition(fromCoords, 0, opt_fromAcc);
+
+  return this.setPosition(toCoords, 100, opt_toAcc);
 };
 
 /**
- * @param {number} delay in ms
+ * @param {Array.<number|string>|goog.math.Coordinate} coords
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.fromPosition.
  */
-npf.fx.KeyframeAnimation.prototype.setDelay = function(delay) {
-  this.delay_ = delay;
+npf.fx.KeyframeAnimation.prototype.fromPositionRule =
+  npf.fx.KeyframeAnimation.prototype.fromPosition;
 
-  if (this.domSet_) {
-    this.setAnimationDelay_(this.delay_);
-  }
+/**
+ * @param {Array.<number|string>|goog.math.Coordinate} coords
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.fromPosition = function(coords, opt_acc) {
+  return this.setPosition(coords, 0, opt_acc);
 };
 
 /**
- * @return {npf.fx.KeyframeAnimation.Direction}
+ * @param {Array.<number|string>|goog.math.Coordinate} coords
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.toPosition.
  */
-npf.fx.KeyframeAnimation.prototype.getDirection = function() {
-  return this.direction_;
+npf.fx.KeyframeAnimation.prototype.toPositionRule =
+  npf.fx.KeyframeAnimation.prototype.toPosition;
+
+/**
+ * @param {Array.<number|string>|goog.math.Coordinate} coords
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.toPosition = function(coords, opt_acc) {
+  return this.setPosition(coords, 100, opt_acc);
 };
 
 /**
- * @param {npf.fx.KeyframeAnimation.Direction} direction
+ * @param {Array.<number|string>|goog.math.Coordinate} coords
+ * @param {number} position
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.setPosition.
  */
-npf.fx.KeyframeAnimation.prototype.setDirection = function(direction) {
-  this.direction_ = direction;
+npf.fx.KeyframeAnimation.prototype.setPositionRule =
+  npf.fx.KeyframeAnimation.prototype.setPosition;
 
-  if (this.domSet_) {
-    this.setAnimationDirection_(this.direction_);
-  }
+/**
+ * @param {Array.<number|string>|goog.math.Coordinate} coords
+ * @param {number} position
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.setPosition = function(coords, position,
+                                                          opt_acc) {
+  this.getKeyframes().setPosition(coords, position, opt_acc);
+
+  return this;
 };
 
 /**
- * @return {Array.<number>}
+ * @param {number|string} fromLeft
+ * @param {number|string} toLeft
+ * @param {Array.<number>=} opt_fromAcc
+ * @param {Array.<number>=} opt_toAcc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.fromToLeft.
  */
-npf.fx.KeyframeAnimation.prototype.getAccel = function() {
-  return this.accel_;
+npf.fx.KeyframeAnimation.prototype.fromToLeftRule =
+  npf.fx.KeyframeAnimation.prototype.fromToLeft;
+
+/**
+ * @param {number|string} fromLeft
+ * @param {number|string} toLeft
+ * @param {Array.<number>=} opt_fromAcc
+ * @param {Array.<number>=} opt_toAcc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.fromToLeft = function(fromLeft, toLeft,
+                                                         opt_fromAcc,
+                                                         opt_toAcc) {
+  this.setLeft(fromLeft, 0, opt_fromAcc);
+
+  return this.setLeft(toLeft, 100, opt_toAcc);
+};
+
+/**
+ * @param {number|string} left
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.fromLeft.
+ */
+npf.fx.KeyframeAnimation.prototype.fromLeftRule =
+  npf.fx.KeyframeAnimation.prototype.fromLeft;
+
+/**
+ * @param {number|string} left
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.fromLeft = function(left, opt_acc) {
+  return this.setLeft(left, 0, opt_acc);
+};
+
+/**
+ * @param {number|string} left
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.toLeft.
+ */
+npf.fx.KeyframeAnimation.prototype.toLeftRule =
+  npf.fx.KeyframeAnimation.prototype.toLeft;
+
+/**
+ * @param {number|string} left
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.toLeft = function(left, opt_acc) {
+  return this.setLeft(left, 100, opt_acc);
+};
+
+/**
+ * @param {number|string} left
+ * @param {number} position
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.setLeft.
+ */
+npf.fx.KeyframeAnimation.prototype.setLeftRule =
+  npf.fx.KeyframeAnimation.prototype.setLeft;
+
+/**
+ * @param {number|string} left
+ * @param {number} position
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.setLeft = function(left, position, opt_acc) {
+  this.getKeyframes().setLeft(left, position, opt_acc);
+
+  return this;
+};
+
+/**
+ * @param {number|string} fromTop
+ * @param {number|string} toTop
+ * @param {Array.<number>=} opt_fromAcc
+ * @param {Array.<number>=} opt_toAcc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.fromToTop.
+ */
+npf.fx.KeyframeAnimation.prototype.fromToTopRule =
+  npf.fx.KeyframeAnimation.prototype.fromToTop;
+
+/**
+ * @param {number|string} fromTop
+ * @param {number|string} toTop
+ * @param {Array.<number>=} opt_fromAcc
+ * @param {Array.<number>=} opt_toAcc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.fromToTop = function(fromTop, toTop,
+                                                        opt_fromAcc,
+                                                        opt_toAcc) {
+  this.setTop(fromTop, 0, opt_fromAcc);
+
+  return this.setTop(toTop, 100, opt_toAcc);
+};
+
+/**
+ * @param {number|string} top
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.fromTop.
+ */
+npf.fx.KeyframeAnimation.prototype.fromTopRule =
+  npf.fx.KeyframeAnimation.prototype.fromTop;
+
+/**
+ * @param {number|string} top
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.fromTop = function(top, opt_acc) {
+  return this.setTop(top, 0, opt_acc);
+};
+
+/**
+ * @param {number|string} top
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.toTop.
+ */
+npf.fx.KeyframeAnimation.prototype.toTopRule =
+  npf.fx.KeyframeAnimation.prototype.toTop;
+
+/**
+ * @param {number|string} top
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.toTop = function(top, opt_acc) {
+  return this.setTop(top, 100, opt_acc);
+};
+
+/**
+ * @param {number|string} top
+ * @param {number} position
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.setTop.
+ */
+npf.fx.KeyframeAnimation.prototype.setTopRule =
+  npf.fx.KeyframeAnimation.prototype.setTop;
+
+/**
+ * @param {number|string} top
+ * @param {number} position
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.setTop = function(top, position, opt_acc) {
+  this.getKeyframes().setTop(top, position, opt_acc);
+
+  return this;
+};
+
+/**
+ * @param {number|string} fromRight
+ * @param {number|string} toRight
+ * @param {Array.<number>=} opt_fromAcc
+ * @param {Array.<number>=} opt_toAcc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.fromToRight.
+ */
+npf.fx.KeyframeAnimation.prototype.fromToRightRule =
+  npf.fx.KeyframeAnimation.prototype.fromToRight;
+
+/**
+ * @param {number|string} fromRight
+ * @param {number|string} toRight
+ * @param {Array.<number>=} opt_fromAcc
+ * @param {Array.<number>=} opt_toAcc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.fromToRight = function(fromRight, toRight,
+                                                          opt_fromAcc,
+                                                          opt_toAcc) {
+  this.setRight(fromRight, 0, opt_fromAcc);
+
+  return this.setRight(toRight, 100, opt_toAcc);
+};
+
+/**
+ * @param {number|string} right
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.fromRight.
+ */
+npf.fx.KeyframeAnimation.prototype.fromRightRule =
+  npf.fx.KeyframeAnimation.prototype.fromRight;
+
+/**
+ * @param {number|string} right
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.fromRight = function(right, opt_acc) {
+  return this.setRight(right, 0, opt_acc);
+};
+
+/**
+ * @param {number|string} right
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.toRight.
+ */
+npf.fx.KeyframeAnimation.prototype.toRightRule =
+  npf.fx.KeyframeAnimation.prototype.toRight;
+
+/**
+ * @param {number|string} right
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.toRight = function(right, opt_acc) {
+  return this.setRight(right, 100, opt_acc);
+};
+
+/**
+ * @param {number|string} right
+ * @param {number} position
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.setRight.
+ */
+npf.fx.KeyframeAnimation.prototype.setRightRule =
+  npf.fx.KeyframeAnimation.prototype.setRight;
+
+/**
+ * @param {number|string} right
+ * @param {number} position
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.setRight = function(right, position,
+                                                       opt_acc) {
+  this.getKeyframes().setRight(right, position, opt_acc);
+
+  return this;
+};
+
+/**
+ * @param {number|string} fromBottom
+ * @param {number|string} toBottom
+ * @param {Array.<number>=} opt_fromAcc
+ * @param {Array.<number>=} opt_toAcc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.fromToBottom.
+ */
+npf.fx.KeyframeAnimation.prototype.fromToBottomRule =
+  npf.fx.KeyframeAnimation.prototype.fromToBottom;
+
+/**
+ * @param {number|string} fromBottom
+ * @param {number|string} toBottom
+ * @param {Array.<number>=} opt_fromAcc
+ * @param {Array.<number>=} opt_toAcc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.fromToBottom = function(fromBottom,
+                                                           toBottom,
+                                                           opt_fromAcc,
+                                                           opt_toAcc) {
+  this.setBottom(fromBottom, 0, opt_fromAcc);
+
+  return this.setBottom(toBottom, 100, opt_toAcc);
+};
+
+/**
+ * @param {number|string} bottom
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.fromBottom.
+ */
+npf.fx.KeyframeAnimation.prototype.fromBottomRule =
+  npf.fx.KeyframeAnimation.prototype.fromBottom;
+
+/**
+ * @param {number|string} bottom
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.fromBottom = function(bottom, opt_acc) {
+  return this.setBottom(bottom, 0, opt_acc);
+};
+
+/**
+ * @param {number|string} bottom
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.toBottom.
+ */
+npf.fx.KeyframeAnimation.prototype.toBottomRule =
+  npf.fx.KeyframeAnimation.prototype.toBottom;
+
+/**
+ * @param {number|string} bottom
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.toBottom = function(bottom, opt_acc) {
+  return this.setBottom(bottom, 100, opt_acc);
+};
+
+/**
+ * @param {number|string} bottom
+ * @param {number} position
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.setBottom.
+ */
+npf.fx.KeyframeAnimation.prototype.setBottomRule =
+  npf.fx.KeyframeAnimation.prototype.setBottom;
+
+/**
+ * @param {number|string} bottom
+ * @param {number} position
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.setBottom = function(bottom, position,
+                                                        opt_acc) {
+  this.getKeyframes().setBottom(bottom, position, opt_acc);
+
+  return this;
+};
+
+/**
+ * @param {Array.<number|string>|goog.math.Size|goog.math.Rect} fromSize
+ * @param {Array.<number|string>|goog.math.Size|goog.math.Rect} toSize
+ * @param {Array.<number>=} opt_fromAcc
+ * @param {Array.<number>=} opt_toAcc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.fromToSize.
+ */
+npf.fx.KeyframeAnimation.prototype.fromToSizeRule =
+  npf.fx.KeyframeAnimation.prototype.fromToSize;
+
+/**
+ * @param {Array.<number|string>|goog.math.Size|goog.math.Rect} fromSize
+ * @param {Array.<number|string>|goog.math.Size|goog.math.Rect} toSize
+ * @param {Array.<number>=} opt_fromAcc
+ * @param {Array.<number>=} opt_toAcc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.fromToSize = function(fromSize, toSize,
+                                                         opt_fromAcc,
+                                                         opt_toAcc) {
+  this.setSize(fromSize, 0, opt_fromAcc);
+
+  return this.setSize(toSize, 100, opt_toAcc);
+};
+
+/**
+ * @param {Array.<number|string>|goog.math.Size|goog.math.Rect} size
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.fromSize.
+ */
+npf.fx.KeyframeAnimation.prototype.fromSizeRule =
+  npf.fx.KeyframeAnimation.prototype.fromSize;
+
+/**
+ * @param {Array.<number|string>|goog.math.Size|goog.math.Rect} size
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.fromSize = function(size, opt_acc) {
+  return this.setSize(size, 0, opt_acc);
+};
+
+/**
+ * @param {Array.<number|string>|goog.math.Size|goog.math.Rect} size
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.toSize.
+ */
+npf.fx.KeyframeAnimation.prototype.toSizeRule =
+  npf.fx.KeyframeAnimation.prototype.toSize;
+
+/**
+ * @param {Array.<number|string>|goog.math.Size|goog.math.Rect} size
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.toSize = function(size, opt_acc) {
+  return this.setSize(size, 100, opt_acc);
+};
+
+/**
+ * @param {Array.<number|string>|goog.math.Size|goog.math.Rect} size
+ * @param {number} position
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.setSize.
+ */
+npf.fx.KeyframeAnimation.prototype.setSizeRule =
+  npf.fx.KeyframeAnimation.prototype.setSize;
+
+/**
+ * @param {Array.<number|string>|goog.math.Size|goog.math.Rect} size
+ * @param {number} position
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.setSize = function(size, position, opt_acc) {
+  this.getKeyframes().setSize(size, position, opt_acc);
+
+  return this;
+};
+
+/**
+ * @param {number|string} fromWidth
+ * @param {number|string} toWidth
+ * @param {Array.<number>=} opt_fromAcc
+ * @param {Array.<number>=} opt_toAcc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.fromToWidth.
+ */
+npf.fx.KeyframeAnimation.prototype.fromToWidthRule =
+  npf.fx.KeyframeAnimation.prototype.fromToWidth;
+
+/**
+ * @param {number|string} fromWidth
+ * @param {number|string} toWidth
+ * @param {Array.<number>=} opt_fromAcc
+ * @param {Array.<number>=} opt_toAcc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.fromToWidth = function(fromWidth, toWidth,
+                                                          opt_fromAcc,
+                                                          opt_toAcc) {
+  this.setWidth(fromWidth, 0, opt_fromAcc);
+
+  return this.setWidth(toWidth, 100, opt_toAcc);
+};
+
+/**
+ * @param {number|string} width
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.fromWidth.
+ */
+npf.fx.KeyframeAnimation.prototype.fromWidthRule =
+  npf.fx.KeyframeAnimation.prototype.fromWidth;
+
+/**
+ * @param {number|string} width
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.fromWidth = function(width, opt_acc) {
+  return this.setWidth(width, 0, opt_acc);
+};
+
+/**
+ * @param {number|string} width
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.toWidth.
+ */
+npf.fx.KeyframeAnimation.prototype.toWidthRule =
+  npf.fx.KeyframeAnimation.prototype.toWidth;
+
+/**
+ * @param {number|string} width
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.toWidth = function(width, opt_acc) {
+  return this.setWidth(width, 100, opt_acc);
+};
+
+/**
+ * @param {number|string} width
+ * @param {number} position
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.setWidth.
+ */
+npf.fx.KeyframeAnimation.prototype.setWidthRule =
+  npf.fx.KeyframeAnimation.prototype.setWidth;
+
+/**
+ * @param {number|string} width
+ * @param {number} position
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.setWidth = function(width, position,
+                                                       opt_acc) {
+  this.getKeyframes().setWidth(width, position, opt_acc);
+
+  return this;
+};
+
+/**
+ * @param {number|string} fromHeight
+ * @param {number|string} toHeight
+ * @param {Array.<number>=} opt_fromAcc
+ * @param {Array.<number>=} opt_toAcc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.fromToHeight.
+ */
+npf.fx.KeyframeAnimation.prototype.fromToHeightRule =
+  npf.fx.KeyframeAnimation.prototype.fromToHeight;
+
+/**
+ * @param {number|string} fromHeight
+ * @param {number|string} toHeight
+ * @param {Array.<number>=} opt_fromAcc
+ * @param {Array.<number>=} opt_toAcc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.fromToHeight = function(fromHeight, toHeight,
+                                                           opt_fromAcc,
+                                                           opt_toAcc) {
+  this.setHeight(fromHeight, 0, opt_fromAcc);
+
+  return this.setHeight(toHeight, 100, opt_toAcc);
+};
+
+/**
+ * @param {number|string} height
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.fromHeight.
+ */
+npf.fx.KeyframeAnimation.prototype.fromHeightRule =
+  npf.fx.KeyframeAnimation.prototype.fromHeight;
+
+/**
+ * @param {number|string} height
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.fromHeight = function(height, opt_acc) {
+  return this.setHeight(height, 0, opt_acc);
+};
+
+/**
+ * @param {number|string} height
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.toHeight.
+ */
+npf.fx.KeyframeAnimation.prototype.toHeightRule =
+  npf.fx.KeyframeAnimation.prototype.toHeight;
+
+/**
+ * @param {number|string} height
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.toHeight = function(height, opt_acc) {
+  return this.setHeight(height, 100, opt_acc);
+};
+
+/**
+ * @param {number|string} height
+ * @param {number} position
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.setHeight.
+ */
+npf.fx.KeyframeAnimation.prototype.setHeightRule =
+  npf.fx.KeyframeAnimation.prototype.setHeight;
+
+/**
+ * @param {number|string} height
+ * @param {number} position
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.setHeight = function(height, position,
+                                                        opt_acc) {
+  this.getKeyframes().setHeight(height, position, opt_acc);
+
+  return this;
+};
+
+/**
+ * @param {string|Array.<number>} fromColor
+ * @param {string|Array.<number>} toColor
+ * @param {Array.<number>=} opt_fromAcc
+ * @param {Array.<number>=} opt_toAcc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.fromToColor.
+ */
+npf.fx.KeyframeAnimation.prototype.fromToColorRule =
+  npf.fx.KeyframeAnimation.prototype.fromToColor;
+
+/**
+ * @param {string|Array.<number>} fromColor
+ * @param {string|Array.<number>} toColor
+ * @param {Array.<number>=} opt_fromAcc
+ * @param {Array.<number>=} opt_toAcc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.fromToColor = function(fromColor, toColor,
+                                                          opt_fromAcc,
+                                                          opt_toAcc) {
+  this.setColor(fromColor, 0, opt_fromAcc);
+
+  return this.setColor(toColor, 100, opt_toAcc);
+};
+
+/**
+ * @param {string|Array.<number>} color
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.fromColor.
+ */
+npf.fx.KeyframeAnimation.prototype.fromColorRule =
+  npf.fx.KeyframeAnimation.prototype.fromColor;
+
+/**
+ * @param {string|Array.<number>} color
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.fromColor = function(color, opt_acc) {
+  return this.setColor(color, 0, opt_acc);
+};
+
+/**
+ * @param {string|Array.<number>} color
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.toColor.
+ */
+npf.fx.KeyframeAnimation.prototype.toColorRule =
+  npf.fx.KeyframeAnimation.prototype.toColor;
+
+/**
+ * @param {string|Array.<number>} color
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.toColor = function(color, opt_acc) {
+  return this.setColor(color, 100, opt_acc);
+};
+
+/**
+ * @param {string|Array.<number>} color
+ * @param {number} position
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.setColor.
+ */
+npf.fx.KeyframeAnimation.prototype.setColorRule =
+  npf.fx.KeyframeAnimation.prototype.setColor;
+
+/**
+ * @param {string|Array.<number>} color
+ * @param {number} position
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.setColor = function(color, position,
+                                                       opt_acc) {
+  this.getKeyframes().setColor(color, position, opt_acc);
+
+  return this;
+};
+
+/**
+ * @param {string|Array.<number>} fromBgColor
+ * @param {string|Array.<number>} toBgColor
+ * @param {Array.<number>=} opt_fromAcc
+ * @param {Array.<number>=} opt_toAcc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.fromToBgColor.
+ */
+npf.fx.KeyframeAnimation.prototype.fromToBgColorRule =
+  npf.fx.KeyframeAnimation.prototype.fromToBgColor;
+
+/**
+ * @param {string|Array.<number>} fromBgColor
+ * @param {string|Array.<number>} toBgColor
+ * @param {Array.<number>=} opt_fromAcc
+ * @param {Array.<number>=} opt_toAcc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.fromToBgColor = function(fromBgColor,
+                                                            toBgColor,
+                                                            opt_fromAcc,
+                                                            opt_toAcc) {
+  this.setBgColor(fromBgColor, 0, opt_fromAcc);
+
+  return this.setBgColor(toBgColor, 100, opt_toAcc);
+};
+
+/**
+ * @param {string|Array.<number>} bgColor
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.fromBgColor.
+ */
+npf.fx.KeyframeAnimation.prototype.fromBgColorRule =
+  npf.fx.KeyframeAnimation.prototype.fromBgColor;
+
+/**
+ * @param {string|Array.<number>} bgColor
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.fromBgColor = function(bgColor, opt_acc) {
+  return this.setBgColor(bgColor, 0, opt_acc);
+};
+
+/**
+ * @param {string|Array.<number>} bgColor
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.toBgColor.
+ */
+npf.fx.KeyframeAnimation.prototype.toBgColorRule =
+  npf.fx.KeyframeAnimation.prototype.toBgColor;
+
+/**
+ * @param {string|Array.<number>} bgColor
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.toBgColor = function(bgColor, opt_acc) {
+  return this.setBgColor(bgColor, 100, opt_acc);
+};
+
+/**
+ * @param {string|Array.<number>} bgColor
+ * @param {number} position
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.setBgColor.
+ */
+npf.fx.KeyframeAnimation.prototype.setBgColorRule =
+  npf.fx.KeyframeAnimation.prototype.setBgColor;
+
+/**
+ * @param {string|Array.<number>} bgColor
+ * @param {number} position
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.setBgColor = function(bgColor, position,
+                                                         opt_acc) {
+  this.getKeyframes().setBgColor(bgColor, position, opt_acc);
+
+  return this;
+};
+
+/**
+ * @param {string} fromTransform
+ * @param {string} toTransform
+ * @param {Array.<number>=} opt_fromAcc
+ * @param {Array.<number>=} opt_toAcc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.fromToTransform.
+ */
+npf.fx.KeyframeAnimation.prototype.fromToTransformRule =
+  npf.fx.KeyframeAnimation.prototype.fromToTransform;
+
+/**
+ * @param {string} fromTransform
+ * @param {string} toTransform
+ * @param {Array.<number>=} opt_fromAcc
+ * @param {Array.<number>=} opt_toAcc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.fromToTransform = function(fromTransform,
+                                                              toTransform,
+                                                              opt_fromAcc,
+                                                              opt_toAcc) {
+  this.setTransform(fromTransform, 0, opt_fromAcc);
+
+  return this.setTransform(toTransform, 100, opt_toAcc);
+};
+
+/**
+ * @param {string} transform
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.fromTransform.
+ */
+npf.fx.KeyframeAnimation.prototype.fromTransformRule =
+  npf.fx.KeyframeAnimation.prototype.fromTransform;
+
+/**
+ * @param {string} transform
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.fromTransform = function(transform,
+                                                            opt_acc) {
+  return this.setTransform(transform, 0, opt_acc);
+};
+
+/**
+ * @param {string} transform
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.toTransform.
+ */
+npf.fx.KeyframeAnimation.prototype.toTransformRule =
+  npf.fx.KeyframeAnimation.prototype.toTransform;
+
+/**
+ * @param {string} transform
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.toTransform = function(transform, opt_acc) {
+  return this.setTransform(transform, 100, opt_acc);
+};
+
+/**
+ * @param {string} transform
+ * @param {number} position
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ * @deprecated Use npf.fx.KeyframeAnimation.prototype.setTransform.
+ */
+npf.fx.KeyframeAnimation.prototype.setTransformRule =
+  npf.fx.KeyframeAnimation.prototype.setTransform;
+
+/**
+ * @param {string} transform
+ * @param {number} position
+ * @param {Array.<number>=} opt_acc
+ * @return {!npf.fx.KeyframeAnimation}
+ */
+npf.fx.KeyframeAnimation.prototype.setTransform = function(transform, position,
+                                                           opt_acc) {
+  this.getKeyframes().setTransform(transform, position, opt_acc);
+
+  return this;
 };
 
 /**
@@ -356,929 +1156,7 @@ npf.fx.KeyframeAnimation.prototype.to = function(rules, opt_acc) {
  */
 npf.fx.KeyframeAnimation.prototype.insertKeyframe = function(rules, position,
                                                              opt_acc) {
-  position = parseInt(position, 10);
-
-  if (0 <= position && position <= 100) {
-    /** @type {Object.<string,string>} */
-    var properties = goog.object.clone(rules);
-
-    if (opt_acc) {
-      /** @type {string} */
-      var timingFunc =
-        npf.fx.KeyframeAnimation.CssProperty.ANIMATION_TIMING_FUNCTION;
-      properties[timingFunc] = 'cubic-bezier(' + opt_acc.join(',') + ')';
-    }
-
-    if (100 == position) {
-      this.endStyles_ = goog.object.clone(rules);
-    }
-
-    if (!this.keyframesMap_[/** @type {string} */ (position)]) {
-      this.keyframesMap_[/** @type {string} */ (position)] = {};
-    }
-
-    goog.object.extend(this.keyframesMap_[/** @type {string} */ (position)],
-      properties);
-  }
-
-  return this;
-};
-
-/**
- * @param {boolean=} opt_restart
- * @return {boolean}
- */
-npf.fx.KeyframeAnimation.prototype.play = function(opt_restart) {
-  if (opt_restart || this.isStopped()) {
-    this.cleared_ = true;
-
-    if (this.domSet_) {
-      this.clearDom();
-    }
-  } else if (this.isPlaying()) {
-    return false;
-  }
-
-  if (this.cleared_) {
-    this.onBegin();
-  }
-
-  this.onPlay();
-
-  if (this.isPaused()) {
-    this.onResume();
-  }
-
-  if (this.cleared_) {
-    this.cleared_ = false;
-    this.setDom();
-  }
-
-  this.setStatePlaying();
-
-  return true;
-};
-
-/**
- * @protected
- */
-npf.fx.KeyframeAnimation.prototype.setDom = function() {
-  var rules = [];
-
-  goog.object.forEach(this.keyframesMap_, function(properties, position) {
-    /** @type {string} */
-    var keyframeText = position + '% {';
-
-    for (var key in properties) {
-      keyframeText += key + ':' + properties[key] + ';';
-    }
-
-    keyframeText += '}';
-    rules.push(keyframeText);
-  }, this);
-
-  this.styleElement_.innerHTML = '@-' + npf.userAgent.Support.vendorPrefix +
-    '-keyframes ' + this.name_ + ' {' + rules.join('') + '}';
-
-  this.handler_.listen(this.element, [
-    npf.userAgent.Support.vendorPrefix + 'AnimationStart',
-    'animationstart'
-  ], this.onAnimationStart_, false, this);
-  this.handler_.listen(this.element, [
-    npf.userAgent.Support.vendorPrefix + 'AnimationEnd',
-    'animationend'
-  ], this.onAnimationEnd_, false, this);
-  this.handler_.listen(this.element, [
-    npf.userAgent.Support.vendorPrefix + 'AnimationIteration',
-    'animationiteration'
-  ], this.onAnimationIteration_, false, this);
-
-  this.setAnimationDelay_(this.delay_);
-  this.setAnimationDirection_(this.direction_);
-  this.setAnimationDuration_(this.duration);
-  this.setAnimationIterationCount_(this.iterationCount_);
-  this.setAnimationName_(this.name_);
-  this.setAnimationTimingFunction_(this.accel_);
-  this.setAnimationPlayState_(npf.fx.KeyframeAnimation.PlayState.RUNNING);
-
-  /*if (this.endStyles_) {
-    goog.style.setStyle(this.element, this.endStyles_);
-  }*/
-
-  this.domSet_ = true;
-};
-
-/**
- * Stops the animation.
- * @param {boolean} gotoEnd If true the animation will move to the end coords.
- */
-npf.fx.KeyframeAnimation.prototype.stop = function(gotoEnd) {
-  this.setStateStopped();
-  this.setAnimationPlayState_(npf.fx.KeyframeAnimation.PlayState.PAUSED);
-
-  if (gotoEnd) {
-    this.clearDom();
-  }
-
-  this.cleared_ = true;
-
-  this.onStop();
-  this.onEnd();
-};
-
-npf.fx.KeyframeAnimation.prototype.pause = function() {
-  if (this.isPlaying()) {
-    this.setAnimationPlayState_(npf.fx.KeyframeAnimation.PlayState.PAUSED);
-    this.setStatePaused();
-    this.onPause();
-  }
-};
-
-/**
- * @protected
- */
-npf.fx.KeyframeAnimation.prototype.clearDom = function() {
-  this.handler_.removeAll();
-
-  for (var name in npf.fx.KeyframeAnimation.CssProperty) {
-    /** @type {string} */
-    var key = npf.fx.KeyframeAnimation.CssProperty[name];
-    goog.style.setStyle(this.element, key, '');
-  }
-
-  this.domSet_ = false;
-};
-
-/**
- * @param {goog.events.Event} evt
- * @private
- */
-npf.fx.KeyframeAnimation.prototype.onAnimationStart_ = function(evt) {
-
-};
-
-/**
- * @param {goog.events.Event} evt
- * @private
- */
-npf.fx.KeyframeAnimation.prototype.onAnimationEnd_ = function(evt) {
-  this.setAnimationPlayState_(npf.fx.KeyframeAnimation.PlayState.PAUSED);
-  this.clearDom();
-  this.cleared_ = true;
-  this.setStateStopped();
-  this.onFinish();
-  this.onEnd();
-};
-
-/**
- * @param {goog.events.Event} evt
- * @private
- */
-npf.fx.KeyframeAnimation.prototype.onAnimationIteration_ = function(evt) {
-  this.onIteration();
-};
-
-/**
- * @protected
- */
-npf.fx.KeyframeAnimation.prototype.onIteration = function() {
-  this.dispatchAnimationEvent(npf.fx.keyframeAnimation.EventType.ITERATION);
-};
-
-/**
- * @param {npf.fx.keyframeAnimation.EventType} type
- * @protected
- */
-npf.fx.KeyframeAnimation.prototype.dispatchAnimationEvent = function(type) {
-  this.dispatchEvent(new npf.fx.keyframeAnimation.Event(type, this));
-};
-
-/**
- * @param {number} delay
- * @private
- */
-npf.fx.KeyframeAnimation.prototype.setAnimationDelay_ = function(delay) {
-  /** @type {string} */
-  var key = npf.fx.KeyframeAnimation.CssProperty.ANIMATION_DELAY;
-  goog.style.setStyle(this.element, key, delay + 'ms');
-};
-
-/**
- * @param {npf.fx.KeyframeAnimation.Direction} direction
- * @private
- */
-npf.fx.KeyframeAnimation.prototype.setAnimationDirection_ = function(direction) {
-  /** @type {string} */
-  var key = npf.fx.KeyframeAnimation.CssProperty.ANIMATION_DIRECTION;
-  goog.style.setStyle(this.element, key, direction);
-};
-
-/**
- * @param {number} duration
- * @private
- */
-npf.fx.KeyframeAnimation.prototype.setAnimationDuration_ = function(duration) {
-  /** @type {string} */
-  var key = npf.fx.KeyframeAnimation.CssProperty.ANIMATION_DURATION;
-  goog.style.setStyle(this.element, key, duration + 'ms');
-};
-
-/**
- * @param {number} count 0 — infinite
- * @private
- */
-npf.fx.KeyframeAnimation.prototype.setAnimationIterationCount_ = function(count) {
-  /** @type {string} */
-  var key = npf.fx.KeyframeAnimation.CssProperty.ANIMATION_ITERATION_COUNT;
-  /** @type {string} */
-  var value = count ? count + '' : 'infinite';
-  goog.style.setStyle(this.element, key, value);
-};
-
-/**
- * @param {string} name
- * @private
- */
-npf.fx.KeyframeAnimation.prototype.setAnimationName_ = function(name) {
-  /** @type {string} */
-  var key = npf.fx.KeyframeAnimation.CssProperty.ANIMATION_NAME;
-  goog.style.setStyle(this.element, key, name);
-};
-
-/**
- * @param {Array.<string>} accel
- * @private
- */
-npf.fx.KeyframeAnimation.prototype.setAnimationTimingFunction_ = function(accel) {
-  /** @type {string} */
-  var key = npf.fx.KeyframeAnimation.CssProperty.ANIMATION_TIMING_FUNCTION;
-  /** @type {string} */
-  var value = 'cubic-bezier(' + accel.join(',') + ')';
-  goog.style.setStyle(this.element, key, value);
-};
-
-/**
- * @param {npf.fx.KeyframeAnimation.PlayState} state
- * @private
- */
-npf.fx.KeyframeAnimation.prototype.setAnimationPlayState_ = function(state) {
-  this.playState_ = state;
-
-  /** @type {string} */
-  var key = npf.fx.KeyframeAnimation.CssProperty.ANIMATION_PLAY_STATE;
-  goog.style.setStyle(this.element, key, state);
-};
-
-/**
- * @param {number|string} fromOpacity
- * @param {number|string} toOpacity
- * @param {Array.<number>=} opt_fromAcc
- * @param {Array.<number>=} opt_toAcc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.fromToOpacityRule = function(fromOpacity,
-                                                                toOpacity,
-                                                                opt_fromAcc,
-                                                                opt_toAcc) {
-  this.setOpacityRule(fromOpacity, 0, opt_fromAcc);
-
-  return this.setOpacityRule(toOpacity, 100, opt_toAcc);
-};
-
-/**
- * @param {number|string} opacity
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.fromOpacityRule = function(opacity,
-                                                              opt_acc) {
-  return this.setOpacityRule(opacity, 0, opt_acc);
-};
-
-/**
- * @param {number|string} opacity
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.toOpacityRule = function(opacity, opt_acc) {
-  return this.setOpacityRule(opacity, 100, opt_acc);
-};
-
-/**
- * @param {number|string} opacity
- * @param {number} position
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.setOpacityRule = function(opacity, position,
-                                                             opt_acc) {
-  return this.insertKeyframe({
-    'opacity': opacity
-  }, position, opt_acc);
-};
-
-/**
- * @param {Array.<number|string>|goog.math.Coordinate} fromCoords
- * @param {Array.<number|string>|goog.math.Coordinate} toCoords
- * @param {Array.<number>=} opt_fromAcc
- * @param {Array.<number>=} opt_toAcc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.fromToPositionRule = function(fromCoords,
-                                                                 toCoords,
-                                                                 opt_fromAcc,
-                                                                 opt_toAcc) {
-  this.setPositionRule(fromCoords, 0, opt_fromAcc);
-
-  return this.setPositionRule(toCoords, 100, opt_toAcc);
-};
-
-/**
- * @param {Array.<number|string>|goog.math.Coordinate} coords
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.fromPositionRule = function(coords,
-                                                               opt_acc) {
-  return this.setPositionRule(coords, 0, opt_acc);
-};
-
-/**
- * @param {Array.<number|string>|goog.math.Coordinate} coords
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.toPositionRule = function(coords, opt_acc) {
-  return this.setPositionRule(coords, 100, opt_acc);
-};
-
-/**
- * @param {Array.<number|string>|goog.math.Coordinate} coords
- * @param {number} position
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.setPositionRule = function(coords, position,
-                                                              opt_acc) {
-  /** @type {number} */
-  var left;
-  /** @type {number} */
-  var top;
-
-  if (goog.isArray(coords)) {
-    if (2 == coords.length) {
-      left = coords[0];
-      top = coords[1];
-    } else {
-      throw Error('Position must be 2D');
-    }
-  } else {
-    left = coords.x;
-    top = coords.y;
-  }
-
-  return this.insertKeyframe({
-    'left': goog.isNumber(left) ? left + 'px' : left,
-    'top': goog.isNumber(top) ? top + 'px' : top
-  }, position, opt_acc);
-};
-
-/**
- * @param {number|string} fromLeft
- * @param {number|string} toLeft
- * @param {Array.<number>=} opt_fromAcc
- * @param {Array.<number>=} opt_toAcc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.fromToLeftRule = function(fromLeft, toLeft,
-                                                             opt_fromAcc,
-                                                             opt_toAcc) {
-  this.setLeftRule(fromLeft, 0, opt_fromAcc);
-
-  return this.setLeftRule(toLeft, 100, opt_toAcc);
-};
-
-/**
- * @param {number|string} left
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.fromLeftRule = function(left, opt_acc) {
-  return this.setLeftRule(left, 0, opt_acc);
-};
-
-/**
- * @param {number|string} left
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.toLeftRule = function(left, opt_acc) {
-  return this.setLeftRule(left, 100, opt_acc);
-};
-
-/**
- * @param {number|string} left
- * @param {number} position
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.setLeftRule = function(left, position,
-                                                          opt_acc) {
-  return this.insertKeyframe({
-    'left': goog.isNumber(left) ? left + 'px' : left
-  }, position, opt_acc);
-};
-
-/**
- * @param {number|string} fromTop
- * @param {number|string} toTop
- * @param {Array.<number>=} opt_fromAcc
- * @param {Array.<number>=} opt_toAcc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.fromToTopRule = function(fromTop, toTop,
-                                                            opt_fromAcc,
-                                                            opt_toAcc) {
-  this.setTopRule(fromTop, 0, opt_fromAcc);
-
-  return this.setTopRule(toTop, 100, opt_toAcc);
-};
-
-/**
- * @param {number|string} top
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.fromTopRule = function(top, opt_acc) {
-  return this.setTopRule(top, 0, opt_acc);
-};
-
-/**
- * @param {number|string} top
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.toTopRule = function(top, opt_acc) {
-  return this.setTopRule(top, 100, opt_acc);
-};
-
-/**
- * @param {number|string} top
- * @param {number} position
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.setTopRule = function(top, position,
-                                                         opt_acc) {
-  return this.insertKeyframe({
-    'top': goog.isNumber(top) ? top + 'px' : top
-  }, position, opt_acc);
-};
-
-/**
- * @param {number|string} fromRight
- * @param {number|string} toRight
- * @param {Array.<number>=} opt_fromAcc
- * @param {Array.<number>=} opt_toAcc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.fromToRightRule = function(fromRight,
-                                                              toRight,
-                                                              opt_fromAcc,
-                                                              opt_toAcc) {
-  this.setRightRule(fromRight, 0, opt_fromAcc);
-
-  return this.setRightRule(toRight, 100, opt_toAcc);
-};
-
-/**
- * @param {number|string} right
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.fromRightRule = function(right, opt_acc) {
-  return this.setRightRule(right, 0, opt_acc);
-};
-
-/**
- * @param {number|string} right
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.toRightRule = function(right, opt_acc) {
-  return this.setRightRule(right, 100, opt_acc);
-};
-
-/**
- * @param {number|string} right
- * @param {number} position
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.setRightRule = function(right, position,
-                                                           opt_acc) {
-  return this.insertKeyframe({
-    'right': goog.isNumber(right) ? right + 'px' : right
-  }, position, opt_acc);
-};
-
-/**
- * @param {number|string} fromBottom
- * @param {number|string} toBottom
- * @param {Array.<number>=} opt_fromAcc
- * @param {Array.<number>=} opt_toAcc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.fromToBottomRule = function(fromBottom,
-                                                               toBottom,
-                                                               opt_fromAcc,
-                                                               opt_toAcc) {
-  this.setBottomRule(fromBottom, 0, opt_fromAcc);
-
-  return this.setBottomRule(toBottom, 100, opt_toAcc);
-};
-
-/**
- * @param {number|string} bottom
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.fromBottomRule = function(bottom, opt_acc) {
-  return this.setBottomRule(bottom, 0, opt_acc);
-};
-
-/**
- * @param {number|string} bottom
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.toBottomRule = function(bottom, opt_acc) {
-  return this.setBottomRule(bottom, 100, opt_acc);
-};
-
-/**
- * @param {number|string} bottom
- * @param {number} position
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.setBottomRule = function(bottom, position,
-                                                            opt_acc) {
-  return this.insertKeyframe({
-    'bottom': goog.isNumber(bottom) ? bottom + 'px' : bottom
-  }, position, opt_acc);
-};
-
-/**
- * @param {Array.<number|string>|goog.math.Size|goog.math.Rect} fromSize
- * @param {Array.<number|string>|goog.math.Size|goog.math.Rect} toSize
- * @param {Array.<number>=} opt_fromAcc
- * @param {Array.<number>=} opt_toAcc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.fromToSizeRule = function(fromSize,
-                                                             toSize,
-                                                             opt_fromAcc,
-                                                             opt_toAcc) {
-  this.setSizeRule(fromSize, 0, opt_fromAcc);
-
-  return this.setSizeRule(toSize, 100, opt_toAcc);
-};
-
-/**
- * @param {Array.<number|string>|goog.math.Size|goog.math.Rect} size
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.fromSizeRule = function(size, opt_acc) {
-  return this.setSizeRule(size, 0, opt_acc);
-};
-
-/**
- * @param {Array.<number|string>|goog.math.Size|goog.math.Rect} size
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.toSizeRule = function(size, opt_acc) {
-  return this.setSizeRule(size, 100, opt_acc);
-};
-
-/**
- * @param {Array.<number|string>|goog.math.Size|goog.math.Rect} size
- * @param {number} position
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.setSizeRule = function(size, position,
-                                                          opt_acc) {
-  /** @type {number} */
-  var width;
-  /** @type {number} */
-  var height;
-
-  if (goog.isArray(size)) {
-    if (2 == size.length) {
-      width = size[0];
-      height = size[1];
-    } else {
-      throw Error('Size must be 2D');
-    }
-  } else {
-    width = size.width;
-    height = size.height;
-  }
-
-  return this.insertKeyframe({
-    'width': goog.isNumber(width) ? width + 'px' : width,
-    'height': goog.isNumber(height) ? height + 'px' : height
-  }, position, opt_acc);
-};
-
-/**
- * @param {number|string} fromWidth
- * @param {number|string} toWidth
- * @param {Array.<number>=} opt_fromAcc
- * @param {Array.<number>=} opt_toAcc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.fromToWidthRule = function(fromWidth,
-                                                              toWidth,
-                                                              opt_fromAcc,
-                                                              opt_toAcc) {
-  this.setWidthRule(fromWidth, 0, opt_fromAcc);
-
-  return this.setWidthRule(toWidth, 100, opt_toAcc);
-};
-
-/**
- * @param {number|string} width
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.fromWidthRule = function(width, opt_acc) {
-  return this.setWidthRule(width, 0, opt_acc);
-};
-
-/**
- * @param {number|string} width
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.toWidthRule = function(width, opt_acc) {
-  return this.setWidthRule(width, 100, opt_acc);
-};
-
-/**
- * @param {number|string} width
- * @param {number} position
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.setWidthRule = function(width, position,
-                                                           opt_acc) {
-  return this.insertKeyframe({
-    'width': goog.isNumber(width) ? width + 'px' : width
-  }, position, opt_acc);
-};
-
-/**
- * @param {number|string} fromHeight
- * @param {number|string} toHeight
- * @param {Array.<number>=} opt_fromAcc
- * @param {Array.<number>=} opt_toAcc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.fromToHeightRule = function(fromHeight,
-                                                               toHeight,
-                                                               opt_fromAcc,
-                                                               opt_toAcc) {
-  this.setHeightRule(fromHeight, 0, opt_fromAcc);
-
-  return this.setHeightRule(toHeight, 100, opt_toAcc);
-};
-
-/**
- * @param {number|string} height
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.fromHeightRule = function(height, opt_acc) {
-  return this.setHeightRule(height, 0, opt_acc);
-};
-
-/**
- * @param {number|string} height
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.toHeightRule = function(height, opt_acc) {
-  return this.setHeightRule(height, 100, opt_acc);
-};
-
-/**
- * @param {number|string} height
- * @param {number} position
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.setHeightRule = function(height, position,
-                                                            opt_acc) {
-  return this.insertKeyframe({
-    'height': goog.isNumber(height) ? height + 'px' : height
-  }, position, opt_acc);
-};
-
-/**
- * @param {string|Array.<number>} fromColor
- * @param {string|Array.<number>} toColor
- * @param {Array.<number>=} opt_fromAcc
- * @param {Array.<number>=} opt_toAcc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.fromToColorRule = function(fromColor,
-                                                              toColor,
-                                                              opt_fromAcc,
-                                                              opt_toAcc) {
-  this.setColorRule(fromColor, 0, opt_fromAcc);
-
-  return this.setColorRule(toColor, 100, opt_toAcc);
-};
-
-/**
- * @param {string|Array.<number>} color
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.fromColorRule = function(color, opt_acc) {
-  return this.setColorRule(color, 0, opt_acc);
-};
-
-/**
- * @param {string|Array.<number>} color
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.toColorRule = function(color, opt_acc) {
-  return this.setColorRule(color, 100, opt_acc);
-};
-
-/**
- * @param {string|Array.<number>} color
- * @param {number} position
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.setColorRule = function(color, position,
-                                                           opt_acc) {
-  var value = '';
-
-  if (goog.isArray(color)) {
-    if (4 == color.length) {
-      value = 'rgba(' + color.join(',') + ')';
-    } else if (3 == color.length) {
-      value = 'rgb(' + color.join(',') + ')';
-    } else {
-      throw Error('Color must be 3D or 4D');
-    }
-  } else {
-    value = color;
-  }
-
-  return this.insertKeyframe({
-    'color': value
-  }, position, opt_acc);
-};
-
-/**
- * @param {string|Array.<number>} fromBgColor
- * @param {string|Array.<number>} toBgColor
- * @param {Array.<number>=} opt_fromAcc
- * @param {Array.<number>=} opt_toAcc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.fromToBgColorRule = function(fromBgColor,
-                                                                toBgColor,
-                                                                opt_fromAcc,
-                                                                opt_toAcc) {
-  this.setBgColorRule(fromBgColor, 0, opt_fromAcc);
-
-  return this.setBgColorRule(toBgColor, 100, opt_toAcc);
-};
-
-/**
- * @param {string|Array.<number>} bgColor
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.fromBgColorRule = function(bgColor,
-                                                              opt_acc) {
-  return this.setBgColorRule(bgColor, 0, opt_acc);
-};
-
-/**
- * @param {string|Array.<number>} bgColor
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.toBgColorRule = function(bgColor, opt_acc) {
-  return this.setBgColorRule(bgColor, 100, opt_acc);
-};
-
-/**
- * @param {string|Array.<number>} bgColor
- * @param {number} position
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.setBgColorRule = function(bgColor, position,
-                                                             opt_acc) {
-  var value = '';
-
-  if (goog.isArray(bgColor)) {
-    if (4 == bgColor.length) {
-      value = 'rgba(' + bgColor.join(',') + ')';
-    } else if (3 == bgColor.length) {
-      value = 'rgb(' + bgColor.join(',') + ')';
-    } else {
-      throw Error('Background Color must be 3D or 4D');
-    }
-  } else {
-    value = bgColor;
-  }
-
-  return this.insertKeyframe({
-    'background-color': value
-  }, position, opt_acc);
-};
-
-/**
- * @param {string} fromTransform
- * @param {string} toTransform
- * @param {Array.<number>=} opt_fromAcc
- * @param {Array.<number>=} opt_toAcc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.fromToTransformRule = function(fromTransform,
-                                                                  toTransform,
-                                                                  opt_fromAcc,
-                                                                  opt_toAcc) {
-  this.setTransformRule(fromTransform, 0, opt_fromAcc);
-
-  return this.setTransformRule(toTransform, 100, opt_toAcc);
-};
-
-/**
- * @param {string} transform
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.fromTransformRule = function(transform,
-                                                                opt_acc) {
-  return this.setTransformRule(transform, 0, opt_acc);
-};
-
-/**
- * @param {string} transform
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.toTransformRule = function(transform,
-                                                              opt_acc) {
-  return this.setTransformRule(transform, 100, opt_acc);
-};
-
-/**
- * @param {string} transform
- * @param {number} position
- * @param {Array.<number>=} opt_acc
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.setTransformRule = function(transform,
-                                                               position,
-                                                               opt_acc) {
-  return this.insertKeyframe(goog.object.create(
-    npf.userAgent.support.getCssPropertyName('transform'), transform
-  ), position, opt_acc);
-};
-
-/**
- * @param {string|Array.<number|string>} origin
- * @return {!npf.fx.KeyframeAnimation}
- */
-npf.fx.KeyframeAnimation.prototype.setTransformOrigin = function(origin) {
-  var value;
-
-  if (goog.isArray(origin)) {
-    if (2 != origin.length && 3 != origin.length) {
-      throw Error('Transform Origin must be 2D or 3D');
-    }
-
-    value = origin.join(' ');
-  } else {
-    value = origin;
-  }
-
-  goog.style.setStyle(this.element, npf.userAgent.support.getCssPropertyName('transform-origin'), /** @type {string} */ (value));
+  this.getKeyframes().insertKeyframe(rules, position, opt_acc);
 
   return this;
 };

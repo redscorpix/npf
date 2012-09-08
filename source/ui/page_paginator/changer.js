@@ -430,7 +430,7 @@ npf.ui.pagePaginator.Changer.prototype.animatePage = function(next) {
 
   this.animation_ = new npf.fx.KeyframeAnimation(this.contentElement_,
     npf.ui.pagePaginator.Changer.DURATION, [0.25, 0.1, 0.25, 1]);
-  this.animation_.addEventListener(npf.fx.keyframeAnimation.EventType.FINISH,
+  this.animation_.addEventListener(npf.fx.cssAnimation.EventType.FINISH,
     this.onAnimationFinish_, false, this);
   this.animation_.from(fromProperties);
   this.animation_.to(toProperties);
@@ -438,7 +438,7 @@ npf.ui.pagePaginator.Changer.prototype.animatePage = function(next) {
 };
 
 /**
- * @param {npf.fx.keyframeAnimation.Event} evt
+ * @param {npf.fx.cssAnimation.Event} evt
  * @private
  */
 npf.ui.pagePaginator.Changer.prototype.onAnimationFinish_ = function(evt) {
@@ -494,7 +494,7 @@ npf.ui.pagePaginator.Changer.prototype.animateReturn_ = function(fromX,
 
   this.animation_ = new npf.fx.KeyframeAnimation(this.contentElement_,
     npf.ui.pagePaginator.Changer.DURATION, timing);
-  this.animation_.addEventListener(npf.fx.keyframeAnimation.EventType.FINISH,
+  this.animation_.addEventListener(npf.fx.cssAnimation.EventType.FINISH,
     this.onReturnAnimationFinish_, false, this);
   this.animation_.from(fromProperties);
   this.animation_.to(toProperties);
@@ -502,7 +502,7 @@ npf.ui.pagePaginator.Changer.prototype.animateReturn_ = function(fromX,
 };
 
 /**
- * @param {npf.fx.keyframeAnimation.Event} evt
+ * @param {npf.fx.cssAnimation.Event} evt
  * @private
  */
 npf.ui.pagePaginator.Changer.prototype.onReturnAnimationFinish_ = function(evt) {

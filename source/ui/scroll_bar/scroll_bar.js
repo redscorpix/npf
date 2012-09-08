@@ -230,21 +230,6 @@ npf.ui.ScrollBar.prototype.disposeInternal = function() {
   delete this.upButton_;
 };
 
-/**
- * @return {npf.ui.scrollBar.Renderer}
- * @override
- */
-npf.ui.ScrollBar.prototype.getRenderer = function() {
-  return /** @type {npf.ui.scrollBar.Renderer} */ (goog.base(this, 'getRenderer'));
-};
-
-/**
- * @param {npf.ui.scrollBar.Renderer} renderer
- */
-npf.ui.ScrollBar.prototype.setRenderer = function(renderer) {
-  goog.base(this, 'setRenderer', renderer);
-};
-
 /** @inheritDoc */
 npf.ui.ScrollBar.prototype.getContentElement = function() {
   /** @type {Element} */

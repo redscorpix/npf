@@ -29,17 +29,14 @@ npf.ui.navigation.ItemRenderer.prototype.getCssClass = function() {
   return npf.ui.navigation.ItemRenderer.CSS_CLASS;
 };
 
-/**
- * @param {npf.ui.navigation.Item} item
- * @return {Element}
- */
+/** @override */
 npf.ui.navigation.ItemRenderer.prototype.createDom = function(item) {
   /** @type {!Element} */
   var element = item.getDomHelper().createDom(goog.dom.TagName.A, {
     'class': this.getClassNames(item).join(' '),
     'href': item.getUrl()
   });
-  this.initializeDom(item, element);
+  this.initializeDom(/** @type {npf.ui.navigation.Item} */ (item), element);
 
   return element;
 };

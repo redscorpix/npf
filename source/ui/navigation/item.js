@@ -79,21 +79,6 @@ npf.ui.navigation.Item.prototype.disposeInternal = function() {
 };
 
 /**
- * @return {npf.ui.navigation.ItemRenderer}
- * @override
- */
-npf.ui.navigation.Item.prototype.getRenderer = function() {
-  return /** @type {npf.ui.navigation.ItemRenderer} */ (goog.base(this, 'getRenderer'));
-};
-
-/**
- * @param {npf.ui.navigation.ItemRenderer} renderer
- */
-npf.ui.navigation.Item.prototype.setRenderer = function(renderer) {
-  return goog.base(this, 'setRenderer', renderer);
-};
-
-/**
  * @param {goog.events.BrowserEvent} evt
  * @private
  */
@@ -132,7 +117,6 @@ npf.ui.navigation.Item.prototype.setCaption = function(caption) {
  * @protected
  */
 npf.ui.navigation.Item.prototype.setCaptionInternal = function(caption) {
-  /** @type {npf.ui.navigation.ItemRenderer} */
   var renderer = this.getRenderer();
   /** @type {Element} */
   var captionElement = renderer.getCaptionElement(this.getElement());
@@ -161,7 +145,6 @@ npf.ui.navigation.Item.prototype.setUrl = function(url) {
  * @protected
  */
 npf.ui.navigation.Item.prototype.setUrlInternal = function(url) {
-  /** @type {npf.ui.navigation.ItemRenderer} */
   var renderer = this.getRenderer();
   /** @type {Element} */
   var linkElement = renderer.getLinkElement(this.getElement());

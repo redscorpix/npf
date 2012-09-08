@@ -20,26 +20,23 @@ goog.addSingletonGetter(npf.ui.pagePaginator.Renderer);
 /**
  * @type {string}
  */
-npf.ui.pagePaginator.Renderer.CSS_CLASS = goog.getCssName('pagePaginator');
+npf.ui.pagePaginator.Renderer.CSS_CLASS = goog.getCssName('npf-pagePaginator');
 
 
-/**
- * @param {npf.ui.PagePaginator} component
- * @return {Element}
- */
+/** @override */
 npf.ui.pagePaginator.Renderer.prototype.createDom = function(component) {
   /** @type {Element} */
   var element = goog.base(this, 'createDom', component);
   /** @type {Element} */
-  var prevElement = this.createPrevElement(component);
+  var prevElement = this.createPrevElement(/** @type {npf.ui.PagePaginator} */ (component));
   /** @type {Element} */
-  var nextElement = this.createNextElement(component);
+  var nextElement = this.createNextElement(/** @type {npf.ui.PagePaginator} */ (component));
   /** @type {Element} */
-  var containerElement = this.createContainerElement(component);
+  var containerElement = this.createContainerElement(/** @type {npf.ui.PagePaginator} */ (component));
   /** @type {Element} */
-  var contentElement = this.createContentElement(component);
+  var contentElement = this.createContentElement(/** @type {npf.ui.PagePaginator} */ (component));
   /** @type {Element} */
-  var indicatorsElement = this.createPageIndicatorsElement(component);
+  var indicatorsElement = this.createPageIndicatorsElement(/** @type {npf.ui.PagePaginator} */ (component));
 
   if (prevElement) {
     goog.dom.appendChild(element, prevElement);

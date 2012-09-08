@@ -142,20 +142,6 @@ npf.ui.form.DatePicker.prototype.disposeInternal = function() {
   delete this.isEmptyValues_;
 };
 
-/**
- * @return {npf.ui.form.DatePickerRenderer}
- */
-npf.ui.form.DatePicker.prototype.getRenderer = function() {
-  return /** @type {npf.ui.form.DatePickerRenderer} */ (goog.base(this, 'getRenderer'));
-};
-
-/**
- * @param {npf.ui.form.DatePickerRenderer} renderer
- */
-npf.ui.form.DatePicker.prototype.setRenderer = function(renderer) {
-  goog.base(this, 'setRenderer', renderer);
-};
-
 /** @inheritDoc */
 npf.ui.form.DatePicker.prototype.initializeInternal = function() {
   goog.base(this, 'initializeInternal');

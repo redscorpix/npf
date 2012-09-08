@@ -111,22 +111,6 @@ npf.ui.form.Field.prototype.disposeInternal = function() {
 };
 
 /**
- * @return {npf.ui.form.FieldRenderer}
- * @override
- */
-npf.ui.form.Field.prototype.getRenderer = function() {
-  return /** @type {npf.ui.form.FieldRenderer} */ (goog.base(this, 'getRenderer'));
-};
-
-/**
- * @param {npf.ui.form.FieldRenderer} renderer
- * @override
- */
-npf.ui.form.Field.prototype.setRenderer = function(renderer) {
-  goog.base(this, 'setRenderer', renderer);
-};
-
-/**
  * @protected
  */
 npf.ui.form.Field.prototype.initializeInternal = function() {

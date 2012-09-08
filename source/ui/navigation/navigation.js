@@ -43,7 +43,6 @@ npf.ui.Navigation.prototype.selectedItem_ = null;
 
 /** @inheritDoc */
 npf.ui.Navigation.prototype.createDom = function() {
-  /** @type {npf.ui.navigation.Renderer} */
   var renderer = this.getRenderer();
   /** @type {Element} */
   var element = renderer.createDom(this);
@@ -57,21 +56,6 @@ npf.ui.Navigation.prototype.disposeInternal = function() {
   delete this.itemsMap_;
   delete this.uidToType_;
   delete this.selectedItem_;
-};
-
-/**
- * @return {npf.ui.navigation.Renderer}
- * @override
- */
-npf.ui.Navigation.prototype.getRenderer = function() {
-  return /** @type {npf.ui.navigation.Renderer} */ (goog.base(this, 'getRenderer'));
-};
-
-/**
- * @param {npf.ui.navigation.Renderer} renderer
- */
-npf.ui.Navigation.prototype.setRenderer = function(renderer) {
-  return goog.base(this, 'setRenderer', renderer);
 };
 
 /**

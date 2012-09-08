@@ -7,19 +7,19 @@ goog.require('npf.ui.searchInput.Renderer');
 
 
 /**
- * @param {string=} optvalue_
+ * @param {string=} opt_value
  * @param {string=} opt_placeholder
  * @param {npf.ui.searchInput.Renderer=} opt_renderer
  * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
  * @extends {npf.ui.RenderComponent}
  */
-npf.ui.SearchInput = function(optvalue_, opt_placeholder, opt_renderer,
+npf.ui.SearchInput = function(opt_value, opt_placeholder, opt_renderer,
                               opt_domHelper) {
   goog.base(this, opt_renderer ||
     npf.ui.searchInput.Renderer.getInstance(), opt_domHelper);
 
-  this.value_ = optvalue_ || '';
+  this.value_ = opt_value || '';
   this.placeholderValue_ = opt_placeholder || '';
 };
 goog.inherits(npf.ui.SearchInput, npf.ui.RenderComponent);
@@ -128,22 +128,6 @@ npf.ui.SearchInput.prototype.disposeInternal = function() {
   delete this.clearable_;
   delete this.hasIcon_;
   delete this.inputHandler_;
-};
-
-/**
- * @return {npf.ui.searchInput.Renderer}
- * @override
- */
-npf.ui.SearchInput.prototype.getRenderer = function() {
-  return /** @type {npf.ui.searchInput.Renderer} */ (goog.base(this, 'getRenderer'));
-};
-
-/**
- * @param {npf.ui.searchInput.Renderer} renderer
- * @override
- */
-npf.ui.SearchInput.prototype.setRenderer = function(renderer) {
-  goog.base(this, 'setRenderer', renderer);
 };
 
 /**

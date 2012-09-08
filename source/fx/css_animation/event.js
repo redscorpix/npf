@@ -1,15 +1,15 @@
-goog.provide('npf.fx.keyframeAnimation.Event');
+goog.provide('npf.fx.cssAnimation.Event');
 
 goog.require('goog.events.Event');
 
 
 /**
- * @param {npf.fx.keyframeAnimation.EventType} type
- * @param {npf.fx.KeyframeAnimation} animation
+ * @param {npf.fx.cssAnimation.EventType} type
+ * @param {npf.fx.CssAnimation} animation
  * @constructor
  * @extends {goog.events.Event}
  */
-npf.fx.keyframeAnimation.Event = function(type, animation) {
+npf.fx.cssAnimation.Event = function(type, animation) {
   goog.base(this, type);
 
   /**
@@ -18,7 +18,7 @@ npf.fx.keyframeAnimation.Event = function(type, animation) {
   this.duration = animation.getDuration();
 
   /**
-   * @type {npf.fx.KeyframeAnimation.PlayState}
+   * @type {npf.style.animation.PlayState}
    */
   this.state = animation.getState();
 
@@ -33,8 +33,8 @@ npf.fx.keyframeAnimation.Event = function(type, animation) {
   this.delay = animation.getDelay();
 
   /**
-   * @type {npf.fx.KeyframeAnimation.Direction}
+   * @type {npf.style.animation.Direction}
    */
   this.direction = animation.getDirection();
 };
-goog.inherits(npf.fx.keyframeAnimation.Event, goog.events.Event);
+goog.inherits(npf.fx.cssAnimation.Event, goog.events.Event);

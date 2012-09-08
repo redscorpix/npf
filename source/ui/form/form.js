@@ -85,22 +85,6 @@ npf.ui.Form.prototype.removeChild = function(child, opt_unrender) {
 };
 
 /**
- * @return {npf.ui.form.Renderer}
- * @override
- */
-npf.ui.Form.prototype.getRenderer = function() {
-  return /** @type {npf.ui.form.Renderer} */ (goog.base(this, 'getRenderer'));
-};
-
-/**
- * @param {npf.ui.form.Renderer} renderer
- * @override
- */
-npf.ui.Form.prototype.setRenderer = function(renderer) {
-  goog.base(this, 'setRenderer', renderer);
-};
-
-/**
  * @param {goog.events.BrowserEvent} evt
  * @private
  */

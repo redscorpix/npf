@@ -46,10 +46,7 @@ npf.ui.scrollBar.Renderer.prototype.getCssClass = function() {
   return npf.ui.scrollBar.Renderer.CSS_CLASS;
 };
 
-/**
- * @param {npf.ui.ScrollBar} component
- * @return {Element}
- */
+/** @override */
 npf.ui.scrollBar.Renderer.prototype.createDom = function(component) {
   /** @type {Element} */
   var element = goog.base(this, 'createDom', component);

@@ -25,10 +25,7 @@ npf.ui.form.DatePickerRenderer.NameSuffix = {
   YEAR: '_year'
 };
 
-/**
- * @param {npf.ui.form.DatePicker} component
- * @return {!Element}
- */
+/** @override */
 npf.ui.form.DatePickerRenderer.prototype.createDom = function(component) {
   /** @type {!Element} */
   var element = goog.base(this, 'createDom', component);

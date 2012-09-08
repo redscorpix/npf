@@ -16,10 +16,7 @@ goog.inherits(npf.ui.form.TextRenderer, npf.ui.form.FieldRenderer);
 goog.addSingletonGetter(npf.ui.form.TextRenderer);
 
 
-/**
- * @param {npf.ui.form.Text} component
- * @return {!Element}
- */
+/** @override */
 npf.ui.form.TextRenderer.prototype.createDom = function(component) {
   /** @type {!Element} */
   var element = goog.base(this, 'createDom', component);
