@@ -27,10 +27,7 @@ npf.ui.form.Renderer.prototype.getCssClass = function() {
   return npf.ui.form.Renderer.CSS_CLASS;
 };
 
-/**
- * @param {npf.ui.Form} form
- * @return {!Element}
- */
+/** @override */
 npf.ui.form.Renderer.prototype.createDom = function(form) {
   /** @type {!Element} */
   var element = component.getDomHelper().createDom(goog.dom.TagName.FORM,

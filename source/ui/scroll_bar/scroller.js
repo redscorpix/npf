@@ -132,21 +132,6 @@ npf.ui.scrollBar.Scroller.prototype.disposeInternal = function() {
 };
 
 /**
- * @return {npf.ui.scrollBar.ScrollerRenderer}
- * @override
- */
-npf.ui.scrollBar.Scroller.prototype.getRenderer = function() {
-  return /** @type {npf.ui.scrollBar.ScrollerRenderer} */ (goog.base(this, 'getRenderer'));
-};
-
-/**
- * @param {npf.ui.scrollBar.ScrollerRenderer} renderer
- */
-npf.ui.scrollBar.Scroller.prototype.setRenderer = function(renderer) {
-  goog.base(this, 'setRenderer', renderer);
-};
-
-/**
  * @return {number}
  */
 npf.ui.scrollBar.Scroller.prototype.getMinWidth = function() {

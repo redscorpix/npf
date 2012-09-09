@@ -103,7 +103,6 @@ npf.ui.PagePaginator.prototype.decorateInternal = function(element) {
 npf.ui.PagePaginator.prototype.initializeDom_ = function() {
   /** @type {Element} */
   var element = this.getElement();
-  /** @type {npf.ui.pagePaginator.Renderer} */
   var renderer = this.getRenderer();
 
   this.page_ = this.appendPage_(this.pageIndex_);
@@ -176,21 +175,6 @@ npf.ui.PagePaginator.prototype.disposeInternal = function() {
   delete this.prevPage_;
   delete this.changer_;
   delete this.draggable_;
-};
-
-/**
- * @return {npf.ui.pagePaginator.Renderer}
- * @override
- */
-npf.ui.PagePaginator.prototype.getRenderer = function() {
-  return /** @type {npf.ui.pagePaginator.Renderer} */ (goog.base(this, 'getRenderer'));
-};
-
-/**
- * @param {npf.ui.pagePaginator.Renderer} renderer
- */
-npf.ui.PagePaginator.prototype.setRenderer = function(renderer) {
-  goog.base(this, 'setRenderer', renderer);
 };
 
 /**
@@ -280,7 +264,6 @@ npf.ui.PagePaginator.prototype.updateContent_ = function() {
     goog.style.setStyle(this.nextPage_.getElement(), 'left', '100%');
   }
 
-  /** @type {npf.ui.pagePaginator.Renderer} */
   var renderer = this.getRenderer();
   renderer.setPrevEnabled(this, !!this.pageIndex_);
   renderer.setNextEnabled(this, this.pageCount_ - 1 > this.pageIndex_);

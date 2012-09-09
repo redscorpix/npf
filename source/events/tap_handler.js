@@ -146,10 +146,5 @@ npf.events.TapHandler.prototype.onTouchStart_ = function(evt) {
 npf.events.TapHandler.prototype.dispatchAndDispose_ = function(evt) {
   var event = new goog.events.BrowserEvent(evt.getBrowserEvent());
   event.type = npf.events.TapHandler.EventType.TAP;
-
-  try {
-    this.dispatchEvent(event);
-  } finally {
-    event.dispose();
-  }
+  this.dispatchEvent(event);
 };

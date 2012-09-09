@@ -942,9 +942,5 @@ npf.events.TouchHandler.prototype.dispatchAndDispose_ = function(type, nativeEve
     goog.object.extend(event, opt_params);
   }
 
-  try {
-    this.dispatchEvent(event);
-  } finally {
-    event.dispose();
-  }
+  this.dispatchEvent(event);
 };
