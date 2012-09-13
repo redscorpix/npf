@@ -280,6 +280,9 @@ npf.fx.CssAnimation.prototype.play = function(opt_restart) {
   if (this.cleared_) {
     this.cleared_ = false;
     this.setDom();
+  } else {
+    this.playState_ = npf.style.animation.PlayState.RUNNING;
+    this.setAnimationPlayState_(this.playState_);
   }
 
   this.setStatePlaying();

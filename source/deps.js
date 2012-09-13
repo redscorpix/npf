@@ -27,6 +27,7 @@ goog.addDependency('../../../source/fx/keyframe_animation/keyframe_animation.js'
 goog.addDependency('../../../source/fx/transition_helper.js', ['npf.fx.TransitionHelper'], ['goog.Disposable', 'goog.fx.Transition.EventType', 'goog.fx.TransitionBase', 'goog.object']);
 goog.addDependency('../../../source/history/history.js', ['npf.History', 'npf.History.EventType'], ['goog.History', 'goog.Uri', 'goog.dom', 'goog.dom.TagName', 'goog.dom.classes', 'goog.events', 'goog.events.EventTarget', 'goog.events.EventType', 'goog.history.EventType', 'goog.history.Html5History', 'npf.history.TokenTransformer']);
 goog.addDependency('../../../source/history/token_transformer.js', ['npf.history.TokenTransformer'], ['goog.history.Html5History.TokenTransformer']);
+goog.addDependency('../../../source/json/path.js', ['npf.json.Path', 'npf.json.path'], []);
 goog.addDependency('../../../source/net/xhr_io.js', ['npf.net.XhrIo'], ['goog.Uri', 'goog.Uri.QueryData', 'goog.net.XhrIo', 'goog.object', 'goog.structs']);
 goog.addDependency('../../../source/pages/manager.js', ['npf.pages.Manager'], ['goog.Uri', 'goog.array', 'goog.events', 'goog.events.EventHandler', 'goog.events.EventTarget', 'goog.net.HttpStatus', 'goog.object', 'npf.Router', 'npf.pages.Page', 'npf.pages.Page.EventType', 'npf.pages.Request']);
 goog.addDependency('../../../source/pages/page.js', ['npf.pages.Page', 'npf.pages.Page.EventType'], ['goog.events', 'goog.events.EventHandler', 'goog.events.EventTarget', 'npf.Router', 'npf.pages.Request']);
