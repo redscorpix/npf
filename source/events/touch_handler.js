@@ -26,9 +26,6 @@ npf.events.TouchHandler = function(element) {
   this.element = element;
   this.prevTapPos_ = [new goog.math.Coordinate(0, 0)];
 
-  this.handler_ = new goog.events.EventHandler();
-  this.registerDisposable(this.handler_);
-
   if (this.cssHacks) {
     var vendors = ['webkit', 'moz', 'ms', 'o', ''];
     var cssProps = {
@@ -52,23 +49,25 @@ npf.events.TouchHandler = function(element) {
     }
   }
 
+  var handler = new goog.events.EventHandler(this);
+  this.registerDisposable(handler);
   var EventType = goog.events.EventType;
 
   if (npf.userAgent.support.isTouchSupported()) {
     // bind events for touch devices
     // except for windows phone 7.5, it doesnt support touch events..!
-    this.handler_
-      .listen(this.element, EventType.TOUCHSTART, this.onStart_, false, this)
-      .listen(this.element, EventType.TOUCHMOVE, this.onProgress_, false, this)
-      .listen(this.element, EventType.TOUCHEND, this.onEnd_, false, this)
-      .listen(this.element, EventType.TOUCHCANCEL, this.onEnd_, false, this);
+    handler
+      .listen(this.element, EventType.TOUCHSTART, this.onStart_)
+      .listen(this.element, EventType.TOUCHMOVE, this.onProgress_)
+      .listen(this.element, EventType.TOUCHEND, this.onEnd_)
+      .listen(this.element, EventType.TOUCHCANCEL, this.onEnd_);
   } else {
     // for non-touch
-    this.handler_
-      .listen(this.element, EventType.MOUSEDOWN, this.onStart_, false, this)
-      .listen(this.element, EventType.MOUSEMOVE, this.onProgress_, false, this)
-      .listen(this.element, EventType.MOUSEOUT, this.onMouseOut_, false, this)
-      .listen(this.element, EventType.MOUSEUP, this.onEnd_, false, this)
+    handler
+      .listen(this.element, EventType.MOUSEDOWN, this.onStart_)
+      .listen(this.element, EventType.MOUSEMOVE, this.onProgress_)
+      .listen(this.element, EventType.MOUSEOUT, this.onMouseOut_)
+      .listen(this.element, EventType.MOUSEUP, this.onEnd_);
   }
 };
 goog.inherits(npf.events.TouchHandler, goog.events.EventTarget);
@@ -346,12 +345,6 @@ npf.events.TouchHandler.prototype.moveEvent_ = null;
 npf.events.TouchHandler.prototype.endEvent_ = null;
 
 /**
- * @type {goog.events.EventHandler}
- * @private
- */
-npf.events.TouchHandler.prototype.handler_;
-
-/**
  * @type {Array.<goog.math.Coordinate>}
  * @private
  */
@@ -374,46 +367,15 @@ npf.events.TouchHandler.prototype.centerPos_ = null;
 npf.events.TouchHandler.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
-  delete this.element;
-  delete this.preventDefault;
-  delete this.cssHacks;
-  delete this.swipeEnabled;
-  delete this.swipeTime;
-  delete this.swipeMinDistance;
-  delete this.dragEnabled;
-  delete this.dragVertical;
-  delete this.dragHorizontal;
-  delete this.dragMinDistance;
-  delete this.transformEnabled;
-  delete this.scaleTreshold;
-  delete this.rotationTreshold;
-  delete this.tapEnabled;
-  delete this.tapDouble;
-  delete this.tapMaxInterval;
-  delete this.tapMaxDistance;
-  delete this.tapDoubleDistance;
-  delete this.holdEnabled;
-  delete this.holdTimeout;
-  delete this.distance_;
-  delete this.angle_;
-  delete this.direction_;
-  delete this.fingers_;
-  delete this.first_;
-  delete this.gesture_;
-  delete this.prevGesture_;
-  delete this.touchStartTime_;
-  delete this.prevTapPos_;
-  delete this.prevTapEndTime_;
-  delete this.holdTimer_;
-  delete this.offset_;
-  delete this.mousedown_;
-  delete this.startEvent_;
-  delete this.moveEvent_;
-  delete this.endEvent_;
-  delete this.handler_;
-  delete this.startPos_;
-  delete this.movePos_;
-  delete this.centerPos_;
+  this.element = null;
+  this.prevTapPos_ = null;
+  this.offset_ = null;
+  this.startEvent_ = null;
+  this.moveEvent_ = null;
+  this.endEvent_ = null;
+  this.startPos_ = null;
+  this.movePos_ = null;
+  this.centerPos_ = null;
 };
 
 /**

@@ -60,7 +60,7 @@ npf.ui.StickyHead.prototype.enterDocument = function() {
 	var handler = this.getHandler();
 	/** @type {Element|Window} */
 	var scrollElement = this._viewportElement ? this._viewportElement : window;
-	handler.listen(scrollElement, goog.events.EventType.SCROLL, this._onScroll, false, this);
+	handler.listen(scrollElement, goog.events.EventType.SCROLL, this._onScroll);
 
 	this.update();
 };
@@ -76,10 +76,10 @@ npf.ui.StickyHead.prototype.exitDocument = function() {
 npf.ui.StickyHead.prototype.disposeInternal = function() {
 	goog.base(this, 'disposeInternal');
 
-	delete this._head;
-	delete this._body;
-	delete this._stickyHead;
-	delete this._viewportElement;
+	this._head = null;
+	this._body = null;
+	this._stickyHead = null;
+	this._viewportElement = null;
 };
 
 /**

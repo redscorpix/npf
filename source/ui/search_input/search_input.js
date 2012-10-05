@@ -97,18 +97,17 @@ npf.ui.SearchInput.prototype.enterDocument = function() {
   var clearElement = this.getClearElement();
 
   if (iconElement) {
-    handler.listen(iconElement, goog.events.EventType.CLICK,
-      this.onIconClick_, false, this);
+    handler.listen(iconElement, goog.events.EventType.CLICK, this.onIconClick_);
   }
 
   if (clearElement) {
     handler.listen(clearElement, goog.events.EventType.CLICK,
-      this.onClearClick_, false, this);
+      this.onClearClick_);
   }
 
   this.inputHandler_ = new goog.events.InputHandler(this.getQueryElement());
   handler.listen(this.inputHandler_, goog.events.InputHandler.EventType.INPUT,
-    this.onChange_, false, this);
+    this.onChange_);
 };
 
 /** @inheritDoc */
@@ -123,11 +122,7 @@ npf.ui.SearchInput.prototype.exitDocument = function() {
 npf.ui.SearchInput.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
-  delete this.value_;
-  delete this.placeholderValue_;
-  delete this.clearable_;
-  delete this.hasIcon_;
-  delete this.inputHandler_;
+  this.inputHandler_ = null;
 };
 
 /**
@@ -185,6 +180,10 @@ npf.ui.SearchInput.prototype.setIcon = function(enable) {
 
 npf.ui.SearchInput.prototype.focus = function() {
   this.getRenderer().focusAndSelect(this.getQueryElement());
+};
+
+npf.ui.SearchInput.prototype.blur = function() {
+  this.getQueryElement().blur();
 };
 
 /**

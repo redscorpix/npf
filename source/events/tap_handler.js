@@ -17,17 +17,17 @@ npf.events.TapHandler = function(element) {
   goog.base(this);
 
   var EventType = goog.events.EventType;
-  var handler = new goog.events.EventHandler();
+  var handler = new goog.events.EventHandler(this);
   this.registerDisposable(handler);
 
   if (npf.userAgent.support.isTouchSupported()) {
     handler
-      .listen(element, EventType.TOUCHCANCEL, this.onTouchCancel_, false, this)
-      .listen(element, EventType.TOUCHEND, this.onTouchEnd_, false, this)
-      .listen(element, EventType.TOUCHMOVE, this.onTouchMove_, false, this)
-      .listen(element, EventType.TOUCHSTART, this.onTouchStart_, false, this);
+      .listen(element, EventType.TOUCHCANCEL, this.onTouchCancel_)
+      .listen(element, EventType.TOUCHEND, this.onTouchEnd_)
+      .listen(element, EventType.TOUCHMOVE, this.onTouchMove_)
+      .listen(element, EventType.TOUCHSTART, this.onTouchStart_);
   } else {
-    handler.listen(element, EventType.CLICK, this.onClick_, false, this);
+    handler.listen(element, EventType.CLICK, this.onClick_);
   }
 };
 goog.inherits(npf.events.TapHandler, goog.events.EventTarget);
@@ -70,15 +70,6 @@ npf.events.TapHandler.prototype.startLeft_;
  */
 npf.events.TapHandler.prototype.startTop_;
 
-
-/** @inheritDoc */
-npf.events.TapHandler.prototype.disposeInternal = function() {
-  goog.base(this, 'disposeInternal');
-
-  delete this.started_;
-  delete this.startLeft_;
-  delete this.startTop_;
-};
 
 /**
  * @param {goog.events.BrowserEvent} evt

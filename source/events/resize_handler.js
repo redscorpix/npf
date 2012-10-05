@@ -16,9 +16,9 @@ goog.require('goog.events.EventTarget');
 npf.events.ResizeHandler = function() {
   goog.base(this);
 
-  this.eventHandler_ = new goog.events.EventHandler();
+  this.eventHandler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.eventHandler_);
-  this.eventHandler_.listen(window, goog.events.EventType.RESIZE, this);
+  this.eventHandler_.listen(window, goog.events.EventType.RESIZE);
 
   if (this.fontSizeMonitor_) {
     this.eventHandler_.listen(this.fontSizeMonitor_,
@@ -94,8 +94,8 @@ npf.events.ResizeHandler.prototype.disposeInternal = function() {
     npf.events.ResizeHandler.removeListener_();
   }
 
-  delete this.fontSizeMonitor_;
-  delete this.eventHandler_;
+  this.fontSizeMonitor_ = null;
+  this.eventHandler_ = null;
 };
 
 /**

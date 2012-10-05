@@ -47,8 +47,8 @@ npf.ui.Component.prototype.disposeInternal = function() {
 
   goog.base(this, 'disposeInternal');
 
-  delete this.disposableOnExitDocument_;
-  delete this.dataManager_;
+  this.disposableOnExitDocument_ = null;
+  this.dataManager_ = null;
 };
 
 /**

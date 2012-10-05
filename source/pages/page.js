@@ -19,7 +19,7 @@ npf.pages.Page = function(manager) {
   this.manager_ = manager;
   this.helpersMap_ = {};
 
-  this.handler_ = new goog.events.EventHandler();
+  this.handler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.handler_);
 };
 goog.inherits(npf.pages.Page, goog.events.EventTarget);
@@ -46,13 +46,13 @@ npf.pages.Page.EventType = {
 npf.pages.Page.prototype.manager_;
 
 /**
- * @type {!Object.<string,goog.Disposable>}
+ * @type {Object.<string,goog.Disposable>}
  * @private
  */
 npf.pages.Page.prototype.helpersMap_;
 
 /**
- * @type {!goog.events.EventHandler}
+ * @type {goog.events.EventHandler}
  * @private
  */
 npf.pages.Page.prototype.handler_;
@@ -76,11 +76,9 @@ npf.pages.Page.prototype.disposeInternal = function() {
 
   goog.base(this, 'disposeInternal');
 
-  delete this.manager_;
-  delete this.helpersMap_;
-  delete this.handler_;
-  delete this.loaded_;
-  delete this.title_;
+  this.manager_ = null;
+  this.helpersMap_ = null;
+  this.handler_ = null;
 };
 
 /**
@@ -152,7 +150,7 @@ npf.pages.Page.prototype.isLoaded = function() {
 };
 
 /**
- * @return {!goog.events.EventHandler}
+ * @return {goog.events.EventHandler}
  */
 npf.pages.Page.prototype.getHandler = function() {
   return this.handler_;
@@ -222,7 +220,7 @@ npf.pages.Page.prototype.getUsingHelperTypes = function() {
 };
 
 /**
- * @return {!Object.<string,goog.Disposable>}
+ * @return {Object.<string,goog.Disposable>}
  */
 npf.pages.Page.prototype.getHelpersMap = function() {
   return this.helpersMap_;

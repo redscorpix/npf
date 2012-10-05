@@ -68,10 +68,8 @@ npf.ui.Image.prototype.createDom = function() {
 npf.ui.Image.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
-  delete this.src_;
-  delete this.size_;
-  delete this.cssClass_;
-  delete this.caption_;
+  this.size_ = null;
+  this.cssClass_ = null;
 };
 
 /**

@@ -62,8 +62,8 @@ npf.ui.RenderComponent.prototype.decorateInternal = function(element) {
 npf.ui.RenderComponent.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
-  delete this.renderer_;
-  delete this.extraClassNames_;
+  this.renderer_ = null;
+  this.extraClassNames_ = null;
 };
 
 /**

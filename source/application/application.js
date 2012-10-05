@@ -35,8 +35,7 @@ npf.Application.prototype.inited_ = false;
 npf.Application.prototype.disposeInternal = function() {
 	goog.base(this, 'disposeInternal');
 
-	delete this.settings_;
-	delete this.inited_;
+	this.settings_ = null;
 };
 
 npf.Application.prototype.init = function() {

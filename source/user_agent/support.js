@@ -159,7 +159,7 @@ npf.userAgent.Support.Ns = {
 
 /**
  * Browser special CSS prefix.
- * @type {?string}
+ * @type {string}
  */
 npf.userAgent.Support.vendorPrefix =
   goog.userAgent.WEBKIT ? 'webkit' :

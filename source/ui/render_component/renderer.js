@@ -48,7 +48,7 @@ npf.ui.renderComponent.Renderer.getCustomRenderer = function(ctor,
 npf.ui.renderComponent.Renderer.CSS_CLASS = goog.getCssName('npf-block');
 
 /**
- * @param {npf.ui.RenderComponent} component
+ * @param {!npf.ui.RenderComponent} component
  * @return {Element}
  */
 npf.ui.renderComponent.Renderer.prototype.createDom = function(component) {
@@ -121,7 +121,7 @@ npf.ui.renderComponent.Renderer.prototype.canDecorate = function(element) {
  * Initializes the component's ID, content, and state based on the ID of the
  * element, its child nodes, and its CSS classes, respectively. Returns the
  * element.
- * @param {npf.ui.RenderComponent} component Component instance to decorate the element.
+ * @param {!npf.ui.RenderComponent} component Component instance to decorate the element.
  * @param {Element} element Element to decorate.
  * @return {Element} Decorated element.
  */

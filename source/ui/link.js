@@ -72,17 +72,15 @@ npf.ui.Link.prototype.enterDocument = function() {
   var tapHandler = new npf.events.TapHandler(this.getElement());
   this.disposeOnExitDocument(tapHandler);
 
-  this.getHandler().listen(tapHandler, npf.events.TapHandler.EventType.TAP,
-    this.onTap_, false, this);
+  this.getHandler()
+    .listen(tapHandler, npf.events.TapHandler.EventType.TAP, this.onTap_);
 };
 
 /** @inheritDoc */
 npf.ui.Link.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
-  delete this.caption_;
-  delete this.url_;
-  delete this.cssClass_;
+  this.cssClass_ = null;
 };
 
 /**

@@ -84,9 +84,7 @@ npf.ui.form.Text.prototype.exitDocument = function() {
 npf.ui.form.Text.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
-  delete this.autoComplete_;
-  delete this.inputHandler_;
-  delete this.maxLength_;
+  this.inputHandler_ = null;
 };
 
 /**
@@ -116,13 +114,6 @@ npf.ui.form.Text.prototype.initializeInternal = function() {
  */
 npf.ui.form.Text.prototype.getValue = function() {
   return /** @type {string} */ (goog.base(this, 'getValue'));
-};
-
-/**
- * @param {string} value
- */
-npf.ui.form.Text.prototype.setValue = function(value) {
-  goog.base(this, 'setValue', value);
 };
 
 /** @inheritDoc */
@@ -184,9 +175,8 @@ npf.ui.form.Text.prototype.setMaxLengthInternal = function(maxLength) {
  * @param {string=} opt_error
  */
 npf.ui.form.Text.prototype.addEmailValidator = function(opt_error) {
-  /** @type {function(string):string} */
-  var validator = function(/** @type {string} */ value) {
-    if (goog.format.EmailAddress.isValidAddress(value)) {
+  var validator = function(value) {
+    if (goog.format.EmailAddress.isValidAddress(/** @type {string} */ (value))) {
       return '';
     } else {
       return opt_error || this.getEmailError();

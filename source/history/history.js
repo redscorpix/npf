@@ -86,9 +86,8 @@ npf.History.prototype.disposeInternal = function() {
 
   goog.base(this, 'disposeInternal');
 
-  delete this.history_;
-  delete this.html5History_;
-  delete this.isLinksHandlerEnabled_;
+  this.history_ = null;
+  this.html5History_ = null;
 };
 
 /**

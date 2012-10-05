@@ -33,7 +33,7 @@ npf.fx.CssAnimation = function(keyframes, element, duration, opt_acc) {
   this.duration = duration;
   this.accel_ = opt_acc || npf.fx.css3.easing.LINEAR;
 
-  this.handler_ = new goog.events.EventHandler();
+  this.handler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.handler_);
 };
 goog.inherits(npf.fx.CssAnimation, goog.fx.TransitionBase);
@@ -151,19 +151,10 @@ npf.fx.CssAnimation.prototype.disposeInternal = function() {
 
   goog.base(this, 'disposeInternal');
 
-  delete this.keyframes_;
-  delete this.element;
-  delete this.duration;
-  delete this.accel_;
-  delete this.delay_;
-  delete this.iterationCount_;
-  delete this.direction_;
-  delete this.handler_;
-  delete this.domSet_;
-  delete this.cleared_;
-  delete this.playState_;
-  delete this.finished_;
-  delete this.endStylesUsed_;
+  this.keyframes_ = null;
+  this.element = null;
+  this.accel_ = null;
+  this.handler_ = null;
 };
 
 /**
@@ -314,9 +305,8 @@ npf.fx.CssAnimation.prototype.setDom = function() {
 
   this.handler_
     //.listen(this.element, startEventTypes, this.onAnimationStart_, false, this)
-    .listen(this.element, endEventTypes, this.onAnimationEnd_, false, this)
-    .listen(this.element, iterationEventTypes, this.onAnimationIteration_,
-      false, this);
+    .listen(this.element, endEventTypes, this.onAnimationEnd_)
+    .listen(this.element, iterationEventTypes, this.onAnimationIteration_);
 
   this.playState_ = npf.style.animation.PlayState.RUNNING;
 

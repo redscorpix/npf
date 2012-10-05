@@ -92,9 +92,7 @@ npf.ui.scrollBar.SizeMonitor.prototype.disposeInternal = function() {
     goog.dom.removeNode(this.sizeElement_);
   }
 
-  delete this.sizeElement_;
-  delete this.lastWidth_;
-  delete this.lastHeight_;
+  this.sizeElement_ = null;
 };
 
 /**

@@ -23,13 +23,13 @@ goog.inherits(npf.ui.Navigation, npf.ui.RenderComponent);
 
 
 /**
- * @type {!Object.<string,npf.ui.navigation.Item>}
+ * @type {Object.<string,npf.ui.navigation.Item>}
  * @private
  */
 npf.ui.Navigation.prototype.itemsMap_;
 
 /**
- * @type {!Object.<string,string>}
+ * @type {Object.<string,string>}
  * @private
  */
 npf.ui.Navigation.prototype.uidToType_;
@@ -53,9 +53,9 @@ npf.ui.Navigation.prototype.createDom = function() {
 npf.ui.Navigation.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
-  delete this.itemsMap_;
-  delete this.uidToType_;
-  delete this.selectedItem_;
+  this.itemsMap_ = null;
+  this.uidToType_ = null;
+  this.selectedItem_ = null;
 };
 
 /**

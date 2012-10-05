@@ -672,23 +672,24 @@ npf.fx.dom.Transform = function(element, time, opt_acc) {
 goog.inherits(npf.fx.dom.Transform, npf.fx.dom.PredefinedEffect);
 
 /**
- * @type {!Object.<string,Array.<number>>}
+ * @type {Object.<string,Array.<number>>}
  * @private
  */
 npf.fx.dom.Transform.prototype._startParameters;
 
 /**
- * @type {!Object.<string,Array.<number>>}
+ * @type {Object.<string,Array.<number>>}
  * @private
  */
 npf.fx.dom.Transform.prototype._endParameters;
+
 
 /** @inheritDoc */
 npf.fx.dom.Transform.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
-  delete this._startParameters;
-  delete this._endParameters;
+  this._startParameters = null;
+  this._endParameters = null;
 };
 
 /**

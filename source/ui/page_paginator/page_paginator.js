@@ -143,14 +143,14 @@ npf.ui.PagePaginator.prototype.enterDocument = function() {
     var prevTapHandler = new npf.events.TapHandler(prevElement);
     this.disposeOnExitDocument(prevTapHandler);
     handler.listen(prevTapHandler, npf.events.TapHandler.EventType.TAP,
-      this.onPrevTap_, false, this);
+      this.onPrevTap_);
   }
 
   if (nextElement) {
     var nextTapHandler = new npf.events.TapHandler(nextElement);
     this.disposeOnExitDocument(nextTapHandler);
     handler.listen(nextTapHandler, npf.events.TapHandler.EventType.TAP,
-      this.onNextTap_, false, this);
+      this.onNextTap_);
   }
 
   this.updateContent_();
@@ -168,13 +168,10 @@ npf.ui.PagePaginator.prototype.exitDocument = function() {
 npf.ui.PagePaginator.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
-  delete this.pageCount_;
-  delete this.pageIndex_;
-  delete this.page_;
-  delete this.nextPage_;
-  delete this.prevPage_;
-  delete this.changer_;
-  delete this.draggable_;
+  this.page_ = null;
+  this.nextPage_ = null;
+  this.prevPage_ = null;
+  this.changer_ = null;
 };
 
 /**
