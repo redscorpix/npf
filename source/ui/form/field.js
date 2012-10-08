@@ -140,7 +140,10 @@ npf.ui.form.Field.prototype.setValue = function(value, opt_noRender) {
   }
 
   this.setValueInternal(correctedValue);
-  this.renderValueInternal(this.getValue());
+
+  if (!opt_noRender) {
+    this.renderValueInternal(this.getValue());
+  }
 
   this.error_ = this.validateInternal();
 

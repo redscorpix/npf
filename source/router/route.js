@@ -167,7 +167,11 @@ npf.router.Route.prototype.getOptions = function(token) {
  * @protected
  */
 npf.router.Route.prototype.getOptionsInternal = function(path) {
-  var values = this._regex.exec(path);
+  /** @type {string} */
+  var clearedPath = '/' == path.substr(path.length - 1) ?
+    path.substr(0, path.length - 1) : path;
+  /** @type {Array.<string>} */
+  var values = this._regex.exec(clearedPath);
   /** @type {Object.<string>} */
   var valuesMap = null;
 

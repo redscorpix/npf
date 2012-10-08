@@ -97,7 +97,7 @@ npf.ui.form.Text.prototype.onInput_ = function(evt) {
   var value = /** @type {string} */ (renderer.getValue(this.getValueElement()));
   value = goog.string.trim(value);
 
-  this.setValue(value);
+  this.setValue(value, true);
 };
 
 /** @inheritDoc */

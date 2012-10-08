@@ -18,7 +18,7 @@ npf.events.ResizeHandler = function() {
 
   this.eventHandler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.eventHandler_);
-  this.eventHandler_.listen(window, goog.events.EventType.RESIZE);
+  this.eventHandler_.listen(window, goog.events.EventType.RESIZE, this);
 
   if (this.fontSizeMonitor_) {
     this.eventHandler_.listen(this.fontSizeMonitor_,
