@@ -207,7 +207,7 @@ npf.pages.Manager.prototype.navigatePage = function(request) {
   var Page = '' == request.name ? null : this.getPageCtorByRoute(request.name);
 
   if (Page) {
-    this.navigatePage_(request, Page);
+    this.processPage(request, Page);
   } else {
     this.navigateErrorInternal(goog.net.HttpStatus.NOT_FOUND, request);
   }
@@ -234,16 +234,16 @@ npf.pages.Manager.prototype.navigateErrorInternal = function(status, request) {
   var Page = this.errorPageCtorsMap_[/** @type {string} */ (status)] || null;
 
   if (Page) {
-    this.navigatePage_(request, Page);
+    this.processPage(request, Page);
   }
 };
 
 /**
  * @param {npf.pages.Request} request
  * @param {Function} Page
- * @private
+ * @protected
  */
-npf.pages.Manager.prototype.navigatePage_ = function(request, Page) {
+npf.pages.Manager.prototype.processPage = function(request, Page) {
   /** @type {npf.pages.Page} */
   var currentPage = this.getCurrentPage();
 

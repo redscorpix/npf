@@ -66,6 +66,8 @@ goog.addDependency('../../../source/ui/page_paginator/changer.js', ['npf.ui.page
 goog.addDependency('../../../source/ui/page_paginator/dragger.js', ['npf.ui.pagePaginator.Dragger'], ['goog.fx.Dragger']);
 goog.addDependency('../../../source/ui/page_paginator/page_paginator.js', ['npf.ui.PagePaginator', 'npf.ui.PagePaginator.EventType'], ['goog.events', 'npf.events.TapHandler', 'npf.ui.RenderComponent', 'npf.ui.pagePaginator.Changer', 'npf.ui.pagePaginator.Renderer']);
 goog.addDependency('../../../source/ui/page_paginator/renderer.js', ['npf.ui.pagePaginator.Renderer'], ['goog.dom', 'goog.dom.TagName', 'goog.dom.classes', 'npf.ui.renderComponent.Renderer']);
+goog.addDependency('../../../source/ui/progress_bar/progress_bar.js', ['npf.ui.ProgressBar', 'npf.ui.ProgressBar.Orientation'], ['goog.ui.Component.EventType', 'goog.ui.RangeModel', 'npf.ui.RenderComponent']);
+goog.addDependency('../../../source/ui/progress_bar/renderer.js', ['npf.ui.progressBar.Renderer'], ['goog.dom', 'goog.dom.TagName', 'goog.dom.a11y', 'goog.dom.classes', 'goog.style', 'npf.ui.renderComponent.Renderer']);
 goog.addDependency('../../../source/ui/render_component/render_component.js', ['npf.ui.RenderComponent'], ['goog.array', 'goog.ui.Component.Error', 'npf.ui.Component', 'npf.ui.renderComponent.Renderer']);
 goog.addDependency('../../../source/ui/render_component/renderer.js', ['npf.ui.renderComponent.Renderer'], ['goog.array', 'goog.dom.TagName', 'goog.dom.classes']);
 goog.addDependency('../../../source/ui/scroll_bar/animation.js', ['npf.ui.scrollBar.Animation'], ['npf.fx.Animation']);
