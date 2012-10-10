@@ -46,7 +46,7 @@ npf.ui.RenderComponent.prototype.createDom = function() {
 };
 
 /**
- * Decorates the given element with this component. Overrides {@link
+ * Decorates the given element with this component. Overrides {@link}
  * goog.ui.Component#decorateInternal} by delegating DOM manipulation
  * to the component's renderer.
  * @param {Element} element Element to decorate.
