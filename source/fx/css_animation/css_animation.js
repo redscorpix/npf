@@ -310,8 +310,15 @@ npf.fx.CssAnimation.prototype.setDom = function() {
 
   this.playState_ = npf.style.animation.PlayState.RUNNING;
 
-  this.setAnimationProperties_(this.duration, this.delay_, this.accel_,
-    this.iterationCount_, this.direction_, this.playState_);
+  npf.style.animation.setAnimation(this.element, {
+    delay: this.delay_,
+    direction: this.direction_,
+    duration: this.duration,
+    iterationCount: this.iterationCount_,
+    name: this.getKeyframes().getName(),
+    playState: this.playState_,
+    timingFunction: this.accel_
+  });
 
   if (this.endStylesUsed_) {
     /** @type {Object.<string,string>} */
@@ -378,22 +385,8 @@ npf.fx.CssAnimation.prototype.setEndStylesUsed = function(use) {
  */
 npf.fx.CssAnimation.prototype.clearDom = function() {
   this.handler_.removeAll();
-
-  /** @type {!Array.<string>} */
-  var names = npf.style.animation.getNames(this.element);
-  /** @type {number} */
-  var animationIndex = goog.array.indexOf(names, this.getKeyframes().getName());
-
-  if (-1 < animationIndex) {
-    npf.style.animation.removeDelayAt(this.element, animationIndex);
-    npf.style.animation.removeDirectionAt(this.element, animationIndex);
-    npf.style.animation.removeDurationAt(this.element, animationIndex);
-    npf.style.animation.removeIterationCountAt(this.element, animationIndex);
-    npf.style.animation.removeNameAt(this.element, animationIndex);
-    npf.style.animation.removePlayStateAt(this.element, animationIndex);
-    npf.style.animation.removeTimingFunctionAt(this.element, animationIndex);
-  }
-
+  npf.style.animation.removeAnimation(this.element,
+    this.getKeyframes().getName());
   this.domSet_ = false;
 };
 
@@ -457,79 +450,12 @@ npf.fx.CssAnimation.prototype.dispatchAnimationEvent = function(type) {
 };
 
 /**
- * @param {number} duration
- * @param {number} delay
- * @param {Array.<string>} accel
- * @param {number} iterationCount
- * @param {npf.style.animation.Direction} direction
- * @param {npf.style.animation.PlayState} playState
- * @private
- */
-npf.fx.CssAnimation.prototype.setAnimationProperties_ = function(duration,
-                                                                 delay,
-                                                                 accel,
-                                                                 iterationCount,
-                                                                 direction,
-                                                                 playState) {
-  /** @type {string} */
-  var name = this.getKeyframes().getName();
-  /** @type {!Array.<string>} */
-  var names = npf.style.animation.getNames(this.element);
-  /** @type {number} */
-  var index = goog.array.indexOf(names, name);
-
-  if (0 > index && names.length) {
-    npf.style.animation.insertDuration(this.element, duration);
-    npf.style.animation.insertDelay(this.element, delay);
-    npf.style.animation.insertTimingFunction(this.element, accel);
-    npf.style.animation.insertIterationCount(this.element, iterationCount);
-    npf.style.animation.insertDirection(this.element, direction);
-    npf.style.animation.insertPlayState(this.element, playState);
-    npf.style.animation.insertName(this.element, name);
-  } else {
-    if (!names.length) {
-      index = 0;
-    }
-
-    npf.style.animation.setDuration(this.element, duration, index);
-    npf.style.animation.setDelay(this.element, delay, index);
-    npf.style.animation.setTimingFunction(this.element, accel, index);
-    npf.style.animation.setIterationCount(this.element, iterationCount, index);
-    npf.style.animation.setDirection(this.element, direction, index);
-    npf.style.animation.setPlayState(this.element, playState, index);
-
-    if (!names.length) {
-      npf.style.animation.setName(this.element, name, index);
-    }
-  }
-};
-
-/**
  * @param {npf.style.animation.PlayState} playState
  * @private
  */
 npf.fx.CssAnimation.prototype.setAnimationPlayState_ = function(playState) {
-  /** @type {string} */
-  var name = this.getKeyframes().getName();
-  /** @type {!Array.<string>} */
-  var names = npf.style.animation.getNames(this.element);
-  /** @type {number} */
-  var index = goog.array.indexOf(names, name);
-
-  if (0 > index && names.length) {
-    npf.style.animation.insertPlayState(this.element, playState);
-    npf.style.animation.insertName(this.element, name);
-  } else {
-    if (!names.length) {
-      index = 0;
-    }
-
-    npf.style.animation.setPlayState(this.element, playState, index);
-
-    if (!names.length) {
-      npf.style.animation.setName(this.element, name, index);
-    }
-  }
+  npf.style.animation.setPlayState(this.element, this.getKeyframes().getName(),
+    playState);
 };
 
 /**

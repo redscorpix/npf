@@ -1,10 +1,14 @@
+goog.provide('npf.style.Animation');
 goog.provide('npf.style.animation');
 goog.provide('npf.style.animation.Direction');
 goog.provide('npf.style.animation.PlayState');
 goog.provide('npf.style.animation.Property');
 
 goog.require('goog.array');
+goog.require('goog.object');
+goog.require('goog.string');
 goog.require('goog.style');
+goog.require('npf.fx.css3.easing');
 goog.require('npf.userAgent.support');
 
 
@@ -38,446 +42,326 @@ npf.style.animation.Property = {
   ANIMATION_TIMING_FUNCTION: 'animation-timing-function'
 };
 
+/**
+ * @typedef {{
+ *  name: string,
+ *  delay: number,
+ *  direction: npf.style.animation.Direction,
+ *  duration: number,
+ *  iterationCount: number,
+ *  playState: npf.style.animation.PlayState,
+ *  timingFunction: Array.<number>
+ * }}
+ */
+npf.style.Animation;
+
 
 /**
  * @param {Element} element
- * @return {!Array.<string>}
+ * @param {string} name
  */
-npf.style.animation.getNames = function(element) {
-  return npf.style.animation.getValues_(element,
-    npf.style.animation.Property.ANIMATION_NAME);
+npf.style.animation.removeAnimation = function(element, name) {
+  /** @type {!Array.<npf.style.Animation>} */
+  var animations = npf.style.animation.getAnimations(element);
+  /** @type {number} */
+  var index = goog.array.findIndex(animations, function(anim) {
+    return anim.name == name;
+  });
+
+  if (-1 < index && goog.array.removeAt(animations, index)) {
+    npf.style.animation.setAnimations_(element, animations);
+  }
+};
+
+/**
+ * @param {Element} element
+ */
+npf.style.animation.removeAnimations = function(element) {
+  npf.style.animation.setValue_(element, goog.object.create(
+    npf.style.animation.Property.ANIMATION_DELAY,           [],
+    npf.style.animation.Property.ANIMATION_DIRECTION,       [],
+    npf.style.animation.Property.ANIMATION_DURATION,        [],
+    npf.style.animation.Property.ANIMATION_ITERATION_COUNT, [],
+    npf.style.animation.Property.ANIMATION_NAME,            [],
+    npf.style.animation.Property.ANIMATION_PLAY_STATE,      [],
+    npf.style.animation.Property.ANIMATION_TIMING_FUNCTION, []
+  ));
 };
 
 /**
  * @param {Element} element
  * @param {string} name
- * @param {number=} opt_index Default is 0.
+ * @return {npf.style.Animation?}
  */
-npf.style.animation.insertName = function(element, name, opt_index) {
-  /** @type {!Array.<string>} */
-  var values = npf.style.animation.getNames(element);
-  npf.style.animation.insertValue(element,
-    npf.style.animation.Property.ANIMATION_NAME, values, name, '__fake',
-    opt_index);
+npf.style.animation.getAnimation = function(element, name) {
+  /** @type {!Array.<npf.style.Animation>} */
+  var animations = npf.style.animation.getAnimations(element);
+
+  return /** @type {npf.style.Animation?} */ (goog.array.find(animations, function(animation) {
+    return animation.name == name;
+  }));
 };
 
 /**
  * @param {Element} element
- * @param {string} name
- * @param {number=} opt_index Default is 0.
- */
-npf.style.animation.setName = function(element, name, opt_index) {
-  /** @type {!Array.<string>} */
-  var values = npf.style.animation.getNames(element);
-  npf.style.animation.setValue(element,
-    npf.style.animation.Property.ANIMATION_NAME, values, name, '__fake',
-    opt_index);
-};
-
-/**
- * @param {Element} element
- * @param {string} name
+ * @param {string|npf.style.Animation} name
+ * @param {npf.style.animation.PlayState=} opt_playState
  * @return {boolean}
  */
-npf.style.animation.removeName = function(element, name) {
-  /** @type {!Array.<string>} */
-  var values = npf.style.animation.getNames(element);
-  /** @type {boolean} */
-  var removed = goog.array.remove(values, name);
+npf.style.animation.setPlayState = function(element, name, opt_playState) {
+  var animationName =
+    /** @type {string} */ (goog.isString(name) ? name : name.name);
+  var playState =
+    /** @type {npf.style.animation.PlayState} */ (goog.isString(name) ?
+    opt_playState : name.playState);
 
-  if (removed) {
+  /** @type {!Array.<npf.style.Animation>} */
+  var animations = npf.style.animation.getAnimations(element);
+  /** @type {number} */
+  var index = goog.array.findIndex(animations, function(anim) {
+    return anim.name == animationName;
+  });
+
+  if (-1 < index) {
+    /** @type {!Array.<string>} */
+    var playStates = [];
+
+    goog.array.forEach(animations, function(animation) {
+      playStates.push(animation.playState);
+    });
+    playStates[index] = playState;
+
     npf.style.animation.setValue_(element,
-      npf.style.animation.Property.ANIMATION_NAME, values);
+      npf.style.animation.Property.ANIMATION_PLAY_STATE, playStates);
+
+    return true;
   }
 
-  return removed;
+  return false;
 };
 
 /**
  * @param {Element} element
- * @param {number} index
- * @return {boolean}
+ * @param {npf.style.Animation} animation
  */
-npf.style.animation.removeNameAt = function(element, index) {
-  /** @type {!Array.<string>} */
-  var values = npf.style.animation.getNames(element);
+npf.style.animation.setAnimation = function(element, animation) {
+  /** @type {!Array.<npf.style.Animation>} */
+  var animations = npf.style.animation.getAnimations(element);
+  /** @type {number} */
+  var index = goog.array.findIndex(animations, function(anim) {
+    return anim.name == animation.name;
+  });
+  /** @type {npf.style.Animation} */
+  var oldAnimation = animations[index] || null;
 
-  return npf.style.animation.removeValueAt(element,
-    npf.style.animation.Property.ANIMATION_NAME, values, index);
-};
-
-/**
- * @param {Element} element
- * @return {!Array.<string>}
- */
-npf.style.animation.getDelays = function(element) {
-  return npf.style.animation.getValues_(element,
-    npf.style.animation.Property.ANIMATION_DELAY);
-};
-
-/**
- * @param {Element} element
- * @param {number} delay
- * @param {number=} opt_index Default is 0.
- */
-npf.style.animation.insertDelay = function(element, delay, opt_index) {
-  /** @type {!Array.<string>} */
-  var values = npf.style.animation.getDelays(element);
-  npf.style.animation.insertValue(element,
-    npf.style.animation.Property.ANIMATION_DELAY, values, delay, 0, opt_index);
-};
-
-/**
- * @param {Element} element
- * @param {number} delay
- * @param {number=} opt_index Default is 0.
- */
-npf.style.animation.setDelay = function(element, delay, opt_index) {
-  /** @type {!Array.<string>} */
-  var values = npf.style.animation.getDelays(element);
-  npf.style.animation.setValue(element,
-    npf.style.animation.Property.ANIMATION_DELAY, values, delay, 0, opt_index);
-};
-
-/**
- * @param {Element} element
- * @param {number} index
- * @return {boolean}
- */
-npf.style.animation.removeDelayAt = function(element, index) {
-  /** @type {!Array.<string>} */
-  var values = npf.style.animation.getDelays(element);
-
-  return npf.style.animation.removeValueAt(element,
-    npf.style.animation.Property.ANIMATION_DELAY, values, index);
-};
-
-/**
- * @param {Element} element
- * @return {!Array.<npf.style.animation.Direction>}
- */
-npf.style.animation.getDirections = function(element) {
-  return npf.style.animation.getValues_(element,
-    npf.style.animation.Property.ANIMATION_DIRECTION);
-};
-
-/**
- * @param {Element} element
- * @param {npf.style.animation.Direction} direction
- * @param {number=} opt_index Default is 0.
- */
-npf.style.animation.insertDirection = function(element, direction, opt_index) {
-  /** @type {!Array.<npf.style.animation.Direction>} */
-  var values = npf.style.animation.getDirections(element);
-  npf.style.animation.insertValue(element,
-    npf.style.animation.Property.ANIMATION_DIRECTION, values, direction,
-    npf.style.animation.Direction.NORMAL, opt_index);
-};
-
-/**
- * @param {Element} element
- * @param {npf.style.animation.Direction} direction
- * @param {number=} opt_index Default is 0.
- */
-npf.style.animation.setDirection = function(element, direction, opt_index) {
-  /** @type {!Array.<npf.style.animation.Direction>} */
-  var values = npf.style.animation.getDirections(element);
-  npf.style.animation.setValue(element,
-    npf.style.animation.Property.ANIMATION_DIRECTION, values, direction,
-    npf.style.animation.Direction.NORMAL, opt_index);
-};
-
-/**
- * @param {Element} element
- * @param {number} index
- * @return {boolean}
- */
-npf.style.animation.removeDirectionAt = function(element, index) {
-  /** @type {!Array.<npf.style.animation.Direction>} */
-  var values = npf.style.animation.getDirections(element);
-
-  return npf.style.animation.removeValueAt(element,
-    npf.style.animation.Property.ANIMATION_DIRECTION, values, index);
-};
-
-/**
- * @param {Element} element
- * @return {!Array.<string>}
- */
-npf.style.animation.getDurations = function(element) {
-  return npf.style.animation.getValues_(element,
-    npf.style.animation.Property.ANIMATION_DURATION);
-};
-
-/**
- * @param {Element} element
- * @param {number} duration
- * @param {number=} opt_index Default is 0.
- */
-npf.style.animation.insertDuration = function(element, duration, opt_index) {
-  /** @type {!Array.<string>} */
-  var values = npf.style.animation.getDurations(element);
-  npf.style.animation.insertValue(element,
-    npf.style.animation.Property.ANIMATION_DURATION, values, duration + 'ms',
-    0, opt_index);
-};
-
-/**
- * @param {Element} element
- * @param {number} duration
- * @param {number=} opt_index Default is 0.
- */
-npf.style.animation.setDuration = function(element, duration, opt_index) {
-  /** @type {!Array.<string>} */
-  var values = npf.style.animation.getDurations(element);
-  npf.style.animation.setValue(element,
-    npf.style.animation.Property.ANIMATION_DURATION, values, duration + 'ms', 0,
-    opt_index);
-};
-
-/**
- * @param {Element} element
- * @param {number} index
- * @return {boolean}
- */
-npf.style.animation.removeDurationAt = function(element, index) {
-  /** @type {!Array.<string>} */
-  var values = npf.style.animation.getDurations(element);
-
-  return npf.style.animation.removeValueAt(element,
-    npf.style.animation.Property.ANIMATION_DURATION, values, index);
-};
-
-/**
- * @param {Element} element
- * @return {!Array.<string>}
- */
-npf.style.animation.getIterationCounts = function(element) {
-  return npf.style.animation.getValues_(element,
-    npf.style.animation.Property.ANIMATION_ITERATION_COUNT);
-};
-
-/**
- * @param {Element} element
- * @param {number} count
- * @param {number=} opt_index Default is 0.
- */
-npf.style.animation.insertIterationCount = function(element, count, opt_index) {
-  var iterationCount = count ? count + '' : 'infinite';
-  /** @type {!Array.<string>} */
-  var values = npf.style.animation.getIterationCounts(element);
-  npf.style.animation.insertValue(element,
-    npf.style.animation.Property.ANIMATION_ITERATION_COUNT, values,
-    iterationCount, 1, opt_index);
-};
-
-/**
- * @param {Element} element
- * @param {number} count
- * @param {number=} opt_index Default is 0.
- */
-npf.style.animation.setIterationCount = function(element, count, opt_index) {
-  var iterationCount = count ? count + '' : 'infinite';
-  /** @type {!Array.<string>} */
-  var values = npf.style.animation.getIterationCounts(element);
-  npf.style.animation.setValue(element,
-    npf.style.animation.Property.ANIMATION_ITERATION_COUNT, values,
-    iterationCount, 1, opt_index);
-};
-
-/**
- * @param {Element} element
- * @param {number} index
- * @return {boolean}
- */
-npf.style.animation.removeIterationCountAt = function(element, index) {
-  /** @type {!Array.<string>} */
-  var values = npf.style.animation.getIterationCounts(element);
-
-  return npf.style.animation.removeValueAt(element,
-    npf.style.animation.Property.ANIMATION_ITERATION_COUNT, values, index);
-};
-
-/**
- * @param {Element} element
- * @return {!Array.<npf.style.animation.PlayState>}
- */
-npf.style.animation.getPlayStates = function(element) {
-  return npf.style.animation.getValues_(element,
-    npf.style.animation.Property.ANIMATION_PLAY_STATE);
-};
-
-/**
- * @param {Element} element
- * @param {npf.style.animation.PlayState} state
- * @param {number=} opt_index Default is 0.
- */
-npf.style.animation.insertPlayState = function(element, state, opt_index) {
-  /** @type {!Array.<npf.style.animation.PlayState>} */
-  var values = npf.style.animation.getPlayStates(element);
-  npf.style.animation.insertValue(element,
-    npf.style.animation.Property.ANIMATION_PLAY_STATE, values, state,
-    npf.style.animation.PlayState.PAUSED, opt_index);
-};
-
-/**
- * @param {Element} element
- * @param {npf.style.animation.PlayState} state
- * @param {number=} opt_index Default is 0.
- */
-npf.style.animation.setPlayState = function(element, state, opt_index) {
-  /** @type {!Array.<npf.style.animation.PlayState>} */
-  var values = npf.style.animation.getPlayStates(element);
-  npf.style.animation.setValue(element,
-    npf.style.animation.Property.ANIMATION_PLAY_STATE, values, state,
-    npf.style.animation.PlayState.PAUSED, opt_index);
-};
-
-/**
- * @param {Element} element
- * @param {number} index
- * @return {boolean}
- */
-npf.style.animation.removePlayStateAt = function(element, index) {
-  /** @type {!Array.<npf.style.animation.PlayState>} */
-  var values = npf.style.animation.getPlayStates(element);
-
-  return npf.style.animation.removeValueAt(element,
-    npf.style.animation.Property.ANIMATION_PLAY_STATE, values, index);
-};
-
-/**
- * @param {Element} element
- * @return {!Array.<string>}
- */
-npf.style.animation.getTimingFunctions = function(element) {
-  var key = npf.style.animation.Property.ANIMATION_TIMING_FUNCTION;
-
-  return npf.style.animation.getValues_(element, key, function(value) {
-    var reg = /cubic\-bezier\((?:[\d,\.]*)\)|[\w\-]+/g;
-    /** @type {Array.<string>} */
-    var values = reg.exec(value);
-    /** @type {!Array.<string>} */
-    var result = [];
-
-    while (values && values[0]) {
-      result.push(value[0]);
-      values = reg.exec(value);
+  if (!(
+    oldAnimation &&
+    oldAnimation.delay == animation.delay &&
+    oldAnimation.direction == animation.direction &&
+    oldAnimation.duration == animation.duration &&
+    oldAnimation.iterationCount == animation.iterationCount &&
+    oldAnimation.playState == animation.playState &&
+    oldAnimation.timingFunction.join(',') == animation.timingFunction.join(',')
+  )) {
+    if (-1 < index) {
+      animations[index] = animation;
+    } else {
+      animations.push(animation);
     }
 
-    return result;
-  });
-};
-
-/**
- * @param {Element} element
- * @param {Array.<string>} func
- * @param {number=} opt_index Default is 0.
- */
-npf.style.animation.insertTimingFunction = function(element, func, opt_index) {
-  var accel = 'cubic-bezier(' + func.join(',') + ')';
-  /** @type {!Array.<string>} */
-  var values = npf.style.animation.getTimingFunctions(element);
-  npf.style.animation.insertValue(element,
-    npf.style.animation.Property.ANIMATION_TIMING_FUNCTION, values, accel,
-    'linear', opt_index);
-};
-
-/**
- * @param {Element} element
- * @param {Array.<string>} func
- * @param {number=} opt_index Default is 0.
- */
-npf.style.animation.setTimingFunction = function(element, func, opt_index) {
-  var accel = 'cubic-bezier(' + func.join(',') + ')';
-  /** @type {!Array.<string>} */
-  var values = npf.style.animation.getTimingFunctions(element);
-  npf.style.animation.setValue(element,
-    npf.style.animation.Property.ANIMATION_TIMING_FUNCTION, values, accel,
-    'linear', opt_index);
-};
-
-/**
- * @param {Element} element
- * @param {number} index
- * @return {boolean}
- */
-npf.style.animation.removeTimingFunctionAt = function(element, index) {
-  /** @type {!Array.<string>} */
-  var values = npf.style.animation.getTimingFunctions(element);
-
-  return npf.style.animation.removeValueAt(element,
-    npf.style.animation.Property.ANIMATION_TIMING_FUNCTION, values, index);
-};
-
-/**
- * @param {Element} element
- * @param {string} key
- * @param {!Array.<string>} values
- * @param {string|number} value
- * @param {string|number} defaultValue
- * @param {number=} opt_index Default is 0.
- */
-npf.style.animation.insertValue = function(element, key, values, value,
-                                           defaultValue, opt_index) {
-  /** @type {number} */
-  var index = opt_index || 0;
-
-  values = npf.style.animation.normalizeValues_(values, index, defaultValue);
-  goog.array.insertAt(values, value, index);
-
-  npf.style.animation.setValue_(element, key, values);
-};
-
-/**
- * @param {Element} element
- * @param {string} key
- * @param {!Array.<string>} values
- * @param {string|number} value
- * @param {string|number} defaultValue
- * @param {number=} opt_index Default is 0.
- */
-npf.style.animation.setValue = function(element, key, values, value,
-                                        defaultValue, opt_index) {
-  /** @type {number} */
-  var index = opt_index || 0;
-
-  values = npf.style.animation.normalizeValues_(values, index + 1,
-    defaultValue);
-  values[index] = value + '';
-
-  npf.style.animation.setValue_(element, key, values);
-};
-
-/**
- * @param {Element} element
- * @param {string} key
- * @param {Array.<string>} values
- * @param {number} index
- * @return {boolean}
- */
-npf.style.animation.removeValueAt = function(element, key, values, index) {
-  /** @type {boolean} */
-  var removed = goog.array.removeAt(values, index);
-
-  if (removed) {
-    npf.style.animation.setValue_(element, key, values);
+    npf.style.animation.setAnimations_(element, animations);
   }
-
-  return removed;
 };
 
 /**
  * @param {Element} element
- * @param {string} key
- * @param {Array.<string>} values
+ * @param {!Array.<npf.style.Animation>} animations
  * @private
  */
-npf.style.animation.setValue_ = function(element, key, values) {
-  /** @type {string} */
-  var style = npf.userAgent.support.getCssPropertyName(key);
+npf.style.animation.setAnimations_ = function(element, animations) {
+  /** @type {!Array.<string>} */
+  var delays = [];
+  /** @type {!Array.<string>} */
+  var directions = [];
+  /** @type {!Array.<string>} */
+  var durations = [];
+  /** @type {!Array.<number|string>} */
+  var iterationCounts = [];
+  /** @type {!Array.<string>} */
+  var names = [];
+  /** @type {!Array.<string>} */
+  var timingFunctions = [];
+  /** @type {!Array.<string>} */
+  var playStates = [];
 
-  goog.style.setStyle(element, style, values.join(','));
+  goog.array.forEach(animations, function(animation) {
+    delays.push(animation.delay + 'ms');
+    directions.push(animation.direction);
+    durations.push(animation.duration + 'ms');
+    iterationCounts.push(animation.iterationCount ?
+      animation.iterationCount : 'infinite');
+    names.push(animation.name);
+    timingFunctions.push(
+      'cubic-bezier(' + animation.timingFunction.join(',') + ')');
+    playStates.push(animation.playState);
+  });
+
+  npf.style.animation.setValue_(element, goog.object.create(
+    npf.style.animation.Property.ANIMATION_DELAY,           delays,
+    npf.style.animation.Property.ANIMATION_DIRECTION,       directions,
+    npf.style.animation.Property.ANIMATION_DURATION,        durations,
+    npf.style.animation.Property.ANIMATION_ITERATION_COUNT, iterationCounts,
+    npf.style.animation.Property.ANIMATION_NAME,            names,
+    npf.style.animation.Property.ANIMATION_PLAY_STATE,      playStates,
+    npf.style.animation.Property.ANIMATION_TIMING_FUNCTION, timingFunctions
+  ));
+};
+
+/**
+ * @param {Element} element
+ * @return {!Array.<npf.style.Animation>}
+ */
+npf.style.animation.getAnimations = function(element) {
+  /** @type {!Array.<npf.style.Animation>} */
+  var animations = [];
+  var Property = npf.style.animation.Property;
+  /** @type {!Array.<string>} */
+  var names = npf.style.animation.getValues_(element, Property.ANIMATION_NAME);
+  /** @type {number} */
+  var i;
+
+  if (names.length) {
+    /** @type {!Array.<string>} */
+    var strDelays = npf.style.animation.getValues_(element,
+      Property.ANIMATION_DELAY);
+    /** @type {!Array.<number>} */
+    var delays = npf.style.animation.getMilliseconds_(strDelays);
+    var directions =
+      /** @type {!Array.<npf.style.animation.Direction>} */ (npf.style.animation.getValues_(element,
+      Property.ANIMATION_DIRECTION));
+    /** @type {!Array.<string>} */
+    var strDurations = npf.style.animation.getValues_(element,
+      Property.ANIMATION_DURATION);
+    /** @type {!Array.<number>} */
+    var durations = npf.style.animation.getMilliseconds_(strDurations);
+    /** @type {!Array.<string>} */
+    var strIterationCounts = npf.style.animation.getValues_(element,
+      Property.ANIMATION_ITERATION_COUNT);
+    /** @type {!Array.<number>} */
+    var iterationCounts = [];
+    var playStates =
+      /** @type {!Array.<npf.style.animation.PlayState>} */ (npf.style.animation.getValues_(element,
+      Property.ANIMATION_PLAY_STATE));
+    /** @type {!Array.<string>} */
+    var strTimingFunctions = npf.style.animation.getValues_(element,
+      Property.ANIMATION_TIMING_FUNCTION, function(value) {
+        var reg = /cubic\-bezier\((?:[\d,\.]*)\)|[\w\-]+/g;
+        /** @type {Array.<string>} */
+        var values = reg.exec(value);
+        /** @type {!Array.<string>} */
+        var result = [];
+
+        while (values && values[0]) {
+          result.push(values[0]);
+          values = reg.exec(value);
+        }
+
+        return result;
+      });
+    /** @type {!Array.<Array.<number>>} */
+    var timingFunctions = [];
+
+    goog.array.forEach(strIterationCounts, function(strCount) {
+      iterationCounts.push(
+        'infinite' == strCount ? 0 : goog.string.toNumber(strCount));
+    });
+
+    goog.array.forEach(strTimingFunctions, function(strFunction) {
+      /** @type {!Array.<string>} */
+      var strParts = strFunction.split(',');
+      /** @type {!Array.<number>} */
+      var parts = [];
+
+      goog.array.forEach(strParts, function(strValue) {
+        parts.push(goog.string.toNumber(strValue));
+      });
+      timingFunctions.push(parts);
+    });
+
+    delays = npf.style.animation.normalizeValues_(delays, names.length, 0);
+    directions = npf.style.animation.normalizeValues_(directions, names.length,
+      npf.style.animation.Direction.NORMAL);
+    durations = npf.style.animation.normalizeValues_(durations, names.length, 0);
+    iterationCounts = npf.style.animation.normalizeValues_(iterationCounts,
+      names.length, 1);
+    playStates = npf.style.animation.normalizeValues_(playStates, names.length,
+      npf.style.animation.PlayState.PAUSED);
+    timingFunctions = npf.style.animation.normalizeValues_(timingFunctions,
+      names.length, npf.fx.css3.easing.LINEAR);
+
+    goog.array.forEach(names, function(name, index) {
+      animations.push({
+        name: name,
+        delay: delays[index],
+        direction: directions[index],
+        duration: durations[index],
+        iterationCount: iterationCounts[index],
+        playState: playStates[index],
+        timingFunction: timingFunctions[index]
+      });
+    });
+  }
+
+  return animations;
+};
+
+/**
+ * @param {!Array.<string>} values
+ * @return {!Array.<number>}
+ * @private
+ */
+npf.style.animation.getMilliseconds_ = function(values) {
+  var msRegExp = /[\.\d]+ms/;
+  var sRegExp = /[\.\d]+s/;
+  /** @type {!Array.<number>} */
+  var result = [];
+
+  goog.array.forEach(values, function(value) {
+    if (msRegExp.test(value)) {
+      result.push(
+        goog.string.toNumber(value.substr(0, value.length - 2)));
+    } else if (sRegExp.test(value)) {
+      result.push(
+        1000 * goog.string.toNumber(value.substr(0, value.length - 1)));
+    } else {
+      result.push(0);
+    }
+  });
+
+  return result;
+};
+
+/**
+ * @param {Element} element
+ * @param {string|Object.<string,Array.<string>>} key
+ * @param {Array.<string>=} opt_value
+ * @private
+ */
+npf.style.animation.setValue_ = function(element, key, opt_value) {
+  /** @type {Object.<string,Array.<string>>} */
+  var values;
+
+  if (goog.isString(key)) {
+    values = goog.object.create(key, /** @type {Array.<string>} */ (opt_value));
+  } else {
+    values = /** @type {Object.<string,Array.<string>>} */ (key);
+  }
+
+  goog.object.forEach(values, function(value, key) {
+    /** @type {string} */
+    var style = npf.userAgent.support.getCssPropertyName(key);
+    goog.style.setStyle(element, style, value.join(','));
+  });
 };
 
 /**
@@ -501,11 +385,7 @@ npf.style.animation.getValues_ = function(element, style, opt_splitFunc) {
     value = npf.style.animation.getStyle_(element, style);
   }
 
-  if (!value || 'none' == value) {
-    value = '';
-  }
-
-  if ('' == value) {
+  if (!value || 'none' == value || '' == value) {
     return [];
   }
 
@@ -536,15 +416,19 @@ npf.style.animation.defaultSplitFunc_ = function(value) {
 };
 
 /**
- * @param {!Array.<string>} values
+ * @param {!Array} values
  * @param {number} count
- * @param {number|string} defaultValue
- * @return {!Array.<string>}
+ * @param {*} defaultValue
+ * @return {!Array}
  * @private
  */
 npf.style.animation.normalizeValues_ = function(values, count, defaultValue) {
-  for (var i = values.length; i < count; i++) {
-    values.push(defaultValue + '');
+  if (values.length > count) {
+    values = goog.array.slice(values, 0, count);
+  } else if (values.length < count) {
+    for (var i = values.length; i < count; i++) {
+      values.push(defaultValue);
+    }
   }
 
   return values;

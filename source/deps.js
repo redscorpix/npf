@@ -40,7 +40,7 @@ goog.addDependency('../../../source/router/router.js', ['npf.Router'], ['goog.Ur
 goog.addDependency('../../../source/string/format.js', ['npf.string.format'], []);
 goog.addDependency('../../../source/string/phone_number.js', ['npf.string.phoneNumber'], ['goog.array']);
 goog.addDependency('../../../source/string/string.js', ['npf.string'], ['goog.format.EmailAddress', 'goog.string']);
-goog.addDependency('../../../source/style/animation.js', ['npf.style.animation', 'npf.style.animation.Direction', 'npf.style.animation.PlayState', 'npf.style.animation.Property'], ['goog.array', 'goog.style', 'npf.userAgent.support']);
+goog.addDependency('../../../source/style/animation.js', ['npf.style.Animation', 'npf.style.animation', 'npf.style.animation.Direction', 'npf.style.animation.PlayState', 'npf.style.animation.Property'], ['goog.array', 'goog.object', 'goog.string', 'goog.style', 'npf.fx.css3.easing', 'npf.userAgent.support']);
 goog.addDependency('../../../source/ui/component.js', ['npf.ui.Component'], ['goog.events.EventTarget', 'goog.ui.Component']);
 goog.addDependency('../../../source/ui/container/container.js', ['npf.ui.Container'], ['goog.dom', 'goog.events.Event', 'goog.events.EventType', 'goog.events.KeyCodes', 'goog.events.KeyHandler', 'goog.events.KeyHandler.EventType', 'goog.ui.Component.Error', 'goog.ui.Component.EventType', 'goog.ui.Component.State', 'goog.userAgent', 'npf.ui.RenderComponent', 'npf.ui.container.Renderer']);
 goog.addDependency('../../../source/ui/container/renderer.js', ['npf.ui.container.Renderer'], ['goog.array', 'goog.dom', 'goog.dom.TagName', 'goog.dom.a11y', 'goog.dom.a11y.State', 'goog.dom.classes', 'goog.object', 'goog.style', 'goog.ui.Component.State', 'goog.userAgent', 'npf.ui.renderComponent.Renderer']);
