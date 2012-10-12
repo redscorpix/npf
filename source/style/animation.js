@@ -5,7 +5,6 @@ goog.provide('npf.style.animation.PlayState');
 goog.provide('npf.style.animation.Property');
 
 goog.require('goog.array');
-goog.require('goog.object');
 goog.require('goog.string');
 goog.require('goog.style');
 goog.require('npf.fx.css3.easing');
@@ -77,15 +76,10 @@ npf.style.animation.removeAnimation = function(element, name) {
  * @param {Element} element
  */
 npf.style.animation.removeAnimations = function(element) {
-  npf.style.animation.setValue_(element, goog.object.create(
-    npf.style.animation.Property.ANIMATION_DELAY,           [],
-    npf.style.animation.Property.ANIMATION_DIRECTION,       [],
-    npf.style.animation.Property.ANIMATION_DURATION,        [],
-    npf.style.animation.Property.ANIMATION_ITERATION_COUNT, [],
-    npf.style.animation.Property.ANIMATION_NAME,            [],
-    npf.style.animation.Property.ANIMATION_PLAY_STATE,      [],
-    npf.style.animation.Property.ANIMATION_TIMING_FUNCTION, []
-  ));
+  npf.style.animation.setValue_(element,
+    npf.style.animation.Property.ANIMATION, '');
+  npf.style.animation.setValue_(element,
+    npf.style.animation.Property.ANIMATION_PLAY_STATE, '');
 };
 
 /**
@@ -132,7 +126,7 @@ npf.style.animation.setPlayState = function(element, name, opt_playState) {
     playStates[index] = playState;
 
     npf.style.animation.setValue_(element,
-      npf.style.animation.Property.ANIMATION_PLAY_STATE, playStates);
+      npf.style.animation.Property.ANIMATION_PLAY_STATE, playStates.join(','));
 
     return true;
   }
@@ -180,41 +174,26 @@ npf.style.animation.setAnimation = function(element, animation) {
  */
 npf.style.animation.setAnimations_ = function(element, animations) {
   /** @type {!Array.<string>} */
-  var delays = [];
-  /** @type {!Array.<string>} */
-  var directions = [];
-  /** @type {!Array.<string>} */
-  var durations = [];
-  /** @type {!Array.<number|string>} */
-  var iterationCounts = [];
-  /** @type {!Array.<string>} */
-  var names = [];
-  /** @type {!Array.<string>} */
-  var timingFunctions = [];
+  var values = [];
   /** @type {!Array.<string>} */
   var playStates = [];
 
   goog.array.forEach(animations, function(animation) {
-    delays.push(animation.delay + 'ms');
-    directions.push(animation.direction);
-    durations.push(animation.duration + 'ms');
-    iterationCounts.push(animation.iterationCount ?
-      animation.iterationCount : 'infinite');
-    names.push(animation.name);
-    timingFunctions.push(
-      'cubic-bezier(' + animation.timingFunction.join(',') + ')');
+    values.push([
+      animation.name,
+      animation.duration + 'ms',
+      'cubic-bezier(' + animation.timingFunction.join(',') + ')',
+      animation.delay + 'ms',
+      animation.iterationCount ? animation.iterationCount : 'infinite',
+      animation.direction
+    ].join(' '));
     playStates.push(animation.playState);
   });
 
-  npf.style.animation.setValue_(element, goog.object.create(
-    npf.style.animation.Property.ANIMATION_DELAY,           delays,
-    npf.style.animation.Property.ANIMATION_DIRECTION,       directions,
-    npf.style.animation.Property.ANIMATION_DURATION,        durations,
-    npf.style.animation.Property.ANIMATION_ITERATION_COUNT, iterationCounts,
-    npf.style.animation.Property.ANIMATION_NAME,            names,
-    npf.style.animation.Property.ANIMATION_PLAY_STATE,      playStates,
-    npf.style.animation.Property.ANIMATION_TIMING_FUNCTION, timingFunctions
-  ));
+  npf.style.animation.setValue_(element,
+    npf.style.animation.Property.ANIMATION, values.join(','));
+  npf.style.animation.setValue_(element,
+    npf.style.animation.Property.ANIMATION_PLAY_STATE, playStates.join(','));
 };
 
 /**
@@ -222,156 +201,133 @@ npf.style.animation.setAnimations_ = function(element, animations) {
  * @return {!Array.<npf.style.Animation>}
  */
 npf.style.animation.getAnimations = function(element) {
+  /** @type {!Array.<string>} */
+  var strAnimations = npf.style.animation.getValue_(element,
+    npf.style.animation.Property.ANIMATION).split(' ');
+  /** @type {string} */
+  var strPlayStates = npf.style.animation.getValue_(element,
+    npf.style.animation.Property.ANIMATION_PLAY_STATE);
+  /** @type {!Array.<npf.style.animation.PlayState>} */
+  var playStates = [];
+
+  if ('' != strPlayStates) {
+    playStates =
+      /** @type {!Array.<npf.style.animation.PlayState>} */ (strPlayStates.replace(/\s/g, '').split(','));
+  }
+
+  /** @type {string} */
+  var name;
+  /** @type {number} */
+  var duration;
+  /** @type {Array.<number>} */
+  var timingFunctions;
+  /** @type {Array.<number>} */
+  var timingFunction;
+  /** @type {number} */
+  var delay;
+  /** @type {number} */
+  var iterationCount;
+  /** @type {npf.style.animation.Direction} */
+  var direction;
   /** @type {!Array.<npf.style.Animation>} */
   var animations = [];
-  var Property = npf.style.animation.Property;
-  /** @type {!Array.<string>} */
-  var names = npf.style.animation.getValues_(element, Property.ANIMATION_NAME);
-  /** @type {number} */
-  var i;
 
-  if (names.length) {
-    /** @type {!Array.<string>} */
-    var strDelays = npf.style.animation.getValues_(element,
-      Property.ANIMATION_DELAY);
-    /** @type {!Array.<number>} */
-    var delays = npf.style.animation.getMilliseconds_(strDelays);
-    var directions =
-      /** @type {!Array.<npf.style.animation.Direction>} */ (npf.style.animation.getValues_(element,
-      Property.ANIMATION_DIRECTION));
-    /** @type {!Array.<string>} */
-    var strDurations = npf.style.animation.getValues_(element,
-      Property.ANIMATION_DURATION);
-    /** @type {!Array.<number>} */
-    var durations = npf.style.animation.getMilliseconds_(strDurations);
-    /** @type {!Array.<string>} */
-    var strIterationCounts = npf.style.animation.getValues_(element,
-      Property.ANIMATION_ITERATION_COUNT);
-    /** @type {!Array.<number>} */
-    var iterationCounts = [];
-    var playStates =
-      /** @type {!Array.<npf.style.animation.PlayState>} */ (npf.style.animation.getValues_(element,
-      Property.ANIMATION_PLAY_STATE));
-    /** @type {!Array.<string>} */
-    var strTimingFunctions = npf.style.animation.getValues_(element,
-      Property.ANIMATION_TIMING_FUNCTION, function(value) {
-        var reg = /cubic\-bezier\((?:[\d,\.]*)\)|[\w\-]+/g;
-        /** @type {Array.<string>} */
-        var values = reg.exec(value);
-        /** @type {!Array.<string>} */
-        var result = [];
+  goog.array.forEach(strAnimations, function(part, i) {
+    var count = 9;
 
-        while (values && values[0]) {
-          result.push(values[0]);
-          values = reg.exec(value);
+    switch (i % count) {
+      case 0:
+        name = part;
+        break;
+
+      case 1:
+        duration = npf.style.animation.getMilliseconds_(part);
+        break;
+
+      case 2:
+        timingFunction = [goog.string.toNumber(part.substr(13, part.length - 14))];
+        break;
+
+      case 3:
+      case 4:
+      case 5:
+        timingFunction.push(goog.string.toNumber(part.substr(0, part.length - 1)));
+        break;
+
+      case 6:
+        delay = npf.style.animation.getMilliseconds_(part);
+        break;
+
+      case 7:
+        iterationCount = 'infinite' == part ? 0 : goog.string.toNumber(part);
+        break;
+
+      case 8:
+        if (strAnimations.length - 1 == i) {
+          direction = /** @type {npf.style.animation.Direction} */ (part);
+        } else {
+          direction = /** @type {npf.style.animation.Direction} */ (part.substr(
+            0, part.length - 1));
         }
 
-        return result;
-      });
-    /** @type {!Array.<Array.<number>>} */
-    var timingFunctions = [];
+        var animation = {
+          name: name,
+          duration: duration,
+          timingFunction: timingFunction,
+          delay: delay,
+          iterationCount: iterationCount,
+          direction: direction,
+          playState: playStates[Math.floor(i / count)] ||
+            npf.style.animation.PlayState.PAUSED
+        };
+        animations.push(animation);
 
-    goog.array.forEach(strIterationCounts, function(strCount) {
-      iterationCounts.push(
-        'infinite' == strCount ? 0 : goog.string.toNumber(strCount));
-    });
-
-    goog.array.forEach(strTimingFunctions, function(strFunction) {
-      /** @type {!Array.<string>} */
-      var strParts = strFunction.split(',');
-      /** @type {!Array.<number>} */
-      var parts = [];
-
-      goog.array.forEach(strParts, function(strValue) {
-        parts.push(goog.string.toNumber(strValue));
-      });
-      timingFunctions.push(parts);
-    });
-
-    delays = npf.style.animation.normalizeValues_(delays, names.length, 0);
-    directions = npf.style.animation.normalizeValues_(directions, names.length,
-      npf.style.animation.Direction.NORMAL);
-    durations = npf.style.animation.normalizeValues_(durations, names.length, 0);
-    iterationCounts = npf.style.animation.normalizeValues_(iterationCounts,
-      names.length, 1);
-    playStates = npf.style.animation.normalizeValues_(playStates, names.length,
-      npf.style.animation.PlayState.PAUSED);
-    timingFunctions = npf.style.animation.normalizeValues_(timingFunctions,
-      names.length, npf.fx.css3.easing.LINEAR);
-
-    goog.array.forEach(names, function(name, index) {
-      animations.push({
-        name: name,
-        delay: delays[index],
-        direction: directions[index],
-        duration: durations[index],
-        iterationCount: iterationCounts[index],
-        playState: playStates[index],
-        timingFunction: timingFunctions[index]
-      });
-    });
-  }
+        break;
+    }
+  });
 
   return animations;
 };
 
 /**
- * @param {!Array.<string>} values
- * @return {!Array.<number>}
+ * @param {string} value
+ * @return {number}
  * @private
  */
-npf.style.animation.getMilliseconds_ = function(values) {
+npf.style.animation.getMilliseconds_ = function(value) {
   var msRegExp = /[\.\d]+ms/;
   var sRegExp = /[\.\d]+s/;
-  /** @type {!Array.<number>} */
-  var result = [];
+  /** @type {number} */
+  var result = 0;
 
-  goog.array.forEach(values, function(value) {
-    if (msRegExp.test(value)) {
-      result.push(
-        goog.string.toNumber(value.substr(0, value.length - 2)));
-    } else if (sRegExp.test(value)) {
-      result.push(
-        1000 * goog.string.toNumber(value.substr(0, value.length - 1)));
-    } else {
-      result.push(0);
-    }
-  });
+  if (msRegExp.test(value)) {
+    result = goog.string.toNumber(value.substr(0, value.length - 2));
+  } else if (sRegExp.test(value)) {
+    result =  1000 * goog.string.toNumber(value.substr(0, value.length - 1));
+  }
 
   return result;
 };
 
 /**
  * @param {Element} element
- * @param {string|Object.<string,Array.<string>>} key
- * @param {Array.<string>=} opt_value
+ * @param {string} key
+ * @param {string} value
  * @private
  */
-npf.style.animation.setValue_ = function(element, key, opt_value) {
-  /** @type {Object.<string,Array.<string>>} */
-  var values;
-
-  if (goog.isString(key)) {
-    values = goog.object.create(key, /** @type {Array.<string>} */ (opt_value));
-  } else {
-    values = /** @type {Object.<string,Array.<string>>} */ (key);
-  }
-
-  goog.object.forEach(values, function(value, key) {
-    /** @type {string} */
-    var style = npf.userAgent.support.getCssPropertyName(key);
-    goog.style.setStyle(element, style, value.join(','));
-  });
+npf.style.animation.setValue_ = function(element, key, value) {
+  /** @type {string} */
+  var style = npf.userAgent.support.getCssPropertyName(key);
+  goog.style.setStyle(element, style, value);
 };
 
 /**
  * @param {Element} element
  * @param {string} style
- * @param {(function(string):!Array.<string>)=} opt_splitFunc
- * @return {!Array.<string>}
+ * @return {string}
  * @private
  */
-npf.style.animation.getValues_ = function(element, style, opt_splitFunc) {
+npf.style.animation.getValue_ = function(element, style) {
   /** @type {string} */
   var property = npf.userAgent.support.getCssPropertyName(style);
   /** @type {string} */
@@ -385,14 +341,7 @@ npf.style.animation.getValues_ = function(element, style, opt_splitFunc) {
     value = npf.style.animation.getStyle_(element, style);
   }
 
-  if (!value || 'none' == value || '' == value) {
-    return [];
-  }
-
-  /** @type {function(string):!Array.<string>} */
-  var splitFunc = opt_splitFunc || npf.style.animation.defaultSplitFunc_;
-
-  return splitFunc(value.replace(/\s/g, ''));
+  return value && 'none' != value ? value : '';
 };
 
 /**
@@ -404,32 +353,4 @@ npf.style.animation.getValues_ = function(element, style, opt_splitFunc) {
 npf.style.animation.getStyle_ = function(element, style) {
   return goog.style.getComputedStyle(element, style) ||
       goog.style.getCascadedStyle(element, style) || element.style[style];
-};
-
-/**
- * @param {string} value
- * @return {!Array.<string>}
- * @private
- */
-npf.style.animation.defaultSplitFunc_ = function(value) {
-  return value.split(',');
-};
-
-/**
- * @param {!Array} values
- * @param {number} count
- * @param {*} defaultValue
- * @return {!Array}
- * @private
- */
-npf.style.animation.normalizeValues_ = function(values, count, defaultValue) {
-  if (values.length > count) {
-    values = goog.array.slice(values, 0, count);
-  } else if (values.length < count) {
-    for (var i = values.length; i < count; i++) {
-      values.push(defaultValue);
-    }
-  }
-
-  return values;
 };
