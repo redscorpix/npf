@@ -1005,7 +1005,7 @@ npf.fx.dom.Transform.prototype.updateStyle = function() {
     }, this);
 
     styles.push(key + '(' + values.join(',') + ')');
-  });
+  }, this);
 
   goog.style.setStyle(this.element, npf.userAgent.support.getCssPropertyName('transform'), styles.join(' '));
 };

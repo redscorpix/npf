@@ -29,7 +29,7 @@ goog.inherits(npf.ui.Image, goog.ui.Component);
 npf.ui.Image.prototype.src_;
 
 /**
- * @type {!goog.math.Size}
+ * @type {goog.math.Size}
  * @private
  */
 npf.ui.Image.prototype.size_;
@@ -80,7 +80,7 @@ npf.ui.Image.prototype.getSrc = function() {
 };
 
 /**
- * @return {!goog.math.Size}
+ * @return {goog.math.Size}
  */
 npf.ui.Image.prototype.getSize = function() {
   return this.size_;

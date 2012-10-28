@@ -149,6 +149,10 @@ npf.fx.CssAnimation.prototype.disposeInternal = function() {
     this.stop(false);
   }
 
+  if (this.domSet_) {
+    this.clearDom();
+  }
+
   goog.base(this, 'disposeInternal');
 
   this.keyframes_ = null;
