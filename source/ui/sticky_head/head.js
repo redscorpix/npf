@@ -39,14 +39,6 @@ npf.ui.stickyHead.Head.prototype.enterDocument = function() {
 	this.setVisibleInternal(this._isVisible);
 };
 
-/** @inheritDoc */
-npf.ui.stickyHead.Head.prototype.disposeInternal = function() {
-	goog.base(this, 'disposeInternal');
-
-	delete this._isSticky;
-	delete this._isVisible;
-};
-
 /**
  * @return {boolean}
  */

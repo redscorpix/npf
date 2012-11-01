@@ -34,11 +34,10 @@ npf.ui.pagePaginator.Changer = function(element, contentElement, page,
   this.pageIndex_ = page;
   this.pageCount_ = pageCount;
 
-  this.handler_ = new goog.events.EventHandler();
+  this.handler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.handler_);
 
-  this.handler_.listen(window, goog.events.EventType.RESIZE,
-    this.onResize_, false, this);
+  this.handler_.listen(window, goog.events.EventType.RESIZE, this.onResize_);
 
   this.update_();
 };
@@ -94,7 +93,7 @@ npf.ui.pagePaginator.Changer.prototype.pageIndex_;
 npf.ui.pagePaginator.Changer.prototype.pageCount_;
 
 /**
- * @type {!goog.events.EventHandler}
+ * @type {goog.events.EventHandler}
  * @private
  */
 npf.ui.pagePaginator.Changer.prototype.handler_;
@@ -149,17 +148,13 @@ npf.ui.pagePaginator.Changer.prototype.disposeInternal = function() {
 
   goog.base(this, 'disposeInternal');
 
-  delete this.element_;
-  delete this.contentElement_;
-  delete this.pageIndex_;
-  delete this.pageCount_;
-  delete this.dragger_;
-  delete this.queueNext_;
-  delete this.animation_;
-  delete this.dragStamps_;
-  delete this.width_;
-  delete this.emptyElement_;
-  delete this.draggable_;
+  this.element_ = null;
+  this.contentElement_ = null;
+  this.handler_ = null;
+  this.dragger_ = null;
+  this.animation_ = null;
+  this.dragStamps_ = null;
+  this.emptyElement_ = null;
 };
 
 /**

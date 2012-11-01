@@ -38,15 +38,6 @@ npf.ui.pagePaginator.Dragger.prototype.timeoutId_;
 
 
 /** @inheritDoc */
-npf.ui.pagePaginator.Dragger.prototype.disposeInternal = function() {
-  goog.base(this, 'disposeInternal');
-
-  delete this.isLeftLimit_;
-  delete this.isRightLimit_;
-  delete this.timeoutId_;
-};
-
-/** @inheritDoc */
 npf.ui.pagePaginator.Dragger.prototype.startDrag = function(e) {
   goog.base(this, 'startDrag', e);
 

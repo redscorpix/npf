@@ -3,17 +3,17 @@ goog.provide('npf.ui.form.FieldRenderer');
 goog.require('goog.dom');
 goog.require('goog.dom.classes');
 goog.require('goog.dom.forms');
-goog.require('npf.ui.renderComponent.Renderer');
+goog.require('npf.ui.container.Renderer');
 
 
 /**
  * @constructor
- * @extends {npf.ui.renderComponent.Renderer}
+ * @extends {npf.ui.container.Renderer}
  */
 npf.ui.form.FieldRenderer = function() {
   goog.base(this);
 };
-goog.inherits(npf.ui.form.FieldRenderer, npf.ui.renderComponent.Renderer);
+goog.inherits(npf.ui.form.FieldRenderer, npf.ui.container.Renderer);
 goog.addSingletonGetter(npf.ui.form.FieldRenderer);
 
 
@@ -30,7 +30,7 @@ npf.ui.form.FieldRenderer.prototype.getCssClass = function() {
 
 /** @inheritDoc */
 npf.ui.form.FieldRenderer.prototype.createDom = function(component) {
-  /** @type {!Element} */
+  /** @type {Element} */
   var element = goog.base(this, 'createDom', component);
   /** @type {!Element} */
   var labelContainerElement = component.getDomHelper().createDom(
@@ -38,10 +38,11 @@ npf.ui.form.FieldRenderer.prototype.createDom = function(component) {
   /** @type {string} */
   var labelContent = component.getLabel();
 
-  if (labelContent) {
+  if ('' != labelContent) {
     /** @type {!Element} */
     var labelElement = component.getDomHelper().createDom(
-      goog.dom.TagName.DIV, this.getLabelCssClass(), labelContent);
+      goog.dom.TagName.DIV, this.getLabelCssClass());
+    labelElement.innerHTML = labelContent;
     goog.dom.appendChild(labelContainerElement, labelElement);
   }
 
@@ -60,10 +61,11 @@ npf.ui.form.FieldRenderer.prototype.createDom = function(component) {
   /** @type {string} */
   var notice = component.getNotice();
 
-  if (notice) {
+  if ('' != notice) {
     /** @type {!Element} */
     var noticeElement = component.getDomHelper().createDom(
-      goog.dom.TagName.DIV, this.getNoticeCssClass(), notice);
+      goog.dom.TagName.DIV, this.getNoticeCssClass());
+    noticeElement.innerHTML = notice;
     goog.dom.appendChild(element, noticeElement);
   }
 
@@ -97,16 +99,6 @@ npf.ui.form.FieldRenderer.prototype.setErrorVisible = function(element,
 npf.ui.form.FieldRenderer.prototype.setContent = function(element, content) {
   if (element) {
     element.innerHTML = content;
-  }
-};
-
-/**
- * @param {Element} element
- * @param {boolean} enable
- */
-npf.ui.form.FieldRenderer.prototype.setEnabled = function(element, enable) {
-  if (element) {
-    goog.dom.classes.enable(element, this.getDisabledCssClass(), !enable);
   }
 };
 
@@ -200,13 +192,6 @@ npf.ui.form.FieldRenderer.prototype.getValueElement = function(element) {
   }
 
   return null;
-};
-
-/**
- * @return {string}
- */
-npf.ui.form.FieldRenderer.prototype.getDisabledCssClass = function() {
-  return goog.getCssName(this.getStructuralCssClass(), 'disabled');
 };
 
 /**

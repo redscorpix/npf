@@ -53,8 +53,8 @@ npf.fx.AwaitingAnimation.prototype.disposeInternal = function() {
 
   goog.base(this, 'disposeInternal');
 
-  delete this.animation_;
-  delete this.awaitingAnimation_;
+  this.animation_ = null;
+  this.awaitingAnimation_ = null;
 };
 
 /**

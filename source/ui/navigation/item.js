@@ -63,19 +63,8 @@ npf.ui.navigation.Item.prototype.enterDocument = function() {
   var tapHandler = new npf.events.TapHandler(this.getElement());
   this.disposeOnExitDocument(tapHandler);
 
-  this.getHandler().listen(tapHandler, npf.events.TapHandler.EventType.TAP,
-    this.onTap_, false, this);
-};
-
-/** @inheritDoc */
-npf.ui.navigation.Item.prototype.disposeInternal = function() {
-  goog.base(this, 'disposeInternal');
-
-  delete this.type_;
-  delete this.caption_;
-  delete this.url_;
-  delete this.selected_;
-  delete this.enabled_;
+  this.getHandler()
+    .listen(tapHandler, npf.events.TapHandler.EventType.TAP, this.onTap_);
 };
 
 /**

@@ -2,7 +2,7 @@ goog.provide('npf.ui.Form');
 
 goog.require('goog.events');
 goog.require('goog.object');
-goog.require('npf.ui.RenderComponent');
+goog.require('npf.ui.Container');
 goog.require('npf.ui.form.EventType');
 goog.require('npf.ui.form.Field');
 goog.require('npf.ui.form.Renderer');
@@ -10,10 +10,12 @@ goog.require('npf.ui.form.SubmitButton');
 
 
 /**
- * @param {npf.ui.form.Renderer=} opt_renderer Renderer used to render or decorate the component.
- * @param {goog.dom.DomHelper=} opt_domHelper DOM helper, used for document interaction.
+ * @param {npf.ui.form.Renderer=} opt_renderer Renderer used to render or
+ *                                             decorate the component.
+ * @param {goog.dom.DomHelper=} opt_domHelper DOM helper, used for document
+ *                                            interaction.
  * @constructor
- * @extends {npf.ui.RenderComponent}
+ * @extends {npf.ui.Container}
  */
 npf.ui.Form = function(opt_renderer, opt_domHelper) {
   goog.base(this, opt_renderer || npf.ui.form.Renderer.getInstance(),
@@ -21,11 +23,11 @@ npf.ui.Form = function(opt_renderer, opt_domHelper) {
 
   this.fieldsMap_ = {};
 };
-goog.inherits(npf.ui.Form, npf.ui.RenderComponent);
+goog.inherits(npf.ui.Form, npf.ui.Container);
 
 
 /**
- * @type {!Object.<string,npf.ui.form.Field>}
+ * @type {Object.<string,npf.ui.form.Field>}
  * @private
  */
 npf.ui.Form.prototype.fieldsMap_;
@@ -48,17 +50,15 @@ npf.ui.Form.prototype.enterDocument = function() {
   goog.base(this, 'enterDocument');
 
   this.getHandler()
-    .listen(this.getElement(), goog.events.EventType.SUBMIT,
-      this.onSubmit_, false, this);
+    .listen(this.getElement(), goog.events.EventType.SUBMIT, this.onSubmit_);
 };
 
 /** @inheritDoc */
 npf.ui.Form.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
-  delete this.fieldsMap_;
-  delete this.submitButton_;
-  delete this.prevented_;
+  this.fieldsMap_ = null;
+  this.submitButton_ = null;
 };
 
 /** @inheritDoc */

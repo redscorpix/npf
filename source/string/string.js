@@ -8,6 +8,7 @@ goog.require('goog.string');
  * @param {Array.<string>} variants
  * @param {number} count
  * @return {string}
+ * @deprecated Use goog.i18n.MessageFormat
  */
 npf.string.declension = function(variants, count) {
   count = Math.floor(count);

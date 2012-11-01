@@ -122,24 +122,20 @@ npf.ui.form.DatePicker.prototype.enterDocument = function() {
   var EventType = goog.events.EventType;
 
   this.getHandler()
-    .listen(dayElement, EventType.CHANGE, this.onChange_, false, this)
-    .listen(monthElement, EventType.CHANGE, this.onChange_, false, this)
-    .listen(yearElement, EventType.CHANGE, this.onChange_, false, this);
+    .listen(dayElement, EventType.CHANGE, this.onChange_)
+    .listen(monthElement, EventType.CHANGE, this.onChange_)
+    .listen(yearElement, EventType.CHANGE, this.onChange_);
 };
 
 /** @inheritDoc */
 npf.ui.form.DatePicker.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
-  delete this.minDate_;
-  delete this.maxDate_;
-  delete this.day_;
-  delete this.month_;
-  delete this.year_;
-  delete this.dayElement_;
-  delete this.monthElement_;
-  delete this.yearElement_;
-  delete this.isEmptyValues_;
+  this.minDate_ = null;
+  this.maxDate_ = null;
+  this.dayElement_ = null;
+  this.monthElement_ = null;
+  this.yearElement_ = null;
 };
 
 /** @inheritDoc */

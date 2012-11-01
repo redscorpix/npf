@@ -50,7 +50,8 @@ npf.router.Route = function(fragment, opt_validatorsMap) {
   /** @type {Array.<string>} */
   var matches;
 
-  while (!goog.isNull(matches = replacedFragment.match(npf.router.Route.MATCH_REGEX))) {
+  while (!goog.isNull(matches = replacedFragment.match(
+    npf.router.Route.MATCH_REGEX))) {
     /** @type {string} */
     var name = matches[1];
     /** @type {string} */
@@ -59,17 +60,22 @@ npf.router.Route = function(fragment, opt_validatorsMap) {
     var args = matches[3] || '';
 
     if ('range' == type || 'int' == type) {
-      replacedFragment = replacedFragment.replace(npf.router.Route.FRAGMENT_REPLACE_REGEX, '(\\d+)');
+      replacedFragment = replacedFragment.replace(
+        npf.router.Route.FRAGMENT_REPLACE_REGEX, '(\\d+)');
 
       if ('range' == type && args) {
         this.addRangeValidator_(name, args);
       }
     } else {
-      replacedFragment = replacedFragment.replace(npf.router.Route.FRAGMENT_REPLACE_REGEX, '(\\w+)');
+      replacedFragment = replacedFragment.replace(
+        npf.router.Route.FRAGMENT_REPLACE_REGEX, '(\\w+)');
     }
 
     this._optionNames.push(name);
-    generateFragment = generateFragment.replace(npf.router.Route.FRAGMENT_REPLACE_REGEX, '{' + name + '}');
+
+    var regExp = new RegExp('\\{(' + name +
+      ')(?:\\:(\\w+)(?:\\(([\\w\\,]+)\\))?)?\\}');
+    generateFragment = generateFragment.replace(regExp, '{' + name + '}');
   }
 
   /**
@@ -161,6 +167,7 @@ npf.router.Route.prototype.getOptions = function(token) {
  * @protected
  */
 npf.router.Route.prototype.getOptionsInternal = function(path) {
+  /** @type {Array.<string>} */
   var values = this._regex.exec(path);
   /** @type {Object.<string>} */
   var valuesMap = null;

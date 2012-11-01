@@ -63,9 +63,8 @@ npf.fx.DomAnimation.prototype.accel;
 npf.fx.DomAnimation.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
-  delete this.element;
-  delete this.time;
-  delete this.accel;
+  this.element = null;
+  this.accel = null;
 };
 
 /**

@@ -1,17 +1,17 @@
 goog.provide('npf.ui.form.Renderer');
 
 goog.require('goog.dom.TagName');
-goog.require('npf.ui.renderComponent.Renderer');
+goog.require('npf.ui.container.Renderer');
 
 
 /**
  * @constructor
- * @extends {npf.ui.renderComponent.Renderer}
+ * @extends {npf.ui.container.Renderer}
  */
 npf.ui.form.Renderer = function() {
   goog.base(this);
 };
-goog.inherits(npf.ui.form.Renderer, npf.ui.renderComponent.Renderer);
+goog.inherits(npf.ui.form.Renderer, npf.ui.container.Renderer);
 goog.addSingletonGetter(npf.ui.form.Renderer);
 
 
@@ -30,7 +30,7 @@ npf.ui.form.Renderer.prototype.getCssClass = function() {
 /** @override */
 npf.ui.form.Renderer.prototype.createDom = function(form) {
   /** @type {!Element} */
-  var element = component.getDomHelper().createDom(goog.dom.TagName.FORM,
+  var element = form.getDomHelper().createDom(goog.dom.TagName.FORM,
     this.getClassNames(form).join(' '));
 
   return element;

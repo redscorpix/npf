@@ -78,8 +78,7 @@ npf.ui.scrollBar.ButtonAnimation.prototype.disposeInternal = function() {
 
   goog.base(this, 'disposeInternal');
 
-  delete this.delay_;
-  delete this.animated_;
+  this.delay_ = null;
 };
 
 /**

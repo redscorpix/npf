@@ -59,7 +59,7 @@ npf.fx.cssAnimation.Keyframes.getNextKeyframeName = function() {
 
 
 /**
- * @type {!Object.<number,Object>}
+ * @type {Object.<number,Object>}
  * @private
  */
 npf.fx.cssAnimation.Keyframes.prototype.keyframesMap_;
@@ -71,7 +71,7 @@ npf.fx.cssAnimation.Keyframes.prototype.keyframesMap_;
 npf.fx.cssAnimation.Keyframes.prototype.name_;
 
 /**
- * @type {!Element}
+ * @type {Element}
  * @private
  */
 npf.fx.cssAnimation.Keyframes.prototype.styleElement_;
@@ -95,11 +95,9 @@ npf.fx.cssAnimation.Keyframes.prototype.disposeInternal = function() {
 
   goog.base(this, 'disposeInternal');
 
-  delete this.keyframesMap_;
-  delete this.name_;
-  delete this.styleElement_;
-  delete this.endStyles_;
-  delete this.inited_;
+  this.keyframesMap_ = null;
+  this.styleElement_ = null;
+  this.endStyles_ = null;
 };
 
 /**
@@ -110,7 +108,7 @@ npf.fx.cssAnimation.Keyframes.prototype.getName = function() {
 };
 
 /**
- * @return {!Element}
+ * @return {Element}
  */
 npf.fx.cssAnimation.Keyframes.prototype.getElement = function() {
   return this.styleElement_;

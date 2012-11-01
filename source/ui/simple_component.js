@@ -81,16 +81,14 @@ npf.ui.SimpleComponent.prototype.createDom = function() {
 npf.ui.SimpleComponent.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
-  delete this.classNames_;
-  delete this.contentClassNames_;
-  delete this.contentElement_;
-  delete this.tagName_;
-  delete this.contentTagName_;
+  this.classNames_ = null;
+  this.contentClassNames_ = null;
+  this.contentElement_ = null;
 };
 
 /** @inheritDoc */
 npf.ui.SimpleComponent.prototype.getContentElement = function() {
-  return this.contentElement_;
+  return this.contentElement_ || this.getElement();
 };
 
 /**

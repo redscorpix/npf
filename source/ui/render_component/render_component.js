@@ -46,7 +46,7 @@ npf.ui.RenderComponent.prototype.createDom = function() {
 };
 
 /**
- * Decorates the given element with this component. Overrides {@link
+ * Decorates the given element with this component. Overrides {@link}
  * goog.ui.Component#decorateInternal} by delegating DOM manipulation
  * to the component's renderer.
  * @param {Element} element Element to decorate.
@@ -62,8 +62,8 @@ npf.ui.RenderComponent.prototype.decorateInternal = function(element) {
 npf.ui.RenderComponent.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
-  delete this.renderer_;
-  delete this.extraClassNames_;
+  this.renderer_ = null;
+  this.extraClassNames_ = null;
 };
 
 /**

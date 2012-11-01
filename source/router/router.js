@@ -9,14 +9,14 @@ goog.require('npf.History');
 
 
 /**
- * @param {goog.History|npf.History=} opthistory_
+ * @param {goog.History|npf.History=} opt_history
  * @constructor
  * @extends {goog.events.EventTarget}
  */
-npf.Router = function(opthistory_) {
+npf.Router = function(opt_history) {
   goog.base(this);
 
-  this.history_ = opthistory_ || new npf.History();
+  this.history_ = opt_history || new npf.History();
   this.registerDisposable(this.history_);
 
   goog.events.listen(this.history_, goog.history.EventType.NAVIGATE,
@@ -93,13 +93,13 @@ npf.Router.normalizeRootPath = function() {
 npf.Router.prototype.history_;
 
 /**
- * @type {!Object.<string,npf.router.Route>}
+ * @type {Object.<string,npf.router.Route>}
  * @private
  */
 npf.Router.prototype.routesMap_;
 
 /**
- * @type {!Array.<npf.Router.NamedRoute>}
+ * @type {Array.<npf.Router.NamedRoute>}
  * @private
  */
 npf.Router.prototype.namedRoutes_;
@@ -131,12 +131,9 @@ npf.Router.prototype.disposeInternal = function() {
 
   goog.base(this, 'disposeInternal');
 
-  delete this.history_;
-  delete this.routesMap_;
-  delete this.namedRoutes_;
-  delete this.currentRouteName_;
-  delete this.enabled_;
-  delete this.slashSuffixEnabled_;
+  this.history_ = null;
+  this.routesMap_ = null;
+  this.namedRoutes_ = null;
 };
 
 /**

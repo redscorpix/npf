@@ -101,9 +101,6 @@ npf.ui.scrollBar.Scroller.prototype.enterDocument = function() {
   this.setSizeInternal(this.size_);
   this.setVisible_(!!this.maxScrollPosition_);
 
-  /** @type {goog.events.EventHandler} */
-  var handler = this.getHandler();
-
   if (this.draggable_) {
     this.createDragger_();
   }
@@ -120,15 +117,7 @@ npf.ui.scrollBar.Scroller.prototype.exitDocument = function() {
 npf.ui.scrollBar.Scroller.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
-  delete this.minWidth_;
-  delete this.draggable_;
-  delete this.dragger_;
-  delete this.position_;
-  delete this.containerSize_;
-  delete this.contentSize_;
-  delete this.maxScrollPosition_;
-  delete this.visible_;
-  delete this.size_;
+  this.dragger_ = null;
 };
 
 /**

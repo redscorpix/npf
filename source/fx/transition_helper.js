@@ -29,7 +29,7 @@ npf.fx.TransitionHelper.prototype.disposeInternal = function() {
 
   goog.base(this, 'disposeInternal');
 
-  delete this.transitionsMap_;
+  this.transitionsMap_ = null;
 };
 
 /**

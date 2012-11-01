@@ -3,8 +3,8 @@ goog.provide('npf.ui.form.Field');
 goog.require('goog.array');
 goog.require('goog.events');
 goog.require('goog.object');
-goog.require('npf.ui.RenderComponent');
 goog.require('goog.ui.IdGenerator');
+goog.require('npf.ui.Container');
 goog.require('npf.ui.form.EventType');
 goog.require('npf.ui.form.FieldRenderer');
 
@@ -14,16 +14,18 @@ goog.require('npf.ui.form.FieldRenderer');
  * @param {npf.ui.form.FieldRenderer=} opt_renderer
  * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
- * @extends {npf.ui.RenderComponent}
+ * @extends {npf.ui.Container}
  */
 npf.ui.form.Field = function(name, opt_renderer, opt_domHelper) {
   goog.base(this, opt_renderer || npf.ui.form.FieldRenderer.getInstance(),
     opt_domHelper);
 
+  this.setSupportedState(goog.ui.Component.State.DISABLED, true);
+
   this.name_ = name;
   this.validators_ = [];
 };
-goog.inherits(npf.ui.form.Field, npf.ui.RenderComponent);
+goog.inherits(npf.ui.form.Field, npf.ui.Container);
 
 
 /**
@@ -56,12 +58,6 @@ npf.ui.form.Field.prototype.validators_;
  * @private
  */
 npf.ui.form.Field.prototype.required_ = false;
-
-/**
- * @type {boolean}
- * @private
- */
-npf.ui.form.Field.prototype.enabled_ = true;
 
 /**
  * @type {string}
@@ -98,16 +94,8 @@ npf.ui.form.Field.prototype.hideErrorOnChange_ = true;
 npf.ui.form.Field.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
-  delete this.name_;
-  delete this.value_;
-  delete this.validators_;
-  delete this.required_;
-  delete this.enabled_;
-  delete this.label_;
-  delete this.notice_;
-  delete this.error_;
-  delete this.errorVisible_;
-  delete this.hideErrorOnChange_;
+  this.value_ = null;
+  this.validators_ = null;
 };
 
 /**
@@ -115,7 +103,6 @@ npf.ui.form.Field.prototype.disposeInternal = function() {
  */
 npf.ui.form.Field.prototype.initializeInternal = function() {
   this.renderValueInternal(this.getValue());
-  this.setEnabledInternal(this.enabled_);
   this.setErrorInternal(this.error_);
   this.setErrorVisibleInternal(this.errorVisible_);
 };
@@ -153,7 +140,10 @@ npf.ui.form.Field.prototype.setValue = function(value, opt_noRender) {
   }
 
   this.setValueInternal(correctedValue);
-  this.renderValueInternal(this.getValue());
+
+  if (!opt_noRender) {
+    this.renderValueInternal(this.getValue());
+  }
 
   this.error_ = this.validateInternal();
 
@@ -297,31 +287,6 @@ npf.ui.form.Field.prototype.setNotice = function(notice) {
   }
 
   this.notice_ = notice;
-};
-
-/**
- * @return {boolean}
- */
-npf.ui.form.Field.prototype.isEnabled = function() {
-  return this.enabled_;
-};
-
-/**
- * @param {boolean} enable
- */
-npf.ui.form.Field.prototype.setEnabled = function(enable) {
-  if (this.enabled_ != enable) {
-    this.enabled_ = enable;
-    this.setEnabledInternal(this.enabled_);
-  }
-};
-
-/**
- * @param {boolean} enable
- * @protected
- */
-npf.ui.form.Field.prototype.setEnabledInternal = function(enable) {
-  this.getRenderer().setEnabled(this.getElement(), enable);
 };
 
 /**

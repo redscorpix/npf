@@ -49,25 +49,25 @@ npf.application.Settings.prototype.urlTypesMap_;
 npf.application.Settings.prototype.optionTypesMap_;
 
 /**
- * @type {!Object}
+ * @type {Object}
  * @private
  */
 npf.application.Settings.prototype.optionsMap_;
 
 /**
- * @type {!Object}
+ * @type {Object}
  * @private
  */
 npf.application.Settings.prototype.urlsMap_;
 
 /**
- * @type {!Array.<string>}
+ * @type {Array.<string>}
  * @private
  */
 npf.application.Settings.prototype.undefinedSettings_;
 
 /**
- * @type {!Object.<string,*>}
+ * @type {Object.<string,*>}
  * @private
  */
 npf.application.Settings.prototype.defaultSettingsMap_;
@@ -77,12 +77,12 @@ npf.application.Settings.prototype.defaultSettingsMap_;
 npf.application.Settings.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
-  delete this.urlTypesMap_;
-  delete this.optionTypesMap_;
-  delete this.undefinedSettings_;
-  delete this.optionsMap_;
-  delete this.urlsMap_;
-  delete this.defaultSettingsMap_;
+  this.urlTypesMap_ = null;
+  this.optionTypesMap_ = null;
+  this.optionsMap_ = null;
+  this.urlsMap_ = null;
+  this.undefinedSettings_ = null;
+  this.defaultSettingsMap_ = null;
 };
 
 /**
@@ -172,7 +172,7 @@ npf.application.Settings.prototype.getOption = function(optionType) {
 };
 
 /**
- * @return {!Array.<string>}
+ * @return {Array.<string>}
  */
 npf.application.Settings.prototype.getUndefinedSettings = function() {
   return this.undefinedSettings_;

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>NPF Unit Tests - npf.json.path</title>
+<script src="../../goog/base.js"></script>
+<script src="./path.js"></script>
+<script>
+goog.require('goog.json');
+goog.require('goog.testing.jsunit');
+</script>
+</head>
+<body>
+<script>
+var json = {
+  "store": {
+    "book": [{
+      "category": "reference",
+      "author": "Nigel Rees",
+      "title": "Sayings of the Century",
+      "price": 8.95
+    }, {
+      "category": "fiction",
+      "author": "Evelyn Waugh",
+      "title": "Sword of Honour",
+      "price": 12.99
+    }, {
+      "category": "fiction",
+      "author": "Herman Melville",
+      "title": "Moby Dick",
+      "isbn": "0-553-21311-3",
+      "price": 8.99
+    }, {
+      "category": "fiction",
+      "author": "J. R. R. Tolkien",
+      "title": "The Lord of the Rings",
+      "isbn": "0-395-19395-8",
+      "price": 22.99
+    }],
+    "bicycle": {
+      "color": "red",
+      "price": 19.95
+    }
+  }
+};
+
+function testTrace() {
+  assertEquals(goog.json.serialize(npf.json.path.trace(json, "$.store.book[*].author")), '["Nigel Rees","Evelyn Waugh","Herman Melville","J. R. R. Tolkien"]');
+  assertEquals(goog.json.serialize(npf.json.path.trace(json, "$..author")),              '["Nigel Rees","Evelyn Waugh","Herman Melville","J. R. R. Tolkien"]');
+  assertEquals(goog.json.serialize(npf.json.path.trace(json, "$.store.*")),              '[[{"category":"reference","author":"Nigel Rees","title":"Sayings of the Century","price":8.95},{"category":"fiction","author":"Evelyn Waugh","title":"Sword of Honour","price":12.99},{"category":"fiction","author":"Herman Melville","title":"Moby Dick","isbn":"0-553-21311-3","price":8.99},{"category":"fiction","author":"J. R. R. Tolkien","title":"The Lord of the Rings","isbn":"0-395-19395-8","price":22.99}],{"color":"red","price":19.95}]');
+  assertEquals(goog.json.serialize(npf.json.path.trace(json, "$.store..price")),         '[8.95,12.99,8.99,22.99,19.95]');
+  assertEquals(goog.json.serialize(npf.json.path.trace(json, "$..book[(@.length-1)]")),  '[{"category":"fiction","author":"J. R. R. Tolkien","title":"The Lord of the Rings","isbn":"0-395-19395-8","price":22.99}]');
+  assertEquals(goog.json.serialize(npf.json.path.trace(json, "$..book[-1:]")),           '[{"category":"fiction","author":"J. R. R. Tolkien","title":"The Lord of the Rings","isbn":"0-395-19395-8","price":22.99}]');
+  assertEquals(goog.json.serialize(npf.json.path.trace(json, "$..book[0,1]")),           '[{"category":"reference","author":"Nigel Rees","title":"Sayings of the Century","price":8.95},{"category":"fiction","author":"Evelyn Waugh","title":"Sword of Honour","price":12.99}]');
+  assertEquals(goog.json.serialize(npf.json.path.trace(json, "$..book[:2]")),            '[{"category":"reference","author":"Nigel Rees","title":"Sayings of the Century","price":8.95},{"category":"fiction","author":"Evelyn Waugh","title":"Sword of Honour","price":12.99}]');
+  assertEquals(goog.json.serialize(npf.json.path.trace(json, "$..book[?(@.isbn)]")),     '[{"category":"fiction","author":"Herman Melville","title":"Moby Dick","isbn":"0-553-21311-3","price":8.99},{"category":"fiction","author":"J. R. R. Tolkien","title":"The Lord of the Rings","isbn":"0-395-19395-8","price":22.99}]');
+  assertEquals(goog.json.serialize(npf.json.path.trace(json, "$..book[?(@.price<10)]")), '[{"category":"reference","author":"Nigel Rees","title":"Sayings of the Century","price":8.95},{"category":"fiction","author":"Herman Melville","title":"Moby Dick","isbn":"0-553-21311-3","price":8.99}]');
+  assertEquals(goog.json.serialize(npf.json.path.trace(json, "$..*")),                   '[{"book":[{"category":"reference","author":"Nigel Rees","title":"Sayings of the Century","price":8.95},{"category":"fiction","author":"Evelyn Waugh","title":"Sword of Honour","price":12.99},{"category":"fiction","author":"Herman Melville","title":"Moby Dick","isbn":"0-553-21311-3","price":8.99},{"category":"fiction","author":"J. R. R. Tolkien","title":"The Lord of the Rings","isbn":"0-395-19395-8","price":22.99}],"bicycle":{"color":"red","price":19.95}},[{"category":"reference","author":"Nigel Rees","title":"Sayings of the Century","price":8.95},{"category":"fiction","author":"Evelyn Waugh","title":"Sword of Honour","price":12.99},{"category":"fiction","author":"Herman Melville","title":"Moby Dick","isbn":"0-553-21311-3","price":8.99},{"category":"fiction","author":"J. R. R. Tolkien","title":"The Lord of the Rings","isbn":"0-395-19395-8","price":22.99}],{"color":"red","price":19.95},{"category":"reference","author":"Nigel Rees","title":"Sayings of the Century","price":8.95},{"category":"fiction","author":"Evelyn Waugh","title":"Sword of Honour","price":12.99},{"category":"fiction","author":"Herman Melville","title":"Moby Dick","isbn":"0-553-21311-3","price":8.99},{"category":"fiction","author":"J. R. R. Tolkien","title":"The Lord of the Rings","isbn":"0-395-19395-8","price":22.99},"reference","Nigel Rees","Sayings of the Century",8.95,"fiction","Evelyn Waugh","Sword of Honour",12.99,"fiction","Herman Melville","Moby Dick","0-553-21311-3",8.99,"fiction","J. R. R. Tolkien","The Lord of the Rings","0-395-19395-8",22.99,"red",19.95]');
+}
+
+function testTracePath() {
+  assertEquals(goog.json.serialize(npf.json.path.tracePath(json, "$.store.book[*].author")), "[\"$['store']['book'][0]['author']\",\"$['store']['book'][1]['author']\",\"$['store']['book'][2]['author']\",\"$['store']['book'][3]['author']\"]");
+  assertEquals(goog.json.serialize(npf.json.path.tracePath(json, "$..author")),              "[\"$['store']['book'][0]['author']\",\"$['store']['book'][1]['author']\",\"$['store']['book'][2]['author']\",\"$['store']['book'][3]['author']\"]");
+  assertEquals(goog.json.serialize(npf.json.path.tracePath(json, "$.store.*")),              "[\"$['store']['book']\",\"$['store']['bicycle']\"]");
+  assertEquals(goog.json.serialize(npf.json.path.tracePath(json, "$.store..price")),         "[\"$['store']['book'][0]['price']\",\"$['store']['book'][1]['price']\",\"$['store']['book'][2]['price']\",\"$['store']['book'][3]['price']\",\"$['store']['bicycle']['price']\"]");
+  assertEquals(goog.json.serialize(npf.json.path.tracePath(json, "$..book[(@.length-1)]")),  "[\"$['store']['book'][3]\"]");
+  assertEquals(goog.json.serialize(npf.json.path.tracePath(json, "$..book[-1:]")),           "[\"$['store']['book'][3]\"]");
+  assertEquals(goog.json.serialize(npf.json.path.tracePath(json, "$..book[0,1]")),           "[\"$['store']['book'][0]\",\"$['store']['book'][1]\"]");
+  assertEquals(goog.json.serialize(npf.json.path.tracePath(json, "$..book[:2]")),            "[\"$['store']['book'][0]\",\"$['store']['book'][1]\"]");
+  assertEquals(goog.json.serialize(npf.json.path.tracePath(json, "$..book[?(@.isbn)]")),     "[\"$['store']['book'][2]\",\"$['store']['book'][3]\"]");
+  assertEquals(goog.json.serialize(npf.json.path.tracePath(json, "$..book[?(@.price<10)]")), "[\"$['store']['book'][0]\",\"$['store']['book'][2]\"]");
+  assertEquals(goog.json.serialize(npf.json.path.tracePath(json, "$..*")),                   "[\"$['store']\",\"$['store']['book']\",\"$['store']['bicycle']\",\"$['store']['book'][0]\",\"$['store']['book'][1]\",\"$['store']['book'][2]\",\"$['store']['book'][3]\",\"$['store']['book'][0]['category']\",\"$['store']['book'][0]['author']\",\"$['store']['book'][0]['title']\",\"$['store']['book'][0]['price']\",\"$['store']['book'][1]['category']\",\"$['store']['book'][1]['author']\",\"$['store']['book'][1]['title']\",\"$['store']['book'][1]['price']\",\"$['store']['book'][2]['category']\",\"$['store']['book'][2]['author']\",\"$['store']['book'][2]['title']\",\"$['store']['book'][2]['isbn']\",\"$['store']['book'][2]['price']\",\"$['store']['book'][3]['category']\",\"$['store']['book'][3]['author']\",\"$['store']['book'][3]['title']\",\"$['store']['book'][3]['isbn']\",\"$['store']['book'][3]['price']\",\"$['store']['bicycle']['color']\",\"$['store']['bicycle']['price']\"]");
+}
+</script>
+</body>
+</html>
+
