@@ -166,7 +166,7 @@ npf.userAgent.Support.vendorPrefix =
   goog.userAgent.GECKO ? 'moz' :
   // TODO(max@): Dirty hack. From 12.10 prefix was removed for  Transitions,
   // Animations and Transforms
-  goog.userAgent.OPERA ? (goog.userAgent.isVersion('12.10') ? 'o' : '') :
+  goog.userAgent.OPERA ? (goog.userAgent.isVersion('12.10') ? '' : 'o') :
   goog.userAgent.IE ? 'ms' : '';
 
 /**
