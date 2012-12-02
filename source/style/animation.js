@@ -490,9 +490,9 @@ npf.style.animation.getValue_ = function(element, style) {
     value = npf.style.animation.getStyle_(element, property);
   }
 
-  if (!value || 'none' == value) {
-    value = npf.style.animation.getStyle_(element, style);
-  }
+  // if (!value || 'none' == value) {
+  //   value = npf.style.animation.getStyle_(element, style);
+  // }
 
   return value && 'none' != value ? value : '';
 };

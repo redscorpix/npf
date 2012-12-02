@@ -1,5 +1,6 @@
 goog.provide('npf.ui.navigation.Item');
 
+goog.require('goog.dom.classes');
 goog.require('npf.events.TapHandler');
 goog.require('npf.ui.RenderComponent');
 goog.require('npf.ui.navigation.ItemRenderer');
@@ -9,12 +10,15 @@ goog.require('npf.ui.navigation.ItemRenderer');
  * @param {string} type
  * @param {string} url
  * @param {string} caption
- * @param {npf.ui.navigation.ItemRenderer=} opt_renderer Renderer used to render or decorate the component.
- * @param {goog.dom.DomHelper=} opt_domHelper DOM helper, used for document interaction.
+ * @param {npf.ui.navigation.ItemRenderer=} opt_renderer Renderer used to render
+ *        or decorate the component.
+ * @param {goog.dom.DomHelper=} opt_domHelper DOM helper, used for document
+ *        interaction.
  * @constructor
  * @extends {npf.ui.RenderComponent}
  */
-npf.ui.navigation.Item = function(type, url, caption, opt_renderer, opt_domHelper) {
+npf.ui.navigation.Item = function(type, url, caption, opt_renderer,
+    opt_domHelper) {
   goog.base(this, opt_renderer ||
     npf.ui.navigation.ItemRenderer.getInstance(), opt_domHelper);
 
@@ -57,6 +61,32 @@ npf.ui.navigation.Item.prototype.enabled_ = true;
 
 
 /** @inheritDoc */
+npf.ui.navigation.Item.prototype.decorateInternal = function(element) {
+  goog.base(this, 'decorateInternal', element);
+
+  /** @type {Element} */
+  var captionElement = this.getCaptionElement();
+  /** @type {Element} */
+  var linkElement = this.getLinkElement();
+
+  if (captionElement) {
+    this.caption_ = captionElement.innerHTML;
+  }
+
+  if (linkElement) {
+    this.url_ = linkElement.getAttribute('href') || '';
+  }
+
+  if (goog.dom.classes.has(element, this.getRenderer().getSelectedCssClass())) {
+    this.selected_ = true;
+  }
+
+  if (goog.dom.classes.has(element, this.getRenderer().getDisabledCssClass())) {
+    this.enabled_ = false;
+  }
+};
+
+/** @inheritDoc */
 npf.ui.navigation.Item.prototype.enterDocument = function() {
   goog.base(this, 'enterDocument');
 
@@ -75,6 +105,13 @@ npf.ui.navigation.Item.prototype.onTap_ = function(evt) {
   if (evt && !this.enabled_) {
     evt.preventDefault();
   }
+
+  this.dispatchEvent({
+    type: goog.ui.Component.EventType.ACTION,
+    itemType: this.getType(),
+    url: this.getUrl(),
+    caption: this.getCaption()
+  });
 };
 
 /**
@@ -163,6 +200,20 @@ npf.ui.navigation.Item.prototype.setSelected = function(select) {
  */
 npf.ui.navigation.Item.prototype.setSelectedInternal = function(select) {
   this.getRenderer().setSelected(this.getElement(), select);
+};
+
+/**
+ * @return {Element}
+ */
+npf.ui.navigation.Item.prototype.getCaptionElement = function() {
+  return this.getRenderer().getCaptionElement(this.getElement());
+};
+
+/**
+ * @return {Element}
+ */
+npf.ui.navigation.Item.prototype.getLinkElement = function() {
+  return this.getRenderer().getLinkElement(this.getElement());
 };
 
 /**

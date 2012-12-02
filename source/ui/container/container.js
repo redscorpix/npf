@@ -157,7 +157,7 @@ npf.ui.Container.prototype.createDom = function() {
 };
 
 /**
- * Decorates the given element with this component. Overrides {@link
+ * Decorates the given element with this component. Overrides {@link}
  * npf.ui.RenderComponent#decorateInternal} by delegating DOM manipulation
  * to the component's renderer.
  * @param {Element} element Element to decorate.

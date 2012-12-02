@@ -54,9 +54,6 @@ npf.ui.scrollBar.Renderer.prototype.createDom = function(component) {
   var containerElement = component.getDomHelper().createDom(
     goog.dom.TagName.DIV, this.getContainerCssClass());
   /** @type {!Element} */
-  var contentWrapperElement = component.getDomHelper().createDom(
-    goog.dom.TagName.DIV, this.getContentWrapperCssClass());
-  /** @type {!Element} */
   var contentElement = component.getDomHelper().createDom(
     goog.dom.TagName.DIV, this.getContentCssClass());
   /** @type {number} */
@@ -76,15 +73,41 @@ npf.ui.scrollBar.Renderer.prototype.createDom = function(component) {
   }
 
   goog.dom.appendChild(element, containerElement);
-  goog.dom.appendChild(containerElement, contentWrapperElement);
-  goog.dom.appendChild(contentWrapperElement, contentElement);
+  goog.dom.appendChild(containerElement, contentElement);
 
   return element;
 };
 
+/**
+ * @param {Element} element
+ * @param {number} width
+ * @param {number} height
+ */
+npf.ui.scrollBar.Renderer.prototype.setSize = function(element, width, height) {
+  if (element) {
+    goog.style.setSize(element, width, height);
+  }
+};
+
+/**
+ * @param {Element} element
+ */
+npf.ui.scrollBar.Renderer.prototype.resetSize = function(element) {
+  if (element) {
+    goog.style.setStyle(element, {
+      'width': '',
+      'height': ''
+    });
+  }
+};
+
 /** @inheritDoc */
 npf.ui.scrollBar.Renderer.prototype.getContentElement = function(element) {
-  return goog.dom.getElementByClass(this.getContentCssClass(), element);
+  if (element) {
+    return goog.dom.getElementByClass(this.getContentCssClass(), element);
+  }
+
+  return null;
 };
 
 /**
@@ -92,15 +115,11 @@ npf.ui.scrollBar.Renderer.prototype.getContentElement = function(element) {
  * @return {Element}
  */
 npf.ui.scrollBar.Renderer.prototype.getScrollElement = function(element) {
-  return goog.dom.getElementByClass(this.getContainerCssClass(), element);
-};
+  if (element) {
+    return goog.dom.getElementByClass(this.getContainerCssClass(), element);
+  }
 
-/**
- * @param {Element} element
- * @return {Element}
- */
-npf.ui.scrollBar.Renderer.prototype.getContentWrapperElement = function(element) {
-  return goog.dom.getElementByClass(this.getContentWrapperCssClass(), element);
+  return null;
 };
 
 /**
@@ -115,11 +134,4 @@ npf.ui.scrollBar.Renderer.prototype.getContainerCssClass = function() {
  */
 npf.ui.scrollBar.Renderer.prototype.getContentCssClass = function() {
   return goog.getCssName(this.getStructuralCssClass(), 'content');
-};
-
-/**
- * @return {string}
- */
-npf.ui.scrollBar.Renderer.prototype.getContentWrapperCssClass = function() {
-  return goog.getCssName(this.getStructuralCssClass(), 'contentWrapper');
 };

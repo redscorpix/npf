@@ -60,14 +60,15 @@ npf.ui.Navigation.prototype.disposeInternal = function() {
 
 /**
  * @param {npf.ui.navigation.Item} item
+ * @param {boolean=} opt_render
  */
-npf.ui.Navigation.prototype.addItem = function(item) {
+npf.ui.Navigation.prototype.addItem = function(item, opt_render) {
   /** @type {string} */
   var type = item.getType();
   goog.object.add(this.itemsMap_, type, item);
   goog.object.add(this.uidToType_, goog.getUid(item) + '', type);
 
-  this.addChild(item, true);
+  this.addChild(item, opt_render);
 };
 
 /**

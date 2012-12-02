@@ -958,7 +958,9 @@ npf.fx.dom.Transform.prototype.setTransformOrigin = function(origin) {
     value = origin;
   }
 
-  goog.style.setStyle(this.element, npf.userAgent.support.getCssPropertyName('transform-origin'), /** @type {string} */ (value));
+  /** @type {string} */
+  var cssName = npf.userAgent.support.getCssPropertyName('transform-origin');
+  goog.style.setStyle(this.element, cssName, /** @type {string} */ (value));
 };
 
 /**
@@ -1007,5 +1009,7 @@ npf.fx.dom.Transform.prototype.updateStyle = function() {
     styles.push(key + '(' + values.join(',') + ')');
   }, this);
 
-  goog.style.setStyle(this.element, npf.userAgent.support.getCssPropertyName('transform'), styles.join(' '));
+  /** @type {string} */
+  var cssName = npf.userAgent.support.getCssPropertyName('transform');
+  goog.style.setStyle(this.element, cssName, styles.join(' '));
 };

@@ -2,17 +2,18 @@ goog.provide('npf.Application');
 
 goog.require('goog.events.EventTarget');
 goog.require('goog.userAgent');
+goog.require('npf.application.Settings');
 
 
 /**
- * @param {npf.application.Settings} settings
+ * @param {npf.application.Settings=} opt_settings
  * @constructor
  * @extends {goog.events.EventTarget}
  */
-npf.Application = function(settings) {
+npf.Application = function(opt_settings) {
   goog.base(this);
 
-  this.settings_ = settings;
+  this.settings_ = opt_settings || null;
   this.registerDisposable(this.settings_);
 };
 goog.inherits(npf.Application, goog.events.EventTarget);
@@ -48,9 +49,7 @@ npf.Application.prototype.init = function() {
 /**
  * @protected
  */
-npf.Application.prototype.initInternal = function() {
-
-};
+npf.Application.prototype.initInternal = goog.nullFunction;
 
 /**
  * @return {boolean}
@@ -65,7 +64,7 @@ npf.Application.prototype.isInited = function() {
  * @return {string}
  */
 npf.Application.prototype.getUrl = function(urlType, opt_params) {
-  return this.settings_.getUrl(urlType, opt_params);
+  return this.settings_ ? this.settings_.getUrl(urlType, opt_params) : '';
 };
 
 /**
@@ -73,5 +72,5 @@ npf.Application.prototype.getUrl = function(urlType, opt_params) {
  * @return {*}
  */
 npf.Application.prototype.getOption = function(optionType) {
-  return this.settings_.getOption(optionType);
+  return this.settings_ ? this.settings_.getOption(optionType) : undefined;
 };

@@ -6,21 +6,18 @@ goog.require('goog.events');
 goog.require('goog.math.Coordinate');
 goog.require('goog.math.Size');
 goog.require('goog.style');
-goog.require('goog.ui.Control');
 goog.require('npf.events.ResizeHandler');
 goog.require('npf.fx.Animation');
 goog.require('npf.ui.RenderComponent');
 goog.require('npf.ui.scrollBar.Animation');
-goog.require('npf.ui.scrollBar.ButtonAnimation');
 goog.require('npf.ui.scrollBar.HorizontalScroller');
 goog.require('npf.ui.scrollBar.Renderer');
-goog.require('npf.ui.scrollBar.SizeMonitor');
 goog.require('npf.ui.scrollBar.VerticalScroller');
 
 
 /**
- * @param {npf.ui.scrollBar.Renderer=} opt_renderer Renderer used to render or decorate the component.
- * @param {goog.dom.DomHelper=} opt_domHelper DOM helper, used for document interaction.
+ * @param {npf.ui.scrollBar.Renderer=} opt_renderer
+ * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
  * @extends {npf.ui.RenderComponent}
  */
@@ -28,22 +25,8 @@ npf.ui.ScrollBar = function(opt_renderer, opt_domHelper) {
   goog.base(this, opt_renderer ||
     npf.ui.scrollBar.Renderer.getInstance(), opt_domHelper);
 
-  this.scrollPosition_ = new goog.math.Coordinate(0, 0);
-
   this.updateDelay_ = new goog.async.Delay(this.update, 0, this);
   this.registerDisposable(this.updateDelay_);
-
-  this.buttonYAnimation_ = new npf.ui.scrollBar.ButtonAnimation();
-  this.buttonYAnimation_.addEventListener(
-    npf.ui.scrollBar.ButtonAnimation.EventType.ANIMATE, this.onAnimateByYButton_,
-    false, this);
-  this.registerDisposable(this.buttonYAnimation_);
-
-  this.buttonXAnimation_ = new npf.ui.scrollBar.ButtonAnimation();
-  this.buttonXAnimation_.addEventListener(
-    npf.ui.scrollBar.ButtonAnimation.EventType.ANIMATE, this.onAnimateByXButton_,
-    false, this);
-  this.registerDisposable(this.buttonXAnimation_);
 };
 goog.inherits(npf.ui.ScrollBar, npf.ui.RenderComponent);
 
@@ -52,7 +35,13 @@ goog.inherits(npf.ui.ScrollBar, npf.ui.RenderComponent);
  * @enum {string}
  */
 npf.ui.ScrollBar.EventType = {
+
+  /**
+   * size (goog.math.Size)
+   * contentSize (goog.math.Size)
+   */
   RESIZE: goog.events.getUniqueId('resize'),
+
   /**
    * scrollLeft (number)
    * scrollTop (number)
@@ -61,10 +50,16 @@ npf.ui.ScrollBar.EventType = {
 };
 
 /**
- * @type {goog.math.Coordinate}
+ * @type {number}
  * @private
  */
-npf.ui.ScrollBar.prototype.scrollPosition_;
+npf.ui.ScrollBar.prototype.scrollLeft_ = 0;
+
+/**
+ * @type {number}
+ * @private
+ */
+npf.ui.ScrollBar.prototype.scrollTop_ = 0;
 
 /**
  * @type {goog.async.Delay}
@@ -73,64 +68,52 @@ npf.ui.ScrollBar.prototype.scrollPosition_;
 npf.ui.ScrollBar.prototype.updateDelay_;
 
 /**
- * @type {npf.ui.scrollBar.ButtonAnimation}
+ * @type {boolean}
  * @private
  */
-npf.ui.ScrollBar.prototype.buttonYAnimation_;
-
-/**
- * @type {npf.ui.scrollBar.ButtonAnimation}
- * @private
- */
-npf.ui.ScrollBar.prototype.buttonXAnimation_;
-
-/**
- * @type {goog.math.Size}
- * @private
- */
-npf.ui.ScrollBar.prototype.size_ = null;
-
-/**
- * @type {goog.math.Size}
- * @private
- */
-npf.ui.ScrollBar.prototype.contentSize_ = null;
-
-/**
- * @type {npf.ui.scrollBar.SizeMonitor}
- * @private
- */
-npf.ui.ScrollBar.prototype.contentSizeMonitor_ = null;
-
-/**
- * @type {npf.events.ResizeHandler}
- * @private
- */
-npf.ui.ScrollBar.prototype.sizeHandler_ = null;
+npf.ui.ScrollBar.prototype.autoSize_ = true;
 
 /**
  * @type {boolean}
  * @private
  */
-npf.ui.ScrollBar.prototype.autoUpdate_ = false;
+npf.ui.ScrollBar.prototype.contentAutoSize_ = true;
 
 /**
- * @type {boolean}
+ * @type {number}
  * @private
  */
-npf.ui.ScrollBar.prototype.enabled_ = true;
+npf.ui.ScrollBar.prototype.width_ = 0;
+
+/**
+ * @type {number}
+ * @private
+ */
+npf.ui.ScrollBar.prototype.height_ = 0;
+
+/**
+ * @type {number}
+ * @private
+ */
+npf.ui.ScrollBar.prototype.contentWidth_ = 0;
+
+/**
+ * @type {number}
+ * @private
+ */
+npf.ui.ScrollBar.prototype.contentHeight_ = 0;
 
 /**
  * @type {npf.ui.scrollBar.VerticalScroller}
  * @private
  */
-npf.ui.ScrollBar.prototype.verticalScroller_ = null;
+npf.ui.ScrollBar.prototype.vertScroller_ = null;
 
 /**
  * @type {npf.ui.scrollBar.HorizontalScroller}
  * @private
  */
-npf.ui.ScrollBar.prototype.horizontalScroller_ = null;
+npf.ui.ScrollBar.prototype.horizScroller_ = null;
 
 /**
  * @type {npf.ui.scrollBar.Animation}
@@ -138,98 +121,61 @@ npf.ui.ScrollBar.prototype.horizontalScroller_ = null;
  */
 npf.ui.ScrollBar.prototype.animation_ = null;
 
-/**
- * @type {goog.ui.Control}
- * @private
- */
-npf.ui.ScrollBar.prototype.downButton_ = null;
 
-/**
- * @type {goog.ui.Control}
- * @private
- */
-npf.ui.ScrollBar.prototype.upButton_ = null;
+/** @inheritDoc */
+npf.ui.ScrollBar.prototype.createDom = function() {
+  goog.base(this, 'createDom');
 
-/**
- * @type {goog.ui.Control}
- * @private
- */
-npf.ui.ScrollBar.prototype.leftButton_ = null;
-
-/**
- * @type {goog.ui.Control}
- * @private
- */
-npf.ui.ScrollBar.prototype.rightButton_ = null;
-
+  this.setAutoSizeInternal(this.autoSize_);
+  this.setContentAutoSizeInternal(this.contentAutoSize_);
+};
 
 /** @inheritDoc */
 npf.ui.ScrollBar.prototype.enterDocument = function() {
   goog.base(this, 'enterDocument');
 
+  if (this.autoSize_) {
+    /** @type {goog.math.Size} */
+    var size = this.getSizeInternal();
+    this.width_ = size.width;
+    this.height_ = size.height;
+  }
+
+  if (this.contentAutoSize_) {
+    /** @type {goog.math.Size} */
+    var contentSize = this.getContentSizeInternal();
+    this.contentWidth_ = contentSize.width;
+    this.contentHeight_ = contentSize.height;
+  }
+
   /** @type {goog.math.Coordinate} */
   var scrollPosition = this.getScrollPosition();
-  this.setScrollPosition(scrollPosition.x, scrollPosition.y);
-  this.size_ = this.getSizeInternal();
-  this.contentSize_ = this.getContentSizeInternal();
+  this.setScrollPositionInternal(scrollPosition.x, scrollPosition.y);
 
-  this.updateScrollerPositions_();
   this.updateScrollers_();
-  this.updateButtons_();
+  this.updateScrollerPositions_();
 
-  if (this.autoUpdate_) {
-    this.setAutoUpdateInternal(true);
-  }
+  var sizeHandler = new npf.events.ResizeHandler();
+  this.disposeOnExitDocument(sizeHandler);
+
+  var ResizeEventType = npf.events.ResizeHandler.EventType;
+  /** @type {string} */
+  var scrollEventType = npf.ui.scrollBar.Scroller.EventType.SCROLL;
+  /** @type {Element} */
+  var scrollElement = this.getScrollElement();
 
   /** @type {goog.events.EventHandler} */
   var handler = this.getHandler();
-  handler.listen(this.getScrollElement(), goog.events.EventType.SCROLL,
-    this.onScroll_);
+  handler
+    .listen(scrollElement, goog.events.EventType.SCROLL, this.onScroll_)
+    .listen(sizeHandler, ResizeEventType.RESIZE, this.onUpdateDelay_);
 
-  this.sizeHandler_ = new npf.events.ResizeHandler();
-  this.sizeHandler_.addEventListener(npf.events.ResizeHandler.EventType.RESIZE,
-    this.onUpdateDelay_, false, this);
-
-  if (this.verticalScroller_) {
-    handler.listen(this.verticalScroller_,
-      npf.ui.scrollBar.Scroller.EventType.SCROLL, this.onVerticalScroll_);
+  if (this.vertScroller_) {
+    handler.listen(this.vertScroller_, scrollEventType, this.onVertScroll_);
   }
 
-  if (this.horizontalScroller_) {
-    handler.listen(this.horizontalScroller_,
-      npf.ui.scrollBar.Scroller.EventType.SCROLL, this.onHorizontalScroll_);
-  }
-
-  if (this.downButton_) {
-    handler
-      .listen(this.downButton_, goog.ui.Component.EventType.CHECK,
-        this.onDownButtonCheck_)
-      .listen(this.downButton_, goog.ui.Component.EventType.UNCHECK,
-        this.onDownButtonUncheck_);
-  }
-
-  if (this.upButton_) {
-    handler
-      .listen(this.upButton_, goog.ui.Component.EventType.CHECK,
-        this.onUpButtonCheck_)
-      .listen(this.upButton_, goog.ui.Component.EventType.UNCHECK,
-        this.onUpButtonUncheck_);
-  }
-
-  if (this.leftButton_) {
-    handler
-      .listen(this.leftButton_, goog.ui.Component.EventType.CHECK,
-        this.onLeftButtonCheck_)
-      .listen(this.leftButton_, goog.ui.Component.EventType.UNCHECK,
-        this.onLeftButtonUncheck_);
-  }
-
-  if (this.rightButton_) {
-    handler
-      .listen(this.rightButton_, goog.ui.Component.EventType.CHECK,
-        this.onRightButtonCheck_)
-      .listen(this.rightButton_, goog.ui.Component.EventType.UNCHECK,
-        this.onRightButtonUncheck_);
+  if (this.horizScroller_) {
+    handler.listen(this.horizScroller_, scrollEventType, this.onHorizScroll_);
   }
 };
 
@@ -239,14 +185,7 @@ npf.ui.ScrollBar.prototype.exitDocument = function() {
     this.animation_.stop(false);
   }
 
-  this.buttonYAnimation_.stop();
-  this.buttonXAnimation_.stop();
   this.updateDelay_.stop();
-
-  this.sizeHandler_.dispose();
-  this.sizeHandler_ = null;
-
-  this.setAutoUpdateInternal(false);
 
   goog.base(this, 'exitDocument');
 };
@@ -255,29 +194,80 @@ npf.ui.ScrollBar.prototype.exitDocument = function() {
 npf.ui.ScrollBar.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
-  this.scrollPosition_ = null;
   this.updateDelay_ = null;
-  this.buttonYAnimation_ = null;
-  this.buttonXAnimation_ = null;
-  this.size_ = null;
-  this.contentSize_ = null;
-  this.contentSizeMonitor_ = null;
-  this.sizeHandler_ = null;
-  this.verticalScroller_ = null;
-  this.horizontalScroller_ = null;
+  this.vertScroller_ = null;
+  this.horizScroller_ = null;
   this.animation_ = null;
-  this.downButton_ = null;
-  this.upButton_ = null;
-  this.leftButton_ = null;
-  this.rightButton_ = null;
 };
 
-/** @inheritDoc */
-npf.ui.ScrollBar.prototype.getContentElement = function() {
-  /** @type {Element} */
-  var element = this.getElement();
+npf.ui.ScrollBar.prototype.update = function() {
+  if (this.isInDocument()) {
+    this.checkSize_();
+    this.checkScroll_();
+  }
+};
 
-  return element ? this.getRenderer().getContentElement(element) : null;
+/**
+ * @private
+ */
+npf.ui.ScrollBar.prototype.checkSize_ = function() {
+  /** @type {boolean} */
+  var sizeChanged = false;
+  /** @type {boolean} */
+  var contentSizeChanged = false;
+
+  if (this.autoSize_) {
+    /** @type {goog.math.Size} */
+    var size = this.getSizeInternal();
+
+    if (!(this.width_ == size.width && this.height_ == size.height)) {
+      this.width_ = size.width;
+      this.height_ = size.height;
+      sizeChanged = true;
+    }
+  }
+
+  if (this.contentAutoSize_) {
+    /** @type {goog.math.Size} */
+    var contentSize = this.getContentSizeInternal();
+
+    if (!(
+      this.contentWidth_ == contentSize.width &&
+      this.contentHeight_ == contentSize.height
+    )) {
+      this.contentWidth_ = contentSize.width;
+      this.cotnentHeight_ = contentSize.height;
+      contentSizeChanged = true;
+    }
+  }
+
+  if (sizeChanged || contentSizeChanged) {
+    this.updateScrollers_();
+    this.dispatchEvent({
+      type: npf.ui.ScrollBar.EventType.RESIZE,
+      size: this.getSize(),
+      contentSize: this.getContentSize()
+    });
+  }
+};
+
+/**
+ * @private
+ */
+npf.ui.ScrollBar.prototype.checkScroll_ = function() {
+  /** @type {!goog.math.Coordinate} */
+  var scroll = this.getScrollPositionInternal();
+
+  if (!(scroll.x == this.scrollLeft_ && scroll.y == this.scrollTop_)) {
+    this.scrollLeft_ = scroll.x;
+    this.scrollTop_ = scroll.y;
+    this.onScroll();
+    this.dispatchEvent({
+      type: npf.ui.ScrollBar.EventType.SCROLL,
+      scrollLeft: this.scrollLeft_,
+      scrollTop: this.scrollTop_
+    });
+  }
 };
 
 /**
@@ -288,56 +278,7 @@ npf.ui.ScrollBar.prototype.onScroll_ = function(evt) {
   evt.preventDefault();
   evt.stopPropagation();
 
-  if (this.enabled_) {
-    this.checkScrollPosition_();
-  }
-};
-
-/**
- * @return {boolean}
- */
-npf.ui.ScrollBar.prototype.isAutoUpdate = function() {
-  return this.autoUpdate_;
-};
-
-/**
- * @param {boolean} update
- */
-npf.ui.ScrollBar.prototype.setAutoUpdate = function(update) {
-  if (this.autoUpdate_ == update) {
-    return;
-  }
-
-  this.autoUpdate_ = update;
-
-  if (this.isInDocument()) {
-    this.setAutoUpdateInternal(this.autoUpdate_);
-
-    if (this.autoUpdate_) {
-      this.update();
-    }
-  }
-};
-
-/**
- * @param {boolean} update
- * @protected
- */
-npf.ui.ScrollBar.prototype.setAutoUpdateInternal = function(update) {
-  if (update) {
-    /** @type {Element} */
-    var contentWrapperElement = this.getContentWrapperElement();
-
-    if (contentWrapperElement) {
-      this.contentSizeMonitor_ = new npf.ui.scrollBar.SizeMonitor(contentWrapperElement);
-      this.contentSizeMonitor_.addEventListener(
-        npf.ui.scrollBar.SizeMonitor.EventType.CHANGE, this.onUpdate_, false,
-        this);
-    }
-  } else {
-    goog.dispose(this.contentSizeMonitor_);
-    this.contentSizeMonitor_ = null;
-  }
+  this.checkScroll_();
 };
 
 /**
@@ -345,83 +286,14 @@ npf.ui.ScrollBar.prototype.setAutoUpdateInternal = function(update) {
  * @private
  */
 npf.ui.ScrollBar.prototype.onUpdateDelay_ = function(evt) {
-  if (this.enabled_) {
-    this.updateDelay_.start();
-  }
-};
-
-/**
- * @param {goog.events.Event} evt
- * @private
- */
-npf.ui.ScrollBar.prototype.onUpdate_ = function(evt) {
-  if (this.enabled_) {
-    this.update();
-  }
+  this.updateDelay_.start();
 };
 
 /**
  * @return {Element}
  */
 npf.ui.ScrollBar.prototype.getScrollElement = function() {
-  /** @type {Element} */
-  var element = this.getElement();
-
-  return element ? this.getRenderer().getScrollElement(element) : null;
-};
-
-/**
- * @return {Element}
- */
-npf.ui.ScrollBar.prototype.getContentWrapperElement = function() {
-  /** @type {Element} */
-  var element = this.getElement();
-
-  return element ? this.getRenderer().getContentWrapperElement(element) : null;
-};
-
-npf.ui.ScrollBar.prototype.update = function() {
-  if (this.isInDocument() && this.enabled_) {
-    this.checkSize_();
-    this.checkScrollPosition_();
-  }
-};
-
-/**
- * @private
- */
-npf.ui.ScrollBar.prototype.checkSize_ = function() {
-  /** @type {goog.math.Size} */
-  var size = this.getSizeInternal();
-  /** @type {goog.math.Size} */
-  var contentSize = this.getContentSizeInternal();
-
-  if (!(goog.math.Size.equals(this.size_, size) &&
-    goog.math.Size.equals(this.contentSize_, contentSize))) {
-    this.size_ = size;
-    this.contentSize_ = contentSize;
-
-    this.updateScrollers_();
-    this.dispatchEvent(npf.ui.ScrollBar.EventType.RESIZE);
-  }
-};
-
-/**
- * @private
- */
-npf.ui.ScrollBar.prototype.checkScrollPosition_ = function() {
-  /** @type {!goog.math.Coordinate} */
-  var scrollPosition = this.getScrollPositionInternal();
-
-  if (!goog.math.Coordinate.equals(this.scrollPosition_, scrollPosition)) {
-    this.scrollPosition_ = scrollPosition;
-    this.onScroll();
-    this.dispatchEvent({
-      type: npf.ui.ScrollBar.EventType.SCROLL,
-      scrollLeft: this.scrollPosition_.x,
-      scrollTop: this.scrollPosition_.y
-    });
-  }
+  return this.getRenderer().getScrollElement(this.getElement());
 };
 
 /**
@@ -429,45 +301,43 @@ npf.ui.ScrollBar.prototype.checkScrollPosition_ = function() {
  */
 npf.ui.ScrollBar.prototype.onScroll = function() {
   this.updateScrollerPositions_();
-  this.updateButtons_();
 };
 
 /**
  * @return {boolean}
  */
-npf.ui.ScrollBar.prototype.isEnabled = function() {
-  return this.enabled_;
+npf.ui.ScrollBar.prototype.isAutoSize = function() {
+  return this.autoSize_;
 };
 
 /**
- * @param {boolean} enable
+ * @param {boolean} autoSize
  */
-npf.ui.ScrollBar.prototype.setEnabled = function(enable) {
-  if (this.enabled_ == enable) {
-    return;
-  }
-
-  this.enabled_ = enable;
-
-  if (this.enabled_) {
-    this.updateScrollers_();
-    this.updateScrollerPositions_();
-    this.updateButtons_();
-  } else {
-    if (this.animation_) {
-      this.animation_.stop(false);
-    }
-
-    this.buttonYAnimation_.stop();
-    this.buttonXAnimation_.stop();
+npf.ui.ScrollBar.prototype.setAutoSize = function(autoSize) {
+  if (this.autoSize_ != autoSize) {
+    this.autoSize_ = autoSize;
+    this.setAutoSizeInternal(this.autoSize_);
+    this.update();
   }
 };
 
 /**
- * @return {goog.math.Size}
+ * @param {boolean} autoSize
+ * @protected
+ */
+npf.ui.ScrollBar.prototype.setAutoSizeInternal = function(autoSize) {
+  if (autoSize) {
+    this.getRenderer().resetSize(this.getElement());
+  } else {
+    this.setSizeInternal(this.width_, this.height_);
+  }
+};
+
+/**
+ * @return {!goog.math.Size}
  */
 npf.ui.ScrollBar.prototype.getSize = function() {
-  return this.size_;
+  return new goog.math.Size(this.width_, this.height_);
 };
 
 /**
@@ -475,17 +345,88 @@ npf.ui.ScrollBar.prototype.getSize = function() {
  * @protected
  */
 npf.ui.ScrollBar.prototype.getSizeInternal = function() {
-  /** @type {Element} */
-  var element = this.getElement();
-
-  return goog.style.getBorderBoxSize(element);
+  return goog.style.getBorderBoxSize(this.getElement());
 };
 
 /**
- * @return {goog.math.Size}
+ * @param {goog.math.Size|number} width
+ * @param {number=} opt_height
+ */
+npf.ui.ScrollBar.prototype.setSize = function(width, opt_height) {
+  if (!this.autoSize_) {
+    var w =
+      /** @type {number} */ (goog.isNumber(width) ? width : width.width);
+    var h =
+      /** @type {number} */ (goog.isNumber(width) ? opt_height : width.height);
+
+    if (this.width_ != w || this.height_ != h) {
+      this.width_ = w;
+      this.height_ = h;
+      this.setSizeInternal(this.width_, this.height_);
+
+      if (!this.contentAutoSize_) {
+        /** @type {goog.math.Size} */
+        var contentSize = this.getContentSizeInternal();
+        this.contentWidth_ = contentSize.width;
+        this.contentHeight_ = contentSize.height;
+      }
+
+      this.updateScrollers_();
+      this.updateScrollerPositions_();
+
+      this.dispatchEvent({
+        type: npf.ui.ScrollBar.EventType.RESIZE,
+        size: this.getSize(),
+        contentSize: this.getContentSize()
+      });
+    }
+  }
+};
+
+/**
+ * @param {number} width
+ * @param {number} height
+ * @protected
+ */
+npf.ui.ScrollBar.prototype.setSizeInternal = function(width, height) {
+  this.getRenderer().setSize(this.getElement(), width, height);
+};
+
+/**
+ * @return {boolean}
+ */
+npf.ui.ScrollBar.prototype.isContentAutoSize = function() {
+  return this.contentAutoSize_;
+};
+
+/**
+ * @param {boolean} autoSize
+ */
+npf.ui.ScrollBar.prototype.setContentAutoSize = function(autoSize) {
+  if (this.contentAutoSize_ != autoSize) {
+    this.contentAutoSize_ = autoSize;
+    this.setContentAutoSizeInternal(this.contentAutoSize_);
+    this.update();
+  }
+};
+
+/**
+ * @param {boolean} autoSize
+ * @protected
+ */
+npf.ui.ScrollBar.prototype.setContentAutoSizeInternal = function(autoSize) {
+  if (autoSize) {
+    this.getRenderer().resetSize(this.getContentElement());
+  } else {
+    this.setContentSizeInternal(this.width_, this.height_);
+  }
+};
+
+/**
+ * @return {!goog.math.Size}
  */
 npf.ui.ScrollBar.prototype.getContentSize = function() {
-  return this.contentSize_;
+  return new goog.math.Size(this.contentWidth_, this.contentHeight_);
 };
 
 /**
@@ -493,10 +434,44 @@ npf.ui.ScrollBar.prototype.getContentSize = function() {
  * @protected
  */
 npf.ui.ScrollBar.prototype.getContentSizeInternal = function() {
-  /** @type {Element} */
-  var contentElement = this.getContentElement();
+  return goog.style.getBorderBoxSize(this.getContentElement());
+};
 
-  return goog.style.getBorderBoxSize(contentElement);
+/**
+ * @param {goog.math.Size|number} width
+ * @param {number=} opt_height
+ */
+npf.ui.ScrollBar.prototype.setContentSize = function(width, opt_height) {
+  if (!this.contentAutoSize_) {
+    var w =
+      /** @type {number} */ (goog.isNumber(width) ? width : width.width);
+    var h =
+      /** @type {number} */ (goog.isNumber(width) ? opt_height : width.height);
+
+    if (this.contentWidth_ != w || this.contentHeight_ != h) {
+      this.contentWidth_ = w;
+      this.contentHeight_ = h;
+      this.setContentSizeInternal(this.contentWidth_, this.contentHeight_);
+
+      this.updateScrollers_();
+      this.updateScrollerPositions_();
+
+      this.dispatchEvent({
+        type: npf.ui.ScrollBar.EventType.RESIZE,
+        size: this.getSize(),
+        contentSize: this.getContentSize()
+      });
+    }
+  }
+};
+
+/**
+ * @param {number} width
+ * @param {number} height
+ * @protected
+ */
+npf.ui.ScrollBar.prototype.setContentSizeInternal = function(width, height) {
+  this.getRenderer().setSize(this.getContentElement(), width, height);
 };
 
 /**
@@ -517,7 +492,7 @@ npf.ui.ScrollBar.prototype.getScrollTop = function() {
  * @return {goog.math.Coordinate}
  */
 npf.ui.ScrollBar.prototype.getScrollPosition = function() {
-  return this.scrollPosition_;
+  return new goog.math.Coordinate(this.scrollLeft_, this.scrollTop_);
 };
 
 /**
@@ -528,7 +503,8 @@ npf.ui.ScrollBar.prototype.getScrollPositionInternal = function() {
   /** @type {Element} */
   var scrollElement = this.getScrollElement();
 
-  return new goog.math.Coordinate(scrollElement.scrollLeft, scrollElement.scrollTop);
+  return new goog.math.Coordinate(
+    scrollElement.scrollLeft, scrollElement.scrollTop);
 };
 
 /**
@@ -548,18 +524,24 @@ npf.ui.ScrollBar.prototype.setScrollTop = function(top) {
 /**
  * @param {number|goog.math.Coordinate} left
  * @param {number=} opt_top
+ * @param {boolean=} opt_force
  */
-npf.ui.ScrollBar.prototype.setScrollPosition = function(left, opt_top) {
-  if (this.animation_) {
-    this.animation_.stop(false);
-  }
-
+npf.ui.ScrollBar.prototype.setScrollPosition = function(
+    left, opt_top, opt_force) {
   /** @type {number} */
   var x = goog.isNumber(left) ? left : /** @type {number} */ (left.x);
   /** @type {number} */
   var y = /** @type {number} */ (goog.isNumber(left) ? opt_top : left.y);
 
-  this.setScrollPositionInternal(x, y);
+  if (opt_force || !(this.scrollLeft_ == x && this.scrollTop_ == y)) {
+    if (this.animation_) {
+      this.animation_.stop(false);
+    }
+
+    this.scrollLeft_ = x;
+    this.scrollTop_ = y;
+    this.setScrollPositionInternal(this.scrollLeft_, this.scrollTop_);
+  }
 };
 
 /**
@@ -598,286 +580,30 @@ npf.ui.ScrollBar.prototype.getMaxScrollPosition = function() {
 };
 
 /**
- * @return {goog.ui.Control}
- */
-npf.ui.ScrollBar.prototype.getDownButton = function() {
-  return this.downButton_;
-};
-
-/**
- * @param {goog.ui.Control} button
- */
-npf.ui.ScrollBar.prototype.setDownButton = function(button) {
-  /** @type {goog.events.EventHandler} */
-  var handler = this.getHandler();
-
-  if (this.downButton_ && this.isInDocument()) {
-    handler
-      .unlisten(this.downButton_, goog.ui.Component.EventType.CHECK,
-        this.onDownButtonCheck_)
-      .unlisten(this.downButton_, goog.ui.Component.EventType.UNCHECK,
-        this.onDownButtonUncheck_);
-  }
-
-  this.downButton_ = button;
-
-  if (this.isInDocument()) {
-    this.updateButtons_();
-    handler
-      .listen(this.downButton_, goog.ui.Component.EventType.CHECK,
-        this.onDownButtonCheck_)
-      .listen(this.downButton_, goog.ui.Component.EventType.UNCHECK,
-        this.onDownButtonUncheck_);
-  }
-};
-
-/**
- * @return {goog.ui.Control}
- */
-npf.ui.ScrollBar.prototype.getUpButton = function() {
-  return this.upButton_;
-};
-
-/**
- * @param {goog.ui.Control} button
- */
-npf.ui.ScrollBar.prototype.setUpButton = function(button) {
-  /** @type {goog.events.EventHandler} */
-  var handler = this.getHandler();
-
-  if (this.upButton_ && this.isInDocument()) {
-    handler
-      .unlisten(this.upButton_, goog.ui.Component.EventType.CHECK,
-        this.onUpButtonCheck_)
-      .unlisten(this.upButton_, goog.ui.Component.EventType.UNCHECK,
-        this.onUpButtonUncheck_);
-  }
-
-  this.upButton_ = button;
-
-  if (this.isInDocument()) {
-    this.updateButtons_();
-    handler
-      .listen(this.upButton_, goog.ui.Component.EventType.CHECK,
-        this.onUpButtonCheck_)
-      .listen(this.upButton_, goog.ui.Component.EventType.UNCHECK,
-        this.onUpButtonUncheck_);
-  }
-};
-
-/**
- * @return {goog.ui.Control}
- */
-npf.ui.ScrollBar.prototype.getLeftButton = function() {
-  return this.leftButton_;
-};
-
-/**
- * @param {goog.ui.Control} button
- */
-npf.ui.ScrollBar.prototype.setLeftButton = function(button) {
-  /** @type {goog.events.EventHandler} */
-  var handler = this.getHandler();
-
-  if (this.leftButton_ && this.isInDocument()) {
-    handler
-      .unlisten(this.leftButton_, goog.ui.Component.EventType.CHECK,
-        this.onLeftButtonCheck_)
-      .unlisten(this.leftButton_, goog.ui.Component.EventType.UNCHECK,
-        this.onLeftButtonUncheck_);
-  }
-
-  this.leftButton_ = button;
-
-  if (this.isInDocument()) {
-    this.updateButtons_();
-    handler
-      .listen(this.leftButton_, goog.ui.Component.EventType.CHECK,
-        this.onLeftButtonCheck_)
-      .listen(this.leftButton_, goog.ui.Component.EventType.UNCHECK,
-        this.onLeftButtonUncheck_);
-  }
-};
-
-/**
- * @return {goog.ui.Control}
- */
-npf.ui.ScrollBar.prototype.getRightButton = function() {
-  return this.rightButton_;
-};
-
-/**
- * @param {goog.ui.Control} button
- */
-npf.ui.ScrollBar.prototype.setRightButton = function(button) {
-  /** @type {goog.events.EventHandler} */
-  var handler = this.getHandler();
-
-  if (this.rightButton_ && this.isInDocument()) {
-    handler
-      .unlisten(this.rightButton_, goog.ui.Component.EventType.CHECK,
-        this.onRightButtonCheck_)
-      .unlisten(this.rightButton_, goog.ui.Component.EventType.UNCHECK,
-        this.onRightButtonUncheck_);
-  }
-
-  this.rightButton_ = button;
-
-  if (this.isInDocument()) {
-    this.updateButtons_();
-    handler
-      .listen(this.rightButton_, goog.ui.Component.EventType.CHECK,
-        this.onRightButtonCheck_)
-      .listen(this.rightButton_, goog.ui.Component.EventType.UNCHECK,
-        this.onRightButtonUncheck_);
-  }
-};
-
-/**
- * @private
- */
-npf.ui.ScrollBar.prototype.updateButtons_ = function() {
-  /** @type {goog.math.Coordinate} */
-  var scrollPosition = this.getScrollPosition();
-  /** @type {goog.math.Coordinate} */
-  var maxScrollPosition = this.getMaxScrollPosition();
-  /** @type {boolean} */
-  var enabled;
-
-  if (this.upButton_) {
-    enabled = !!scrollPosition.y;
-
-    this.upButton_.setEnabled(enabled);
-
-    if (!enabled && npf.ui.scrollBar.ButtonAnimation.Direction.UP ==
-      this.buttonYAnimation_.getDirection()) {
-      this.buttonYAnimation_.stop();
-    }
-  }
-
-  if (this.downButton_) {
-    enabled = !!(maxScrollPosition.y - scrollPosition.y);
-    this.downButton_.setEnabled(enabled);
-
-    if (!enabled && npf.ui.scrollBar.ButtonAnimation.Direction.DOWN ==
-      this.buttonYAnimation_.getDirection()) {
-      this.buttonYAnimation_.stop();
-    }
-  }
-
-  if (this.leftButton_) {
-    enabled = !!scrollPosition.x;
-
-    this.leftButton_.setEnabled(enabled);
-
-    if (!enabled && npf.ui.scrollBar.ButtonAnimation.Direction.UP ==
-      this.buttonXAnimation_.getDirection()) {
-      this.buttonXAnimation_.stop();
-    }
-  }
-
-  if (this.rightButton_) {
-    enabled = !!(maxScrollPosition.x - scrollPosition.x);
-    this.rightButton_.setEnabled(enabled);
-
-    if (!enabled && npf.ui.scrollBar.ButtonAnimation.Direction.DOWN ==
-      this.buttonXAnimation_.getDirection()) {
-      this.buttonXAnimation_.stop();
-    }
-  }
-};
-
-/**
- * @param {goog.events.Event} evt
- * @private
- */
-npf.ui.ScrollBar.prototype.onUpButtonCheck_ = function(evt) {
-  this.buttonYAnimation_.start(npf.ui.scrollBar.ButtonAnimation.Direction.UP);
-};
-
-/**
- * @param {goog.events.Event} evt
- * @private
- */
-npf.ui.ScrollBar.prototype.onUpButtonUncheck_ = function(evt) {
-  this.buttonYAnimation_.stop();
-};
-
-/**
- * @param {goog.events.Event} evt
- * @private
- */
-npf.ui.ScrollBar.prototype.onDownButtonCheck_ = function(evt) {
-  this.buttonYAnimation_.start(npf.ui.scrollBar.ButtonAnimation.Direction.DOWN);
-};
-
-/**
- * @param {goog.events.Event} evt
- * @private
- */
-npf.ui.ScrollBar.prototype.onDownButtonUncheck_ = function(evt) {
-  this.buttonYAnimation_.stop();
-};
-
-/**
- * @param {goog.events.Event} evt
- * @private
- */
-npf.ui.ScrollBar.prototype.onLeftButtonCheck_ = function(evt) {
-  this.buttonXAnimation_.start(npf.ui.scrollBar.ButtonAnimation.Direction.UP);
-};
-
-/**
- * @param {goog.events.Event} evt
- * @private
- */
-npf.ui.ScrollBar.prototype.onLeftButtonUncheck_ = function(evt) {
-  this.buttonXAnimation_.stop();
-};
-
-/**
- * @param {goog.events.Event} evt
- * @private
- */
-npf.ui.ScrollBar.prototype.onRightButtonCheck_ = function(evt) {
-  this.buttonXAnimation_.start(npf.ui.scrollBar.ButtonAnimation.Direction.DOWN);
-};
-
-/**
- * @param {goog.events.Event} evt
- * @private
- */
-npf.ui.ScrollBar.prototype.onRightButtonUncheck_ = function(evt) {
-  this.buttonXAnimation_.stop();
-};
-
-/**
  * @return {npf.ui.scrollBar.VerticalScroller}
  */
 npf.ui.ScrollBar.prototype.getVerticalScroller = function() {
-  return this.verticalScroller_;
+  return this.vertScroller_;
 };
 
 /**
- * @param {npf.ui.scrollBar.VerticalScroller} scrollBar
+ * @param {npf.ui.scrollBar.VerticalScroller} scroller
  */
-npf.ui.ScrollBar.prototype.setVerticalScroller = function(scrollBar) {
+npf.ui.ScrollBar.prototype.setVerticalScroller = function(scroller) {
   /** @type {goog.events.EventHandler} */
   var handler = this.getHandler();
   var EventType = npf.ui.scrollBar.Scroller.EventType;
 
-  if (this.verticalScroller_ && this.isInDocument()) {
-    handler.unlisten(this.verticalScroller_, EventType.SCROLL,
-      this.onVerticalScroll_);
+  if (this.vertScroller_ && this.isInDocument()) {
+    handler.unlisten(this.vertScroller_, EventType.SCROLL, this.onVertScroll_);
   }
 
-  this.verticalScroller_ = scrollBar;
+  this.vertScroller_ = scroller;
 
   if (this.isInDocument()) {
-    this.updateScrollerPositions_();
     this.updateScrollers_();
-    handler.listen(this.verticalScroller_,
-      EventType.SCROLL, this.onVerticalScroll_);
+    this.updateScrollerPositions_();
+    handler.listen(this.vertScroller_, EventType.SCROLL, this.onVertScroll_);
   }
 };
 
@@ -885,50 +611,45 @@ npf.ui.ScrollBar.prototype.setVerticalScroller = function(scrollBar) {
  * @return {npf.ui.scrollBar.HorizontalScroller}
  */
 npf.ui.ScrollBar.prototype.getHorizontalScroller = function() {
-  return this.horizontalScroller_;
+  return this.horizScroller_;
 };
 
 /**
- * @param {npf.ui.scrollBar.HorizontalScroller} scrollBar
+ * @param {npf.ui.scrollBar.HorizontalScroller} scroller
  */
-npf.ui.ScrollBar.prototype.setHorizontalScroller = function(scrollBar) {
+npf.ui.ScrollBar.prototype.setHorizontalScroller = function(scroller) {
   /** @type {goog.events.EventHandler} */
   var handler = this.getHandler();
   var EventType = npf.ui.scrollBar.Scroller.EventType;
 
-  if (this.horizontalScroller_ && this.isInDocument()) {
-    handler.unlisten(this.horizontalScroller_, EventType.SCROLL,
-      this.onHorizontalScroll_);
+  if (this.horizScroller_ && this.isInDocument()) {
+    handler.unlisten(
+      this.horizScroller_, EventType.SCROLL, this.onHorizScroll_);
   }
 
-  this.horizontalScroller_ = scrollBar;
+  this.horizScroller_ = scroller;
 
   if (this.isInDocument()) {
-    this.updateScrollerPositions_();
     this.updateScrollers_();
-    handler.listen(this.horizontalScroller_, EventType.SCROLL,
-      this.onHorizontalScroll_);
+    this.updateScrollerPositions_();
+    handler.listen(this.horizScroller_, EventType.SCROLL, this.onHorizScroll_);
   }
 };
 
 /**
  * @param {goog.events.Event} evt
  */
-npf.ui.ScrollBar.prototype.onVerticalScroll_ = function(evt) {
-  if (this.enabled_) {
-    var position = /** @type {number} */ (evt.position);
-    this.setScrollTop(position);
-  }
+npf.ui.ScrollBar.prototype.onVertScroll_ = function(evt) {
+  var position = /** @type {number} */ (evt.position);
+  this.setScrollTop(position);
 };
 
 /**
  * @param {goog.events.Event} evt
  */
-npf.ui.ScrollBar.prototype.onHorizontalScroll_ = function(evt) {
-  if (this.enabled_) {
-    var position = /** @type {number} */ (evt.position);
-    this.setScrollLeft(position);
-  }
+npf.ui.ScrollBar.prototype.onHorizScroll_ = function(evt) {
+  var position = /** @type {number} */ (evt.position);
+  this.setScrollLeft(position);
 };
 
 /**
@@ -938,12 +659,12 @@ npf.ui.ScrollBar.prototype.updateScrollerPositions_ = function() {
   /** @type {goog.math.Coordinate} */
   var scrollPosition = this.getScrollPosition();
 
-  if (this.horizontalScroller_) {
-    this.horizontalScroller_.setPosition(scrollPosition.x);
+  if (this.horizScroller_) {
+    this.horizScroller_.setPosition(scrollPosition.x);
   }
 
-  if (this.verticalScroller_) {
-    this.verticalScroller_.setPosition(scrollPosition.y);
+  if (this.vertScroller_) {
+    this.vertScroller_.setPosition(scrollPosition.y);
   }
 };
 
@@ -955,47 +676,21 @@ npf.ui.ScrollBar.prototype.updateScrollers_ = function() {
   var size = this.getSize();
   /** @type {goog.math.Size} */
   var contentSize = this.getContentSize();
-  /** @type {goog.math.Coordinate} */
-  var maxScrollPosition = this.getMaxScrollPosition();
 
-  this.updateScrollerSizes();
-
-  if (this.verticalScroller_) {
-    this.verticalScroller_.setSizes(size.height, contentSize.height,
-      maxScrollPosition.y);
+  if (this.vertScroller_) {
+    this.vertScroller_.setScrollBarSizes({
+      size: size,
+      contentSize: contentSize
+    });
+    this.vertScroller_.setVisible(0 < contentSize.height - size.height);
   }
 
-  if (this.horizontalScroller_) {
-    this.horizontalScroller_.setSizes(size.width, contentSize.width,
-      maxScrollPosition.x);
-  }
-};
-
-/**
- * @protected
- */
-npf.ui.ScrollBar.prototype.updateScrollerSizes = function() {
-  /** @type {Element} */
-  var backgroundElement;
-
-  if (this.verticalScroller_) {
-    backgroundElement = this.verticalScroller_.getBackgroundElement();
-
-    if (backgroundElement) {
-      /** @type {number} */
-      var height = goog.style.getBorderBoxSize(backgroundElement).height;
-      this.verticalScroller_.setSize(height);
-    }
-  }
-
-  if (this.horizontalScroller_) {
-    backgroundElement = this.horizontalScroller_.getBackgroundElement();
-
-    if (backgroundElement) {
-      /** @type {number} */
-      var width = goog.style.getBorderBoxSize(backgroundElement).width;
-      this.horizontalScroller_.setSize(height);
-    }
+  if (this.horizScroller_) {
+    this.horizScroller_.setScrollBarSizes({
+      size: size,
+      contentSize: contentSize
+    });
+    this.horizScroller_.setVisible(0 < contentSize.width - size.width);
   }
 };
 
@@ -1077,22 +772,4 @@ npf.ui.ScrollBar.prototype.onAnimate_ = function(evt) {
   /** @type {number} */
   var y = Math.round(evt.y);
   this.setScrollPositionInternal(x, y);
-};
-
-/**
- * @param {goog.events.Event} evt
- * @private
- */
-npf.ui.ScrollBar.prototype.onAnimateByYButton_ = function(evt) {
-  var move = /** @type {number} */ (evt.move);
-  this.setScrollTop(this.getScrollTop() + move);
-};
-
-/**
- * @param {goog.events.Event} evt
- * @private
- */
-npf.ui.ScrollBar.prototype.onAnimateByXButton_ = function(evt) {
-  var move = /** @type {number} */ (evt.move);
-  this.setScrollLeft(this.getScrollLeft() + move);
 };

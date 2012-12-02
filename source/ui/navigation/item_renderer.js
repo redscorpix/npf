@@ -59,8 +59,7 @@ npf.ui.navigation.ItemRenderer.prototype.initializeDom = function(item,
 npf.ui.navigation.ItemRenderer.prototype.setSelected = function(element,
                                                                 select) {
   if (element) {
-    goog.dom.classes.enable(element,
-      goog.getCssName(this.getCssClass(), 'selected'), select);
+    goog.dom.classes.enable(element, this.getSelectedCssClass(), select);
   }
 };
 
@@ -71,8 +70,7 @@ npf.ui.navigation.ItemRenderer.prototype.setSelected = function(element,
 npf.ui.navigation.ItemRenderer.prototype.setEnabled = function(element,
                                                                enable) {
   if (element) {
-    goog.dom.classes.enable(element,
-      goog.getCssName(this.getCssClass(), 'disabled'), !enable);
+    goog.dom.classes.enable(element, this.getDisabledCssClass(), !enable);
   }
 };
 
@@ -113,4 +111,18 @@ npf.ui.navigation.ItemRenderer.prototype.getCaptionElement = function(element) {
  */
 npf.ui.navigation.ItemRenderer.prototype.getLinkElement = function(element) {
   return element;
+};
+
+/**
+ * @return {string}
+ */
+npf.ui.navigation.ItemRenderer.prototype.getDisabledCssClass = function() {
+  return goog.getCssName(this.getStructuralCssClass(), 'disabled');
+};
+
+/**
+ * @return {string}
+ */
+npf.ui.navigation.ItemRenderer.prototype.getSelectedCssClass = function() {
+  return goog.getCssName(this.getStructuralCssClass(), 'selected');
 };

@@ -14,8 +14,8 @@ goog.require('goog.object');
 npf.application.Settings = function(urlTypesMap, optionTypesMap) {
   goog.base(this);
 
-  this.urlTypesMap_ = urlTypesMap;
-  this.optionTypesMap_ = optionTypesMap;
+  this.urlTypesMap_ = urlTypesMap || {};
+  this.optionTypesMap_ = optionTypesMap || {};
   this.optionsMap_ = {};
   this.urlsMap_ = {};
   this.undefinedSettings_ = [];
