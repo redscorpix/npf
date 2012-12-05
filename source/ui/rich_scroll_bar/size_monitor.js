@@ -1,5 +1,5 @@
-goog.provide('npf.ui.scrollBar.SizeMonitor');
-goog.provide('npf.ui.scrollBar.SizeMonitor.EventType');
+goog.provide('npf.ui.richScrollBar.SizeMonitor');
+goog.provide('npf.ui.richScrollBar.SizeMonitor.EventType');
 
 goog.require('goog.dom');
 goog.require('goog.events');
@@ -14,7 +14,7 @@ goog.require('goog.userAgent');
  * @constructor
  * @extends {goog.events.EventTarget}
  */
-npf.ui.scrollBar.SizeMonitor = function(parentElement, opt_domHelper) {
+npf.ui.richScrollBar.SizeMonitor = function(parentElement, opt_domHelper) {
   goog.base(this);
 
   var dom = opt_domHelper || goog.dom.getDomHelper();
@@ -67,20 +67,20 @@ npf.ui.scrollBar.SizeMonitor = function(parentElement, opt_domHelper) {
    */
   this.lastHeight_ = this.sizeElement_.offsetHeight;
 };
-goog.inherits(npf.ui.scrollBar.SizeMonitor, goog.events.EventTarget);
+goog.inherits(npf.ui.richScrollBar.SizeMonitor, goog.events.EventTarget);
 
 
 /**
  * The event types that the FontSizeMonitor fires.
  * @enum {string}
  */
-npf.ui.scrollBar.SizeMonitor.EventType = {
+npf.ui.richScrollBar.SizeMonitor.EventType = {
   CHANGE : goog.events.getUniqueId('change')
 };
 
 
 /** @inheritDoc */
-npf.ui.scrollBar.SizeMonitor.prototype.disposeInternal = function() {
+npf.ui.richScrollBar.SizeMonitor.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
   goog.events.unlisten(this.resizeTarget_, goog.events.EventType.RESIZE,
@@ -101,13 +101,13 @@ npf.ui.scrollBar.SizeMonitor.prototype.disposeInternal = function() {
  * @param {goog.events.BrowserEvent} e The event object.
  * @private
  */
-npf.ui.scrollBar.SizeMonitor.prototype.handleResize_ = function(e) {
+npf.ui.richScrollBar.SizeMonitor.prototype.handleResize_ = function(e) {
   var currentWidth = this.sizeElement_.offsetWidth;
   var currentHeight = this.sizeElement_.offsetHeight;
 
   if (this.lastWidth_ != currentWidth || this.lastHeight_ != currentHeight) {
     this.lastWidth_ = currentWidth;
     this.lastHeight_ = currentHeight;
-    this.dispatchEvent(npf.ui.scrollBar.SizeMonitor.EventType.CHANGE);
+    this.dispatchEvent(npf.ui.richScrollBar.SizeMonitor.EventType.CHANGE);
   }
 };

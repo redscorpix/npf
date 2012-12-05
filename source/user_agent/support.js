@@ -193,11 +193,14 @@ npf.userAgent.Support.omPrefixes_ = 'Webkit Moz O ms';
  * use a lowercase `ms` instead of the correct `Ms` in IE9
  *
  * More here: http://github.com/Modernizr/Modernizr/issues/issue/21
- * @type {Array.<string>}
+ * @type {!Array.<string>}
  */
 npf.userAgent.Support.domPrefixes =
   npf.userAgent.Support.omPrefixes_.toLowerCase().split(' ');
 
+/**
+ * @type {!Array.<string>}
+ */
 npf.userAgent.Support.cssomPrefixes =
   npf.userAgent.Support.omPrefixes_.split(' ');
 
@@ -1721,18 +1724,46 @@ npf.userAgent.support.isWebWorkersSupported = function() {
 };
 
 /**
+ * @type {!Object.<string,string>}
+ * @private
+ */
+npf.userAgent.support.cssPropertyNames_ = {};
+
+/**
  * Returns property name with proper browser prefix.
  *
  * @param {string} str Property name
  * @return {string} Property name with browser prefix.
  */
 npf.userAgent.support.getCssPropertyName = function(str) {
-  /** @type {string} */
-  var returnValue = '';
+  if (!goog.isDef(npf.userAgent.support.cssPropertyNames_[str])) {
+    /** @type {!Element} */
+    var element = goog.dom.createElement(goog.dom.TagName.DIV);
+    /** @type {string} */
+    var str1 = str.replace(/\-[a-z]/g, function(str, m1) {
+      return str.charAt(1).toUpperCase();
+    });
+    /** @type {string} */
+    var str2 = str1.charAt(0).toUpperCase() + str1.substr(1);
 
-  if (npf.userAgent.Support.vendorPrefix) {
-    returnValue = '-' + npf.userAgent.Support.vendorPrefix + '-';
+    npf.userAgent.support.cssPropertyNames_[str] = '';
+
+    if (goog.isDef(element.style[str1])) {
+      npf.userAgent.support.cssPropertyNames_[str] = str;
+    } else {
+      /** @type {!Array.<string>} */
+      var vendorPrefixes = npf.userAgent.Support.cssomPrefixes;
+
+      for (var i = 0; i < vendorPrefixes.length; i++) {
+        if (goog.isDef(element.style[vendorPrefixes[i] + str2])) {
+          npf.userAgent.support.cssPropertyNames_[str] =
+            '-' + vendorPrefixes[i].toLowerCase() + '-' + str;
+
+          break;
+        }
+      }
+    }
   }
 
-  return returnValue + str;
+  return npf.userAgent.support.cssPropertyNames_[str];
 };

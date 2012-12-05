@@ -135,22 +135,29 @@ npf.ui.form.Field.prototype.getRequestValue = function() {
 npf.ui.form.Field.prototype.setValue = function(value, opt_noRender) {
   var correctedValue = this.correctValueInternal(value);
 
-  if (this.isSameValue(correctedValue)) {
-    return;
+  if (!this.isSameValue(correctedValue)) {
+    if (this.hideErrorOnChange_) {
+      this.setErrorVisible(false);
+    }
+
+    this.setValueInternal(correctedValue);
+
+    if (!opt_noRender) {
+      this.renderValueInternal(this.getValue());
+    }
+
+    /** @type {string} */
+    var error = this.validateInternal();
+    this.setError(error);
+
+    this.onChange();
   }
+};
 
-  this.setValueInternal(correctedValue);
-
-  if (!opt_noRender) {
-    this.renderValueInternal(this.getValue());
-  }
-
-  this.error_ = this.validateInternal();
-
-  if (!this.error_ && this.hideErrorOnChange_) {
-    this.setErrorVisible(false);
-  }
-
+/**
+ * @protected
+ */
+npf.ui.form.Field.prototype.onChange = function() {
   this.dispatchEvent({
     type: npf.ui.form.EventType.CHANGE,
     value: this.getValue()
@@ -314,6 +321,10 @@ npf.ui.form.Field.prototype.addRegExpValidator = function(regExp, error) {
   });
 };
 
+npf.ui.form.Field.prototype.focus = function() {
+  this.getRenderer().focus(this.getValueElement());
+};
+
 npf.ui.form.Field.prototype.focusAndSelect = function() {
   this.getRenderer().focusAndSelect(this.getValueElement());
 };
@@ -334,11 +345,14 @@ npf.ui.form.Field.prototype.setHiddenErrorOnChange = function(hide) {
 
 /**
  * Показывает сообщение об ошибке.
- * @param {string} error
+ * @param {string=} opt_error
  */
-npf.ui.form.Field.prototype.showError = function(error) {
-  this.setError(error);
-  this.setErrorVisible(true);
+npf.ui.form.Field.prototype.showError = function(opt_error) {
+  if (goog.isString(opt_error)) {
+    this.setError(opt_error);
+  }
+
+  this.setErrorVisible(this.hasError());
 };
 
 npf.ui.form.Field.prototype.hideError = function() {
@@ -374,7 +388,7 @@ npf.ui.form.Field.prototype.setErrorVisibleInternal = function(visible) {
  * @return {boolean}
  */
 npf.ui.form.Field.prototype.hasError = function() {
-  return '' != this.error_;
+  return !!this.error_;
 };
 
 /**
@@ -385,11 +399,11 @@ npf.ui.form.Field.prototype.getError = function() {
 };
 
 /**
- * @param {?string=} opterror_
+ * @param {?string=} opt_error
  */
-npf.ui.form.Field.prototype.setError = function(opterror_) {
+npf.ui.form.Field.prototype.setError = function(opt_error) {
   /** @type {string} */
-  var error = goog.isString(opterror_) ? opterror_ : '';
+  var error = goog.isString(opt_error) ? opt_error : '';
 
   if (this.error_ != error) {
     this.error_ = error;

@@ -120,7 +120,7 @@ npf.ui.Form.prototype.getRequestData = function() {
   var result = {};
 
   goog.object.forEach(this.fieldsMap_, function(field) {
-    result[field.getName()] = field.getRequestData();
+    result[field.getName()] = field.getRequestValue();
   }, this);
 
   return result;

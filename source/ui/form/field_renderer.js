@@ -115,6 +115,15 @@ npf.ui.form.FieldRenderer.prototype.setValue = function(element, value) {
 /**
  * @param {Element} element
  */
+npf.ui.form.FieldRenderer.prototype.focus = function(element) {
+  if (element) {
+    element.focus();
+  }
+};
+
+/**
+ * @param {Element} element
+ */
 npf.ui.form.FieldRenderer.prototype.focusAndSelect = function(element) {
   if (element) {
     goog.dom.forms.focusAndSelect(element);

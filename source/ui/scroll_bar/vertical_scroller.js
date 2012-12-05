@@ -3,16 +3,18 @@ goog.provide('npf.ui.scrollBar.VerticalScroller');
 goog.require('goog.math.Rect');
 goog.require('goog.style');
 goog.require('npf.ui.scrollBar.Scroller');
+goog.require('npf.ui.scrollBar.VerticalScrollerRenderer');
 
 
 /**
- * @param {npf.ui.scrollBar.ScrollerRenderer=} opt_renderer Renderer used to render or decorate the component.
- * @param {goog.dom.DomHelper=} opt_domHelper DOM helper, used for document interaction.
+ * @param {npf.ui.scrollBar.VerticalScrollerRenderer=} opt_renderer
+ * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
  * @extends {npf.ui.scrollBar.Scroller}
  */
 npf.ui.scrollBar.VerticalScroller = function(opt_renderer, opt_domHelper) {
-  goog.base(this, opt_renderer, opt_domHelper);
+  goog.base(this, opt_renderer ||
+    npf.ui.scrollBar.VerticalScrollerRenderer.getInstance(), opt_domHelper);
 
   this.addClassName(npf.ui.scrollBar.VerticalScroller.CSS_CLASS);
 };
@@ -27,21 +29,28 @@ npf.ui.scrollBar.VerticalScroller.CSS_CLASS =
 
 
 /** @inheritDoc */
-npf.ui.scrollBar.VerticalScroller.prototype.getDimenstionCoordinate = function(coordinate) {
+npf.ui.scrollBar.VerticalScroller.prototype.getDimensionCoordinate = function(
+    coordinate) {
   return coordinate.y;
 };
 
 /** @inheritDoc */
-npf.ui.scrollBar.VerticalScroller.prototype.setRunnerElementPosition = function(position) {
-  goog.style.setStyle(this.getRunnerElement(), 'top', position + 'px');
+npf.ui.scrollBar.VerticalScroller.prototype.getLimits = function() {
+  return new goog.math.Rect(0, 0, 0, this.getMaxRunnerPosition());
 };
 
 /** @inheritDoc */
-npf.ui.scrollBar.VerticalScroller.prototype.setRunnerElementSize = function(size) {
-  goog.style.setStyle(this.getRunnerElement(), 'height', size + 'px');
+npf.ui.scrollBar.VerticalScroller.prototype.getScrollBarSize = function() {
+  /** @type {npf.ui.scrollBar.Scroller.ScrollBarSizes?} */
+  var scrollBarSizes = this.getScrollBarSizes();
+
+  return scrollBarSizes ? scrollBarSizes.size.height : 0;
 };
 
 /** @inheritDoc */
-npf.ui.scrollBar.VerticalScroller.prototype.getLimits = function(maxPosition) {
-  return new goog.math.Rect(0, 0, 0, maxPosition);
+npf.ui.scrollBar.VerticalScroller.prototype.getScrollBarContentSize = function() {
+  /** @type {npf.ui.scrollBar.Scroller.ScrollBarSizes?} */
+  var scrollBarSizes = this.getScrollBarSizes();
+
+  return scrollBarSizes ? scrollBarSizes.contentSize.height : 0;
 };

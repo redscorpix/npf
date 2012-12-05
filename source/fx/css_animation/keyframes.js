@@ -7,7 +7,6 @@ goog.require('goog.math.Coordinate');
 goog.require('goog.math.Rect');
 goog.require('goog.math.Size');
 goog.require('goog.object');
-goog.require('npf.userAgent.Support');
 goog.require('npf.userAgent.support');
 
 
@@ -46,6 +45,12 @@ goog.inherits(npf.fx.cssAnimation.Keyframes, goog.Disposable);
 npf.fx.cssAnimation.Keyframes.KEYFRAME_NAME_PREFIX = 'kf_';
 
 /**
+ * @type {string}
+ * @private
+ */
+npf.fx.cssAnimation.Keyframes.vendorPrefix_;
+
+/**
  * @return {string}
  */
 npf.fx.cssAnimation.Keyframes.getNextKeyframeName = function() {
@@ -56,6 +61,34 @@ npf.fx.cssAnimation.Keyframes.getNextKeyframeName = function() {
     return npf.fx.cssAnimation.Keyframes.KEYFRAME_NAME_PREFIX + (++counter);
   };
 }();
+
+/**
+ * @return {string}
+ */
+npf.fx.cssAnimation.Keyframes.getVendorPrefix = function() {
+  if (!goog.isDef(npf.fx.cssAnimation.Keyframes.vendorPrefix_)) {
+    /** @type {!Element} */
+    var element = goog.dom.createElement(goog.dom.TagName.DIV);
+
+    npf.fx.cssAnimation.Keyframes.vendorPrefix_ = '';
+
+    if (!goog.isDef(element.style['animationName'])) {
+      /** @type {!Array.<string>} */
+      var vendorPrefixes = npf.userAgent.Support.cssomPrefixes;
+
+      for (var i = 0; i < vendorPrefixes.length; i++) {
+        if (goog.isDef(element.style[vendorPrefixes[i] + 'AnimationName'])) {
+          npf.fx.cssAnimation.Keyframes.vendorPrefix_ =
+            vendorPrefixes[i].toLowerCase();
+
+          break;
+        }
+      }
+    }
+  }
+
+  return npf.fx.cssAnimation.Keyframes.vendorPrefix_;
+};
 
 
 /**
@@ -127,8 +160,8 @@ npf.fx.cssAnimation.Keyframes.prototype.init = function() {
 
     /** @type {!Array.<string>} */
     var rules = [];
-    /** @type {string?} */
-    var vendorPrefix = npf.userAgent.Support.vendorPrefix;
+    /** @type {string} */
+    var vendorPrefix = npf.fx.cssAnimation.Keyframes.getVendorPrefix();
     /** @type {string} */
     var keyframeRule = vendorPrefix ?
       '@-' + vendorPrefix + '-keyframes ' : '@keyframes';
