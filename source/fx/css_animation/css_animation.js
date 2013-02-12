@@ -6,6 +6,7 @@ goog.require('goog.events.EventHandler');
 goog.require('goog.fx.Transition');
 goog.require('goog.fx.TransitionBase');
 goog.require('goog.style');
+goog.require('goog.Timer');
 goog.require('npf.fx.Animation');
 goog.require('npf.fx.css3.easing');
 goog.require('npf.fx.cssAnimation.Keyframes');
@@ -416,13 +417,15 @@ npf.fx.CssAnimation.prototype.onAnimationEnd_ = function(evt) {
   var name = /** @type {string} */ (evt.getBrowserEvent()['animationName']);
 
   if (this.element === element && this.keyframes_.getName() == name) {
-    this.playState_ = npf.style.animation.PlayState.PAUSED;
-    this.clearDom();
-    this.cleared_ = true;
-    this.finished_ = true;
-    this.setStateStopped();
-    this.onFinish();
-    this.onEnd();
+    goog.Timer.callOnce(function() {
+      this.playState_ = npf.style.animation.PlayState.PAUSED;
+      this.clearDom();
+      this.cleared_ = true;
+      this.finished_ = true;
+      this.setStateStopped();
+      this.onFinish();
+      this.onEnd();
+    }, 0, this);
   }
 };
 
