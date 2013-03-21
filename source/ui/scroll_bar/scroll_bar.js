@@ -236,7 +236,7 @@ npf.ui.ScrollBar.prototype.checkSize_ = function() {
       this.contentHeight_ == contentSize.height
     )) {
       this.contentWidth_ = contentSize.width;
-      this.cotnentHeight_ = contentSize.height;
+      this.contentHeight_ = contentSize.height;
       contentSizeChanged = true;
     }
   }
