@@ -10,15 +10,17 @@ goog.require('npf.graphics.faceDetection.Detector');
 
 /**
  * @param {Image} image Loaded image with right width and height.
+ * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
  * @extends {goog.events.EventTarget}
  * @source http://liuliu.me/ccv/js/nss/,
  *         https://github.com/liuliu/ccv/tree/unstable/js
  */
-npf.graphics.FaceDetection = function(image) {
+npf.graphics.FaceDetection = function(image, opt_domHelper) {
   goog.base(this);
 
-  this._image = image;
+  this.image_ = image;
+  this.domHelper_ = opt_domHelper || goog.dom.getDomHelper();
 };
 goog.inherits(npf.graphics.FaceDetection, goog.events.EventTarget);
 
@@ -64,42 +66,56 @@ npf.graphics.FaceDetection.detect = function(image, callback, opt_scope) {
  * @type {Image}
  * @private
  */
-npf.graphics.FaceDetection.prototype._image;
+npf.graphics.FaceDetection.prototype.image_;
+
+/**
+ * @type {goog.dom.DomHelper}
+ * @private
+ */
+npf.graphics.FaceDetection.prototype.domHelper_;
 
 /**
  * @type {Array.<npf.graphics.FaceDetection.Face>}
  * @private
  */
-npf.graphics.FaceDetection.prototype._faces = null;
+npf.graphics.FaceDetection.prototype.faces_ = null;
 
 
 /** @inheritDoc */
 npf.graphics.FaceDetection.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
-  this._image = null;
-  this._faces = null;
+  this.image_ = null;
+  this.domHelper_ = null;
+  this.faces_ = null;
+};
+
+/**
+ * @return {goog.dom.DomHelper}
+ */
+npf.graphics.FaceDetection.prototype.getDomHelper = function() {
+  return this.domHelper_;
 };
 
 /**
  * @return {Array.<goog.math.Rect>}
  */
 npf.graphics.FaceDetection.prototype.getFaces = function() {
-  return this._faces;
+  return this.faces_;
 };
 
 npf.graphics.FaceDetection.prototype.start = function() {
   var detector = new npf.graphics.faceDetection.Detector(
-    this.grayscale(this.pre(this._image)));
+    this.grayscale(this.pre(this.image_)));
   var comp = detector.detect();
-  this._onDetect(comp);
+  this.onDetect_(comp);
 };
 
 /**
  * @param {!Array.<npf.graphics.faceDetection.Detector.Face>} sequence
  * @private
  */
-npf.graphics.FaceDetection.prototype._onDetect = function(sequence) {
+npf.graphics.FaceDetection.prototype.onDetect_ = function(sequence) {
   /** @type {!Array.<goog.math.Rect>} */
   var faces = [];
 
@@ -111,11 +127,11 @@ npf.graphics.FaceDetection.prototype._onDetect = function(sequence) {
     });
   }, this);
 
-  this._faces = faces;
+  this.faces_ = faces;
 
   this.dispatchEvent({
     type: npf.graphics.FaceDetection.EventType.DETECT,
-    faces: this._faces
+    faces: this.faces_
   });
 };
 
@@ -145,11 +161,13 @@ npf.graphics.FaceDetection.prototype.grayscale = function(canvas) {
  */
 npf.graphics.FaceDetection.prototype.pre = function(image) {
   if (goog.dom.TagName.IMG == image.tagName) {
-    var canvas = /** @type {HTMLCanvasElement} */ (goog.dom.createDom(goog.dom.TagName.CANVAS, {
-      'width': image.width,
-      'height': image.height
-    }));
-    goog.dom.appendChild(document.body, canvas);
+    var canvas = /** @type {HTMLCanvasElement} */ (this.domHelper_.createDom(
+      goog.dom.TagName.CANVAS, {
+        'width': image.width,
+        'height': image.height
+      })
+    );
+    goog.dom.appendChild(this.domHelper_.getDocument().body, canvas);
 
     var ctx = canvas.getContext("2d");
     ctx.drawImage(image, 0, 0);

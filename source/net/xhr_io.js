@@ -1,14 +1,14 @@
 goog.provide('npf.net.XhrIo');
 
+goog.require('goog.Uri');
 goog.require('goog.net.XhrIo');
 goog.require('goog.object');
 goog.require('goog.structs');
-goog.require('goog.Uri');
-goog.require('goog.Uri.QueryData');
 
 
 /**
- * @param {goog.net.XmlHttpFactory=} opt_xmlHttpFactory
+ * @param {goog.net.XmlHttpFactory=} opt_xmlHttpFactory Factory to use when
+ *     creating XMLHttpRequest objects.
  * @constructor
  * @extends {goog.net.XhrIo}
  */
@@ -20,48 +20,87 @@ goog.inherits(npf.net.XhrIo, goog.net.XhrIo);
 
 /**
  * @type {?function(npf.net.XhrIo, goog.net.EventType)}
+ * @deprecated Use {@link npf.net.XhrIo.addGlobalHandler}.
  */
 npf.net.XhrIo.preprocessHandle = null;
 
 /**
+ * @type {!Object.<function(npf.net.XhrIo, goog.net.EventType)>}
+ * @private
+ */
+npf.net.XhrIo.globalHandles_ = {};
+
+/**
+ * @type {number}
+ * @private
+ */
+npf.net.XhrIo.globalHandleCounter_ = 0;
+
+/**
  * All non-disposed instances of npf.net.XhrIo created
- * by {@link goog.net.XhrIo.send} are in this Array.
- * @see goog.net.XhrIo.cleanupAllPendingStaticSends
+ * by {@link npf.net.XhrIo.send} are in this Array.
+ * @see npf.net.XhrIo.cleanup
  * @type {!Array.<npf.net.XhrIo>}
  * @private
  */
 npf.net.XhrIo.sendInstances_ = [];
 
+
+/**
+ * @param {function(npf.net.XhrIo, goog.net.EventType)} handler
+ * @return {number}
+ */
+npf.net.XhrIo.addGlobalHandler = function(handler) {
+  npf.net.XhrIo.globalHandleCounter_++;
+  npf.net.XhrIo.globalHandles_[npf.net.XhrIo.globalHandleCounter_] = handler;
+
+  return npf.net.XhrIo.globalHandleCounter_;
+};
+
+/**
+ * @param {number} id
+ * @return {boolean}
+ */
+npf.net.XhrIo.removeGlobalHandler = function(id) {
+  return goog.object.remove(npf.net.XhrIo.globalHandles_, id);
+};
+
 /**
  * Static send that creates a short lived instance of XhrIo to send the
  * request.
- * @see goog.net.XhrIo.cleanupAllPendingStaticSends
+ * @see npf.net.XhrIo.cleanup
  * @param {string|goog.Uri} url Uri to make request to.
  * @param {Function=} opt_callback Callback function for when request is
  *     complete.
  * @param {string=} opt_method Send method, default: GET.
- * @param {string|Object=} opt_content Post data. This can be a Gears blob
- *     if the underlying HTTP request object is a Gears HTTP request.
+ * @param {ArrayBuffer|Blob|Document|FormData|GearsBlob|string=} opt_content
+ *     Post data. This can be a Gears blob if the underlying HTTP request object
+ *     is a Gears HTTP request.
  * @param {Object|goog.structs.Map=} opt_headers Map of headers to add to the
  *     request.
  * @param {number=} opt_timeoutInterval Number of milliseconds after which an
  *     incomplete request will be aborted; 0 means no timeout is set.
+ * @param {boolean=} opt_withCredentials Whether to send credentials with the
+ *     request. Default to false. See {@link goog.net.XhrIo#setWithCredentials}.
  */
 npf.net.XhrIo.send = function(url, opt_callback, opt_method, opt_content,
-                              opt_headers, opt_timeoutInterval) {
-  /** @type {!npf.net.XhrIo} */
-  var x = new npf.net.XhrIo();
-  npf.net.XhrIo.sendInstances_.push(x);
+    opt_headers, opt_timeoutInterval, opt_withCredentials) {
+  var x = new goog.net.XhrIo();
+  goog.net.XhrIo.sendInstances_.push(x);
 
   if (opt_callback) {
     goog.events.listen(x, goog.net.EventType.COMPLETE, opt_callback);
   }
 
   goog.events.listen(x, goog.net.EventType.READY,
-     goog.partial(npf.net.XhrIo.cleanupSend_, x));
+    goog.partial(goog.net.XhrIo.cleanupSend_, x));
 
   if (opt_timeoutInterval) {
     x.setTimeoutInterval(opt_timeoutInterval);
+  }
+
+  if (opt_withCredentials) {
+    x.setWithCredentials(opt_withCredentials);
   }
 
   x.send(url, opt_method, opt_content, opt_headers);
@@ -69,18 +108,18 @@ npf.net.XhrIo.send = function(url, opt_callback, opt_method, opt_content,
 
 /**
  * Disposes all non-disposed instances of npf.net.XhrIo created by
- * {@link goog.net.XhrIo.send}.
- * {@link goog.net.XhrIo.send} cleans up the npf.net.XhrIo instance
+ * {@link npf.net.XhrIo.send}.
+ * {@link npf.net.XhrIo.send} cleans up the npf.net.XhrIo instance
  * it creates when the request completes or fails.  However, if
  * the request never completes, then the npf.net.XhrIo is not disposed.
  * This can occur if the window is unloaded before the request completes.
- * We could have {@link goog.net.XhrIo.send} return the npf.net.XhrIo
- * it creates and make the client of {@link goog.net.XhrIo.send} be
+ * We could have {@link npf.net.XhrIo.send} return the npf.net.XhrIo
+ * it creates and make the client of {@link npf.net.XhrIo.send} be
  * responsible for disposing it in this case.  However, this makes things
  * significantly more complicated for the client, and the whole point
- * of {@link goog.net.XhrIo.send} is that it's simple and easy to use.
- * Clients of {@link goog.net.XhrIo.send} should call
- * {@link goog.net.XhrIo.cleanupAllPendingStaticSends} when doing final
+ * of {@link npf.net.XhrIo.send} is that it's simple and easy to use.
+ * Clients of {@link npf.net.XhrIo.send} should call
+ * {@link npf.net.XhrIo.cleanupAllPendingStaticSends} when doing final
  * cleanup on window unload.
  */
 npf.net.XhrIo.cleanup = function() {
@@ -93,25 +132,10 @@ npf.net.XhrIo.cleanup = function() {
 };
 
 /**
- * Installs exception protection for all entry point introduced by
- * npf.net.XhrIo instances which are not protected by
- * {@link goog.debug.ErrorHandler#protectWindowSetTimeout},
- * {@link goog.debug.ErrorHandler#protectWindowSetInterval}, or
- * {@link goog.events.protectBrowserEventEntryPoint}.
- *
- * @param {goog.debug.ErrorHandler} errorHandler Error handler with which to
- *     protect the entry point(s).
- */
-npf.net.XhrIo.protectEntryPoints = function(errorHandler) {
-  npf.net.XhrIo.prototype.onReadyStateChangeEntryPoint_ =
-    errorHandler.protectEntryPoint(npf.net.XhrIo.prototype.onReadyStateChangeEntryPoint_);
-};
-
-/**
  * Disposes of the specified npf.net.XhrIo created by
- * {@link goog.net.XhrIo.send} and removes it from
- * {@link goog.net.XhrIo.pendingStaticSendInstances_}.
- * @param {npf.net.XhrIo} XhrIo An XhrIo created by {@link goog.net.XhrIo.send}.
+ * {@link npf.net.XhrIo.send} and removes it from
+ * {@link npf.net.XhrIo.sendInstances_}.
+ * @param {npf.net.XhrIo} XhrIo An XhrIo created by {@npf goog.net.XhrIo.send}.
  * @private
  */
 npf.net.XhrIo.cleanupSend_ = function(XhrIo) {
@@ -123,141 +147,26 @@ npf.net.XhrIo.cleanupSend_ = function(XhrIo) {
  * Instance send that actually uses XMLHttpRequest to make a server call.
  * @param {string|goog.Uri} url Uri to make request to.
  * @param {string=} opt_method Send method, default: GET.
- * @param {string|Object=} opt_content GET, POST or PUT content.
- * @param {Object|goog.structs.Map=} opt_headers Map of headers to add to the request.
- * @override
+ * @param {ArrayBuffer|Blob|Document|FormData|GearsBlob|string=} opt_content
+ *     Post data. This can be a Gears blob if the underlying HTTP request object
+ *     is a Gears HTTP request.
+ * @param {Object|goog.structs.Map=} opt_headers Map of headers to add to the
+ *     request.
  */
-npf.net.XhrIo.prototype.send = function(url, opt_method, opt_content, opt_headers) {
-  /** @type {!goog.Uri} */
-  var inputUri = goog.Uri.parse(url);
-  /** @type {string} */
-  var inputMethod = opt_method ? opt_method.toUpperCase() : 'GET';
-  /** @type {!goog.Uri} */
-  var uri = this.parseRequestUri(inputUri, inputMethod, opt_content,
-    opt_headers);
-  /** @type {string} */
-  var method = this.parseRequestMethod(inputUri, inputMethod, opt_content,
-    opt_headers);
-  /** @type {string} */
-  var content = this.parseRequestContent(inputUri, inputMethod, opt_content,
-    opt_headers);
+npf.net.XhrIo.prototype.send = function(url, opt_method, opt_content,
+    opt_headers) {
   /** @type {!Object} */
-  var headers = this.parseRequestHeaders(inputUri, inputMethod, opt_content,
-    opt_headers);
+  var headers = this.parseRequestHeaders(opt_headers);
 
-  goog.base(this, 'send', uri, method, content, headers);
+  goog.base(this, 'send', url, opt_method, opt_content, headers);
 };
 
 /**
- * @param {goog.Uri} uri
- * @param {string} method
- * @param {string|Object=} opt_content
- * @param {Object|goog.structs.Map=} opt_headers
- * @return {!goog.Uri}
- * @protected
- */
-npf.net.XhrIo.prototype.parseRequestUri = function(uri, method, opt_content,
-                                                   opt_headers) {
-  /** @type {!goog.Uri} */
-  var result = uri.clone();
-
-  if ('DELETE' == method || 'PUT' == method) {
-    // Прячем метод в GET-параметр.
-    uri.getQueryData().set('_method', method);
-  } else if ('GET' == method) {
-    // Добавляем параметры в URI.
-
-    /** @type {goog.Uri.QueryData} */
-    var content = this.parseContent(uri, method, opt_content, opt_headers);
-
-    if (content) {
-      uri.getQueryData().extend(content);
-    }
-  }
-
-  return uri;
-};
-
-/**
- * @param {goog.Uri} uri
- * @param {string} method
- * @param {string|Object=} opt_content
- * @param {Object|goog.structs.Map=} opt_headers
- * @return {string}
- * @protected
- */
-npf.net.XhrIo.prototype.parseRequestMethod = function(uri, method, opt_content,
-                                                      opt_headers) {
-  if ('DELETE' == method || 'PUT' == method) {
-    method = 'POST';
-  }
-
-  return method;
-};
-
-/**
- * @param {goog.Uri} uri
- * @param {string} method
- * @param {string|Object=} opt_content
- * @param {Object|goog.structs.Map=} opt_headers
- * @return {string}
- * @protected
- */
-npf.net.XhrIo.prototype.parseRequestContent = function(uri, method, opt_content,
-                                                       opt_headers) {
-  /** @type {string} */
-  var plainContent = '';
-
-  if ('GET' != method) {
-    /** @type {goog.Uri.QueryData} */
-    var content = this.parseContent(uri, method, opt_content, opt_headers);
-
-    if (content) {
-      plainContent = content.toString();
-    }
-  }
-
-  return plainContent;
-};
-
-/**
- * @param {goog.Uri} uri
- * @param {string} method
- * @param {string|Object=} opt_content
- * @param {Object|goog.structs.Map=} opt_headers
- * @return {goog.Uri.QueryData?}
- * @protected
- */
-npf.net.XhrIo.prototype.parseContent = function(uri, method, opt_content,
-                                                opt_headers) {
-  /** @type {goog.Uri.QueryData} */
-  var content = null;
-
-  if (goog.isString(opt_content)) {
-    /** @type {goog.Uri.QueryData} */
-    var contentFromString = goog.Uri.parse('?' + opt_content).getQueryData();
-
-    if (contentFromString) {
-      content = contentFromString;
-    }
-  } else if (goog.isObject(opt_content)) {
-    content = new goog.Uri.QueryData();
-    content.extend(opt_content);
-  }
-
-  return content;
-};
-
-/**
- * @param {goog.Uri} uri
- * @param {string} method
- * @param {string|Object=} opt_content
  * @param {Object|goog.structs.Map=} opt_headers
  * @return {!Object}
  * @protected
  */
-npf.net.XhrIo.prototype.parseRequestHeaders = function(uri, method, opt_content,
-                                                       opt_headers) {
+npf.net.XhrIo.prototype.parseRequestHeaders = function(opt_headers) {
   /** @type {!Object} */
   var headers = {};
 
@@ -286,18 +195,31 @@ npf.net.XhrIo.prototype.isServerError = function() {
 
 /** @inheritDoc */
 npf.net.XhrIo.prototype.dispatchEvent = function(e) {
-  var eventType =
-    /** @type {goog.net.EventType|null|undefined} */ (goog.isString(e) ? e : e.type);
+  var eventType = /** @type {goog.net.EventType|null|undefined} */ (
+    goog.isString(e) ? e : e.type);
 
-  if (npf.net.XhrIo.preprocessHandle && eventType) {
-    npf.net.XhrIo.preprocessHandle(this, eventType);
+  if (eventType) {
+    goog.object.forEach(npf.net.XhrIo.globalHandles_, function(handler) {
+      handler(this, /** @type {goog.net.EventType} */ (eventType));
+    }, this);
   }
 
   return goog.base(this, 'dispatchEvent', e);
 };
 
 /**
+ * @param {string} prop
  * @return {*|undefined}
+ */
+npf.net.XhrIo.prototype.getResponseJsonProperty = function(prop) {
+  var jsonData = this.getResponseJson();
+
+  return goog.isObject(jsonData) ? jsonData[prop] : undefined;
+};
+
+/**
+ * @return {*|undefined}
+ * @deprecated Use getResponseJsonProperty
  */
 npf.net.XhrIo.prototype.getResponseJsonResult = function() {
   var jsonData = this.getResponseJson();
@@ -307,19 +229,10 @@ npf.net.XhrIo.prototype.getResponseJsonResult = function() {
 
 /**
  * @return {*|undefined}
+ * @deprecated Use getResponseJsonProperty
  */
 npf.net.XhrIo.prototype.getResponseJsonErrors = function() {
   var jsonData = this.getResponseJson();
 
   return goog.isObject(jsonData) ? jsonData['errors'] : undefined;
 };
-
-// it can be monitored for exception handling, etc.
-goog.debug.entryPointRegistry.register(
-  /**
-   * @param {function(!Function): !Function} transformer The transforming function.
-   */
-  function(transformer) {
-    npf.net.XhrIo.prototype.onReadyStateChangeEntryPoint_ =
-      transformer(npf.net.XhrIo.prototype.onReadyStateChangeEntryPoint_);
-  });

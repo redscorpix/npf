@@ -13,7 +13,8 @@ goog.require('npf.ui.renderComponent.Renderer');
 npf.ui.scrollBar.ScrollerRenderer = function() {
   goog.base(this);
 };
-goog.inherits(npf.ui.scrollBar.ScrollerRenderer, npf.ui.renderComponent.Renderer);
+goog.inherits(npf.ui.scrollBar.ScrollerRenderer,
+  npf.ui.renderComponent.Renderer);
 goog.addSingletonGetter(npf.ui.scrollBar.ScrollerRenderer);
 
 
@@ -50,9 +51,10 @@ npf.ui.scrollBar.ScrollerRenderer.prototype.createDom = function(scroller) {
  * @param {Element} element
  * @param {boolean} visible
  */
-npf.ui.scrollBar.ScrollerRenderer.prototype.setVisible = function(element, visible) {
+npf.ui.scrollBar.ScrollerRenderer.prototype.setVisible = function(element,
+    visible) {
   if (element) {
-    goog.style.setStyle(element, 'display', visible ? '' : 'none');
+    goog.style.showElement(element, visible);
   }
 };
 
@@ -70,9 +72,21 @@ npf.ui.scrollBar.ScrollerRenderer.prototype.setSize = goog.abstractMethod;
 
 /**
  * @param {Element} element
+ * @param {boolean} unselectable
+ */
+npf.ui.scrollBar.ScrollerRenderer.prototype.setUnselectable = function(element,
+    unselectable) {
+  if (element) {
+    goog.style.setUnselectable(element, unselectable, true);
+  }
+};
+
+/**
+ * @param {Element} element
  * @return {Element}
  */
-npf.ui.scrollBar.ScrollerRenderer.prototype.getRunnerElement = function(element) {
+npf.ui.scrollBar.ScrollerRenderer.prototype.getRunnerElement = function(
+    element) {
   if (element) {
     return goog.dom.getElementByClass(this.getRunnerCssClass(), element);
   }
@@ -84,7 +98,8 @@ npf.ui.scrollBar.ScrollerRenderer.prototype.getRunnerElement = function(element)
  * @param {Element} element
  * @return {Element}
  */
-npf.ui.scrollBar.ScrollerRenderer.prototype.getBackgroundElement = function(element) {
+npf.ui.scrollBar.ScrollerRenderer.prototype.getBackgroundElement = function(
+    element) {
   if (element) {
     return goog.dom.getElementByClass(this.getBackgroundCssClass(), element);
   }

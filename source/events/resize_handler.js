@@ -1,6 +1,7 @@
 goog.provide('npf.events.ResizeHandler');
 goog.provide('npf.events.ResizeHandler.EventType');
 
+goog.require('goog.dom');
 goog.require('goog.dom.FontSizeMonitor');
 goog.require('goog.events');
 goog.require('goog.events.EventHandler');
@@ -10,20 +11,25 @@ goog.require('goog.events.EventTarget');
 /**
  * Event handler for goog.events.EventType.RESIZE and
  * goog.dom.FontSizeMonitor.EventType.CHANGE.
+ * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
  * @extends {goog.events.EventTarget}
  */
-npf.events.ResizeHandler = function() {
+npf.events.ResizeHandler = function(opt_domHelper) {
   goog.base(this);
+
+  this.domHelper_ = opt_domHelper || goog.dom.getDomHelper();
 
   this.eventHandler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.eventHandler_);
-  this.eventHandler_.listen(window, goog.events.EventType.RESIZE, this);
 
-  if (this.fontSizeMonitor_) {
-    this.eventHandler_.listen(this.fontSizeMonitor_,
-      goog.dom.FontSizeMonitor.EventType.CHANGE, this);
-  }
+  this.fontSizeMonitor_ = new goog.dom.FontSizeMonitor(this.domHelper_);
+  this.registerDisposable(this.fontSizeMonitor_);
+
+  this.eventHandler_
+    .listen(this.domHelper_.getWindow(), goog.events.EventType.RESIZE, this)
+    .listen(this.fontSizeMonitor_, goog.dom.FontSizeMonitor.EventType.CHANGE,
+      this);
 };
 goog.inherits(npf.events.ResizeHandler, goog.events.EventTarget);
 
@@ -36,42 +42,10 @@ npf.events.ResizeHandler.EventType = {
 };
 
 /**
- * @type {number}
+ * @type {goog.dom.DomHelper}
  * @private
  */
-npf.events.ResizeHandler._counter = 0;
-
-/**
- * @type {goog.dom.FontSizeMonitor}
- * @private
- */
-npf.events.ResizeHandler.fontSizeMonitor_ = null;
-
-/**
- * @return {goog.dom.FontSizeMonitor}
- * @private
- */
-npf.events.ResizeHandler.addListener_ = function() {
-  npf.events.ResizeHandler._counter++;
-
-  if (!npf.events.ResizeHandler.fontSizeMonitor_) {
-    npf.events.ResizeHandler.fontSizeMonitor_ = new goog.dom.FontSizeMonitor();
-  }
-
-  return npf.events.ResizeHandler.fontSizeMonitor_;
-};
-
-/**
- * @private
- */
-npf.events.ResizeHandler.removeListener_ = function() {
-  npf.events.ResizeHandler._counter--;
-
-  if (!--npf.events.ResizeHandler._counter) {
-    npf.events.ResizeHandler.fontSizeMonitor_.dispose();
-    npf.events.ResizeHandler.fontSizeMonitor_ = null;
-  }
-};
+npf.events.ResizeHandler.prototype.domHelper_;
 
 /**
  * @type {goog.dom.FontSizeMonitor}
@@ -90,10 +64,7 @@ npf.events.ResizeHandler.prototype.eventHandler_;
 npf.events.ResizeHandler.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
-  if (this.fontSizeMonitor_) {
-    npf.events.ResizeHandler.removeListener_();
-  }
-
+  this.domHelper_ = null;
   this.fontSizeMonitor_ = null;
   this.eventHandler_ = null;
 };

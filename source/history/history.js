@@ -154,19 +154,25 @@ npf.History.prototype.isLinksHandlerEnabled = function() {
 
 /**
  * @param {boolean} enable
+ * @param {goog.dom.DomHelper=} opt_domHelper
  */
-npf.History.prototype.setLinksHandlerEnabled = function(enable) {
+npf.History.prototype.setLinksHandlerEnabled = function(enable, opt_domHelper) {
   if (this.isLinksHandlerEnabled_ == enable) {
     return;
   }
 
   this.isLinksHandlerEnabled_ = enable;
 
+  /** @type {!goog.dom.DomHelper} */
+  var domHelper = opt_domHelper || goog.dom.getDomHelper();
+  /** @type {Element} */
+  var bodyElement = domHelper.getDocument().body;
+
   if (this.isLinksHandlerEnabled_) {
-    goog.events.listen(document.body, goog.events.EventType.CLICK,
+    goog.events.listen(bodyElement, goog.events.EventType.CLICK,
       this.onClick_, false, this);
   } else {
-    goog.events.unlisten(document.body, goog.events.EventType.CLICK,
+    goog.events.unlisten(bodyElement, goog.events.EventType.CLICK,
       this.onClick_, false, this);
   }
 };
@@ -205,5 +211,6 @@ npf.History.prototype.onClick_ = function(evt) {
  * @protected
  */
 npf.History.prototype.isInnerHandler = function(linkElement) {
-  return !goog.dom.classes.has(linkElement, npf.History.EXTERNAL_CSS_CLASS);
+  return '_blank' != linkElement.getAttribute('target') &&
+    !goog.dom.classes.has(linkElement, npf.History.EXTERNAL_CSS_CLASS);
 };

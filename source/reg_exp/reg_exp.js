@@ -77,7 +77,7 @@ npf.regExp = (function() {
   /**
    * Check for flag y support (Firefox 3+)
    */
-  var hasNativeY = !!window['RegExp']['prototype']['sticky'];
+  var hasNativeY = !!goog.global['RegExp']['prototype']['sticky'];
 
   /**
    * Used to kill infinite recursion during npf.regExp construction

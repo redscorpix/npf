@@ -27,7 +27,6 @@ goog.require('goog.fx.Transition.EventType');
 goog.require('goog.object');
 goog.require('goog.style');
 goog.require('npf.fx.Animation');
-goog.require('npf.userAgent.support');
 
 
 /**
@@ -452,14 +451,14 @@ npf.fx.dom.Fade.prototype.updateStyle = function() {
  * Animation event handler that will show the element.
  */
 npf.fx.dom.Fade.prototype.show = function() {
-  this.element.style.display = '';
+  goog.style.showElement(this.element, true);
 };
 
 /**
  * Animation event handler that will hide the element
  */
 npf.fx.dom.Fade.prototype.hide = function() {
-  this.element.style.display = 'none';
+  goog.style.showElement(this.element, false);
 };
 
 /**
@@ -958,9 +957,8 @@ npf.fx.dom.Transform.prototype.setTransformOrigin = function(origin) {
     value = origin;
   }
 
-  /** @type {string} */
-  var cssName = npf.userAgent.support.getCssPropertyName('transform-origin');
-  goog.style.setStyle(this.element, cssName, /** @type {string} */ (value));
+  goog.style.setStyle(
+    this.element, 'transform-origin', /** @type {string} */ (value));
 };
 
 /**
@@ -1009,7 +1007,5 @@ npf.fx.dom.Transform.prototype.updateStyle = function() {
     styles.push(key + '(' + values.join(',') + ')');
   }, this);
 
-  /** @type {string} */
-  var cssName = npf.userAgent.support.getCssPropertyName('transform');
-  goog.style.setStyle(this.element, cssName, styles.join(' '));
+  goog.style.setStyle(this.element, 'transform', styles.join(' '));
 };

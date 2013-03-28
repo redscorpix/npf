@@ -1,6 +1,5 @@
 goog.provide('npf.ui.Container');
 
-goog.require('goog.dom');
 goog.require('goog.events.Event');
 goog.require('goog.events.EventType');
 goog.require('goog.events.KeyCodes');
@@ -124,7 +123,7 @@ npf.ui.Container.prototype.allowTextSelection_ = false;
 
 /**
  * The component's preferred ARIA role.
- * @type {?goog.dom.a11y.Role}
+ * @type {?goog.a11y.aria.Role}
  * @private
  */
 npf.ui.Container.prototype.preferredAriaRole_ = null;
@@ -178,7 +177,7 @@ npf.ui.Container.prototype.decorateInternal = function(element) {
   }
 
   // Initialize visibility based on the decorated element's styling.
-  this.visible_ = element.style.display != 'none';
+  this.visible_ = this.getRenderer().isElementShown(element);
 };
 
 /** @inheritDoc */
@@ -279,7 +278,7 @@ npf.ui.Container.prototype.getKeyHandler = function() {
  * cases where a different ARIA role is appropriate for a component because of the
  * context in which it's used.  E.g., a {@link goog.ui.MenuButton} added to a
  * {@link goog.ui.Select} should have an ARIA role of LISTBOX and not MENUITEM.
- * @return {?goog.dom.a11y.Role} This component's preferred ARIA role or null if
+ * @return {?goog.a11y.aria.Role} This component's preferred ARIA role or null if
  *     no preferred ARIA role is set.
  */
 npf.ui.Container.prototype.getPreferredAriaRole = function() {
@@ -293,7 +292,7 @@ npf.ui.Container.prototype.getPreferredAriaRole = function() {
  * different ARIA role is appropriate for a component because of the
  * context in which it's used.  E.g., a {@link goog.ui.MenuButton} added to a
  * {@link goog.ui.Select} should have an ARIA role of LISTBOX and not MENUITEM.
- * @param {goog.dom.a11y.Role} role This component's preferred ARIA role.
+ * @param {goog.a11y.aria.Role} role This component's preferred ARIA role.
  */
 npf.ui.Container.prototype.setPreferredAriaRole = function(role) {
   this.preferredAriaRole_ = role;
@@ -806,7 +805,7 @@ npf.ui.Container.prototype.isTransitionAllowed = function(state, enable) {
 npf.ui.Container.prototype.handleMouseOver = function(e) {
   // Ignore mouse moves between descendants.
   if (
-    !npf.ui.Container.isMouseEventWithinElement_(e, this.getHoverableElement()) &&
+    !this.getRenderer().isMouseEventWithinElement(e, this.getHoverableElement()) &&
     this.dispatchEvent(goog.ui.Component.EventType.ENTER) &&
     this.isEnabled() &&
     this.isAutoState(goog.ui.Component.State.HOVER)
@@ -825,7 +824,7 @@ npf.ui.Container.prototype.handleMouseOver = function(e) {
  */
 npf.ui.Container.prototype.handleMouseOut = function(e) {
   if (
-    !npf.ui.Container.isMouseEventWithinElement_(e, this.getHoverableElement()) &&
+    !this.getRenderer().isMouseEventWithinElement(e, this.getHoverableElement()) &&
     this.dispatchEvent(goog.ui.Component.EventType.LEAVE)
   ) {
     if (this.isAutoState(goog.ui.Component.State.ACTIVE)) {
@@ -845,23 +844,6 @@ npf.ui.Container.prototype.handleMouseOut = function(e) {
 npf.ui.Container.prototype.getHoverableElement = function() {
   return this.getElement();
 };
-
-/**
- * Checks if a mouse event (mouseover or mouseout) occured below an element.
- * @param {goog.events.BrowserEvent} e Mouse event (should be mouseover or
- *     mouseout).
- * @param {Element} elem The ancestor element.
- * @return {boolean} Whether the event has a relatedTarget (the element the
- *     mouse is coming from) and it's a descendent of elem.
- * @private
- */
-npf.ui.Container.isMouseEventWithinElement_ = function(e, elem) {
-  // If relatedTarget is null, it means there was no previous element (e.g.
-  // the mouse moved out of the window).  Assume this means that the mouse
-  // event was not within the element.
-  return !!e.relatedTarget && goog.dom.contains(elem, e.relatedTarget);
-};
-
 
 /**
  * Handles mousedown events.  If the component is enabled, highlights and

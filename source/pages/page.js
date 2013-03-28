@@ -1,7 +1,10 @@
 goog.provide('npf.pages.Page');
 goog.provide('npf.pages.Page.EventType');
+goog.provide('npf.pages.PageErrorEvent');
 
+goog.require('goog.dom');
 goog.require('goog.events');
+goog.require('goog.events.Event');
 goog.require('goog.events.EventHandler');
 goog.require('goog.events.EventTarget');
 goog.require('npf.Router');
@@ -30,12 +33,10 @@ goog.inherits(npf.pages.Page, goog.events.EventTarget);
  */
 npf.pages.Page.EventType = {
   /**
-   * status (goog.net.HttpStatus)
+   * npf.pages.PageErrorEvent
    */
   ERROR: goog.events.getUniqueId('error'),
-  /**
-   * title (string)
-   */
+
   TITLE_CHANGE: goog.events.getUniqueId('titleChange')
 };
 
@@ -91,8 +92,8 @@ npf.pages.Page.prototype.load = function(request) {
     try {
       this.loadInternal(request);
     } catch (e) {
-      if (goog.DEBUG && window.console) {
-        window.console.error(e.stack);
+      if (goog.DEBUG && goog.global.console) {
+        goog.global.console.error(e.stack);
       }
 
       throw e;
@@ -119,8 +120,8 @@ npf.pages.Page.prototype.unload = function() {
   try {
     this.unloadInternal();
   } catch (e) {
-    if (goog.DEBUG && window.console) {
-      window.console.error(e.stack);
+    if (goog.DEBUG && goog.global.console) {
+      goog.global.console.error(e.stack);
     }
 
     throw e;
@@ -168,8 +169,9 @@ npf.pages.Page.prototype.getParentContainer = function() {
  * @param {boolean=} opt_render only for container-component
  */
 npf.pages.Page.prototype.appendToParentContainer = function(container,
-                                                            opt_render) {
-  var parentContainer = this.manager_.getParentContainer() || document.body;
+    opt_render) {
+  var parentContainer = this.manager_.getParentContainer() ||
+    container.getDomHelper().getDocument().body;
 
   if (parentContainer.getElement) {
     parentContainer.addChild(container, opt_render);
@@ -183,7 +185,7 @@ npf.pages.Page.prototype.appendToParentContainer = function(container,
  * @param {boolean=} opt_unrender only for container-component
  */
 npf.pages.Page.prototype.removeFromParentContainer = function(container,
-                                                              opt_unrender) {
+    opt_unrender) {
   var parentContainer = this.manager_.getParentContainer();
 
   if (parentContainer && parentContainer.getElement) {
@@ -204,12 +206,10 @@ npf.pages.Page.prototype.getTitle = function() {
  * @param {string} title
  */
 npf.pages.Page.prototype.setTitle = function(title) {
-  if (this.title_ == title) {
-    return;
+  if (this.title_ != title) {
+    this.title_ = title;
+    this.dispatchTitleChangeEvent();
   }
-
-  this.title_ = title;
-  this.dispatchTitleChangeEvent(this.title_);
 };
 
 /**
@@ -329,7 +329,7 @@ npf.pages.Page.prototype.getRouteNameAt = function(index) {
  * @param {boolean=} opt_replace
  */
 npf.pages.Page.prototype.navigateRoute = function(routeName, opt_optionsMap,
-                                                  opt_query, opt_replace) {
+    opt_query, opt_replace) {
   /** @type {npf.Router} */
   var router = this.getRouter();
 
@@ -378,19 +378,29 @@ npf.pages.Page.prototype.getRequestFromHistory = function(opt_index) {
  * @protected
  */
 npf.pages.Page.prototype.dispatchErrorEvent = function(status) {
-  this.dispatchEvent({
-    type: npf.pages.Page.EventType.ERROR,
-    status: status
-  });
+  var event = new npf.pages.PageErrorEvent(status);
+  this.dispatchEvent(event);
 };
 
 /**
- * @param {string} title
  * @protected
  */
-npf.pages.Page.prototype.dispatchTitleChangeEvent = function(title) {
-  this.dispatchEvent({
-    type: npf.pages.Page.EventType.TITLE_CHANGE,
-    title: title
-  });
+npf.pages.Page.prototype.dispatchTitleChangeEvent = function() {
+  this.dispatchEvent(npf.pages.Page.EventType.TITLE_CHANGE);
 };
+
+
+/**
+ * @param {goog.net.HttpStatus} status
+ * @constructor
+ * @extends {goog.events.Event}
+ */
+npf.pages.PageErrorEvent = function(status) {
+  goog.base(this, npf.pages.Page.EventType.ERROR);
+
+  /**
+   * @type {goog.net.HttpStatus}
+   */
+  this.status = status;
+};
+goog.inherits(npf.pages.PageErrorEvent, goog.events.Event);

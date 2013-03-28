@@ -60,6 +60,17 @@ npf.ui.renderComponent.Renderer.prototype.createDom = function(component) {
 };
 
 /**
+ * @param {npf.ui.RenderComponent} component
+ * @param {Element} element
+ * @protected
+ */
+npf.ui.renderComponent.Renderer.prototype.applyClassNames = function(component,
+    element) {
+  goog.dom.classes.add.apply(this,
+    [element].concat(this.getClassNames(component)));
+};
+
+/**
  * Takes the component's root element and returns the parent element of the
  * component's contents.  Since by default components are rendered as a single
  * DIV, the default implementation returns the element itself.  Subclasses

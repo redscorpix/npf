@@ -1,6 +1,5 @@
 goog.provide('npf.ui.StickyHead');
 
-goog.require('goog.dom');
 goog.require('goog.style');
 goog.require('npf.ui.RenderComponent');
 goog.require('npf.ui.stickyHead.Body');
@@ -13,6 +12,7 @@ goog.require('npf.ui.stickyHead.Renderer');
  * @param {goog.dom.DomHelper=} opt_domHelper DOM helper, used for document interaction.
  * @constructor
  * @extends {npf.ui.RenderComponent}
+ * @deprecated
  */
 npf.ui.StickyHead = function(opt_renderer, opt_domHelper) {
 	goog.base(this, opt_renderer || npf.ui.stickyHead.Renderer.getInstance(), opt_domHelper);

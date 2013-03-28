@@ -1,11 +1,12 @@
 goog.provide('npf.ui.scrollBar.Scroller');
 goog.provide('npf.ui.scrollBar.Scroller.EventType');
+goog.provide('npf.ui.scrollBar.ScrollerEvent');
 
 goog.require('goog.events');
+goog.require('goog.events.Event');
 goog.require('goog.fx.Dragger');
 goog.require('goog.math');
 goog.require('goog.math.Size');
-goog.require('goog.style');
 goog.require('npf.ui.RenderComponent');
 goog.require('npf.ui.scrollBar.ScrollerRenderer');
 
@@ -37,7 +38,7 @@ npf.ui.scrollBar.Scroller.ScrollBarSizes;
 npf.ui.scrollBar.Scroller.EventType = {
 
   /**
-   * position (number)
+   * npf.ui.scrollBar.ScrollerEvent
    */
   SCROLL: goog.events.getUniqueId('scroll')
 };
@@ -339,13 +340,14 @@ npf.ui.scrollBar.Scroller.prototype.onDragStart_ = function(evt) {
 
   if (this.position_ != position) {
     this.position_ = position;
-    this.dispatchEvent({
-      type: npf.ui.scrollBar.Scroller.EventType.SCROLL,
-      position: this.position_
-    });
+
+    var event = new npf.ui.scrollBar.ScrollerEvent(
+      npf.ui.scrollBar.Scroller.EventType.SCROLL, this.position_);
+    this.dispatchEvent(event);
   }
 
-  goog.style.setUnselectable(document.body, true, true);
+  this.getRenderer().setUnselectable(
+    this.getDomHelper().getDocument().body, true);
 };
 
 /**
@@ -356,10 +358,9 @@ npf.ui.scrollBar.Scroller.prototype.onDrag_ = function(evt) {
   var mouseMove2dPosition = new goog.math.Coordinate(evt.left, evt.top);
   this.position_ = this.getDimensionCoordinate(mouseMove2dPosition);
 
-  this.dispatchEvent({
-    type: npf.ui.scrollBar.Scroller.EventType.SCROLL,
-    position: this.position_
-  });
+  var event = new npf.ui.scrollBar.ScrollerEvent(
+    npf.ui.scrollBar.Scroller.EventType.SCROLL, this.position_);
+  this.dispatchEvent(event);
 };
 
 /**
@@ -367,7 +368,8 @@ npf.ui.scrollBar.Scroller.prototype.onDrag_ = function(evt) {
  * @private
  */
 npf.ui.scrollBar.Scroller.prototype.onDragEnd_ = function(evt) {
-  goog.style.setUnselectable(document.body, false, true);
+  this.getRenderer().setUnselectable(
+    this.getDomHelper().getDocument().body, false);
 };
 
 /**
@@ -408,3 +410,20 @@ npf.ui.scrollBar.Scroller.prototype.getScrollBarSize = goog.abstractMethod;
  */
 npf.ui.scrollBar.Scroller.prototype.getScrollBarContentSize =
   goog.abstractMethod;
+
+
+/**
+ * @param {npf.ui.scrollBar.Scroller.EventType} type
+ * @param {number} position
+ * @constructor
+ * @extends {goog.events.Event}
+ */
+npf.ui.scrollBar.ScrollerEvent = function(type, position) {
+  goog.base(this, type);
+
+  /**
+   * @type {number}
+   */
+  this.position = position;
+};
+goog.inherits(npf.ui.scrollBar.ScrollerEvent, goog.events.Event);

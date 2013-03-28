@@ -1,7 +1,6 @@
 goog.provide('npf.ui.scrollBar.HorizontalScroller');
 
 goog.require('goog.math.Rect');
-goog.require('goog.style');
 goog.require('npf.ui.scrollBar.Scroller');
 goog.require('npf.ui.scrollBar.HorizontalScrollerRenderer');
 

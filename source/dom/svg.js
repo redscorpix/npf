@@ -1,4 +1,5 @@
 goog.provide('npf.dom.svg');
+goog.provide('npf.dom.svg.Ns');
 
 goog.require('goog.array');
 goog.require('goog.object');
@@ -8,9 +9,10 @@ goog.require('goog.object');
  * @enum {string}
  */
 npf.dom.svg.Ns = {
+  EV: 'http://www.w3.org/2001/xml-events',
+  MATH_ML: 'http://www.w3.org/1998/Math/MathML',
   SVG: 'http://www.w3.org/2000/svg',
   XLINK: 'http://www.w3.org/1999/xlink',
-  EV: 'http://www.w3.org/2001/xml-events',
   XML: 'http://www.w3.org/XML/1998/namespace'
 };
 

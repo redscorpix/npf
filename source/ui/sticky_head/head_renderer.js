@@ -62,6 +62,6 @@ npf.ui.stickyHead.HeadRenderer.prototype.setVisible = function(component, visibl
 	var element = component.getElement();
 
 	if (element) {
-		goog.style.setStyle(element, 'display', visible ? '' : 'none');
+		goog.style.showElement(element, visible);
 	}
 };

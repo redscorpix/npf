@@ -1,5 +1,7 @@
 goog.provide('npf.ui.richScrollBar.Renderer');
 
+goog.require('goog.dom');
+goog.require('goog.dom.TagName');
 goog.require('npf.ui.scrollBar.Renderer');
 
 

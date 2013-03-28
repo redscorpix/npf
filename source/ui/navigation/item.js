@@ -1,7 +1,6 @@
 goog.provide('npf.ui.navigation.Item');
 
 goog.require('goog.dom.classes');
-goog.require('npf.events.TapHandler');
 goog.require('npf.ui.RenderComponent');
 goog.require('npf.ui.navigation.ItemRenderer');
 
@@ -90,18 +89,15 @@ npf.ui.navigation.Item.prototype.decorateInternal = function(element) {
 npf.ui.navigation.Item.prototype.enterDocument = function() {
   goog.base(this, 'enterDocument');
 
-  var tapHandler = new npf.events.TapHandler(this.getElement());
-  this.disposeOnExitDocument(tapHandler);
-
   this.getHandler()
-    .listen(tapHandler, npf.events.TapHandler.EventType.TAP, this.onTap_);
+    .listen(this.getElement(), goog.events.EventType.CLICK, this.onClick_);
 };
 
 /**
  * @param {goog.events.BrowserEvent} evt
  * @private
  */
-npf.ui.navigation.Item.prototype.onTap_ = function(evt) {
+npf.ui.navigation.Item.prototype.onClick_ = function(evt) {
   if (evt && !this.enabled_) {
     evt.preventDefault();
   }

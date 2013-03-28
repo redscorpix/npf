@@ -2,6 +2,7 @@ goog.provide('npf.ui.scrollBar.Renderer');
 
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
+goog.require('goog.math.Size');
 goog.require('goog.style');
 goog.require('goog.userAgent');
 goog.require('npf.ui.renderComponent.Renderer');
@@ -76,6 +77,18 @@ npf.ui.scrollBar.Renderer.prototype.createDom = function(component) {
   goog.dom.appendChild(containerElement, contentElement);
 
   return element;
+};
+
+/**
+ * @param {Element} element
+ * @return {!goog.math.Size}
+ */
+npf.ui.scrollBar.Renderer.prototype.getSize = function(element) {
+  if (element) {
+    return goog.style.getBorderBoxSize(element);
+  }
+
+  return new goog.math.Size(0, 0);
 };
 
 /**

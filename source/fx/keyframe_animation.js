@@ -2,9 +2,6 @@ goog.provide('npf.fx.KeyframeAnimation');
 
 goog.require('npf.fx.CssAnimation');
 goog.require('npf.fx.cssAnimation.Keyframes');
-goog.require('npf.style.animation.Direction');
-goog.require('npf.style.animation.PlayState');
-goog.require('npf.userAgent.support');
 
 
 /**
