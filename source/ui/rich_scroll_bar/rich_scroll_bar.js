@@ -1,5 +1,6 @@
 goog.provide('npf.ui.RichScrollBar');
 
+goog.require('goog.Timer');
 goog.require('goog.ui.Control');
 goog.require('npf.ui.ScrollBar');
 goog.require('npf.ui.richScrollBar.ButtonAnimation');
@@ -19,6 +20,12 @@ npf.ui.RichScrollBar = function(opt_renderer, opt_domHelper) {
 };
 goog.inherits(npf.ui.RichScrollBar, npf.ui.ScrollBar);
 
+
+/**
+ * @type {number}
+ * @const
+ */
+npf.ui.RichScrollBar.BUTTON_CLICK_DELAY = 100;
 
 /**
  * @type {boolean}
@@ -68,6 +75,12 @@ npf.ui.RichScrollBar.prototype.leftButton_ = null;
  */
 npf.ui.RichScrollBar.prototype.rightButton_ = null;
 
+/**
+ * @type {number}
+ * @private
+ */
+npf.ui.RichScrollBar.prototype.buttonCheckTimeoutId_ = 0;
+
 
 /** @inheritDoc */
 npf.ui.RichScrollBar.prototype.enterDocument = function() {
@@ -92,32 +105,27 @@ npf.ui.RichScrollBar.prototype.enterDocument = function() {
     .listen(this.yAnimation_, ButAnimEvtType.ANIMATE, this.onAnimateByYButton_);
 
   if (this.downButton_) {
-    handler
-      .listen(this.downButton_, checkEventType, this.onDownButtonCheck_)
-      .listen(this.downButton_, uncheckEventType, this.onDownButtonUncheck_);
+    handler.listen(this.downButton_, checkEventType, this.onDownButtonCheck_);
   }
 
   if (this.upButton_) {
-    handler
-      .listen(this.upButton_, checkEventType, this.onUpButtonCheck_)
-      .listen(this.upButton_, uncheckEventType, this.onUpButtonUncheck_);
+    handler.listen(this.upButton_, checkEventType, this.onUpButtonCheck_);
   }
 
   if (this.leftButton_) {
-    handler
-      .listen(this.leftButton_, checkEventType, this.onLeftButtonCheck_)
-      .listen(this.leftButton_, uncheckEventType, this.onLeftButtonUncheck_);
+    handler.listen(this.leftButton_, checkEventType, this.onLeftButtonCheck_);
   }
 
   if (this.rightButton_) {
-    handler
-      .listen(this.rightButton_, checkEventType, this.onRightButtonCheck_)
-      .listen(this.rightButton_, uncheckEventType, this.onRightButtonUncheck_);
+    handler.listen(this.rightButton_, checkEventType, this.onRightButtonCheck_);
   }
 };
 
 /** @inheritDoc */
 npf.ui.RichScrollBar.prototype.exitDocument = function() {
+  goog.Timer.clear(this.buttonCheckTimeoutId_);
+  this.buttonCheckTimeoutId_ = 0;
+
   this.setAutoUpdateInternal(false);
 
   this.xAnimation_.dispose();
@@ -223,17 +231,14 @@ npf.ui.RichScrollBar.prototype.setDownButton = function(button) {
 
   if (this.downButton_ && this.isInDocument()) {
     handler
-      .unlisten(this.downButton_, EventType.CHECK, this.onDownButtonCheck_)
-      .unlisten(this.downButton_, EventType.UNCHECK, this.onDownButtonUncheck_);
+      .unlisten(this.downButton_, EventType.CHECK, this.onDownButtonCheck_);
   }
 
   this.downButton_ = button;
 
   if (this.isInDocument()) {
     this.updateButtons_();
-    handler
-      .listen(this.downButton_, EventType.CHECK, this.onDownButtonCheck_)
-      .listen(this.downButton_, EventType.UNCHECK, this.onDownButtonUncheck_);
+    handler.listen(this.downButton_, EventType.CHECK, this.onDownButtonCheck_);
   }
 };
 
@@ -254,17 +259,14 @@ npf.ui.RichScrollBar.prototype.setUpButton = function(button) {
 
   if (this.upButton_ && this.isInDocument()) {
     handler
-      .unlisten(this.upButton_, EventType.CHECK, this.onUpButtonCheck_)
-      .unlisten(this.upButton_, EventType.UNCHECK, this.onUpButtonUncheck_);
+      .unlisten(this.upButton_, EventType.CHECK, this.onUpButtonCheck_);
   }
 
   this.upButton_ = button;
 
   if (this.isInDocument()) {
     this.updateButtons_();
-    handler
-      .listen(this.upButton_, EventType.CHECK, this.onUpButtonCheck_)
-      .listen(this.upButton_, EventType.UNCHECK, this.onUpButtonUncheck_);
+    handler.listen(this.upButton_, EventType.CHECK, this.onUpButtonCheck_);
   }
 };
 
@@ -285,17 +287,14 @@ npf.ui.RichScrollBar.prototype.setLeftButton = function(button) {
 
   if (this.leftButton_ && this.isInDocument()) {
     handler
-      .unlisten(this.leftButton_, EventType.CHECK, this.onLeftButtonCheck_)
-      .unlisten(this.leftButton_, EventType.UNCHECK, this.onLeftButtonUncheck_);
+      .unlisten(this.leftButton_, EventType.CHECK, this.onLeftButtonCheck_);
   }
 
   this.leftButton_ = button;
 
   if (this.isInDocument()) {
     this.updateButtons_();
-    handler
-      .listen(this.leftButton_, EventType.CHECK, this.onLeftButtonCheck_)
-      .listen(this.leftButton_, EventType.UNCHECK, this.onLeftButtonUncheck_);
+    handler.listen(this.leftButton_, EventType.CHECK, this.onLeftButtonCheck_);
   }
 };
 
@@ -316,8 +315,7 @@ npf.ui.RichScrollBar.prototype.setRightButton = function(button) {
 
   if (this.rightButton_ && this.isInDocument()) {
     handler
-      .unlisten(this.rightButton_, EventType.CHECK, this.onRightButtonCheck_)
-      .unlisten(this.rightButton_, EventType.UNCHECK, this.onRightButtonUncheck_);
+      .unlisten(this.rightButton_, EventType.CHECK, this.onRightButtonCheck_);
   }
 
   this.rightButton_ = button;
@@ -325,8 +323,7 @@ npf.ui.RichScrollBar.prototype.setRightButton = function(button) {
   if (this.isInDocument()) {
     this.updateButtons_();
     handler
-      .listen(this.rightButton_, EventType.CHECK, this.onRightButtonCheck_)
-      .listen(this.rightButton_, EventType.UNCHECK, this.onRightButtonUncheck_);
+      .listen(this.rightButton_, EventType.CHECK, this.onRightButtonCheck_);
   }
 };
 
@@ -402,7 +399,16 @@ npf.ui.RichScrollBar.prototype.updateButtons_ = function() {
  * @private
  */
 npf.ui.RichScrollBar.prototype.onUpButtonCheck_ = function(evt) {
-  this.yAnimation_.start(npf.ui.richScrollBar.ButtonAnimation.Direction.UP);
+  /** @type {!Document} */
+  var doc = this.getDomHelper().getDocument();
+  var EventType = goog.events.EventType;
+  this.getHandler().listen(doc, EventType.MOUSEUP, this.onUpButtonUncheck_);
+
+  goog.Timer.clear(this.buttonCheckTimeoutId_);
+  this.buttonCheckTimeoutId_ = goog.Timer.callOnce(function() {
+    this.buttonCheckTimeoutId_ = 0;
+    this.yAnimation_.start(npf.ui.richScrollBar.ButtonAnimation.Direction.UP);
+  }, npf.ui.RichScrollBar.BUTTON_CLICK_DELAY, this);
 };
 
 /**
@@ -410,7 +416,19 @@ npf.ui.RichScrollBar.prototype.onUpButtonCheck_ = function(evt) {
  * @private
  */
 npf.ui.RichScrollBar.prototype.onUpButtonUncheck_ = function(evt) {
-  this.yAnimation_.stop();
+  /** @type {!Document} */
+  var doc = this.getDomHelper().getDocument();
+  var EventType = goog.events.EventType;
+  this.getHandler().unlisten(doc, EventType.MOUSEUP, this.onUpButtonUncheck_);
+
+  if (this.buttonCheckTimeoutId_) {
+    goog.Timer.clear(this.buttonCheckTimeoutId_);
+    this.buttonCheckTimeoutId_ = 0;
+
+    this.animateToTop(this.getScrollTop() - this.getSize().height * 0.75);
+  } else {
+    this.yAnimation_.stop();
+  }
 };
 
 /**
@@ -418,7 +436,16 @@ npf.ui.RichScrollBar.prototype.onUpButtonUncheck_ = function(evt) {
  * @private
  */
 npf.ui.RichScrollBar.prototype.onDownButtonCheck_ = function(evt) {
-  this.yAnimation_.start(npf.ui.richScrollBar.ButtonAnimation.Direction.DOWN);
+  /** @type {!Document} */
+  var doc = this.getDomHelper().getDocument();
+  var EventType = goog.events.EventType;
+  this.getHandler().listen(doc, EventType.MOUSEUP, this.onDownButtonUncheck_);
+
+  goog.Timer.clear(this.buttonCheckTimeoutId_);
+  this.buttonCheckTimeoutId_ = goog.Timer.callOnce(function() {
+    this.buttonCheckTimeoutId_ = 0;
+    this.yAnimation_.start(npf.ui.richScrollBar.ButtonAnimation.Direction.DOWN);
+  }, npf.ui.RichScrollBar.BUTTON_CLICK_DELAY, this);
 };
 
 /**
@@ -426,7 +453,18 @@ npf.ui.RichScrollBar.prototype.onDownButtonCheck_ = function(evt) {
  * @private
  */
 npf.ui.RichScrollBar.prototype.onDownButtonUncheck_ = function(evt) {
-  this.yAnimation_.stop();
+  /** @type {!Document} */
+  var doc = this.getDomHelper().getDocument();
+  var EventType = goog.events.EventType;
+  this.getHandler().unlisten(doc, EventType.MOUSEUP, this.onDownButtonUncheck_);
+
+  if (this.buttonCheckTimeoutId_) {
+    goog.Timer.clear(this.buttonCheckTimeoutId_);
+    this.buttonCheckTimeoutId_ = 0;
+    this.animateToTop(this.getScrollTop() + this.getSize().height * 0.75);
+  } else {
+    this.yAnimation_.stop();
+  }
 };
 
 /**
@@ -434,7 +472,16 @@ npf.ui.RichScrollBar.prototype.onDownButtonUncheck_ = function(evt) {
  * @private
  */
 npf.ui.RichScrollBar.prototype.onLeftButtonCheck_ = function(evt) {
-  this.xAnimation_.start(npf.ui.richScrollBar.ButtonAnimation.Direction.UP);
+  /** @type {!Document} */
+  var doc = this.getDomHelper().getDocument();
+  var EventType = goog.events.EventType;
+  this.getHandler().listen(doc, EventType.MOUSEUP, this.onLeftButtonUncheck_);
+
+  goog.Timer.clear(this.buttonCheckTimeoutId_);
+  this.buttonCheckTimeoutId_ = goog.Timer.callOnce(function() {
+    this.buttonCheckTimeoutId_ = 0;
+    this.xAnimation_.start(npf.ui.richScrollBar.ButtonAnimation.Direction.UP);
+  }, npf.ui.RichScrollBar.BUTTON_CLICK_DELAY, this);
 };
 
 /**
@@ -442,7 +489,19 @@ npf.ui.RichScrollBar.prototype.onLeftButtonCheck_ = function(evt) {
  * @private
  */
 npf.ui.RichScrollBar.prototype.onLeftButtonUncheck_ = function(evt) {
-  this.xAnimation_.stop();
+  /** @type {!Document} */
+  var doc = this.getDomHelper().getDocument();
+  var EventType = goog.events.EventType;
+  this.getHandler().unlisten(doc, EventType.MOUSEUP, this.onLeftButtonUncheck_);
+
+  if (this.buttonCheckTimeoutId_) {
+    goog.Timer.clear(this.buttonCheckTimeoutId_);
+    this.buttonCheckTimeoutId_ = 0;
+
+    this.animateToLeft(this.getScrollLeft() - this.getSize().width * 0.75);
+  } else {
+    this.xAnimation_.stop();
+  }
 };
 
 /**
@@ -450,7 +509,16 @@ npf.ui.RichScrollBar.prototype.onLeftButtonUncheck_ = function(evt) {
  * @private
  */
 npf.ui.RichScrollBar.prototype.onRightButtonCheck_ = function(evt) {
-  this.xAnimation_.start(npf.ui.richScrollBar.ButtonAnimation.Direction.DOWN);
+  /** @type {!Document} */
+  var doc = this.getDomHelper().getDocument();
+  var EventType = goog.events.EventType;
+  this.getHandler().listen(doc, EventType.MOUSEUP, this.onRightButtonUncheck_);
+
+  goog.Timer.clear(this.buttonCheckTimeoutId_);
+  this.buttonCheckTimeoutId_ = goog.Timer.callOnce(function() {
+    this.buttonCheckTimeoutId_ = 0;
+    this.xAnimation_.start(npf.ui.richScrollBar.ButtonAnimation.Direction.DOWN);
+  }, npf.ui.RichScrollBar.BUTTON_CLICK_DELAY, this);
 };
 
 /**
@@ -458,7 +526,19 @@ npf.ui.RichScrollBar.prototype.onRightButtonCheck_ = function(evt) {
  * @private
  */
 npf.ui.RichScrollBar.prototype.onRightButtonUncheck_ = function(evt) {
-  this.xAnimation_.stop();
+  /** @type {!Document} */
+  var doc = this.getDomHelper().getDocument();
+  var EventType = goog.events.EventType;
+  this.getHandler().unlisten(doc, EventType.MOUSEUP, this.onRightButtonUncheck_);
+
+  if (this.buttonCheckTimeoutId_) {
+    goog.Timer.clear(this.buttonCheckTimeoutId_);
+    this.buttonCheckTimeoutId_ = 0;
+
+    this.animateToLeft(this.getScrollLeft() + this.getSize().width * 0.75);
+  } else {
+    this.xAnimation_.stop();
+  }
 };
 
 /**

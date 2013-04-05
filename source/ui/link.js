@@ -3,7 +3,6 @@ goog.provide('npf.ui.Link');
 goog.require('goog.dom.classes');
 goog.require('goog.dom.TagName');
 goog.require('goog.events.BrowserEvent');
-goog.require('npf.events.TapHandler');
 goog.require('npf.ui.Component');
 
 
@@ -69,11 +68,8 @@ npf.ui.Link.prototype.createDom = function() {
 npf.ui.Link.prototype.enterDocument = function() {
   goog.base(this, 'enterDocument');
 
-  var tapHandler = new npf.events.TapHandler(this.getElement());
-  this.disposeOnExitDocument(tapHandler);
-
   this.getHandler()
-    .listen(tapHandler, npf.events.TapHandler.EventType.TAP, this.onTap_);
+    .listen(this.getElement(), goog.events.EventType.CLICK, this.onClick_);
 };
 
 /** @inheritDoc */
@@ -87,7 +83,7 @@ npf.ui.Link.prototype.disposeInternal = function() {
  * @param {goog.events.BrowserEvent} evt
  * @private
  */
-npf.ui.Link.prototype.onTap_ = function(evt) {
+npf.ui.Link.prototype.onClick_ = function(evt) {
   /** @type {goog.events.BrowserEvent} */
   var event = new goog.events.BrowserEvent(evt.getBrowserEvent());
   event.type = goog.ui.Component.EventType.ACTION;

@@ -6,6 +6,7 @@ goog.require('goog.dom.TagName');
 goog.require('goog.math.Coordinate');
 goog.require('goog.math.Rect');
 goog.require('goog.math.Size');
+goog.require('goog.style');
 goog.require('goog.object');
 goog.require('npf.userAgent.support');
 
@@ -15,17 +16,17 @@ goog.require('npf.userAgent.support');
  * @param {Object.<string,string|number>=} opt_to
  * @param {Array.<number>=} opt_fromAcc
  * @param {Array.<number>=} opt_toAcc
+ * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
  * @extends {goog.Disposable}
  */
 npf.fx.cssAnimation.Keyframes = function(opt_from, opt_to, opt_fromAcc,
-                                         opt_toAcc) {
+                                         opt_toAcc, opt_domHelper) {
   goog.base(this);
 
-  this.styleElement_ = goog.dom.createDom(goog.dom.TagName.STYLE);
-  goog.dom.appendChild(document.head, this.styleElement_);
-
+  this.domHelper_ = opt_domHelper || goog.dom.getDomHelper();
   this.name_ = npf.fx.cssAnimation.Keyframes.getNextKeyframeName();
+
   this.keyframesMap_ = {};
 
   if (opt_from) {
@@ -49,6 +50,7 @@ npf.fx.cssAnimation.Keyframes.KEYFRAME_NAME_PREFIX = 'kf_';
  * @private
  */
 npf.fx.cssAnimation.Keyframes.vendorPrefix_;
+
 
 /**
  * @return {string}
@@ -104,7 +106,13 @@ npf.fx.cssAnimation.Keyframes.prototype.keyframesMap_;
 npf.fx.cssAnimation.Keyframes.prototype.name_;
 
 /**
- * @type {Element}
+ * @type {goog.dom.DomHelper}
+ * @private
+ */
+npf.fx.cssAnimation.Keyframes.domHelper_;
+
+/**
+ * @type {Element|StyleSheet}
  * @private
  */
 npf.fx.cssAnimation.Keyframes.prototype.styleElement_;
@@ -124,11 +132,14 @@ npf.fx.cssAnimation.Keyframes.prototype.inited_ = false;
 
 /** @inheritDoc */
 npf.fx.cssAnimation.Keyframes.prototype.disposeInternal = function() {
-  goog.dom.removeNode(this.styleElement_);
+  if (this.styleElement_) {
+    goog.style.uninstallStyles(this.styleElement_);
+  }
 
   goog.base(this, 'disposeInternal');
 
   this.keyframesMap_ = null;
+  this.domHelper_ = null;
   this.styleElement_ = null;
   this.endStyles_ = null;
 };
@@ -141,7 +152,7 @@ npf.fx.cssAnimation.Keyframes.prototype.getName = function() {
 };
 
 /**
- * @return {Element}
+ * @return {Element|StyleSheet}
  */
 npf.fx.cssAnimation.Keyframes.prototype.getElement = function() {
   return this.styleElement_;
@@ -171,15 +182,22 @@ npf.fx.cssAnimation.Keyframes.prototype.init = function() {
       var keyframeText = position + '% {';
 
       for (var key in properties) {
-        keyframeText += key + ':' + properties[key] + ';';
+        /** @type {string} */
+        var name = npf.userAgent.support.getCssPropertyName(key);
+
+        if (name) {
+          keyframeText += name + ':' + properties[key] + ';';
+        }
       }
 
       keyframeText += '}';
       rules.push(keyframeText);
     }, this);
 
-    this.styleElement_.innerHTML = keyframeRule + ' ' +
-      this.name_ + ' {' + rules.join('') + '}';
+    this.styleElement_ = goog.style.installStyles(
+      keyframeRule + ' ' + this.name_ + ' {' + rules.join('') + '}',
+      this.domHelper_.getDocument()
+    );
   }
 };
 
@@ -882,4 +900,18 @@ npf.fx.cssAnimation.Keyframes.prototype.insertKeyframe = function(rules,
   }
 
   return this;
+};
+
+/**
+ * @return {goog.dom.DomHelper}
+ */
+npf.fx.cssAnimation.Keyframes.prototype.getDomHelper = function() {
+  return this.domHelper_;
+};
+
+/**
+ * @param {goog.dom.DomHelper} domHelper
+ */
+npf.fx.cssAnimation.Keyframes.prototype.setDomHelper = function(domHelper) {
+  this.domHelper_ = domHelper;
 };

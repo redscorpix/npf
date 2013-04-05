@@ -5,28 +5,6 @@ goog.require('goog.string');
 
 
 /**
- * @param {Array.<string>} variants
- * @param {number} count
- * @return {string}
- * @deprecated Use goog.i18n.MessageFormat
- */
-npf.string.declension = function(variants, count) {
-  count = Math.floor(count);
-
-  if (/1[1-4]$/.test(count)) {
-    return variants[2];
-  }
-  if (/[2-4]$/.test(count)) {
-    return variants[1];
-  }
-  if (/1$/.test(count)) {
-    return variants[0];
-  }
-
-  return variants[2];
-};
-
-/**
  * Возвращает длительность в формате H:i:s.
  * @param {number} duration In seconds.
  * @return {string}

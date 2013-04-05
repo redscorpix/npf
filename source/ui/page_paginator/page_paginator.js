@@ -2,7 +2,6 @@ goog.provide('npf.ui.PagePaginator');
 goog.provide('npf.ui.PagePaginator.EventType');
 
 goog.require('goog.events');
-goog.require('npf.events.TapHandler');
 goog.require('npf.ui.RenderComponent');
 goog.require('npf.ui.pagePaginator.Changer');
 goog.require('npf.ui.pagePaginator.Renderer');
@@ -82,6 +81,12 @@ npf.ui.PagePaginator.prototype.changer_ = null;
  */
 npf.ui.PagePaginator.prototype.draggable_ = true;
 
+/**
+ * @type {boolean}
+ * @private
+ */
+npf.ui.PagePaginator.prototype.ring_ = false;
+
 
 /** @inheritDoc */
 npf.ui.PagePaginator.prototype.createDom = function() {
@@ -104,15 +109,19 @@ npf.ui.PagePaginator.prototype.initializeDom_ = function() {
   /** @type {Element} */
   var element = this.getElement();
   var renderer = this.getRenderer();
+  /** @type {number} */
+  var index;
 
   this.page_ = this.appendPage_(this.pageIndex_);
 
-  if (this.pageIndex_) {
-    this.prevPage_ = this.appendPage_(this.pageIndex_ - 1);
+  if (this.ring_ || this.pageIndex_) {
+    index = (this.pageCount_ + this.pageIndex_ - 1) % this.pageCount_;
+    this.prevPage_ = this.appendPage_(index);
   }
 
-  if (this.pageCount_ - 1 > this.pageIndex_) {
-    this.nextPage_ = this.appendPage_(this.pageIndex_ + 1);
+  if (this.ring_ || this.pageCount_ - 1 > this.pageIndex_) {
+    index = (this.pageCount_ + this.pageIndex_ + 1) % this.pageCount_;
+    this.nextPage_ = this.appendPage_(index);
   }
 };
 
@@ -130,9 +139,10 @@ npf.ui.PagePaginator.prototype.enterDocument = function() {
   this.changer_ = new npf.ui.pagePaginator.Changer(containerElement,
     contentElement, this.pageIndex_, this.pageCount_);
   this.changer_.setDraggable(this.draggable_);
-  this.changer_.addEventListener(
-    npf.ui.pagePaginator.Changer.EventType.PAGE_CHANGE, this.onPageChange_,
-    false, this);
+  this.changer_.setRing(this.ring_);
+  handler.listen(this.changer_,
+    npf.ui.pagePaginator.Changer.EventType.PAGE_CHANGE, this.onPageChange_);
+  this.changer_.init();
 
   /** @type {Element} */
   var prevElement = this.getPrevElement();
@@ -140,17 +150,11 @@ npf.ui.PagePaginator.prototype.enterDocument = function() {
   var nextElement = this.getNextElement();
 
   if (prevElement) {
-    var prevTapHandler = new npf.events.TapHandler(prevElement);
-    this.disposeOnExitDocument(prevTapHandler);
-    handler.listen(prevTapHandler, npf.events.TapHandler.EventType.TAP,
-      this.onPrevTap_);
+    handler.listen(prevElement, goog.events.EventType.CLICK, this.onPrevClick_);
   }
 
   if (nextElement) {
-    var nextTapHandler = new npf.events.TapHandler(nextElement);
-    this.disposeOnExitDocument(nextTapHandler);
-    handler.listen(nextTapHandler, npf.events.TapHandler.EventType.TAP,
-      this.onNextTap_);
+    handler.listen(nextElement, goog.events.EventType.CLICK, this.onNextClick_);
   }
 
   this.updateContent_();
@@ -178,16 +182,28 @@ npf.ui.PagePaginator.prototype.disposeInternal = function() {
  * @param {goog.events.BrowserEvent} evt
  * @private
  */
-npf.ui.PagePaginator.prototype.onPrevTap_ = function(evt) {
-  this.changer_.animatePage(false);
+npf.ui.PagePaginator.prototype.onPrevClick_ = function(evt) {
+  this.prev();
 };
 
 /**
  * @param {goog.events.BrowserEvent} evt
  * @private
  */
-npf.ui.PagePaginator.prototype.onNextTap_ = function(evt) {
-  this.changer_.animatePage(true);
+npf.ui.PagePaginator.prototype.onNextClick_ = function(evt) {
+  this.next();
+};
+
+npf.ui.PagePaginator.prototype.next = function() {
+  if (this.changer_) {
+    this.changer_.animatePage(true);
+  }
+};
+
+npf.ui.PagePaginator.prototype.prev = function() {
+  if (this.changer_) {
+    this.changer_.animatePage(false);
+  }
 };
 
 /**
@@ -195,10 +211,12 @@ npf.ui.PagePaginator.prototype.onNextTap_ = function(evt) {
  * @private
  */
 npf.ui.PagePaginator.prototype.onPageChange_ = function(evt) {
-  /** @type {number} */
   var pageIndex = /** @type {number} */ (evt.page);
+  var next = /** @type {boolean} */ (evt.next);
+  /** @type {number} */
+  var index;
 
-  if (this.pageIndex_ < pageIndex) {
+  if (next) {
     if (this.prevPage_) {
       this.removeChild(this.prevPage_);
       this.prevPage_.dispose();
@@ -207,8 +225,9 @@ npf.ui.PagePaginator.prototype.onPageChange_ = function(evt) {
     this.prevPage_ = this.page_;
     this.page_ = this.nextPage_;
 
-    if (this.pageCount_ - 1 > pageIndex) {
-      this.nextPage_ = this.appendPage_(pageIndex + 1);
+    if (this.ring_ || this.pageCount_ - 1 > pageIndex) {
+      index = (pageIndex + 1) % this.pageCount_;
+      this.nextPage_ = this.appendPage_(index);
     } else {
       this.nextPage_ = null;
     }
@@ -221,8 +240,9 @@ npf.ui.PagePaginator.prototype.onPageChange_ = function(evt) {
     this.nextPage_ = this.page_;
     this.page_ = this.prevPage_;
 
-    if (pageIndex) {
-      this.prevPage_ = this.appendPage_(pageIndex - 1);
+    if (this.ring_ || pageIndex) {
+      index = (this.pageCount_ + pageIndex - 1) % this.pageCount_;
+      this.prevPage_ = this.appendPage_(index);
     } else {
       this.prevPage_ = null;
     }
@@ -251,19 +271,20 @@ npf.ui.PagePaginator.prototype.onChange = function(index) {
  * @private
  */
 npf.ui.PagePaginator.prototype.updateContent_ = function() {
-  goog.style.setStyle(this.page_.getElement(), 'left', '0px');
+  this.getRenderer().setLeft(this.page_.getElement(), 0);
 
   if (this.prevPage_) {
-    goog.style.setStyle(this.prevPage_.getElement(), 'left', '-100%');
+    this.getRenderer().setLeft(this.prevPage_.getElement(), '-100%');
   }
 
   if (this.nextPage_) {
-    goog.style.setStyle(this.nextPage_.getElement(), 'left', '100%');
+    this.getRenderer().setLeft(this.nextPage_.getElement(), '100%');
   }
 
   var renderer = this.getRenderer();
-  renderer.setPrevEnabled(this, !!this.pageIndex_);
-  renderer.setNextEnabled(this, this.pageCount_ - 1 > this.pageIndex_);
+  renderer.setPrevEnabled(this, this.ring_ || !!this.pageIndex_);
+  renderer.setNextEnabled(
+    this, this.ring_ || this.pageCount_ - 1 > this.pageIndex_);
   renderer.setSelected(this, this.pageIndex_, true);
 };
 
@@ -316,6 +337,26 @@ npf.ui.PagePaginator.prototype.setDraggable = function(drag) {
   if (this.changer_) {
     this.changer_.setDraggable(this.draggable_);
   }
+};
+
+/**
+ * @return {boolean}
+ */
+npf.ui.PagePaginator.prototype.isRing = function() {
+  return this.ring_;
+};
+
+/**
+ * @param {boolean} enable
+ * @throws {Error} If the control is already in the document.
+ */
+npf.ui.PagePaginator.prototype.setRing = function(enable) {
+  if (this.isInDocument()) {
+    // Too late.
+    throw Error(goog.ui.Component.Error.ALREADY_RENDERED);
+  }
+
+  this.ring_ = enable;
 };
 
 /**

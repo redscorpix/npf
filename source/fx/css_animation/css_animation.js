@@ -18,7 +18,7 @@ goog.require('npf.userAgent.support');
 
 
 /**
-* @param {npf.fx.cssAnimation.Keyframes} keyframes
+ * @param {npf.fx.cssAnimation.Keyframes} keyframes
  * @param {Element} element
  * @param {number} duration in ms
  * @param {Array.<number>=} opt_acc defaults to npf.fx.css3.easing.LINEAR
@@ -56,7 +56,7 @@ npf.fx.CssAnimation.PreferredTimingFunction = {
  */
 npf.fx.CssAnimation.isSupported = function() {
   /** @type {boolean} */
-  var supported = npf.userAgent.support.isCssAnimationSupported();
+  var supported = npf.userAgent.support.getCssAnimations();
 
   return supported && npf.fx.Animation.enabled;
 };
@@ -482,9 +482,8 @@ npf.fx.CssAnimation.prototype.setTransformOrigin = function(origin) {
     value = origin;
   }
 
-  /** @type {string} */
-  var key = npf.userAgent.support.getCssPropertyName('transform-origin');
-  goog.style.setStyle(this.element, key, /** @type {string} */ (value));
+  goog.style.setStyle(
+    this.element, 'transform-origin', /** @type {string} */ (value));
 
   return this;
 };

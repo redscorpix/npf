@@ -504,9 +504,7 @@ npf.style.animation.getValue_ = function(element, style) {
  * @private
  */
 npf.style.animation.setValue_ = function(element, key, value) {
-  /** @type {string} */
-  var style = npf.userAgent.support.getCssPropertyName(key);
-  goog.style.setStyle(element, style, value);
+  goog.style.setStyle(element, key, value);
 };
 
 /**

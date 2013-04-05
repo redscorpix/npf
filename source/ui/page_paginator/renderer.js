@@ -3,6 +3,7 @@ goog.provide('npf.ui.pagePaginator.Renderer');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('goog.dom.classes');
+goog.require('goog.style');
 goog.require('npf.ui.renderComponent.Renderer');
 
 
@@ -28,15 +29,20 @@ npf.ui.pagePaginator.Renderer.prototype.createDom = function(component) {
   /** @type {Element} */
   var element = goog.base(this, 'createDom', component);
   /** @type {Element} */
-  var prevElement = this.createPrevElement(/** @type {npf.ui.PagePaginator} */ (component));
+  var prevElement = this.createPrevElement(
+    /** @type {npf.ui.PagePaginator} */ (component));
   /** @type {Element} */
-  var nextElement = this.createNextElement(/** @type {npf.ui.PagePaginator} */ (component));
+  var nextElement = this.createNextElement(
+    /** @type {npf.ui.PagePaginator} */ (component));
   /** @type {Element} */
-  var containerElement = this.createContainerElement(/** @type {npf.ui.PagePaginator} */ (component));
+  var containerElement = this.createContainerElement(
+    /** @type {npf.ui.PagePaginator} */ (component));
   /** @type {Element} */
-  var contentElement = this.createContentElement(/** @type {npf.ui.PagePaginator} */ (component));
+  var contentElement = this.createContentElement(
+    /** @type {npf.ui.PagePaginator} */ (component));
   /** @type {Element} */
-  var indicatorsElement = this.createPageIndicatorsElement(/** @type {npf.ui.PagePaginator} */ (component));
+  var indicatorsElement = this.createPageIndicatorsElement(
+    /** @type {npf.ui.PagePaginator} */ (component));
 
   if (prevElement) {
     goog.dom.appendChild(element, prevElement);
@@ -65,7 +71,8 @@ npf.ui.pagePaginator.Renderer.prototype.createDom = function(component) {
  * @param {npf.ui.PagePaginator} component
  * @return {Element}
  */
-npf.ui.pagePaginator.Renderer.prototype.createPrevElement = function(component) {
+npf.ui.pagePaginator.Renderer.prototype.createPrevElement = function(
+    component) {
   return component.getDomHelper().createDom(goog.dom.TagName.INS,
     this.getPrevCssClass());
 };
@@ -74,7 +81,8 @@ npf.ui.pagePaginator.Renderer.prototype.createPrevElement = function(component) 
  * @param {npf.ui.PagePaginator} component
  * @return {Element}
  */
-npf.ui.pagePaginator.Renderer.prototype.createNextElement = function(component) {
+npf.ui.pagePaginator.Renderer.prototype.createNextElement = function(
+    component) {
   return component.getDomHelper().createDom(goog.dom.TagName.INS,
     this.getNextCssClass());
 };
@@ -83,7 +91,8 @@ npf.ui.pagePaginator.Renderer.prototype.createNextElement = function(component) 
  * @param {npf.ui.PagePaginator} component
  * @return {Element}
  */
-npf.ui.pagePaginator.Renderer.prototype.createContainerElement = function(component) {
+npf.ui.pagePaginator.Renderer.prototype.createContainerElement = function(
+    component) {
   return component.getDomHelper().createDom(goog.dom.TagName.DIV,
     this.getContainerCssClass());
 };
@@ -92,7 +101,8 @@ npf.ui.pagePaginator.Renderer.prototype.createContainerElement = function(compon
  * @param {npf.ui.PagePaginator} component
  * @return {Element}
  */
-npf.ui.pagePaginator.Renderer.prototype.createContentElement = function(component) {
+npf.ui.pagePaginator.Renderer.prototype.createContentElement = function(
+    component) {
   return component.getDomHelper().createDom(goog.dom.TagName.DIV,
     this.getContentCssClass());
 };
@@ -101,7 +111,8 @@ npf.ui.pagePaginator.Renderer.prototype.createContentElement = function(componen
  * @param {npf.ui.PagePaginator} component
  * @return {Element}
  */
-npf.ui.pagePaginator.Renderer.prototype.createPageIndicatorsElement = function(component) {
+npf.ui.pagePaginator.Renderer.prototype.createPageIndicatorsElement = function(
+    component) {
   /** @type {!Element} */
   var element = component.getDomHelper().createDom(goog.dom.TagName.INS,
     this.getPageIndicatorsCssClass());
@@ -136,7 +147,8 @@ npf.ui.pagePaginator.Renderer.prototype.getContentElement = function(element) {
  * @param {Element} element
  * @return {Element}
  */
-npf.ui.pagePaginator.Renderer.prototype.getContainerElement = function(element) {
+npf.ui.pagePaginator.Renderer.prototype.getContainerElement = function(
+    element) {
   if (element) {
     return goog.dom.getElementByClass(this.getContainerCssClass(), element);
   }
@@ -171,7 +183,8 @@ npf.ui.pagePaginator.Renderer.prototype.getNextElement = function(element) {
 /**
  * @return {{length:number}}
  */
-npf.ui.pagePaginator.Renderer.prototype.getPageIndicatorElements = function(element) {
+npf.ui.pagePaginator.Renderer.prototype.getPageIndicatorElements = function(
+    element) {
   return goog.dom.getElementsByClass(this.getPageIndicatorCssClass(), element);
 };
 
@@ -180,7 +193,7 @@ npf.ui.pagePaginator.Renderer.prototype.getPageIndicatorElements = function(elem
  * @param {boolean} enable
  */
 npf.ui.pagePaginator.Renderer.prototype.setPrevEnabled = function(component,
-                                                                  enable) {
+    enable) {
   /** @type {Element} */
   var prevElement = component.getPrevElement();
 
@@ -195,7 +208,7 @@ npf.ui.pagePaginator.Renderer.prototype.setPrevEnabled = function(component,
  * @param {boolean} enable
  */
 npf.ui.pagePaginator.Renderer.prototype.setNextEnabled = function(component,
-                                                                  enable) {
+    enable) {
   /** @type {Element} */
   var nextElement = component.getNextElement();
 
@@ -301,7 +314,7 @@ npf.ui.pagePaginator.Renderer.prototype.getSelectedPageIndicatorCssClass = funct
  * @param {boolean} select
  */
 npf.ui.pagePaginator.Renderer.prototype.setSelected = function(component, index,
-                                                               select) {
+    select) {
   /** @type {Element} */
   var element = component.getElement();
 
@@ -313,5 +326,16 @@ npf.ui.pagePaginator.Renderer.prototype.setSelected = function(component, index,
       goog.dom.classes.enable(indicatorElements[index],
         this.getSelectedPageIndicatorCssClass(), select);
     }
+  }
+};
+
+/**
+ * @param {Element} element
+ * @param {number|string} left
+ */
+npf.ui.pagePaginator.Renderer.prototype.setLeft = function(element, left) {
+  if (element) {
+    left = goog.isNumber(left) ? left + 'px' : left;
+    goog.style.setStyle(element, 'left', left);
   }
 };

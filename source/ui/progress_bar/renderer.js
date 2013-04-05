@@ -1,8 +1,8 @@
 goog.provide('npf.ui.progressBar.Renderer');
 
+goog.require('goog.a11y.aria');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
-goog.require('goog.dom.a11y');
 goog.require('goog.dom.classes');
 goog.require('goog.style');
 goog.require('npf.ui.renderComponent.Renderer');
@@ -34,8 +34,8 @@ npf.ui.progressBar.Renderer.prototype.getCssClass = function() {
 npf.ui.progressBar.Renderer.prototype.createDom = function(component) {
   /** @type {npf.ui.ProgressBar.Orientation} */
   var orientation = component.getOrientation();
-  /** @type {Element} */
-  var element = goog.base(this, 'createDom', component);
+  var element = /** @type {!Element} */ (
+    goog.base(this, 'createDom', component));
   goog.dom.classes.add(element, this.getOrientationCssClass(orientation));
 
   var thumbElement = this.createThumbElement(component);
@@ -43,8 +43,8 @@ npf.ui.progressBar.Renderer.prototype.createDom = function(component) {
 
   // state live = polite will notify the user of updates,
   // but will not interrupt ongoing feedback
-  goog.dom.a11y.setRole(element, 'progressbar');
-  goog.dom.a11y.setState(element, 'live', 'polite');
+  goog.a11y.aria.setRole(element, 'progressbar');
+  goog.a11y.aria.setState(element, 'live', 'polite');
 
   return element;
 };
@@ -129,7 +129,7 @@ npf.ui.progressBar.Renderer.prototype.setValue = function(component, value) {
   var element = component.getElement();
 
   if (element) {
-    goog.dom.a11y.setState(element, 'valuenow', value);
+    goog.a11y.aria.setState(element, 'valuenow', value);
   }
 };
 
@@ -142,7 +142,7 @@ npf.ui.progressBar.Renderer.prototype.setMinimum = function(component, value) {
   var element = component.getElement();
 
   if (element) {
-    goog.dom.a11y.setState(element, 'valuemin', value);
+    goog.a11y.aria.setState(element, 'valuemin', value);
   }
 };
 
@@ -155,7 +155,7 @@ npf.ui.progressBar.Renderer.prototype.setMaximum = function(component, value) {
   var element = component.getElement();
 
   if (element) {
-    goog.dom.a11y.setState(element, 'valuemax', value);
+    goog.a11y.aria.setState(element, 'valuemax', value);
   }
 };
 

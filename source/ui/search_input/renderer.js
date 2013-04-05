@@ -250,6 +250,6 @@ npf.ui.searchInput.Renderer.prototype.getValue = function(element) {
  */
 npf.ui.searchInput.Renderer.prototype.setVisible = function(element, visible) {
   if (element) {
-    goog.style.setStyle(element, 'display', visible ? '' : 'none');
+    goog.style.showElement(element, visible);
   }
 };

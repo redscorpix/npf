@@ -30,12 +30,6 @@ npf.ui.pagePaginator.Dragger.prototype.isLeftLimit_ = false;
  */
 npf.ui.pagePaginator.Dragger.prototype.isRightLimit_ = false;
 
-/**
- * @type {number}
- * @private
- */
-npf.ui.pagePaginator.Dragger.prototype.timeoutId_;
-
 
 /** @inheritDoc */
 npf.ui.pagePaginator.Dragger.prototype.startDrag = function(e) {

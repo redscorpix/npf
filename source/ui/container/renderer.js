@@ -1,10 +1,9 @@
 goog.provide('npf.ui.container.Renderer');
 
+goog.require('goog.a11y.aria');
+goog.require('goog.a11y.aria.State');
 goog.require('goog.array');
-goog.require('goog.dom.TagName');
 goog.require('goog.dom');
-goog.require('goog.dom.a11y');
-goog.require('goog.dom.a11y.State');
 goog.require('goog.dom.classes');
 goog.require('goog.object');
 goog.require('goog.style');
@@ -68,7 +67,7 @@ npf.ui.container.Renderer.prototype.getCssClass = function() {
 /**
  * Returns the ARIA role to be applied to the component.
  * See http://wiki/Main/ARIA for more info.
- * @return {goog.dom.a11y.Role|undefined} ARIA role.
+ * @return {goog.a11y.aria.Role|undefined} ARIA role.
  */
 npf.ui.container.Renderer.prototype.getAriaRole = function() {
   // By default, the ARIA role is unspecified.
@@ -189,14 +188,14 @@ npf.ui.container.Renderer.prototype.initializeDom = function(component) {
 /**
  * Sets the element's ARIA role.
  * @param {Element} element Element to update.
- * @param {?goog.dom.a11y.Role=} opt_preferredRole The preferred ARIA role.
+ * @param {?goog.a11y.aria.Role=} opt_preferredRole The preferred ARIA role.
  */
 npf.ui.container.Renderer.prototype.setAriaRole = function(element,
                                                            opt_preferredRole) {
   var ariaRole = opt_preferredRole || this.getAriaRole();
 
-  if (ariaRole) {
-    goog.dom.a11y.setRole(element, ariaRole);
+  if (element && ariaRole) {
+    goog.a11y.aria.setRole(element, ariaRole);
   }
 };
 
@@ -322,6 +321,17 @@ npf.ui.container.Renderer.prototype.setFocusable = function(component, focusable
   }
 };
 
+/**
+ * @param {Element} element
+ * @return {boolean}
+ */
+npf.ui.container.Renderer.prototype.isElementShown = function(element) {
+  if (element) {
+    return goog.style.isElementShown(element);
+  }
+
+  return false;
+};
 
 /**
  * Shows or hides the element.
@@ -334,6 +344,22 @@ npf.ui.container.Renderer.prototype.setVisible = function(element, visible) {
   goog.style.showElement(element, visible);
 };
 
+/**
+ * Checks if a mouse event (mouseover or mouseout) occured below an element.
+ * @param {goog.events.BrowserEvent} evt Mouse event (should be mouseover or
+ *     mouseout).
+ * @param {Element} element The ancestor element.
+ * @return {boolean} Whether the event has a relatedTarget (the element the
+ *     mouse is coming from) and it's a descendent of element.
+ * @private
+ */
+npf.ui.container.Renderer.prototype.isMouseEventWithinElement = function(evt,
+    element) {
+  // If relatedTarget is null, it means there was no previous element (e.g.
+  // the mouse moved out of the window).  Assume this means that the mouse
+  // event was not within the element.
+  return !!evt.relatedTarget && goog.dom.contains(element, evt.relatedTarget);
+};
 
 /**
  * Updates the appearance of the component in response to a state change.
@@ -370,17 +396,17 @@ npf.ui.container.Renderer.prototype.updateAriaState = function(element, state,
   // Ensure the ARIA state map exists.
   if (!npf.ui.container.Renderer.ARIA_STATE_MAP_) {
     npf.ui.container.Renderer.ARIA_STATE_MAP_ = goog.object.create(
-      goog.ui.Component.State.DISABLED, goog.dom.a11y.State.DISABLED,
-      goog.ui.Component.State.SELECTED, goog.dom.a11y.State.SELECTED,
-      goog.ui.Component.State.CHECKED, goog.dom.a11y.State.CHECKED,
-      goog.ui.Component.State.OPENED, goog.dom.a11y.State.EXPANDED
+      goog.ui.Component.State.DISABLED, goog.a11y.aria.State.DISABLED,
+      goog.ui.Component.State.SELECTED, goog.a11y.aria.State.SELECTED,
+      goog.ui.Component.State.CHECKED, goog.a11y.aria.State.CHECKED,
+      goog.ui.Component.State.OPENED, goog.a11y.aria.State.EXPANDED
     );
   }
 
   var ariaState = npf.ui.container.Renderer.ARIA_STATE_MAP_[state];
 
-  if (ariaState) {
-    goog.dom.a11y.setState(element, ariaState, enable);
+  if (element && ariaState) {
+    goog.a11y.aria.setState(element, ariaState, enable);
   }
 };
 

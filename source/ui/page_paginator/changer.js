@@ -13,7 +13,7 @@ goog.require('goog.object');
 goog.require('goog.style');
 goog.require('goog.userAgent');
 goog.require('npf.fx.KeyframeAnimation');
-goog.require('npf.userAgent.support');
+goog.require('npf.fx.css3.easing');
 goog.require('npf.ui.pagePaginator.Dragger');
 
 
@@ -36,10 +36,6 @@ npf.ui.pagePaginator.Changer = function(element, contentElement, page,
 
   this.handler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.handler_);
-
-  this.handler_.listen(window, goog.events.EventType.RESIZE, this.onResize_);
-
-  this.update_();
 };
 goog.inherits(npf.ui.pagePaginator.Changer, goog.events.EventTarget);
 
@@ -58,6 +54,7 @@ npf.ui.pagePaginator.Changer.Stamp;
 npf.ui.pagePaginator.Changer.EventType = {
   /**
    * page (number)
+   * next (boolean)
    */
   PAGE_CHANGE: goog.events.getUniqueId('pageChange')
 };
@@ -66,7 +63,7 @@ npf.ui.pagePaginator.Changer.EventType = {
  * @type {number}
  * @const
  */
-npf.ui.pagePaginator.Changer.DURATION = 500;
+npf.ui.pagePaginator.Changer.DURATION = 250;
 
 /**
  * @type {Element}
@@ -140,6 +137,12 @@ npf.ui.pagePaginator.Changer.prototype.emptyElement_ = null;
  */
 npf.ui.pagePaginator.Changer.prototype.draggable_ = true;
 
+/**
+ * @type {boolean}
+ * @private
+ */
+npf.ui.pagePaginator.Changer.prototype.ring_ = false;
+
 
 /** @inheritDoc */
 npf.ui.pagePaginator.Changer.prototype.disposeInternal = function() {
@@ -155,6 +158,14 @@ npf.ui.pagePaginator.Changer.prototype.disposeInternal = function() {
   this.animation_ = null;
   this.dragStamps_ = null;
   this.emptyElement_ = null;
+};
+
+npf.ui.pagePaginator.Changer.prototype.init = function() {
+  /** @type {!goog.dom.DomHelper} */
+  var domHelper = goog.dom.getDomHelper(this.element_);
+  this.handler_
+    .listen(domHelper.getWindow(), goog.events.EventType.RESIZE, this.onResize_);
+  this.update_();
 };
 
 /**
@@ -219,13 +230,9 @@ npf.ui.pagePaginator.Changer.prototype.reinitDragger_ = function() {
   this.dragger_.addEventListener(goog.fx.Dragger.EventType.END,
     this.onDragEnd_, false, this);
 
-  if (!this.pageIndex_) {
-    this.dragger_.setLeftLimit(true);
-  }
-
-  if (this.pageCount_ - 1 == this.pageIndex_) {
-    this.dragger_.setRightLimit(true);
-  }
+  this.dragger_.setLeftLimit(!this.ring_ && !this.pageIndex_);
+  this.dragger_.setRightLimit(
+    !this.ring_ && this.pageCount_ - 1 == this.pageIndex_);
 };
 
 /**
@@ -267,7 +274,8 @@ npf.ui.pagePaginator.Changer.prototype.onDrag_ = function(evt) {
   });
 
   if (!this.emptyElement_ && 10 < Math.abs(this.dragStamps_[0].x - left)) {
-    this.emptyElement_ = goog.dom.createElement(goog.dom.TagName.DIV);
+    this.emptyElement_ = goog.dom.getDomHelper(this.element_).createElement(
+      goog.dom.TagName.DIV);
     goog.style.setStyle(this.emptyElement_, {
       'height': '100%',
       'left': '0px',
@@ -284,74 +292,51 @@ npf.ui.pagePaginator.Changer.prototype.onDrag_ = function(evt) {
  * @private
  */
 npf.ui.pagePaginator.Changer.prototype.onDragEnd_ = function(evt) {
-  /** @type {number} */
-  var direction = 0;
-  /** @type {number} */
-  var pointCount = this.dragStamps_.length;
-  /** @type {Array.<number>} */
-  var timing = null;
+  var firstLeft = this.dragStamps_[0] ? this.dragStamps_[0].x : 0;
+  var firstTime = this.dragStamps_[0] ? this.dragStamps_[0].time : goog.now();
+  var now = goog.now();
+  var threshold = this.width_ / 2;
+  var offset = parseInt(goog.style.getStyle(this.contentElement_, 'left') || 0, 10);
+  var animationDirection = 0;
+  var flickDistance = offset - firstLeft;
+  var flickDuration = now - firstTime;
 
-  if (2 < pointCount) {
-    // По двум последним точкам с помощью уравнения прямой узнаем, остановил ли пользователь анимацию.
+  if (flickDuration > 0 && Math.abs(flickDistance) >= 10) {
+    var velocity = flickDistance / flickDuration;
 
-    /** @type {number} */
-    var x1 = this.dragStamps_[pointCount - 2].time -
-      this.dragStamps_[pointCount - 3].time;
-    /** @type {number} */
-    var y1 = Math.abs(this.dragStamps_[pointCount - 2].x -
-      this.dragStamps_[pointCount - 3].x);
-    /** @type {number} */
-    var x2 = this.dragStamps_[pointCount - 1].time -
-      this.dragStamps_[pointCount - 2].time;
-    /** @type {number} */
-    var y2 = Math.abs(this.dragStamps_[pointCount - 1].x -
-      this.dragStamps_[pointCount - 2].x);
-    /**
-     * timestamp при y3 = 0
-     * @type {number}
-     */
-    var x3 = y1 - y2 ? (x2 * y1 - x1 * y2) / (y1 - y2) : 0;
+    if (Math.abs(velocity) >= 1) {
+      if (velocity < 0 && (this.pageIndex_ < this.pageCount_ - 1 || this.ring_)) {
+        animationDirection = -1;
+      } else if (velocity > 0 && (this.pageIndex_ > 0 || this.ring_)) {
+        animationDirection = 1;
+      }
+    }
+  }
 
-    if (10 < x3) {
-      direction = 0 < this.dragStamps_[pointCount - 1].x -
-        this.dragStamps_[pointCount - 2].x ? 1 : -1;
-      timing = [0, 0, 0, 1];
+  if (!animationDirection) {
+    if (
+      (this.ring_ || this.pageIndex_ < this.pageCount_ - 1) &&
+      offset < -threshold
+    ) {
+      animationDirection = -1;
+    } else if (
+      (this.ring_ || this.pageIndex_ > 0) &&
+      offset > threshold
+    ) {
+      animationDirection = 1;
     }
   }
 
   this.dragStamps_ = null;
 
-  /** @type {number} */
-  var left = parseInt(goog.style.getStyle(this.contentElement_, 'left'), 10);
-  /** @type {number} */
-  var pageIndex = this.pageIndex_;
-
-  if (
-    this.pageCount_ - 1 > this.pageIndex_ &&
-    (
-      (left < -this.width_ / 2 && 0 >= direction) ||
-      (left < this.width_ / 2 && 0 > direction)
-    )
-  ) {
-    pageIndex++;
-    left += this.width_;
-  } else if (
-    this.pageIndex_ &&
-    (
-      (left > this.width_ / 2 && 0 <= direction) ||
-      (left > -this.width_ / 2 && 0 < direction)
-    )
-  ) {
-    pageIndex--;
-    left -= this.width_;
-  }
-
-  if (this.pageIndex_ != pageIndex) {
-    this.pageIndex_ = pageIndex;
+  if (animationDirection) {
+    this.pageIndex_ = (
+      this.pageCount_ + this.pageIndex_ - animationDirection) % this.pageCount_;
 
     this.dispatchEvent({
       type: npf.ui.pagePaginator.Changer.EventType.PAGE_CHANGE,
-      page: this.pageIndex_
+      page: this.pageIndex_,
+      next: 0 > animationDirection
     });
 
     if (this.draggable_) {
@@ -366,7 +351,7 @@ npf.ui.pagePaginator.Changer.prototype.onDragEnd_ = function(evt) {
   goog.dom.removeNode(this.emptyElement_);
   this.emptyElement_ = null;
 
-  this.animateReturn_(left, direction ? timing : null);
+  this.animateReturn_(offset - this.width_ * animationDirection);
 };
 
 /**
@@ -380,8 +365,8 @@ npf.ui.pagePaginator.Changer.prototype.animatePage = function(next) {
   }
 
   if (
-    (next && this.pageCount_ - 1 == this.pageIndex_) ||
-    (!next && !this.pageIndex_)
+    (next && this.pageCount_ - 1 == this.pageIndex_ && !this.ring_) ||
+    (!next && !this.pageIndex_ && !this.ring_)
   ) {
     return;
   }
@@ -392,6 +377,8 @@ npf.ui.pagePaginator.Changer.prototype.animatePage = function(next) {
     this.pageIndex_--;
   }
 
+  this.pageIndex_ = (this.pageCount_ + this.pageIndex_) % this.pageCount_;
+
   /** @type {number} */
   var from = next ? this.width_ : -this.width_;
   /** @type {!Object} */
@@ -400,27 +387,25 @@ npf.ui.pagePaginator.Changer.prototype.animatePage = function(next) {
   var toProperties;
 
   if (goog.userAgent.MOBILE) {
-    /** @type {string} */
-    var transformCss = npf.userAgent.support.getCssPropertyName('transform');
-
-    fromProperties = goog.object.create(
-      transformCss, 'translate(' + from + 'px,0px)'
-    );
-    toProperties = goog.object.create(
-      transformCss, 'translate(0px,0px)'
-    );
+    fromProperties = {
+      'transform': 'translate(' + from + 'px,0px)'
+    };
+    toProperties = {
+      'transform': 'translate(0px,0px)'
+    };
   } else {
-    fromProperties = goog.object.create(
-      'left', from + 'px'
-    );
-    toProperties = goog.object.create(
-      'left', '0px'
-    );
+    fromProperties = {
+      'left': from + 'px'
+    };
+    toProperties = {
+      'left': '0px'
+    };
   }
 
   this.dispatchEvent({
     type: npf.ui.pagePaginator.Changer.EventType.PAGE_CHANGE,
-    page: this.pageIndex_
+    page: this.pageIndex_,
+    next: next
   });
 
   this.animation_ = new npf.fx.KeyframeAnimation(this.contentElement_,
@@ -456,39 +441,32 @@ npf.ui.pagePaginator.Changer.prototype.onAnimationFinish_ = function(evt) {
 
 /**
  * @param {number} fromX
- * @param {Array.<number>=} opt_timing
  * @private
  */
-npf.ui.pagePaginator.Changer.prototype.animateReturn_ = function(fromX,
-                                                                 opt_timing) {
-  /** @type {!Array.<number>} */
-  var timing = opt_timing || [0.25, 0.1, 0.25, 1];
+npf.ui.pagePaginator.Changer.prototype.animateReturn_ = function(fromX) {
   /** @type {!Object} */
   var fromProperties;
   /** @type {!Object} */
   var toProperties;
 
   if (goog.userAgent.MOBILE) {
-    /** @type {string} */
-    var transformCss = npf.userAgent.support.getCssPropertyName('transform');
-
-    fromProperties = goog.object.create(
-      transformCss, 'translate(' + fromX + 'px,0px)'
-    );
-    toProperties = goog.object.create(
-      transformCss, 'translate(0px,0px)'
-    );
+    fromProperties = {
+      'transform': 'translate(' + fromX + 'px,0px)'
+    };
+    toProperties = {
+      'transform': 'translate(0px,0px)'
+    };
   } else {
-    fromProperties = goog.object.create(
-      'left', fromX + 'px'
-    );
-    toProperties = goog.object.create(
-      'left', '0px'
-    );
+    fromProperties = {
+      'left': fromX + 'px'
+    };
+    toProperties = {
+      'left': '0px'
+    };
   }
 
   this.animation_ = new npf.fx.KeyframeAnimation(this.contentElement_,
-    npf.ui.pagePaginator.Changer.DURATION, timing);
+    npf.ui.pagePaginator.Changer.DURATION, npf.fx.css3.easing.EASE_OUT);
   this.animation_.addEventListener(npf.fx.cssAnimation.EventType.FINISH,
     this.onReturnAnimationFinish_, false, this);
   this.animation_.from(fromProperties);
@@ -531,4 +509,18 @@ npf.ui.pagePaginator.Changer.prototype.setDraggable = function(drag) {
     goog.dispose(this.dragger_);
     this.dragger_ = null;
   }
+};
+
+/**
+ * @return {boolean}
+ */
+npf.ui.pagePaginator.Changer.prototype.isRing = function() {
+  return this.ring_;
+};
+
+/**
+ * @param {boolean} enable
+ */
+npf.ui.pagePaginator.Changer.prototype.setRing = function(enable) {
+  this.ring_ = enable;
 };

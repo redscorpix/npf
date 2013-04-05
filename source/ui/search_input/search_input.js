@@ -101,8 +101,8 @@ npf.ui.SearchInput.prototype.enterDocument = function() {
   }
 
   if (clearElement) {
-    handler.listen(clearElement, goog.events.EventType.CLICK,
-      this.onClearClick_);
+    handler
+      .listen(clearElement, goog.events.EventType.CLICK, this.onClearClick_);
   }
 
   this.inputHandler_ = new goog.events.InputHandler(this.getQueryElement());

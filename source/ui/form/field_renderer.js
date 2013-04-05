@@ -1,6 +1,7 @@
 goog.provide('npf.ui.form.FieldRenderer');
 
 goog.require('goog.dom');
+goog.require('goog.dom.TagName');
 goog.require('goog.dom.classes');
 goog.require('goog.dom.forms');
 goog.require('npf.ui.container.Renderer');

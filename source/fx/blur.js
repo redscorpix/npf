@@ -6,7 +6,7 @@ goog.provide('npf.fx.blur.BlurStack');
  * Version: 0.5
  * Author: Mario Klingemann
  * Contact: mario@quasimondo.com
- * Website: http://www.quasimondo.com/StackBlurForCanvas
+ * Website: http://www.quasimondo.com/StackBlurForCanvas/StackBlurDemo.html
  * Twitter: @quasimondo
  */
 
@@ -17,6 +17,7 @@ goog.provide('npf.fx.blur.BlurStack');
  * @param {number} radius
  * @param {boolean=} opt_blurAlphaChannel
  * @return {boolean}
+ * @deprecated Use npf.graphics.Blur
  */
 npf.fx.blur.stackBlurImage = function(img, canvas, radius,
                                       opt_blurAlphaChannel) {
@@ -49,6 +50,7 @@ npf.fx.blur.stackBlurImage = function(img, canvas, radius,
  * @param {number} height
  * @param {number} radius
  * @return {boolean}
+ * @deprecated Use npf.graphics.Blur
  */
 npf.fx.blur.stackBlurCanvasRGBA = function(canvas, left, top, width, height,
                                            radius) {
@@ -415,11 +417,12 @@ npf.fx.blur.stackBlurCanvasRGBA = function(canvas, left, top, width, height,
  * @param {number} height
  * @param {number} radius
  * @return {boolean}
+ * @deprecated Use npf.graphics.Blur
  */
 npf.fx.blur.stackBlurCanvasRGB = function(canvas, left, top, width, height,
                                           radius) {
-  var context =
-    /** @type {CanvasRenderingContext2D} */ (canvas.getContext("2d"));
+  var context = /** @type {CanvasRenderingContext2D} */ (
+    canvas.getContext("2d"));
   /** @type {ImageData} */
   var imageData;
 
@@ -692,6 +695,7 @@ npf.fx.blur.stackBlurCanvasRGB = function(canvas, left, top, width, height,
 
 /**
  * @constructor
+ * @deprecated Use npf.graphics.Blur
  */
 npf.fx.blur.BlurStack = function() {
   /**

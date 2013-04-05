@@ -12,6 +12,7 @@ goog.require('npf.userAgent.support');
  * @param {Node} element
  * @constructor
  * @extends {goog.events.EventTarget}
+ * @deprecated Use npf.events.TouchHandler
  */
 npf.events.TapHandler = function(element) {
   goog.base(this);
@@ -20,7 +21,7 @@ npf.events.TapHandler = function(element) {
   var handler = new goog.events.EventHandler(this);
   this.registerDisposable(handler);
 
-  if (npf.userAgent.support.isTouchSupported()) {
+  if (npf.userAgent.support.getTouch()) {
     handler
       .listen(element, EventType.TOUCHCANCEL, this.onTouchCancel_)
       .listen(element, EventType.TOUCHEND, this.onTouchEnd_)
