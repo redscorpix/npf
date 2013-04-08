@@ -341,7 +341,7 @@ npf.ui.container.Renderer.prototype.isElementShown = function(element) {
 npf.ui.container.Renderer.prototype.setVisible = function(element, visible) {
   // The base class implementation is trivial; subclasses should override as
   // needed.  It should be possible to do animated reveals, for example.
-  goog.style.showElement(element, visible);
+  goog.style.setElementShown(element, visible);
 };
 
 /**

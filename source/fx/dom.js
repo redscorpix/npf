@@ -451,14 +451,14 @@ npf.fx.dom.Fade.prototype.updateStyle = function() {
  * Animation event handler that will show the element.
  */
 npf.fx.dom.Fade.prototype.show = function() {
-  goog.style.showElement(this.element, true);
+  goog.style.setElementShown(this.element, true);
 };
 
 /**
  * Animation event handler that will hide the element
  */
 npf.fx.dom.Fade.prototype.hide = function() {
-  goog.style.showElement(this.element, false);
+  goog.style.setElementShown(this.element, false);
 };
 
 /**
