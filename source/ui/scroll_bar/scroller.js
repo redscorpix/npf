@@ -257,6 +257,10 @@ npf.ui.scrollBar.Scroller.prototype.getRunnerSize = function() {
   var scrollBarSize = this.getScrollBarSize();
   /** @type {number} */
   var scrollBarContentSize = this.getScrollBarContentSize();
+  // TODO(max.nikitin@): IE8 doesn't support division by zero :)
+  if (scrollBarContentSize * size == 0) {
+    return 0;
+  }
   /** @type {number} */
   var runnerSize = Math.round(scrollBarSize / scrollBarContentSize * size);
 
