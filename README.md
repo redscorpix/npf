@@ -1,4 +1,4 @@
 npf
 ===
 
-No Pop Framework
+No Pop Framework based on Google Closure Library.

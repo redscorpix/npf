@@ -1,0 +1,73 @@
+/**
+ * Container
+ */
+.npf-scrollable-container {
+  position: relative;
+}
+
+.npf-scrollable-container-scroll {
+  bottom: 0;
+  left: 0;
+  overflow: scroll;
+  -webkit-overflow-scrolling: touch;
+  position: absolute;
+  right: 0;
+  top: 0;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.npf-scrollable-container-content {
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+
+/**
+ * Scroll Bar
+ */
+.npf-scrollable-scrollBar {
+  display: block;
+  height: 100%;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 15px;
+}
+
+.npf-scrollable-scrollBar-background,
+.npf-scrollable-scrollBar-runner {
+  @include border-radius(2px);
+
+  display: block;
+  left: 0;
+  margin-left: 5px;
+  position: absolute;
+  width: 5px
+}
+
+.npf-scrollable-scrollBar-background {
+  background: #bbb;
+  height: 100%;
+  top: 0;
+  visibility: hidden;
+}
+
+.npf-scrollable-scrollBar-runner {
+  background: #999;
+  top: 0;
+}
+
+.npf-scrollable-scrollBar:hover {
+  .npf-scrollable-scrollBar-background {
+    visibility: visible;
+  }
+
+  .npf-scrollable-scrollBar-runner {
+    background: #666;
+  }
+}
