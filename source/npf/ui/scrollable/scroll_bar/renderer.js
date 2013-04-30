@@ -53,7 +53,7 @@ npf.ui.scrollable.scrollBar.Renderer.prototype.createDom = function(scroller) {
 npf.ui.scrollable.scrollBar.Renderer.prototype.setVisible = function(element,
     visible) {
   if (element) {
-    goog.style.showElement(element, visible);
+    goog.style.setElementShown (element, visible);
   }
 };
 
