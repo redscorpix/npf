@@ -417,15 +417,13 @@ npf.fx.CssAnimation.prototype.onAnimationEnd_ = function(evt) {
   var name = /** @type {string} */ (evt.getBrowserEvent()['animationName']);
 
   if (this.element === element && this.keyframes_.getName() == name) {
-    goog.Timer.callOnce(function() {
-      this.playState_ = npf.style.animation.PlayState.PAUSED;
-      this.clearDom();
-      this.cleared_ = true;
-      this.finished_ = true;
-      this.setStateStopped();
-      this.onFinish();
-      this.onEnd();
-    }, 0, this);
+    this.playState_ = npf.style.animation.PlayState.PAUSED;
+    this.clearDom();
+    this.cleared_ = true;
+    this.finished_ = true;
+    this.setStateStopped();
+    this.onFinish();
+    this.onEnd();
   }
 };
 
