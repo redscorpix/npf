@@ -18,29 +18,26 @@ npf.events.MouseSimulator = function(element) {
   this.handler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.handler_);
 
-  this.handler_
-    .listen(this.element_, goog.events.EventType.TOUCHSTART, this.onStart_)
-    .listen(this.element_, goog.events.EventType.TOUCHMOVE, this.onMove_)
-    .listen(this.element_, goog.events.EventType.TOUCHEND, this.onEnd_);
+  this.handler_.
+    listen(this.element_, goog.events.EventType.TOUCHSTART, this.onStart_).
+    listen(this.element_, goog.events.EventType.TOUCHMOVE, this.onMove_).
+    listen(this.element_, goog.events.EventType.TOUCHEND, this.onEnd_);
 };
 goog.inherits(npf.events.MouseSimulator, goog.Disposable);
 
 
 /**
- * @type {Node}
- * @private
+ * @private {Node}
  */
 npf.events.MouseSimulator.prototype.element_;
 
 /**
- * @type {goog.events.EventHandler}
- * @private
+ * @private {goog.events.EventHandler}
  */
 npf.events.MouseSimulator.prototype.handler_;
 
 /**
- * @type {boolean}
- * @private
+ * @private {boolean}
  */
 npf.events.MouseSimulator.prototype.moved_ = false;
 

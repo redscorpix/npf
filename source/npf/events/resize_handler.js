@@ -26,9 +26,9 @@ npf.events.ResizeHandler = function(opt_domHelper) {
   this.fontSizeMonitor_ = new goog.dom.FontSizeMonitor(this.domHelper_);
   this.registerDisposable(this.fontSizeMonitor_);
 
-  this.eventHandler_
-    .listen(this.domHelper_.getWindow(), goog.events.EventType.RESIZE, this)
-    .listen(this.fontSizeMonitor_, goog.dom.FontSizeMonitor.EventType.CHANGE,
+  this.eventHandler_.
+    listen(this.domHelper_.getWindow(), goog.events.EventType.RESIZE, this).
+    listen(this.fontSizeMonitor_, goog.dom.FontSizeMonitor.EventType.CHANGE,
       this);
 };
 goog.inherits(npf.events.ResizeHandler, goog.events.EventTarget);
@@ -42,22 +42,19 @@ npf.events.ResizeHandler.EventType = {
 };
 
 /**
- * @type {goog.dom.DomHelper}
- * @private
+ * @private {goog.dom.DomHelper}
  */
 npf.events.ResizeHandler.prototype.domHelper_;
 
 /**
- * @type {goog.dom.FontSizeMonitor}
- * @private
- */
-npf.events.ResizeHandler.prototype.fontSizeMonitor_;
-
-/**
- * @type {goog.events.EventHandler}
- * @private
+ * @private {goog.events.EventHandler}
  */
 npf.events.ResizeHandler.prototype.eventHandler_;
+
+/**
+ * @private {goog.dom.FontSizeMonitor}
+ */
+npf.events.ResizeHandler.prototype.fontSizeMonitor_;
 
 
 /** @inheritDoc */
@@ -65,8 +62,8 @@ npf.events.ResizeHandler.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
   this.domHelper_ = null;
-  this.fontSizeMonitor_ = null;
   this.eventHandler_ = null;
+  this.fontSizeMonitor_ = null;
 };
 
 /**

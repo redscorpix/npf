@@ -28,8 +28,7 @@ goog.addSingletonGetter(npf.ui.StatedRenderer);
  * component states to ARIA states is neither component- nor renderer-specific,
  * this is a static property of the renderer class, and is initialized on first
  * use.
- * @type {Object}
- * @private
+ * @private {Object}
  */
 npf.ui.StatedRenderer.ARIA_STATE_MAP_;
 
@@ -338,7 +337,9 @@ npf.ui.StatedRenderer.prototype.isElementShown = function(element) {
 npf.ui.StatedRenderer.prototype.setVisible = function(element, visible) {
   // The base class implementation is trivial; subclasses should override as
   // needed.  It should be possible to do animated reveals, for example.
-  goog.style.showElement(element, visible);
+  if (element) {
+    goog.style.setElementShown(element, visible);
+  }
 };
 
 /**
@@ -526,8 +527,7 @@ npf.ui.StatedRenderer.prototype.createClassByStateMap_ = function() {
    * used when changing the DOM in response to a state change.  Precomputed
    * and cached on first use to minimize object allocations and string
    * concatenation.
-   * @type {Object}
-   * @private
+   * @private {Object}
    */
   this.classByState_ = goog.object.create(
     goog.ui.Component.State.DISABLED, this.getDisabledCssClass(),
@@ -555,8 +555,7 @@ npf.ui.StatedRenderer.prototype.createStateByClassMap_ = function() {
    * Map of state-specific structural class names to component states,
    * used during element decoration.  Precomputed and cached on first use
    * to minimize object allocations and string concatenation.
-   * @type {Object}
-   * @private
+   * @private {Object}
    */
   this.stateByClass_ = goog.object.transpose(this.classByState_);
 };

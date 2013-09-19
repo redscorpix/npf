@@ -95,7 +95,7 @@ npf.ui.Renderer.prototype.getContentElement = function(element) {
  */
 npf.ui.Renderer.prototype.enableClassName = function(component, className,
     enable) {
-  var element = (/** @type {Element} */ component.getElement ?
+  var element = /** @type {Element} */ (component.getElement ?
     component.getElement() : component);
 
   if (element) {

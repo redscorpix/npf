@@ -2,6 +2,7 @@ goog.provide('npf.ui.form.Password');
 
 goog.require('npf.ui.form.PasswordRenderer');
 goog.require('npf.ui.form.Text');
+goog.require('npf.ui.form.validation.Compare');
 
 
 /**
@@ -19,33 +20,11 @@ goog.inherits(npf.ui.form.Password, npf.ui.form.Text);
 
 
 /**
- * @enum {string}
+ * @param {string} errorMessage
+ * @param {npf.ui.form.Password} field
  */
-npf.ui.form.Password.ErrorMessage = {
-  COMPARE: 'Пароли не&nbsp;совпадают.'
-};
-
-/**
- * @param {npf.ui.form.Password} passwordField
- * @param {string=} opt_error
- */
-npf.ui.form.Password.prototype.addCompareValidator = function(passwordField,
-                                                              opt_error) {
-  /** @type {function(string):string} */
-  var validator = function(/** @type {string} */ value) {
-    if (passwordField.getValue() == value) {
-      return '';
-    } else {
-      return opt_error || this.getCompareError();
-    }
-  };
-
-  this.addValidator(goog.bind(validator, this));
-};
-
-/**
- * @return {string}
- */
-npf.ui.form.Password.prototype.getCompareError = function() {
-  return npf.ui.form.Password.ErrorMessage.COMPARE;
+npf.ui.form.Password.prototype.addCompareValidator = function(errorMessage,
+    field) {
+  var validator = new npf.ui.form.validation.Compare(errorMessage, field);
+  this.addValidator(validator);
 };

@@ -21,13 +21,11 @@ goog.addSingletonGetter(npf.ui.stickyHead.HeadRenderer);
  */
 npf.ui.stickyHead.HeadRenderer.CSS_CLASS = goog.getCssName('stickyHead-head');
 
-/**
- * @enum {string}
- */
-npf.ui.stickyHead.HeadRenderer.CssClass = {
-	STICKY: goog.getCssName('stickyHead-stickyHead')
-};
 
+/** @inheritDoc */
+npf.ui.stickyHead.HeadRenderer.prototype.getCssClass = function() {
+	return npf.ui.stickyHead.HeadRenderer.CSS_CLASS;
+};
 
 /** @inheritDoc */
 npf.ui.stickyHead.HeadRenderer.prototype.createDom = function(component) {
@@ -41,27 +39,23 @@ npf.ui.stickyHead.HeadRenderer.prototype.createDom = function(component) {
 	return element;
 };
 
-/** @inheritDoc */
-npf.ui.stickyHead.HeadRenderer.prototype.getCssClass = function() {
-	return npf.ui.stickyHead.HeadRenderer.CSS_CLASS;
+/**
+ * @param {!npf.ui.stickyHead.Head} component
+ * @param {boolean} visible
+ */
+npf.ui.stickyHead.HeadRenderer.prototype.setVisible = function(component,
+		visible) {
+	/** @type {Element} */
+	var element = component.getElement();
+
+	if (element) {
+		goog.style.setElementShown(element, visible);
+	}
 };
 
 /**
  * @return {string}
  */
 npf.ui.stickyHead.HeadRenderer.prototype.getStickyCssClass = function() {
-	return npf.ui.stickyHead.HeadRenderer.CssClass.STICKY;
-};
-
-/**
- * @param {!npf.ui.stickyHead.Head} component
- * @param {boolean} visible
- */
-npf.ui.stickyHead.HeadRenderer.prototype.setVisible = function(component, visible) {
-	/** @type {Element} */
-	var element = component.getElement();
-
-	if (element) {
-		goog.style.showElement(element, visible);
-	}
+	return goog.getCssName(this.getStructuralCssClass(), 'stickyHead');
 };

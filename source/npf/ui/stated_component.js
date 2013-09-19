@@ -50,15 +50,13 @@ goog.inherits(npf.ui.StatedComponent, npf.ui.RenderedComponent);
 
 /**
  * Current component state; a bit mask of {@link goog.ui.Component.State}s.
- * @type {number}
- * @private
+ * @private {number}
  */
 npf.ui.StatedComponent.prototype.state_ = 0x00;
 
 /**
  * A bit mask of {@link goog.ui.Component.State}s this component supports.
- * @type {number}
- * @private
+ * @private {number}
  */
 npf.ui.StatedComponent.prototype.supportedStates_ = 0x00;
 
@@ -73,8 +71,7 @@ npf.ui.StatedComponent.prototype.supportedStates_ = 0x00;
  * toolbar) will typically want to have their container manage their highlight
  * state.  Selectable components managed by a selection model will also typically
  * want their selection state to be managed by the model.
- * @type {number}
- * @private
+ * @private {number}
  */
 npf.ui.StatedComponent.prototype.autoStates_ = goog.ui.Component.State.ALL;
 
@@ -86,45 +83,39 @@ npf.ui.StatedComponent.prototype.autoStates_ = goog.ui.Component.State.ALL;
  * events  as needed.  Subclasses may enable transition events by default.
  * Components hosted in containers or managed by a selection model will typically
  * want to dispatch transition events.
- * @type {number}
- * @private
+ * @private {number}
  */
 npf.ui.StatedComponent.prototype.statesWithTransitionEvents_ = 0x00;
 
 /**
  * Component visibility.
- * @type {boolean}
- * @private
+ * @private {boolean}
  */
 npf.ui.StatedComponent.prototype.visible_ = true;
 
 /**
  * Keyboard event handler.
- * @type {goog.events.KeyHandler}
- * @private
+ * @private {goog.events.KeyHandler}
  */
 npf.ui.StatedComponent.prototype.keyHandler_;
 
 /**
  * Whether the component should listen for and handle mouse events; defaults to
  * true.
- * @type {boolean}
- * @private
+ * @private {boolean}
  */
 npf.ui.StatedComponent.prototype.handleMouseEvents_ = true;
 
 
 /**
  * Whether the component allows text selection within its DOM.  Defaults to false.
- * @type {boolean}
- * @private
+ * @private {boolean}
  */
 npf.ui.StatedComponent.prototype.allowTextSelection_ = false;
 
 /**
  * The component's preferred ARIA role.
- * @type {?goog.a11y.aria.Role}
- * @private
+ * @private {?goog.a11y.aria.Role}
  */
 npf.ui.StatedComponent.prototype.preferredAriaRole_ = null;
 
@@ -671,8 +662,10 @@ npf.ui.StatedComponent.prototype.setState = function(state, enable) {
  * update the component's styling, and doesn't reject unsupported states.
  * Called by renderers during element decoration.  Considered protected;
  * should only be used within this package and by subclasses.
+ *
+ * This should only be used by subclasses and its associated renderers.
+ *
  * @param {number} state Bit mask representing component state.
- * @protected
  */
 npf.ui.StatedComponent.prototype.setStateInternal = function(state) {
   this.state_ = state;

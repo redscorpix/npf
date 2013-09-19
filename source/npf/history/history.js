@@ -23,8 +23,8 @@ npf.History = function() {
   goog.base(this);
 
   if (npf.History.isHtml5HistorySupported) {
-    this.html5History_ = new goog.history.Html5History(null,
-      new npf.history.TokenTransformer());
+    this.html5History_ = new goog.history.Html5History(
+      null, new npf.history.TokenTransformer());
     this.html5History_.setPathPrefix('');
     this.html5History_.setParentEventTarget(this);
     this.html5History_.setUseFragment(false);
@@ -41,7 +41,7 @@ goog.inherits(npf.History, goog.events.EventTarget);
 /**
  * @define {boolean}
  */
-npf.History.ASSUME_HTML5 = false;
+goog.define('npf.History.ASSUME_HTML5', false);
 
 /**
  * @enum {string}
@@ -61,21 +61,19 @@ npf.History.EXTERNAL_CSS_CLASS = goog.getCssName('external');
 npf.History.isHtml5HistorySupported =
   npf.History.ASSUME_HTML5 || goog.history.Html5History.isSupported();
 
+
 /**
- * @type {goog.History}
- * @private
+ * @private {goog.History}
  */
 npf.History.prototype.history_ = null;
 
 /**
- * @type {goog.history.Html5History}
- * @private
+ * @private {goog.history.Html5History}
  */
 npf.History.prototype.html5History_ = null;
 
 /**
- * @type {boolean}
- * @private
+ * @private {boolean}
  */
 npf.History.prototype.isLinksHandlerEnabled_ = false;
 
@@ -186,9 +184,8 @@ npf.History.prototype.onClick_ = function(evt) {
   var targetElement = evt ? evt.target : null;
 
   if (targetElement && !evt.getBrowserEvent()['defaultPrevented']) {
-    var element =
-      /** @type {Element} */ (goog.dom.getAncestorByTagNameAndClass(targetElement,
-      goog.dom.TagName.A));
+    var element = /** @type {Element} */ (
+      goog.dom.getAncestorByTagNameAndClass(targetElement, goog.dom.TagName.A));
 
     if (element && this.isInnerHandler(element)) {
       var uri = goog.Uri.parse(element.href);

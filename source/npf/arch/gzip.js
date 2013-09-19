@@ -17,14 +17,12 @@ npf.arch.Gzip = function() {
 
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.Gzip.ID1 = 0x1F;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.Gzip.ID2 = 0x8B;
 
@@ -48,14 +46,12 @@ npf.arch.Gzip.PossibleFlag = {
 
 /**
  * OS identifier (Unix)
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.Gzip.OS = 3;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.Gzip.DEFAULT_LEVEL = 6;
 

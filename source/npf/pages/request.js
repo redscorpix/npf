@@ -29,7 +29,7 @@ npf.pages.Request = function(uri, opt_route, opt_name, opt_options) {
   this.name = goog.isString(opt_name) ? opt_name : '';
 
   /**
-   * @type {Object.<string,string>}
+   * @type {Object.<string>}
    */
   this.options = opt_options || null;
 };
@@ -40,7 +40,8 @@ npf.pages.Request = function(uri, opt_route, opt_name, opt_options) {
 npf.pages.Request.prototype.clone = function() {
   var options = options ? goog.object.clone(this.options) : null;
 
-  return new npf.pages.Request(this.uri.clone(), this.route, this.name, options);
+  return new npf.pages.Request(
+    this.uri.clone(), this.route, this.name, options);
 };
 
 /**
@@ -79,8 +80,8 @@ npf.pages.Request.prototype.getToken = function() {
  * @return {string|undefined}
  */
 npf.pages.Request.prototype.getParameter = function(key) {
-  return /** @type {string|undefined} */ (this.uri.getQueryData().get(key, undefined)) ||
-    undefined;
+  return /** @type {string|undefined} */ (
+    this.uri.getQueryData().get(key, undefined)) || undefined;
 };
 
 /**

@@ -147,8 +147,10 @@ npf.string.stripTags = function(source) {
 /**
  * Truncate email address by pattern aa<...>aa@bb.cc or aa@bb<...>
  * @param {string} email Email address
- * @param {number=} opt_maxLength Max length of truncated email address, default is 30
- * @param {number=} opt_maxHostLength Max lenngth substring after "@" of email address, default is 23
+ * @param {number=} opt_maxLength Max length of truncated email address,
+ *                                default is 30
+ * @param {number=} opt_maxHostLength Max lenngth substring after "@" of email
+ *                                    address, default is 23
  * @return {string}
  */
 npf.string.trunctateEmail = function(email, opt_maxLength, opt_maxHostLength) {

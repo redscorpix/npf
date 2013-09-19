@@ -11,11 +11,17 @@ goog.require('npf.graphics.faceDetection.cascade');
  * @param {number=} opt_minNeighbors
  * @constructor
  */
-npf.graphics.faceDetection.Detector = function(canvas, opt_interval, opt_minNeighbors) {
+npf.graphics.faceDetection.Detector = function(canvas, opt_interval,
+    opt_minNeighbors) {
   /**
    * @type {HTMLCanvasElement}
    */
   this.canvas = canvas;
+
+  /**
+   * @type {!goog.dom.DomHelper}
+   */
+  this.domHelper = goog.dom.getDomHelper(this.canvas);
 
   /**
    * @type {number}
@@ -25,7 +31,8 @@ npf.graphics.faceDetection.Detector = function(canvas, opt_interval, opt_minNeig
   /**
    * @type {number}
    */
-  this.minNeighbors = opt_minNeighbors || npf.graphics.faceDetection.Detector.MIN_NEIGHBORS;
+  this.minNeighbors = opt_minNeighbors ||
+    npf.graphics.faceDetection.Detector.MIN_NEIGHBORS;
 
   /**
    * @type {number}
@@ -38,9 +45,9 @@ npf.graphics.faceDetection.Detector = function(canvas, opt_interval, opt_minNeig
   this.next = this.interval + 1;
 
   /**
-   * @type {Array.<Object>}
+   * @type {!Array.<Object>}
    */
-  this._features = [];
+  this.features_ = [];
 
   /**
    * @type {number}
@@ -50,6 +57,25 @@ npf.graphics.faceDetection.Detector = function(canvas, opt_interval, opt_minNeig
     npf.graphics.faceDetection.cascade.HEIGHT)) / Math.log(this.scale));
 };
 
+
+/**
+ * @const {number}
+ */
+npf.graphics.faceDetection.Detector.INTERVAL = 5;
+
+/**
+ * @const {number}
+ */
+npf.graphics.faceDetection.Detector.MIN_NEIGHBORS = 1;
+
+/**
+ * @typedef {{
+ *  width: number,
+ *  height: number,
+ *  data: Uint8ClampedArray
+ * }}
+ */
+npf.graphics.faceDetection.Detector.CanvasData;
 
 /**
  * @typedef {{
@@ -62,27 +88,6 @@ npf.graphics.faceDetection.Detector = function(canvas, opt_interval, opt_minNeig
  * }}
  */
 npf.graphics.faceDetection.Detector.Face;
-
-/**
- * @typedef {{
- *  width: number,
- *  height: number,
- *  data: Uint8ClampedArray
- * }}
- */
-npf.graphics.faceDetection.Detector.CanvasData;
-
-/**
- * @type {number}
- * @const
- */
-npf.graphics.faceDetection.Detector.INTERVAL = 5;
-
-/**
- * @type {number}
- * @const
- */
-npf.graphics.faceDetection.Detector.MIN_NEIGHBORS = 1;
 
 
 npf.graphics.faceDetection.Detector.prototype.detect = function() {
@@ -111,12 +116,14 @@ npf.graphics.faceDetection.Detector.prototype.pre = function() {
     dest.getContext("2d").drawImage(source, sx, sy, sw, sh, dx, dy, dw, dh);
   };
   /** @type {function(number,number):!HTMLCanvasElement} */
-  var createCanvasElement = function(width, height) {
-    return /** @type {!HTMLCanvasElement} */ (goog.dom.createDom(goog.dom.TagName.CANVAS, {
-      'width': width,
-      'height': height
-    }));
-  };
+  var createCanvasElement = goog.bind(function(width, height) {
+    return /** @type {!HTMLCanvasElement} */ (
+      this.domHelper.createDom(goog.dom.TagName.CANVAS, {
+        'width': width,
+        'height': height
+      })
+    );
+  }, this);
 
   canvases[0] = this.canvas;
   result[0] = {
@@ -279,7 +286,7 @@ npf.graphics.faceDetection.Detector.prototype.core = function(canvasData) {
         }
       }
 
-      this._features[j] = feature;
+      this.features_[j] = feature;
     }
 
     for (q = 0; q < 4; q++) {
@@ -303,7 +310,7 @@ npf.graphics.faceDetection.Detector.prototype.core = function(canvasData) {
             sum = 0;
 
             var alpha = stageClassifier[j].alpha;
-            var feature = this._features[j];
+            var feature = this.features_[j];
 
             for (k = 0; k < stageClassifier[j].count; k++) {
               var feature_k = feature[k];
@@ -398,7 +405,7 @@ npf.graphics.faceDetection.Detector.prototype.post = function(seq) {
   var i;
   /** @type {number} */
   var j;
-  var result = this._arrayGroup(seq, function (r1, r2) {
+  var result = this.arrayGroup_(seq, function (r1, r2) {
     var distance = Math.floor(r1.width * 0.25 + 0.5);
 
     return r2.x <= r1.x + distance &&
@@ -495,12 +502,16 @@ npf.graphics.faceDetection.Detector.prototype.post = function(seq) {
 
 /**
  * @param {Array.<npf.graphics.faceDetection.Detector.Face>} seq
- * @param {function(npf.graphics.faceDetection.Detector.Face,npf.graphics.faceDetection.Detector.Face):boolean} gfunc
+ * @param {function(npf.graphics.faceDetection.Detector.Face,
+ *                  npf.graphics.faceDetection.Detector.Face):boolean} gfunc
  * @return {{cat:number,index:!Array.<number>}}
  * @private
  */
-npf.graphics.faceDetection.Detector.prototype._arrayGroup = function(seq, gfunc) {
+npf.graphics.faceDetection.Detector.prototype.arrayGroup_ = function(seq,
+    gfunc) {
+  /** @type {number} */
   var i;
+  /** @type {number} */
   var j;
   var node = new Array(seq.length);
 

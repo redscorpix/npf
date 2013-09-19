@@ -303,10 +303,10 @@ npf.ui.pagePaginator.Renderer.prototype.setSelected = function(component, index,
   var element = component.getElement();
 
   if (element) {
-    /** @type {{length:number}} */
+    /** @type {{length:number}?} */
     var indicatorElements = this.getPageIndicatorElements(element);
 
-    if (indicatorElements[index]) {
+    if (indicatorElements && indicatorElements[index]) {
       goog.dom.classes.enable(indicatorElements[index],
         this.getSelectedPageIndicatorCssClass(), select);
     }

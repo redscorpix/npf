@@ -30,36 +30,25 @@ npf.ui.navigation.ItemRenderer.prototype.getCssClass = function() {
 };
 
 /** @override */
-npf.ui.navigation.ItemRenderer.prototype.createDom = function(item) {
+npf.ui.navigation.ItemRenderer.prototype.createDom = function(component) {
   /** @type {!Element} */
-  var element = item.getDomHelper().createDom(goog.dom.TagName.A, {
-    'class': this.getClassNames(item).join(' '),
-    'href': item.getUrl()
+  var element = component.getDomHelper().createDom(goog.dom.TagName.A, {
+    'class': this.getClassNames(component).join(' '),
+    'href': component.getUrl()
   });
-  this.initializeDom(/** @type {npf.ui.navigation.Item} */ (item), element);
+  this.applyClassNames(component, element);
 
   return element;
 };
 
 /**
- * @param {npf.ui.navigation.Item} item
  * @param {Element} element
+ * @param {string} caption
  */
-npf.ui.navigation.ItemRenderer.prototype.initializeDom = function(item,
-                                                                  element) {
-  this.setCaption(this.getCaptionElement(element), item.getCaption());
-  this.setSelected(element, item.isSelected());
-  this.setEnabled(element, item.isEnabled());
-};
-
-/**
- * @param {Element} element
- * @param {boolean} select
- */
-npf.ui.navigation.ItemRenderer.prototype.setSelected = function(element,
-                                                                select) {
+npf.ui.navigation.ItemRenderer.prototype.setCaption = function(element,
+    caption) {
   if (element) {
-    goog.dom.classes.enable(element, this.getSelectedCssClass(), select);
+    element.innerHTML = caption;
   }
 };
 
@@ -68,7 +57,7 @@ npf.ui.navigation.ItemRenderer.prototype.setSelected = function(element,
  * @param {boolean} enable
  */
 npf.ui.navigation.ItemRenderer.prototype.setEnabled = function(element,
-                                                               enable) {
+    enable) {
   if (element) {
     goog.dom.classes.enable(element, this.getDisabledCssClass(), !enable);
   }
@@ -76,12 +65,12 @@ npf.ui.navigation.ItemRenderer.prototype.setEnabled = function(element,
 
 /**
  * @param {Element} element
- * @param {string} caption
+ * @param {boolean} select
  */
-npf.ui.navigation.ItemRenderer.prototype.setCaption = function(element,
-                                                               caption) {
+npf.ui.navigation.ItemRenderer.prototype.setSelected = function(element,
+    select) {
   if (element) {
-    element.innerHTML = caption;
+    goog.dom.classes.enable(element, this.getSelectedCssClass(), select);
   }
 };
 

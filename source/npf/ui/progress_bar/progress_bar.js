@@ -20,8 +20,8 @@ npf.ui.ProgressBar = function(opt_renderer, opt_domHelper) {
 
   this.rangeModel_ = new goog.ui.RangeModel;
   this.registerDisposable(this.rangeModel_);
-  this.rangeModel_.addEventListener(goog.ui.Component.EventType.CHANGE,
-    this.handleChange_, false, this);
+  this.rangeModel_.listen(
+    goog.ui.Component.EventType.CHANGE, this.handleChange_, false, this);
 };
 goog.inherits(npf.ui.ProgressBar, npf.ui.RenderedComponent);
 
@@ -35,28 +35,27 @@ npf.ui.ProgressBar.Orientation = {
   VERTICAL: 'vertical'
 };
 
-/**
- * The underlying data model for the progress bar.
- * @type {goog.ui.RangeModel}
- * @private
- */
-npf.ui.ProgressBar.prototype.rangeModel_;
 
 /**
- * @type {npf.ui.ProgressBar.Orientation}
- * @private
+ * @private {npf.ui.ProgressBar.Orientation}
  */
 npf.ui.ProgressBar.prototype.orientation_ =
   npf.ui.ProgressBar.Orientation.HORIZONTAL;
+
+/**
+ * The underlying data model for the progress bar.
+ * @private {goog.ui.RangeModel}
+ */
+npf.ui.ProgressBar.prototype.rangeModel_;
 
 
 /** @inheritDoc */
 npf.ui.ProgressBar.prototype.createDom = function() {
   goog.base(this, 'createDom');
 
-  this.setValueInternal(this.getValue());
-  this.setMinimumInternal(this.getMinimum());
-  this.setMaximumInternal(this.getMaximum());
+  this.applyMaximum(this.getMaximum());
+  this.applyMinimum(this.getMinimum());
+  this.applyValue(this.getValue());
 };
 
 /** @inheritDoc */
@@ -74,20 +73,20 @@ npf.ui.ProgressBar.prototype.disposeInternal = function() {
 };
 
 /**
- * @return {number} The value.
+ * @return {number} The maximum value.
  */
-npf.ui.ProgressBar.prototype.getValue = function() {
-  return this.rangeModel_.getValue();
+npf.ui.ProgressBar.prototype.getMaximum = function() {
+  return this.rangeModel_.getMaximum();
 };
 
-
 /**
+ * Sets the maximum number
  * @param {number} value
  */
-npf.ui.ProgressBar.prototype.setValue = function(value) {
-  if (this.getValue() != value) {
-    this.rangeModel_.setValue(value);
-    this.setValueInternal(this.getValue());
+npf.ui.ProgressBar.prototype.setMaximum = function(value) {
+  if (this.getMaximum() != value) {
+    this.setMaximumInternal(value);
+    this.applyMaximum(this.getMaximum());
   }
 };
 
@@ -95,8 +94,16 @@ npf.ui.ProgressBar.prototype.setValue = function(value) {
  * @param {number} value
  * @protected
  */
-npf.ui.ProgressBar.prototype.setValueInternal = function(value) {
-  this.getRenderer().setValue(this, value);
+npf.ui.ProgressBar.prototype.setMaximumInternal = function(value) {
+  this.rangeModel_.setMaximum(value);
+};
+
+/**
+ * @param {number} value
+ * @protected
+ */
+npf.ui.ProgressBar.prototype.applyMaximum = function(value) {
+  this.getRenderer().setMaximum(this, value);
 };
 
 /**
@@ -112,8 +119,8 @@ npf.ui.ProgressBar.prototype.getMinimum = function() {
  */
 npf.ui.ProgressBar.prototype.setMinimum = function(value) {
   if (this.getMinimum() != value) {
-    this.rangeModel_.setMinimum(value);
-    this.setMinimumInternal(this.getMinimum());
+    this.setMinimumInternal(value);
+    this.applyMinimum(this.getMinimum());
   }
 };
 
@@ -122,53 +129,15 @@ npf.ui.ProgressBar.prototype.setMinimum = function(value) {
  * @protected
  */
 npf.ui.ProgressBar.prototype.setMinimumInternal = function(value) {
+  this.rangeModel_.setMinimum(value);
+};
+
+/**
+ * @param {number} value
+ * @protected
+ */
+npf.ui.ProgressBar.prototype.applyMinimum = function(value) {
   this.getRenderer().setMinimum(this, value);
-};
-
-/**
- * @return {number} The maximum value.
- */
-npf.ui.ProgressBar.prototype.getMaximum = function() {
-  return this.rangeModel_.getMaximum();
-};
-
-/**
- * Sets the maximum number
- * @param {number} value
- */
-npf.ui.ProgressBar.prototype.setMaximum = function(value) {
-  if (this.getMaximum() != value) {
-    this.rangeModel_.setMaximum(value);
-    this.setMaximumInternal(this.getMaximum());
-  }
-};
-
-/**
- * @param {number} value
- * @protected
- */
-npf.ui.ProgressBar.prototype.setMaximumInternal = function(value) {
-  this.getRenderer().setMaximum(this, value);
-};
-
-/**
- * Call back when the internal range model changes
- * @param {goog.events.Event} e The event object.
- * @private
- */
-npf.ui.ProgressBar.prototype.handleChange_ = function(e) {
-  this.updateUi();
-  this.dispatchEvent(goog.ui.Component.EventType.CHANGE);
-};
-
-
-/**
- * This is called when we need to update the size of the thumb. This happens
- * when first created as well as when the value and the orientation changes.
- * @protected
- */
-npf.ui.ProgressBar.prototype.updateUi = function() {
-  this.getRenderer().updateUi(this);
 };
 
 /**
@@ -212,6 +181,59 @@ npf.ui.ProgressBar.prototype.getStep = function() {
  */
 npf.ui.ProgressBar.prototype.setStep = function(step) {
   this.rangeModel_.setStep(step);
+};
+
+/**
+ * @return {number} The value.
+ */
+npf.ui.ProgressBar.prototype.getValue = function() {
+  return this.rangeModel_.getValue();
+};
+
+/**
+ * @param {number} value
+ */
+npf.ui.ProgressBar.prototype.setValue = function(value) {
+  if (this.getValue() != value) {
+    this.setValueInternal(value);
+    this.applyValue(this.getValue());
+  }
+};
+
+/**
+ * @param {number} value
+ * @protected
+ */
+npf.ui.ProgressBar.prototype.setValueInternal = function(value) {
+  this.rangeModel_.setValue(value);
+};
+
+/**
+ * @param {number} value
+ * @protected
+ */
+npf.ui.ProgressBar.prototype.applyValue = function(value) {
+  this.getRenderer().setValue(this, value);
+};
+
+/**
+ * Call back when the internal range model changes
+ * @param {goog.events.Event} e The event object.
+ * @private
+ */
+npf.ui.ProgressBar.prototype.handleChange_ = function(e) {
+  this.updateUi();
+  this.dispatchEvent(goog.ui.Component.EventType.CHANGE);
+};
+
+
+/**
+ * This is called when we need to update the size of the thumb. This happens
+ * when first created as well as when the value and the orientation changes.
+ * @protected
+ */
+npf.ui.ProgressBar.prototype.updateUi = function() {
+  this.getRenderer().updateUi(this);
 };
 
 /**

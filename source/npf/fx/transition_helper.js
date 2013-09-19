@@ -17,7 +17,7 @@ goog.inherits(npf.fx.TransitionHelper, goog.Disposable);
 
 
 /**
- * @type {Object.<string,goog.fx.TransitionBase>}
+ * @type {Object.<goog.fx.TransitionBase>}
  * @private
  */
 npf.fx.TransitionHelper.prototype.transitionsMap_ = null;
@@ -45,9 +45,9 @@ npf.fx.TransitionHelper.prototype.play = function(transition, opt_onEnd) {
     this.transitionsMap_ = {};
   }
 
-  this.transitionsMap_[/** @type {string} */ (id)] = transition;
+  this.transitionsMap_[id] = transition;
 
-  transition.addEventListener(goog.fx.Transition.EventType.END, function(evt) {
+  transition.listen(goog.fx.Transition.EventType.END, function(evt) {
     if (opt_onEnd) {
       opt_onEnd();
     }
@@ -89,12 +89,13 @@ npf.fx.TransitionHelper.prototype.resume = function(transitionId) {
 npf.fx.TransitionHelper.prototype.remove = function(transitionId) {
   if (this.transitionsMap_) {
     /** @type {number} */
-    var id = goog.isNumber(transitionId) ? transitionId : goog.getUid(transitionId);
+    var id = goog.isNumber(transitionId) ?
+      transitionId : goog.getUid(transitionId);
     /** @type {goog.fx.TransitionBase} */
-    var transition = this.transitionsMap_[/** @type {string} */ (id)] || null;
+    var transition = this.transitionsMap_[id] || null;
 
     if (transition) {
-      delete this.transitionsMap_[/** @type {string} */ (id)];
+      delete this.transitionsMap_[id];
       transition.dispose();
     }
   }
@@ -118,7 +119,7 @@ npf.fx.TransitionHelper.prototype.getTransition = function(transition) {
     /** @type {number} */
     var id = goog.isNumber(transition) ? transition : goog.getUid(transition);
 
-    return this.transitionsMap_[/** @type {string} */ (id)] || null;
+    return this.transitionsMap_[id] || null;
   }
 
   return null;

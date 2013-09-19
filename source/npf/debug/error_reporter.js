@@ -18,6 +18,7 @@ goog.require('goog.debug.ErrorReporter');
  *     the ErrorReporter just for transmission of reports.
  * @constructor
  * @extends {goog.debug.ErrorReporter}
+ * @deprecated
  */
 npf.debug.ErrorReporter = function(handlerUrl, opt_contextProvider,
 																   opt_noAutoProtect) {

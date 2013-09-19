@@ -133,8 +133,7 @@ npf.events.TouchHandler.getAngle = function(pos1, pos2) {
 npf.events.TouchHandler.prototype.element;
 
 /**
- * @type {goog.dom.DomHelper}
- * @private
+ * @private {goog.dom.DomHelper}
  */
 npf.events.TouchHandler.prototype.domHelper_;
 
@@ -237,65 +236,55 @@ npf.events.TouchHandler.prototype.holdTimeout = 500;
 
 /**
  * Holds the distance that has been moved.
- * @type {number}
- * @private
+ * @private {number}
  */
 npf.events.TouchHandler.prototype.distance_ = 0;
 
 /**
  * Holds the exact angle that has been moved.
- * @type {number}
- * @private
+ * @private {number}
  */
 npf.events.TouchHandler.prototype.angle_ = 0;
 
 /**
  * Holds the diraction that has been moved.
- * @type {?npf.events.TouchHandler.Direction}
- * @private
+ * @private {?npf.events.TouchHandler.Direction}
  */
 npf.events.TouchHandler.prototype.direction_ = null;
 
 /**
  * How many fingers are on the screen.
- * @type {number}
- * @private
+ * @private {number}
  */
 npf.events.TouchHandler.prototype.fingers_ = 0;
 
 /**
- * @type {boolean}
- * @private
+ * @private {boolean}
  */
 npf.events.TouchHandler.prototype.first_ = false;
 
 /**
- * @type {?npf.events.TouchHandler.Gesture}
- * @private
+ * @private {?npf.events.TouchHandler.Gesture}
  */
 npf.events.TouchHandler.prototype.gesture_ = null;
 
 /**
- * @type {?npf.events.TouchHandler.Gesture}
- * @private
+ * @private {?npf.events.TouchHandler.Gesture}
  */
 npf.events.TouchHandler.prototype.prevGesture_ = null;
 
 /**
- * @type {?number}
- * @private
+ * @private {?number}
  */
 npf.events.TouchHandler.prototype.touchStartTime_ = null;
 
 /**
- * @type {Array.<goog.math.Coordinate>}
- * @private
+ * @private {Array.<goog.math.Coordinate>}
  */
 npf.events.TouchHandler.prototype.prevTapPos_;
 
 /**
- * @type {?number}
- * @private
+ * @private {?number}
  */
 npf.events.TouchHandler.prototype.prevTapEndTime_ = null;
 
@@ -305,51 +294,43 @@ npf.events.TouchHandler.prototype.prevTapEndTime_ = null;
 npf.events.TouchHandler.prototype.holdTimer_ = null;
 
 /**
- * @type {goog.math.Coordinate}
- * @private
+ * @private {goog.math.Coordinate}
  */
 npf.events.TouchHandler.prototype.offset_ = null;
 
 /**
  * Keep track of the mouse status.
- * @type {boolean}
- * @private
+ * @private {boolean}
  */
 npf.events.TouchHandler.prototype.mousedown_ = false;
 
 /**
- * @type {Event}
- * @private
+ * @private {Event}
  */
 npf.events.TouchHandler.prototype.startEvent_ = null;
 
 /**
- * @type {Event}
- * @private
+ * @private {Event}
  */
 npf.events.TouchHandler.prototype.moveEvent_ = null;
 
 /**
- * @type {Event}
- * @private
+ * @private {Event}
  */
 npf.events.TouchHandler.prototype.endEvent_ = null;
 
 /**
- * @type {Array.<goog.math.Coordinate>}
- * @private
+ * @private {Array.<goog.math.Coordinate>}
  */
 npf.events.TouchHandler.prototype.startPos_ = null;
 
 /**
- * @type {Array.<goog.math.Coordinate>}
- * @private
+ * @private {Array.<goog.math.Coordinate>}
  */
 npf.events.TouchHandler.prototype.movePos_ = null;
 
 /**
- * @type {goog.math.Coordinate}
- * @private
+ * @private {goog.math.Coordinate}
  */
 npf.events.TouchHandler.prototype.centerPos_ = null;
 

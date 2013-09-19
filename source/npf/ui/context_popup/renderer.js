@@ -32,7 +32,7 @@ npf.ui.contextPopup.Renderer.prototype.getCssClass = function() {
 npf.ui.contextPopup.Renderer.prototype.createDom = function(component) {
   /** @type {Element} */
   var element = goog.base(this, 'createDom', component);
-  goog.style.showElement(element, false);
+  goog.style.setElementShown(element, false);
   /** @type {!Element} */
   var contentElement = component.getDomHelper().createDom(goog.dom.TagName.DIV,
     this.getContentCssClass());

@@ -91,9 +91,11 @@ npf.style.animation.getAnimation = function(element, name) {
   /** @type {!Array.<npf.style.Animation>} */
   var animations = npf.style.animation.getAnimations(element);
 
-  return /** @type {npf.style.Animation?} */ (goog.array.find(animations, function(animation) {
-    return animation.name == name;
-  }));
+  return /** @type {npf.style.Animation?} */ (
+    goog.array.find(animations, function(animation) {
+      return animation.name == name;
+    })
+  );
 };
 
 /**
@@ -267,10 +269,11 @@ npf.style.animation.getPlayStates = function(element, opt_count) {
   /** @type {npf.style.animation.PlayState} */
   var defValue = npf.style.animation.PlayState.PAUSED;
 
-  var states =
-    /** @type {!Array.<npf.style.animation.PlayState>} */ (goog.array.map(values, function(value) {
+  var states = /** @type {!Array.<npf.style.animation.PlayState>} */ (
+    goog.array.map(values, function(value) {
       return '' == value ? defValue : value;
-    }));
+    })
+  );
 
   if (goog.isNumber(opt_count) && states.length != opt_count) {
     states = npf.style.animation.normalize_(states, opt_count, defValue);
@@ -297,7 +300,9 @@ npf.style.animation.getTimingFunctions = function(element, opt_count) {
   goog.array.forEach(values, function(value, i) {
     switch (i % 4) {
       case 0:
-        timingFunction = [goog.string.toNumber(value.substr(13, value.length - 13))];
+        timingFunction = [
+          goog.string.toNumber(value.substr(13, value.length - 13))
+        ];
         break;
 
       case 1:
@@ -306,14 +311,16 @@ npf.style.animation.getTimingFunctions = function(element, opt_count) {
         break;
 
       case 3:
-        timingFunction.push(goog.string.toNumber(value.substr(0, value.length - 1)));
+        timingFunction.push(
+          goog.string.toNumber(value.substr(0, value.length - 1)));
         result.push(timingFunction);
         break;
     }
   });
 
   if (goog.isNumber(opt_count) && result.length != opt_count) {
-    result = npf.style.animation.normalize_(result, opt_count, npf.fx.css3.easing.LINEAR);
+    result = npf.style.animation.normalize_(
+      result, opt_count, npf.fx.css3.easing.LINEAR);
   }
 
   return result;
@@ -364,7 +371,7 @@ npf.style.animation.getNumberValues_ = function(element, style, opt_count) {
       if (msRegExp.test(value)) {
         result = goog.string.toNumber(value.substr(0, value.length - 2));
       } else if (sRegExp.test(value)) {
-        result =  1000 * goog.string.toNumber(value.substr(0, value.length - 1));
+        result = 1000 * goog.string.toNumber(value.substr(0, value.length - 1));
       }
 
       return result;
@@ -418,13 +425,15 @@ npf.style.animation.getDirections = function(element, opt_count) {
   /** @type {!Array.<string>} */
   var values = npf.style.animation.getValues_(element, style);
   var defValue = npf.style.animation.Direction.NORMAL;
-  var directions =
-    /** @type {!Array.<npf.style.animation.Direction>} */ (goog.array.map(values, function(value) {
+  var directions = /** @type {!Array.<npf.style.animation.Direction>} */ (
+    goog.array.map(values, function(value) {
       return '' == value ? defValue : value;
-    }));
+    })
+  );
 
   if (goog.isNumber(opt_count) && directions.length != opt_count) {
-    directions = npf.style.animation.normalize_(directions, opt_count, defValue);
+    directions = npf.style.animation.normalize_(
+      directions, opt_count, defValue);
   }
 
   return directions;

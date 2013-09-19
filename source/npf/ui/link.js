@@ -1,66 +1,65 @@
 goog.provide('npf.ui.Link');
 
-goog.require('goog.dom.classes');
+goog.require('goog.Uri');
 goog.require('goog.dom.TagName');
+goog.require('goog.dom.classes');
 goog.require('goog.events.BrowserEvent');
 goog.require('npf.ui.Component');
 
 
 /**
- * @param {string=} opt_htmlCaption
- * @param {string=} opt_url
+ * @param {Object|string|Array|NodeList} caption
+ * @param {string|goog.Uri=} opt_url
  * @constructor
  * @extends {npf.ui.Component}
  */
-npf.ui.Link = function(opt_htmlCaption, opt_url) {
+npf.ui.Link = function(caption, opt_url) {
   goog.base(this);
 
-  this.caption_ = opt_htmlCaption || null;
-  this.url_ = opt_url || null;
+  this.caption_ = caption;
+
+  if (opt_url) {
+    this.uri_ = new goog.Uri(opt_url);
+  }
 };
 goog.inherits(npf.ui.Link, npf.ui.Component);
 
 
 /**
- * @type {?string}
+ * @type {Object|string|Array|NodeList}
  * @private
  */
 npf.ui.Link.prototype.caption_;
 
 /**
- * @type {?string}
- * @private
- */
-npf.ui.Link.prototype.url_;
-
-/**
- * @type {Array.<string>}
- * @private
+ * @private {Array.<string>}
  */
 npf.ui.Link.prototype.cssClass_ = null;
+
+/**
+ * @private {goog.Uri}
+ */
+npf.ui.Link.prototype.uri_ = null;
 
 
 /** @inheritDoc */
 npf.ui.Link.prototype.createDom = function() {
   /** @type {string} */
   var tagName = goog.dom.TagName.SPAN;
-  /** @type {Object} */
-  var attrs = null;
+  /** @type {!Object} */
+  var attrs = {};
 
-  if (this.url_) {
+  if (this.cssClass_) {
+    attrs['class'] = this.cssClass_.join(' ');
+  }
+
+  if (this.uri_) {
     tagName = goog.dom.TagName.A;
-    attrs = {
-      'href': this.url_
-    };
+    attrs['href'] = this.getUrl();
   }
 
   /** @type {!Element} */
   var element = this.getDomHelper().createDom(tagName, attrs, this.caption_);
-
-  if (this.cssClass_) {
-    goog.dom.classes.add(element, this.cssClass_.join(' '));
-  }
-
   this.setElementInternal(element);
 };
 
@@ -77,6 +76,7 @@ npf.ui.Link.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
   this.cssClass_ = null;
+  this.uri_ = null;
 };
 
 /**
@@ -92,31 +92,17 @@ npf.ui.Link.prototype.onClick_ = function(evt) {
 };
 
 /**
- * @return {string?}
+ * @return {Object|string|Array|NodeList}
  */
 npf.ui.Link.prototype.getCaption = function() {
   return this.caption_;
 };
 
 /**
- * @param {string=} optcaption_
+ * @param {Object|string|Array|NodeList} caption
  */
-npf.ui.Link.prototype.setCaption = function(optcaption_) {
-  this.caption_ = optcaption_ || null;
-};
-
-/**
- * @return {string?}
- */
-npf.ui.Link.prototype.getUrl = function() {
-  return this.url_;
-};
-
-/**
- * @param {string=} opt_url
- */
-npf.ui.Link.prototype.setUrl = function(opt_url) {
-  this.url_ = opt_url || null;
+npf.ui.Link.prototype.setCaption = function(caption) {
+  this.caption_ = caption;
 };
 
 /**
@@ -135,4 +121,32 @@ npf.ui.Link.prototype.setCssClass = function(cssClass) {
   } else {
     this.cssClass_ = cssClass;
   }
+};
+
+/**
+ * @return {goog.Uri}
+ */
+npf.ui.Link.prototype.getUri = function() {
+  return this.uri_;
+};
+
+/**
+ * @param {string|goog.Uri} url
+ */
+npf.ui.Link.prototype.setUri = function(url) {
+  this.uri_ = new goog.Uri(url);
+};
+
+/**
+ * @return {string}
+ */
+npf.ui.Link.prototype.getUrl = function() {
+  return this.uri_ ? this.uri_.toString() : '';
+};
+
+/**
+ * @param {string|goog.Uri} url
+ */
+npf.ui.Link.prototype.setUrl = function(url) {
+  this.setUri(url);
 };

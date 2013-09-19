@@ -9,14 +9,12 @@ goog.require('npf.userAgent.support');
 
 
 /**
- * @type {!Object.<number>}
- * @private
+ * @private {!Object.<number>}
  */
 npf.events.uidsMap_ = {};
 
 /**
- * @type {!Object.<npf.events.MouseSimulator>}
- * @private
+ * @private {!Object.<npf.events.MouseSimulator>}
  */
 npf.events.simulatorsMap_ = {};
 

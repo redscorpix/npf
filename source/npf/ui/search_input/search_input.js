@@ -15,7 +15,7 @@ goog.require('npf.ui.searchInput.Renderer');
  * @extends {npf.ui.RenderedComponent}
  */
 npf.ui.SearchInput = function(opt_value, opt_placeholder, opt_renderer,
-                              opt_domHelper) {
+    opt_domHelper) {
   goog.base(this, opt_renderer ||
     npf.ui.searchInput.Renderer.getInstance(), opt_domHelper);
 
@@ -30,59 +30,43 @@ goog.inherits(npf.ui.SearchInput, npf.ui.RenderedComponent);
  */
 npf.ui.SearchInput.EventType = {
   /**
-   * Изменилось значение контрола.
-   * value (string)
-   */
-  CHANGE: goog.events.getUniqueId('change'),
-
-  /**
    * Пустое значение в контроле.
    */
-  CLEAR: goog.events.getUniqueId('clear')
+  CLEAR: goog.events.getUniqueId('clear'),
+
+  /**
+   * Изменилось значение контрола.
+   */
+  CHANGE: goog.events.getUniqueId('change')
 };
 
-/**
- * @type {string}
- * @private
- */
-npf.ui.SearchInput.prototype.value_ = '';
 
 /**
- * @type {string}
- * @private
- */
-npf.ui.SearchInput.prototype.placeholderValue_ = '';
-
-/**
- * @type {boolean}
- * @private
+ * @private {boolean}
  */
 npf.ui.SearchInput.prototype.clearable_ = true;
 
 /**
- * @type {boolean}
- * @private
+ * @private {boolean}
  */
 npf.ui.SearchInput.prototype.hasIcon_ = true;
 
 /**
- * @type {goog.events.InputHandler}
- * @private
+ * @private {string}
  */
-npf.ui.SearchInput.prototype.inputHandler_ = null;
+npf.ui.SearchInput.prototype.placeholderValue_ = '';
+
+/**
+ * @private {string}
+ */
+npf.ui.SearchInput.prototype.value_ = '';
 
 
 /** @inheritDoc */
 npf.ui.SearchInput.prototype.createDom = function() {
   goog.base(this, 'createDom');
 
-  /** @type {Element} */
-  var placeholderElement = this.getPlaceholderElement();
-  /** @type {Element} */
-  var clearElement = this.getClearElement();
-
-  this.setInputValue(this.value_);
-  this.setEmptyInternal('' == this.value_);
+  this.applyValue(this.getValue(), '');
 };
 
 /** @inheritDoc */
@@ -92,62 +76,23 @@ npf.ui.SearchInput.prototype.enterDocument = function() {
   /** @type {goog.events.EventHandler} */
   var handler = this.getHandler();
   /** @type {Element} */
-  var iconElement = this.getIconElement();
-  /** @type {Element} */
   var clearElement = this.getClearElement();
+  /** @type {Element} */
+  var iconElement = this.getIconElement();
+
+  if (clearElement) {
+    handler.listen(
+      clearElement, goog.events.EventType.CLICK, this.onClearClick_);
+  }
 
   if (iconElement) {
     handler.listen(iconElement, goog.events.EventType.CLICK, this.onIconClick_);
   }
 
-  if (clearElement) {
-    handler
-      .listen(clearElement, goog.events.EventType.CLICK, this.onClearClick_);
-  }
-
-  this.inputHandler_ = new goog.events.InputHandler(this.getQueryElement());
-  handler.listen(this.inputHandler_, goog.events.InputHandler.EventType.INPUT,
-    this.onChange_);
-};
-
-/** @inheritDoc */
-npf.ui.SearchInput.prototype.exitDocument = function() {
-  this.inputHandler_.dispose();
-  this.inputHandler_ = null;
-
-  goog.base(this, 'exitDocument');
-};
-
-/** @inheritDoc */
-npf.ui.SearchInput.prototype.disposeInternal = function() {
-  goog.base(this, 'disposeInternal');
-
-  this.inputHandler_ = null;
-};
-
-/**
- * @param {goog.events.BrowserEvent} evt
- * @private
- */
-npf.ui.SearchInput.prototype.onIconClick_ = function(evt) {
-  this.getRenderer().focus(this.getQueryElement());
-};
-
-/**
- * @param {goog.events.BrowserEvent} evt
- * @private
- */
-npf.ui.SearchInput.prototype.onClearClick_ = function(evt) {
-  this.setValueInternal('', true);
-  this.getRenderer().focus(this.getQueryElement());
-};
-
-/**
- * @param {goog.events.BrowserEvent} evt
- * @private
- */
-npf.ui.SearchInput.prototype.onChange_ = function(evt) {
-  this.update();
+  var inputHandler = new goog.events.InputHandler(this.getQueryElement());
+  this.disposeOnExitDocument(inputHandler);
+  handler.listen(
+    inputHandler, goog.events.InputHandler.EventType.INPUT, this.onChange_);
 };
 
 /**
@@ -167,6 +112,13 @@ npf.ui.SearchInput.prototype.setClearable = function(enable) {
 /**
  * @return {boolean}
  */
+npf.ui.SearchInput.prototype.isEmpty = function() {
+  return '' == this.getValue();
+};
+
+/**
+ * @return {boolean}
+ */
 npf.ui.SearchInput.prototype.hasIcon = function() {
   return this.hasIcon_;
 };
@@ -176,14 +128,6 @@ npf.ui.SearchInput.prototype.hasIcon = function() {
  */
 npf.ui.SearchInput.prototype.setIcon = function(enable) {
   this.hasIcon_ = enable;
-};
-
-npf.ui.SearchInput.prototype.focus = function() {
-  this.getRenderer().focusAndSelect(this.getQueryElement());
-};
-
-npf.ui.SearchInput.prototype.blur = function() {
-  this.getQueryElement().blur();
 };
 
 /**
@@ -200,66 +144,85 @@ npf.ui.SearchInput.prototype.getValue = function() {
   return this.value_;
 };
 
-npf.ui.SearchInput.prototype.update = function() {
-  /** @type {string} */
-  var value = this.getRenderer().getValue(this.getQueryElement());
-  this.setValueInternal(value, false);
-};
-
 /**
  * @param {string} value
+ * @param {boolean=} opt_noDom
  */
-npf.ui.SearchInput.prototype.setValue = function(value) {
-  this.setValueInternal(value, true);
+npf.ui.SearchInput.prototype.setValue = function(value, opt_noDom) {
+  /** @type {string} */
+  var oldValue = this.getValue();
+
+  if (oldValue != value) {
+    this.setValueInternal(value);
+    this.applyValue(this.getValue(), oldValue, opt_noDom);
+
+    this.dispatchChangeEvent();
+
+    if ('' == this.getValue()) {
+      this.dispatchClearEvent();
+    }
+  }
 };
 
 /**
  * @param {string} value
- * @param {boolean} updateInput
  * @protected
  */
-npf.ui.SearchInput.prototype.setValueInternal = function(value, updateInput) {
-  if (this.value_ == value) {
-    return;
-  }
+npf.ui.SearchInput.prototype.setValueInternal = function(value) {
+  this.value_ = value;
+};
 
+/**
+ * @param {string} value
+ * @param {string} oldValue
+ * @param {boolean=} opt_noDom
+ * @protected
+ */
+npf.ui.SearchInput.prototype.applyValue = function(value, oldValue, opt_noDom) {
   /** @type {boolean} */
-  var oldEmpty = '' == this.value_;
+  var oldEmpty = '' == oldValue;
   /** @type {boolean} */
   var newEmpty = '' == value;
 
-  this.value_ = value;
-
   if (oldEmpty != newEmpty) {
-    this.setEmptyInternal(newEmpty);
+    this.getRenderer().setVisible(this.getClearElement(), !newEmpty);
+    this.getRenderer().setVisible(this.getPlaceholderElement(), newEmpty);
   }
 
-  if (updateInput) {
-    this.setInputValue(value);
-  }
-
-  this.dispatchChangeEvent();
-
-  if ('' == this.value_) {
-    this.dispatchClearEvent();
+  if (!opt_noDom) {
+    this.getRenderer().setValue(this.getQueryElement(), value);
   }
 };
 
-/**
- * @param {string} value
- * @protected
- */
-npf.ui.SearchInput.prototype.setInputValue = function(value) {
-  this.getRenderer().setValue(this.getQueryElement(), value);
+npf.ui.SearchInput.prototype.blur = function() {
+  this.getRenderer().blur(this.getQueryElement());
 };
 
 /**
- * @param {boolean} empty
- * @protected
+ * @param {boolean=} opt_select
  */
-npf.ui.SearchInput.prototype.setEmptyInternal = function(empty) {
-  this.getRenderer().setVisible(this.getClearElement(), !empty);
-  this.getRenderer().setVisible(this.getPlaceholderElement(), empty);
+npf.ui.SearchInput.prototype.focus = function(opt_select) {
+  this.getRenderer().focus(this.getQueryElement(), opt_select);
+};
+
+npf.ui.SearchInput.prototype.update = function() {
+  /** @type {string} */
+  var value = this.getRenderer().getValue(this.getQueryElement());
+  this.setValue(value);
+};
+
+/**
+ * @return {Element}
+ */
+npf.ui.SearchInput.prototype.getClearElement = function() {
+  return this.getRenderer().getClearElement(this.getElement());
+};
+
+/**
+ * @return {Element}
+ */
+npf.ui.SearchInput.prototype.getIconElement = function() {
+  return this.getRenderer().getIconElement(this.getElement());
 };
 
 /**
@@ -277,34 +240,40 @@ npf.ui.SearchInput.prototype.getQueryElement = function() {
 };
 
 /**
- * @return {Element}
- */
-npf.ui.SearchInput.prototype.getIconElement = function() {
-  return this.getRenderer().getIconElement(this.getElement());
-};
-
-/**
- * @return {?Element}
- */
-npf.ui.SearchInput.prototype.getClearElement = function() {
-  return this.getRenderer().getClearElement(this.getElement());
-};
-
-/**
  * @protected
  */
 npf.ui.SearchInput.prototype.dispatchChangeEvent = function() {
-  this.dispatchEvent({
-    type: npf.ui.SearchInput.EventType.CHANGE,
-    value: this.value_
-  });
+  this.dispatchEvent(npf.ui.SearchInput.EventType.CHANGE);
 };
 
 /**
  * @protected
  */
 npf.ui.SearchInput.prototype.dispatchClearEvent = function() {
-  this.dispatchEvent({
-    type: npf.ui.SearchInput.EventType.CLEAR
-  });
+  this.dispatchEvent(npf.ui.SearchInput.EventType.CLEAR);
+};
+
+/**
+ * @param {goog.events.BrowserEvent} evt
+ * @private
+ */
+npf.ui.SearchInput.prototype.onIconClick_ = function(evt) {
+  this.getRenderer().focus(this.getQueryElement(), true);
+};
+
+/**
+ * @param {goog.events.BrowserEvent} evt
+ * @private
+ */
+npf.ui.SearchInput.prototype.onClearClick_ = function(evt) {
+  this.setValue('');
+  this.getRenderer().focus(this.getQueryElement());
+};
+
+/**
+ * @param {goog.events.BrowserEvent} evt
+ * @private
+ */
+npf.ui.SearchInput.prototype.onChange_ = function(evt) {
+  this.update();
 };

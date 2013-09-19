@@ -11,8 +11,10 @@ goog.require('npf.graphics.blend.functions');
 /**
  * JavaScript implementation of common blending modes, based on
  * http://stackoverflow.com/questions/5919663/how-does-photoshop-blend-two-images-together
- * @param {HTMLCanvasElement|Image|HTMLImageElement} source1 Canvas or loaded image.
- * @param {HTMLCanvasElement|Image|HTMLImageElement} source2 Canvas or loaded image.
+ * @param {HTMLCanvasElement|Image|HTMLImageElement} source1 Canvas or loaded
+ *                                                           image.
+ * @param {HTMLCanvasElement|Image|HTMLImageElement} source2 Canvas or loaded
+ *                                                           image.
  * @param {HTMLCanvasElement} destination
  * @constructor
  * @extends {npf.graphics.Effect}
@@ -61,8 +63,10 @@ npf.graphics.Blend.Mode = {
 
 
 /**
- * @param {HTMLCanvasElement|Image|HTMLImageElement} source1 Canvas or loaded image.
- * @param {HTMLCanvasElement|Image|HTMLImageElement} source2 Canvas or loaded image.
+ * @param {HTMLCanvasElement|Image|HTMLImageElement} source1 Canvas or loaded
+ *                                                           image.
+ * @param {HTMLCanvasElement|Image|HTMLImageElement} source2 Canvas or loaded
+ *                                                           image.
  * @param {Object.<number|string>=} opt_attrs
  * @param {goog.dom.DomHelper=} opt_domHelper
  * @return {!npf.graphics.Blend}
@@ -161,7 +165,7 @@ npf.graphics.Blend.getBlendFunction = function(mode) {
 
 /**
  * @param {npf.graphics.Blend.Mode=} opt_mode Blending mode. Defaults
- *                                      to npf.graphics.Blend.Mode.NORMAL.
+ *                                   to npf.graphics.Blend.Mode.NORMAL.
  * @param {number=} opt_alpha Blending opacity. Defaults to 1.
  * @return {boolean}
  */

@@ -27,10 +27,10 @@ goog.require('npf.userAgent.support');
 npf.fx.CssAnimation = function(keyframes, element, duration, opt_acc) {
   goog.base(this);
 
-  this.keyframes_ = keyframes;
-  this.element = element;
-  this.duration = duration;
   this.accel_ = opt_acc || npf.fx.css3.easing.LINEAR;
+  this.duration = duration;
+  this.element = element;
+  this.keyframes_ = keyframes;
 
   this.handler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.handler_);
@@ -61,85 +61,71 @@ npf.fx.CssAnimation.isSupported = function() {
 
 
 /**
- * @type {npf.fx.cssAnimation.Keyframes}
- * @private
- */
-npf.fx.CssAnimation.prototype.keyframes_;
-
-/**
- * @type {Element}
- * @protected
- */
-npf.fx.CssAnimation.prototype.element;
-
-/**
- * @type {number}
- * @protected
- */
-npf.fx.CssAnimation.prototype.duration;
-
-/**
- * @type {Array.<number>}
- * @private
+ * @private {Array.<number>}
  */
 npf.fx.CssAnimation.prototype.accel_;
 
 /**
- * @type {number}
- * @private
+ * @private {boolean}
+ */
+npf.fx.CssAnimation.prototype.cleared_ = true;
+
+/**
+ * @private {number}
  */
 npf.fx.CssAnimation.prototype.delay_ = 0;
 
 /**
- * 0 — infinite.
- * @type {number}
- * @private
- */
-npf.fx.CssAnimation.prototype.iterationCount_ = 1;
-
-/**
- * @type {npf.style.animation.Direction}
- * @private
+ * @private {npf.style.animation.Direction}
  */
 npf.fx.CssAnimation.prototype.direction_ =
   npf.style.animation.Direction.NORMAL;
 
 /**
- * @type {goog.events.EventHandler}
- * @private
- */
-npf.fx.CssAnimation.prototype.handler_;
-
-/**
- * @type {boolean}
- * @private
+ * @private {boolean}
  */
 npf.fx.CssAnimation.prototype.domSet_ = false;
 
 /**
- * @type {boolean}
- * @private
+ * @protected {number}
  */
-npf.fx.CssAnimation.prototype.cleared_ = true;
+npf.fx.CssAnimation.prototype.duration;
 
 /**
- * @type {npf.style.animation.PlayState}
- * @private
+ * @protected {Element}
  */
-npf.fx.CssAnimation.prototype.playState_ =
-  npf.style.animation.PlayState.PAUSED;
+npf.fx.CssAnimation.prototype.element;
 
 /**
- * @type {boolean}
- * @private
+ * @private {boolean}
+ */
+npf.fx.CssAnimation.prototype.endStylesUsed_ = false;
+
+/**
+ * @private {boolean}
  */
 npf.fx.CssAnimation.prototype.finished_ = false;
 
 /**
- * @type {boolean}
- * @private
+ * @private {goog.events.EventHandler}
  */
-npf.fx.CssAnimation.prototype.endStylesUsed_ = false;
+npf.fx.CssAnimation.prototype.handler_;
+
+/**
+ * 0 — infinite.
+ * @private {number}
+ */
+npf.fx.CssAnimation.prototype.iterationCount_ = 1;
+
+/**
+ * @private {npf.fx.cssAnimation.Keyframes}
+ */
+npf.fx.CssAnimation.prototype.keyframes_;
+
+/**
+ * @private {npf.style.animation.PlayState}
+ */
+npf.fx.CssAnimation.prototype.playState_ = npf.style.animation.PlayState.PAUSED;
 
 
 /** @inheritDoc */
@@ -154,59 +140,17 @@ npf.fx.CssAnimation.prototype.disposeInternal = function() {
 
   goog.base(this, 'disposeInternal');
 
-  this.keyframes_ = null;
-  this.element = null;
   this.accel_ = null;
+  this.element = null;
   this.handler_ = null;
+  this.keyframes_ = null;
 };
 
 /**
- * @return {npf.fx.cssAnimation.Keyframes}
+ * @return {Array.<number>}
  */
-npf.fx.CssAnimation.prototype.getKeyframes = function() {
-  return this.keyframes_;
-};
-
-/**
- * @return {Element}
- */
-npf.fx.CssAnimation.prototype.getElement = function() {
-  return this.element;
-};
-
-/**
- * @return {npf.style.animation.PlayState}
- */
-npf.fx.CssAnimation.prototype.getState = function() {
-  return this.playState_;
-};
-
-/**
- * @return {number} 0 — infinite
- */
-npf.fx.CssAnimation.prototype.getIterationCount = function() {
-  return this.iterationCount_;
-};
-
-/**
- * @param {number} count 0 — infinite
- */
-npf.fx.CssAnimation.prototype.setIterationCount = function(count) {
-  this.iterationCount_ = count;
-};
-
-/**
- * @return {number} in ms
- */
-npf.fx.CssAnimation.prototype.getDuration = function() {
-  return this.duration;
-};
-
-/**
- * @param {number} duration in ms
- */
-npf.fx.CssAnimation.prototype.setDuration = function(duration) {
-  this.duration = duration;
+npf.fx.CssAnimation.prototype.getAccel = function() {
+  return this.accel_;
 };
 
 /**
@@ -238,10 +182,73 @@ npf.fx.CssAnimation.prototype.setDirection = function(direction) {
 };
 
 /**
- * @return {Array.<number>}
+ * @return {number} in ms
  */
-npf.fx.CssAnimation.prototype.getAccel = function() {
-  return this.accel_;
+npf.fx.CssAnimation.prototype.getDuration = function() {
+  return this.duration;
+};
+
+/**
+ * @param {number} duration in ms
+ */
+npf.fx.CssAnimation.prototype.setDuration = function(duration) {
+  this.duration = duration;
+};
+
+/**
+ * @return {Element}
+ */
+npf.fx.CssAnimation.prototype.getElement = function() {
+  return this.element;
+};
+
+/**
+ * @return {boolean}
+ */
+npf.fx.CssAnimation.prototype.areEndStylesUsed = function() {
+  return this.endStylesUsed_;
+};
+
+/**
+ * @param {boolean} use
+ */
+npf.fx.CssAnimation.prototype.setEndStylesUsed = function(use) {
+  this.endStylesUsed_ = use;
+};
+
+/**
+ * @return {boolean}
+ */
+npf.fx.CssAnimation.prototype.isFinished = function() {
+  return this.finished_;
+};
+
+/**
+ * @return {npf.fx.cssAnimation.Keyframes}
+ */
+npf.fx.CssAnimation.prototype.getKeyframes = function() {
+  return this.keyframes_;
+};
+
+/**
+ * @return {number} 0 — infinite
+ */
+npf.fx.CssAnimation.prototype.getIterationCount = function() {
+  return this.iterationCount_;
+};
+
+/**
+ * @param {number} count 0 — infinite
+ */
+npf.fx.CssAnimation.prototype.setIterationCount = function(count) {
+  this.iterationCount_ = count;
+};
+
+/**
+ * @return {npf.style.animation.PlayState}
+ */
+npf.fx.CssAnimation.prototype.getState = function() {
+  return this.playState_;
 };
 
 /**
@@ -307,7 +314,6 @@ npf.fx.CssAnimation.prototype.setDom = function() {
   }
 
   this.handler_
-    //.listen(this.element, startEventTypes, this.onAnimationStart_, false, this)
     .listen(this.element, endEventTypes, this.onAnimationEnd_)
     .listen(this.element, iterationEventTypes, this.onAnimationIteration_);
 
@@ -335,7 +341,8 @@ npf.fx.CssAnimation.prototype.setDom = function() {
 
 /**
  * Stops the animation.
- * @param {boolean=} opt_gotoEnd If true the animation will move to the end coords.
+ * @param {boolean=} opt_gotoEnd If true the animation will move
+ *                               to the end coords.
  */
 npf.fx.CssAnimation.prototype.stop = function(opt_gotoEnd) {
   this.setStateStopped();
@@ -363,27 +370,6 @@ npf.fx.CssAnimation.prototype.pause = function() {
 };
 
 /**
- * @return {boolean}
- */
-npf.fx.CssAnimation.prototype.isFinished = function() {
-  return this.finished_;
-};
-
-/**
- * @return {boolean}
- */
-npf.fx.CssAnimation.prototype.areEndStylesUsed = function() {
-  return this.endStylesUsed_;
-};
-
-/**
- * @param {boolean} use
- */
-npf.fx.CssAnimation.prototype.setEndStylesUsed = function(use) {
-  this.endStylesUsed_ = use;
-};
-
-/**
  * @protected
  */
 npf.fx.CssAnimation.prototype.clearDom = function() {
@@ -392,19 +378,6 @@ npf.fx.CssAnimation.prototype.clearDom = function() {
     this.getKeyframes().getName());
   this.domSet_ = false;
 };
-
-///**
-// * @param {goog.events.BrowserEvent} evt
-// * @private
-// */
-//npf.fx.CssAnimation.prototype.onAnimationStart_ = function(evt) {
-//  var element = /** @type {Element} */ (evt.target);
-//  var name = /** @type {string} */ (evt.getBrowserEvent()['animationName']);
-
-//  if (this.element === element && this.keyframes_.getName() == name) {
-
-//  }
-//};
 
 /**
  * @param {goog.events.BrowserEvent} evt

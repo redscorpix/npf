@@ -21,11 +21,11 @@ npf.Router = function(opt_history) {
   this.history_ = opt_history || new npf.History();
   this.registerDisposable(this.history_);
 
-  goog.events.listen(this.history_, goog.history.EventType.NAVIGATE,
-  	this.onNavigate_, false, this);
-
-  this.routesMap_ = {};
   this.namedRoutes_ = [];
+  this.routesMap_ = {};
+
+  this.history_.listen(
+    goog.history.EventType.NAVIGATE, this.onNavigate_, false, this);
 };
 goog.inherits(npf.Router, goog.events.EventTarget);
 
@@ -88,11 +88,27 @@ npf.Router.normalizeRootPath = function() {
   return true;
 };
 
+
+/**
+ * @private {string}
+ */
+npf.Router.prototype.currentRouteName_ = '';
+
 /**
  * @type {goog.History|npf.History}
  * @private
  */
 npf.Router.prototype.history_;
+
+/**
+ * @private {boolean}
+ */
+npf.Router.prototype.enabled_ = false;
+
+/**
+ * @private {Array.<npf.Router.NamedRoute>}
+ */
+npf.Router.prototype.namedRoutes_;
 
 /**
  * @type {Object.<string,npf.router.Route>}
@@ -101,41 +117,20 @@ npf.Router.prototype.history_;
 npf.Router.prototype.routesMap_;
 
 /**
- * @type {Array.<npf.Router.NamedRoute>}
- * @private
- */
-npf.Router.prototype.namedRoutes_;
-
-/**
- * @type {string}
- * @private
- */
-npf.Router.prototype.currentRouteName_ = '';
-
-/**
- * @type {boolean}
- * @private
- */
-npf.Router.prototype.enabled_ = false;
-
-/**
- * @type {boolean}
- * @private
+ * @private {boolean}
  */
 npf.Router.prototype.slashSuffixEnabled_ = true;
 
 
 /** @inheritDoc */
 npf.Router.prototype.disposeInternal = function() {
-  goog.events.unlisten(this.history_, goog.history.EventType.NAVIGATE,
-  	this.onNavigate_, false, this);
   this.setEnabled(false);
 
   goog.base(this, 'disposeInternal');
 
   this.history_ = null;
-  this.routesMap_ = null;
   this.namedRoutes_ = null;
+  this.routesMap_ = null;
 };
 
 /**
@@ -262,12 +257,12 @@ npf.Router.prototype.removeRoute = function(name) {
 
 /**
  * @param {string|npf.router.Route} routeName
- * @param {Object.<string,number|string>=} opt_optionsMap
- * @param {string|goog.Uri.QueryData|Object.<string,string>=} opt_query
+ * @param {Object.<number|string>=} opt_optionsMap
+ * @param {string|goog.Uri.QueryData|Object.<string>=} opt_query
  * @param {boolean=} opt_replace
  */
 npf.Router.prototype.navigateRoute = function(routeName, opt_optionsMap,
-																							opt_query, opt_replace) {
+    opt_query, opt_replace) {
   /** @type {npf.router.Route} */
   var route = goog.isString(routeName) ? this.getRoute(routeName) : routeName;
 

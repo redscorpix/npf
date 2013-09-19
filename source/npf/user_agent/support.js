@@ -103,14 +103,12 @@ npf.userAgent.Support.eventTagNames = function() {
 
 /**
  * Create our element that we do most feature tests on.
- * @type {string}
- * @const
+ * @const {string}
  */
 npf.userAgent.Support.MOD = 'useragentsupport_' + goog.math.randomInt(1000000);
 
 /**
- * @type {string}
- * @const
+ * @const {string}
  */
 npf.userAgent.Support.SMILE = ':)';
 
@@ -132,8 +130,7 @@ npf.userAgent.Support.prefixes = (npf.userAgent.Support.vendorPrefix ? ' -' +
   npf.userAgent.Support.vendorPrefix + '- ' : ' ').split(' ');
 
 /**
- * @type {string}
- * @private
+ * @private {string}
  */
 npf.userAgent.Support.omPrefixes_ = 'Webkit Moz O ms';
 
@@ -166,14 +163,12 @@ npf.userAgent.Support.cssomPrefixes =
 npf.userAgent.Support.prototype.checks_;
 
 /**
- * @type {CSSStyleDeclaration}
- * @private
+ * @private {CSSStyleDeclaration}
  */
 npf.userAgent.Support.prototype.mStyle_;
 
 /**
- * @type {!Object.<string>}
- * @private
+ * @private {!Object.<string>}
  */
 npf.userAgent.Support.prototype.cssPropertyNames_;
 
@@ -401,7 +396,8 @@ npf.userAgent.Support.prototype.getAnimatedPng = function(callback, opt_scope) {
  * @param {Object=} opt_scope
  */
 npf.userAgent.support.getAnimatedPng = function(callback, opt_scope) {
-  return npf.userAgent.Support.getInstance().getAnimatedPng(callback, opt_scope);
+  return npf.userAgent.Support.getInstance().getAnimatedPng(
+    callback, opt_scope);
 };
 
 /**
@@ -850,7 +846,7 @@ npf.userAgent.support.getCanvas = function() {
  */
 npf.userAgent.Support.prototype.getCanvasToJpeg = function(callback,
     opt_scope) {
-  this._canvasToDataUrl(
+  this.canvasToDataUrl_(
     npf.userAgent.Support.Property_.CANVAS_TO_JPEG, callback, opt_scope);
 };
 
@@ -869,7 +865,7 @@ npf.userAgent.support.getCanvasToJpeg = function(callback, opt_scope) {
  */
 npf.userAgent.Support.prototype.getCanvasToWebp = function(callback,
     opt_scope) {
-  this._canvasToDataUrl(
+  this.canvasToDataUrl_(
     npf.userAgent.Support.Property_.CANVAS_TO_WEBP, callback, opt_scope);
 };
 
@@ -890,7 +886,7 @@ npf.userAgent.support.getCanvasToWebp = function(callback, opt_scope) {
  * @param {Object=} opt_scope
  * @private
  */
-npf.userAgent.Support.prototype._canvasToDataUrl = function(propName, callback,
+npf.userAgent.Support.prototype.canvasToDataUrl_ = function(propName, callback,
     opt_scope) {
   var Property = npf.userAgent.Support.Property_;
 
@@ -926,8 +922,9 @@ npf.userAgent.Support.prototype.getCanvasText = function() {
   var propName = npf.userAgent.Support.Property_.CANVAS_TEXT;
 
   if (!goog.isDef(this.checks_[propName])) {
-    this.checks_[propName] = this.getCanvas() && goog.isFunction(
-      goog.dom.createElement(goog.dom.TagName.CANVAS).getContext('2d').fillText);
+    var element = goog.dom.createElement(goog.dom.TagName.CANVAS);
+    this.checks_[propName] = this.getCanvas() &&
+      goog.isFunction(element.getContext('2d').fillText);
   }
 
   return /** @type {boolean} */ (this.checks_[propName]);
@@ -1123,7 +1120,8 @@ npf.userAgent.Support.prototype.getCssTransforms3d = function() {
       isPropertySupported &&
       'webkitPerspective' in doc.documentElement.style
     ) {
-      // Webkit allows this media query to succeed only if the feature is enabled.
+      // Webkit allows this media query to succeed only if the feature
+      // is enabled.
       // `@media (transform-3d),(-o-transform-3d),(-moz-transform-3d),
       // (-ms-transform-3d),(-webkit-transform-3d),(MOD){ ... }`
 
@@ -1976,8 +1974,9 @@ npf.userAgent.Support.prototype.getMultipleBackgrounds = function() {
 
     this.setCss_('background:url(https://),url(https://),red url(https://)');
 
-    // If the UA supports multiple backgrounds, there should be three occurrences
-    //   of the string "url(" in the return value for elemStyle.background
+    // If the UA supports multiple backgrounds, there should be three
+    // occurrences of the string "url(" in the return value
+    // for elemStyle.background
     this.checks_[propName] = /(url\s*\(.*?){3}/.test(this.mStyle_.background);
   }
 
@@ -2315,7 +2314,8 @@ npf.userAgent.Support.prototype.getTouch = function() {
 
     if (
       ('ontouchstart' in goog.global) ||
-      goog.global['DocumentTouch'] && doc instanceof goog.global['DocumentTouch']
+      goog.global['DocumentTouch'] &&
+      doc instanceof goog.global['DocumentTouch']
     ) {
       this.checks_[propName] = true;
     } else {
@@ -2518,7 +2518,8 @@ npf.userAgent.support.getWebSocket = function() {
  * @return {boolean}
  */
 npf.userAgent.Support.prototype.getWebSocketBinary = function() {
-  return !!(goog.global['WebSocket'] && (new WebSocket('ws://.'))['binaryType']);
+  return !!(goog.global['WebSocket'] &&
+    (new WebSocket('ws://.'))['binaryType']);
 };
 
 /**
@@ -2629,7 +2630,8 @@ npf.userAgent.Support.prototype.isCssPropertySupported_ = function(
 };
 
 /**
- * Allows you to add custom styles to the document and test an element afterwards
+ * Allows you to add custom styles to the document and test an element
+ * afterwards.
  * @param {string} rule
  * @param {function(!Element, string)} callback
  * @param {number=} opt_nodes

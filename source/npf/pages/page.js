@@ -13,14 +13,15 @@ goog.require('npf.pages.Request');
 
 /**
  * @param {npf.pages.Manager} manager
+ * @param {string} type
  * @constructor
  * @extends {goog.events.EventTarget}
  */
-npf.pages.Page = function(manager) {
+npf.pages.Page = function(manager, type) {
   goog.base(this);
 
   this.manager_ = manager;
-  this.helpersMap_ = {};
+  this.type_ = type;
 
   this.handler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.handler_);
@@ -41,34 +42,29 @@ npf.pages.Page.EventType = {
 };
 
 /**
- * @type {npf.pages.Manager}
- * @private
- */
-npf.pages.Page.prototype.manager_;
-
-/**
- * @type {Object.<string,goog.Disposable>}
- * @private
- */
-npf.pages.Page.prototype.helpersMap_;
-
-/**
- * @type {goog.events.EventHandler}
- * @private
+ * @private {goog.events.EventHandler}
  */
 npf.pages.Page.prototype.handler_;
 
 /**
- * @type {boolean}
- * @private
+ * @private {boolean}
  */
 npf.pages.Page.prototype.loaded_ = false;
 
 /**
- * @type {string}
- * @private
+ * @private {npf.pages.Manager}
+ */
+npf.pages.Page.prototype.manager_;
+
+/**
+ * @private {string}
  */
 npf.pages.Page.prototype.title_ = '';
+
+/**
+ * @private {string}
+ */
+npf.pages.Page.prototype.type_;
 
 
 /** @inheritDoc */
@@ -77,9 +73,8 @@ npf.pages.Page.prototype.disposeInternal = function() {
 
   goog.base(this, 'disposeInternal');
 
-  this.manager_ = null;
-  this.helpersMap_ = null;
   this.handler_ = null;
+  this.manager_ = null;
 };
 
 /**
@@ -131,9 +126,7 @@ npf.pages.Page.prototype.unload = function() {
 /**
  * @protected
  */
-npf.pages.Page.prototype.unloadInternal = function() {
-  this.removeHelpers();
-};
+npf.pages.Page.prototype.unloadInternal = goog.nullFunction;
 
 /**
  * @param {npf.pages.Request} request
@@ -223,7 +216,7 @@ npf.pages.Page.prototype.getUsingHelperTypes = function() {
  * @return {Object.<string,goog.Disposable>}
  */
 npf.pages.Page.prototype.getHelpersMap = function() {
-  return this.helpersMap_;
+  return this.getManager().getHelpersMap();
 };
 
 /**
@@ -231,15 +224,7 @@ npf.pages.Page.prototype.getHelpersMap = function() {
  * @return {goog.Disposable}
  */
 npf.pages.Page.prototype.getHelper = function(type) {
-  return this.helpersMap_[type] || null;
-};
-
-/**
- * @param {goog.Disposable} helper
- * @param {string} type
- */
-npf.pages.Page.prototype.setHelper = function(helper, type) {
-  this.helpersMap_[type] = helper;
+  return this.getManager().getHelper(type);
 };
 
 /**
@@ -247,13 +232,6 @@ npf.pages.Page.prototype.setHelper = function(helper, type) {
  * @protected
  */
 npf.pages.Page.prototype.initHelpers = function(request) {};
-
-/**
- * @protected
- */
-npf.pages.Page.prototype.removeHelpers = function() {
-  this.helpersMap_ = {};
-};
 
 /**
  * @return {npf.pages.Manager}
@@ -371,6 +349,13 @@ npf.pages.Page.prototype.getRequest = function() {
  */
 npf.pages.Page.prototype.getRequestFromHistory = function(opt_index) {
   return this.manager_ ? this.manager_.getRequestFromHistory(opt_index) : null;
+};
+
+/**
+ * @return {string}
+ */
+npf.pages.Page.prototype.getType = function() {
+  return this.type_;
 };
 
 /**

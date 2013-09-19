@@ -1,6 +1,7 @@
 goog.provide('npfTransition');
 
 goog.require('goog.debug.ErrorHandler');
+goog.require('goog.events.EventWrapper');
 goog.require('npf.fx.KeyframeAnimation');
 goog.require('npf.userAgent.support');
 goog.require('npfTransition.AnimationQueue');

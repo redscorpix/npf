@@ -32,34 +32,29 @@ goog.inherits(npf.ui.SimpleComponent, npf.ui.Component);
 
 
 /**
- * @type {Array.<string>}
- * @private
+ * @private {Array.<string>}
  */
 npf.ui.SimpleComponent.prototype.classNames_ = null;
 
 /**
- * @type {Array.<string>}
- * @private
+ * @private {Array.<string>}
  */
 npf.ui.SimpleComponent.prototype.contentClassNames_ = null;
 
 /**
- * @type {Element}
- * @private
+ * @private {Element}
  */
 npf.ui.SimpleComponent.prototype.contentElement_ = null;
 
 /**
- * @type {string}
- * @private
- */
-npf.ui.SimpleComponent.prototype.tagName_ = goog.dom.TagName.DIV;
-
-/**
- * @type {string}
- * @private
+ * @private {string}
  */
 npf.ui.SimpleComponent.prototype.contentTagName_ = goog.dom.TagName.DIV;
+
+/**
+ * @private {string}
+ */
+npf.ui.SimpleComponent.prototype.tagName_ = goog.dom.TagName.DIV;
 
 
 /** @inheritDoc */

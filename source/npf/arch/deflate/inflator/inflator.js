@@ -13,46 +13,39 @@ npf.arch.deflate.Inflator = function() {
 
 /**
  * Sliding Window size
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Inflator.WSIZE = 32768;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Inflator.STORED_BLOCK = 0;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Inflator.STATIC_TREES = 1;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Inflator.DYN_TREES = 2;
 
 /**
  * bits in base literal/length lookup table
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Inflator.LBITS = 9;
 
 /**
  * bits in base distance lookup table
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Inflator.DBITS = 6;
 
 /**
- * @type {!Array.<number>}
- * @const
+ * @const {!Array.<number>}
  */
 npf.arch.deflate.Inflator.MASK_BITS = [
   0x0000,
@@ -62,8 +55,7 @@ npf.arch.deflate.Inflator.MASK_BITS = [
 
 /**
  * Copy lengths for literal codes 257..285
- * @type {!Array.<number>}
- * @const
+ * @const {!Array.<number>}
  */
 npf.arch.deflate.Inflator.CPLENS = [
   3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31,
@@ -72,8 +64,7 @@ npf.arch.deflate.Inflator.CPLENS = [
 
 /**
  * Extra bits for literal codes 257..285
- * @type {!Array.<number>}
- * @const
+ * @const {!Array.<number>}
  */
 npf.arch.deflate.Inflator.CPLEXT = [
   0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2,
@@ -82,8 +73,7 @@ npf.arch.deflate.Inflator.CPLEXT = [
 
 /**
  * Copy offsets for distance codes 0..29
- * @type {!Array.<number>}
- * @const
+ * @const {!Array.<number>}
  */
 npf.arch.deflate.Inflator.CPDIST = [
   1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193,
@@ -93,8 +83,7 @@ npf.arch.deflate.Inflator.CPDIST = [
 
 /**
  * Extra bits for distance codes
- * @type {!Array.<number>}
- * @const
+ * @const {!Array.<number>}
  */
 npf.arch.deflate.Inflator.CPDEXT = [
   0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6,
@@ -104,37 +93,32 @@ npf.arch.deflate.Inflator.CPDEXT = [
 
 /**
  * Order of the bit length code lengths
- * @type {!Array.<number>}
- * @const
+ * @const {!Array.<number>}
  */
 npf.arch.deflate.Inflator.BORDER = [
   16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15
 ];
 
 /**
- * @type {Array.<number>}
- * @private
+ * @private {Array.<number>}
  */
 npf.arch.deflate.Inflator.prototype.slide_;
 
 /**
  * current position in slide
- * @type {number}
- * @private
+ * @private {number}
  */
 npf.arch.deflate.Inflator.prototype.wp_;
 
 /**
  * inflate static
- * @type {npf.arch.deflate.inflator.HuftList}
- * @private
+ * @private {npf.arch.deflate.inflator.HuftList}
  */
 npf.arch.deflate.Inflator.prototype.fixedTl_ = null;
 
 /**
  * Inflate static.
- * @type {npf.arch.deflate.inflator.HuftList}
- * @private
+ * @private {npf.arch.deflate.inflator.HuftList}
  */
 npf.arch.deflate.Inflator.prototype.fixedTd_;
 
@@ -154,53 +138,45 @@ npf.arch.deflate.Inflator.prototype.fixedBd_;
 
 /**
  * bit buffer
- * @type {number}
- * @private
+ * @private {number}
  */
 npf.arch.deflate.Inflator.prototype.bitBuf_;
 
 /**
  * bits in bit buffer
- * @type {number}
- * @private
+ * @private {number}
  */
 npf.arch.deflate.Inflator.prototype.bitLen_;
 
 /**
- * @type {number}
- * @private
+ * @private {number}
  */
 npf.arch.deflate.Inflator.prototype.method_;
 
 /**
- * @type {boolean}
- * @private
+ * @private {boolean}
  */
 npf.arch.deflate.Inflator.prototype.eof_;
 
 /**
- * @type {number}
- * @private
+ * @private {number}
  */
 npf.arch.deflate.Inflator.prototype.copyLeng_;
 
 /**
- * @type {number}
- * @private
+ * @private {number}
  */
 npf.arch.deflate.Inflator.prototype.copyDist_;
 
 /**
  * Literal length decoder table.
- * @type {npf.arch.deflate.inflator.HuftList}
- * @private
+ * @private {npf.arch.deflate.inflator.HuftList}
  */
 npf.arch.deflate.Inflator.prototype.tl_;
 
 /**
  * Literal distance decoder table.
- * @type {npf.arch.deflate.inflator.HuftList}
- * @private
+ * @private {npf.arch.deflate.inflator.HuftList}
  */
 npf.arch.deflate.Inflator.prototype.td_;
 
@@ -219,14 +195,12 @@ npf.arch.deflate.Inflator.prototype.bl_;
 npf.arch.deflate.Inflator.prototype.bd_;
 
 /**
- * @type {Array.<number>}
- * @private
+ * @private {Array.<number>}
  */
 npf.arch.deflate.Inflator.prototype.inflateData_;
 
 /**
- * @type {number}
- * @private
+ * @private {number}
  */
 npf.arch.deflate.Inflator.prototype.inflatePos_;
 

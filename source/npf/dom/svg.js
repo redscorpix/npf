@@ -17,16 +17,15 @@ npf.dom.svg.Ns = {
 };
 
 /**
- * @type {!Array.<string>}
- * @private
+ * @private {!Array.<string>}
  */
-npf.dom.svg._xlinkAttrs = ['actuate', 'arcrole', 'href', 'role', 'show', 'title', 'type'];
+npf.dom.svg.xlinkAttrs_ = [
+  'actuate', 'arcrole', 'href', 'role', 'show', 'title', 'type'];
 
 /**
- * @type {!Array.<string>}
- * @private
+ * @private {!Array.<string>}
  */
-npf.dom.svg._xmlAttrs = ['base', 'lang', 'space'];
+npf.dom.svg.xmlAttrs_ = ['base', 'lang', 'space'];
 
 
 /**
@@ -55,7 +54,7 @@ npf.dom.svg.createElement = function(tagName, opt_attrs) {
 };
 
 /**
- * Из строки делает SVG-элемент.
+ * Parse string and returns SVG element.
  * @param {string} data
  * @return {Element}
  */
@@ -89,7 +88,7 @@ npf.dom.svg.parseFromString = function(data) {
  */
 npf.dom.svg.getAttr = function(element, name) {
   /** @type {?string} */
-  var ns = npf.dom.svg._getAttrNamespace(name);
+  var ns = npf.dom.svg.getAttrNamespace_(name);
 
   return ns ? element.getAttributeNS(ns, name) : element.getAttribute(name);
 };
@@ -106,10 +105,11 @@ npf.dom.svg.setAttr = function(element, name, opt_value) {
     });
   } else if (goog.isString(name)) {
     /** @type {?string} */
-    var ns = npf.dom.svg._getAttrNamespace(name);
+    var ns = npf.dom.svg.getAttrNamespace_(name);
 
     if (ns) {
-      element.setAttributeNS(ns, name, /** @type {string|number} */ (opt_value));
+      element.setAttributeNS(
+        ns, name, /** @type {string|number} */ (opt_value));
     } else {
       element.setAttribute(name, /** @type {string|number} */ (opt_value));
     }
@@ -122,7 +122,7 @@ npf.dom.svg.setAttr = function(element, name, opt_value) {
  */
 npf.dom.svg.removeAttr = function(element, name) {
   /** @type {?string} */
-  var ns = npf.dom.svg._getAttrNamespace(name);
+  var ns = npf.dom.svg.getAttrNamespace_(name);
 
   if (ns) {
     element.removeAttributeNS(ns, name);
@@ -136,10 +136,10 @@ npf.dom.svg.removeAttr = function(element, name) {
  * @return {string?}
  * @private
  */
-npf.dom.svg._getAttrNamespace = function(name) {
-  if (-1 < goog.array.indexOf(npf.dom.svg._xlinkAttrs, name)) {
+npf.dom.svg.getAttrNamespace_ = function(name) {
+  if (-1 < goog.array.indexOf(npf.dom.svg.xlinkAttrs_, name)) {
     return npf.dom.svg.Ns.XLINK;
-  } else if (-1 < goog.array.indexOf(npf.dom.svg._xmlAttrs, name)) {
+  } else if (-1 < goog.array.indexOf(npf.dom.svg.xmlAttrs_, name)) {
     return npf.dom.svg.Ns.XML;
   }
 

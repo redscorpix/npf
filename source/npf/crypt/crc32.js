@@ -7,20 +7,17 @@ goog.provide('npf.crypt.crc32');
 
 /**
  * Reverse polynomial
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.crypt.crc32.POLY = 0xEDB88320;
 
 /**
- * @type {number}
- * @private
+ * @private {number}
  */
 npf.crypt.crc32.crcTable_;
 
 /**
- * @type {!Array.<number>}
- * @private
+ * @private {!Array.<number>}
  */
 npf.crypt.crc32.table_ = (function() {
   var table = [];

@@ -19,14 +19,12 @@ goog.inherits(npf.ui.pagePaginator.Dragger, goog.fx.Dragger);
 
 
 /**
- * @type {boolean}
- * @private
+ * @private {boolean}
  */
 npf.ui.pagePaginator.Dragger.prototype.isLeftLimit_ = false;
 
 /**
- * @type {boolean}
- * @private
+ * @private {boolean}
  */
 npf.ui.pagePaginator.Dragger.prototype.isRightLimit_ = false;
 
@@ -42,7 +40,7 @@ npf.ui.pagePaginator.Dragger.prototype.startDrag = function(e) {
 
 /** @inheritDoc */
 npf.ui.pagePaginator.Dragger.prototype.doDrag = function(e, x, y,
-                                                         dragFromScroll) {
+    dragFromScroll) {
   goog.base(this, 'doDrag', e, x, y, dragFromScroll);
 
   if (goog.events.EventType.TOUCHMOVE == e.type) {

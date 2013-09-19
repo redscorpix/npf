@@ -22,16 +22,18 @@ goog.addSingletonGetter(npf.ui.form.Renderer);
  */
 npf.ui.form.Renderer.CSS_CLASS = goog.getCssName('npf-form');
 
+
 /** @inheritDoc */
 npf.ui.form.Renderer.prototype.getCssClass = function() {
   return npf.ui.form.Renderer.CSS_CLASS;
 };
 
-/** @override */
-npf.ui.form.Renderer.prototype.createDom = function(form) {
+/** @inheritDoc */
+npf.ui.form.Renderer.prototype.createDom = function(component) {
   /** @type {!Element} */
-  var element = form.getDomHelper().createDom(goog.dom.TagName.FORM,
-    this.getClassNames(form).join(' '));
+  var element = component.getDomHelper().createDom(goog.dom.TagName.FORM,
+    this.getClassNames(component).join(' '));
+  this.setAriaStates(/** @type {!npf.ui.Form} */ (component), element);
 
   return element;
 };

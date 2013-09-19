@@ -16,8 +16,7 @@ goog.inherits(npf.ui.Component, goog.ui.Component);
 
 
 /**
- * @type {Array.<goog.Disposable>}
- * @private
+ * @private {Array.<goog.Disposable>}
  */
 npf.ui.Component.prototype.disposeOnExitDocument_ = null;
 

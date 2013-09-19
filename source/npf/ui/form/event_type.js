@@ -8,18 +8,25 @@ goog.require('goog.events');
  */
 npf.ui.form.EventType = {
   /**
-   * value (*)
+   * Изменилось значение поля.
+   * npf.ui.form.FieldEvent
    */
   CHANGE: goog.events.getUniqueId('change'),
+
   /**
-   * value (*)
-   * error (string)
+   * Ошибочное значение поля.
+   * npf.ui.form.FieldEvent
    */
   ERROR: goog.events.getUniqueId('error'),
+
   /**
-   * value (*)
+   * Поле стало валидным.
+   * npf.ui.form.FieldEvent
    */
   VALID: goog.events.getUniqueId('valid'),
 
+  /**
+   * Отправка формы.
+   */
   SUBMIT: goog.events.getUniqueId('submit')
 };
