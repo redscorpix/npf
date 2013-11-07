@@ -6,13 +6,15 @@ goog.require('goog.Uri');
 goog.require('goog.array');
 goog.require('goog.debug.Logger');
 goog.require('goog.debug.entryPointRegistry');
+goog.require('goog.events.BrowserEvent');
 goog.require('goog.events.EventTarget');
 goog.require('goog.json');
-goog.require('goog.log');
 goog.require('goog.net.ErrorCode');
 goog.require('goog.net.EventType');
 goog.require('goog.net.HttpStatus');
 goog.require('goog.net.XmlHttp');
+goog.require('goog.net.XmlHttp.OptionType');
+goog.require('goog.net.XmlHttp.ReadyState');
 goog.require('goog.object');
 goog.require('goog.string');
 goog.require('goog.structs');
@@ -1147,13 +1149,19 @@ npf.net.XhrIo2.prototype.getAllResponseHeaders = function() {
  *     and header values as values.
  */
 npf.net.XhrIo2.prototype.getResponseHeaders = function() {
+  /** @type {!Object.<string>} */
   var headersObject = {};
+  /** @type {!Array.<string>} */
   var headersArray = this.getAllResponseHeaders().split('\r\n');
+
   for (var i = 0; i < headersArray.length; i++) {
     if (goog.string.isEmpty(headersArray[i])) {
       continue;
     }
+
+    /** @type {!Array.<string>} */
     var keyValue = goog.string.splitLimit(headersArray[i], ': ', 2);
+
     if (headersObject[keyValue[0]]) {
       headersObject[keyValue[0]] += ', ' + keyValue[1];
     } else {
@@ -1226,7 +1234,11 @@ npf.net.XhrIo2.prototype.dispatchEvent = function(e) {
 npf.net.XhrIo2.prototype.getResponseJsonProperty = function(prop) {
   var jsonData = this.getResponseJson();
 
-  return goog.isObject(jsonData) ? jsonData[prop] : undefined;
+  if (goog.isObject(jsonData)) {
+    return jsonData[prop];
+  }
+
+  return undefined;
 };
 
 

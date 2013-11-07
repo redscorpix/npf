@@ -79,6 +79,7 @@ npf.pages.Page.prototype.disposeInternal = function() {
 
 /**
  * @param {npf.pages.Request} request
+ * @throws {Error}
  */
 npf.pages.Page.prototype.load = function(request) {
   if (!this.loaded_) {
@@ -104,6 +105,9 @@ npf.pages.Page.prototype.loadInternal = function(request) {
   this.initHelpers(request);
 };
 
+/**
+ * @throws {Error}
+ */
 npf.pages.Page.prototype.unload = function() {
   if (!this.loaded_) {
     return;

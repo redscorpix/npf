@@ -5,7 +5,6 @@ goog.require('goog.dom.TagName');
 goog.require('goog.math.Coordinate');
 goog.require('goog.math.Size');
 goog.require('goog.style');
-goog.require('goog.userAgent');
 goog.require('npf.ui.StatedRenderer');
 
 

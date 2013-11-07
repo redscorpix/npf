@@ -4,6 +4,7 @@ goog.provide('npf.ui.ProgressBar.Orientation');
 goog.require('goog.ui.Component.EventType');
 goog.require('goog.ui.RangeModel');
 goog.require('npf.ui.RenderedComponent');
+goog.require('npf.ui.progressBar.Renderer');
 
 
 
@@ -103,7 +104,9 @@ npf.ui.ProgressBar.prototype.setMaximumInternal = function(value) {
  * @protected
  */
 npf.ui.ProgressBar.prototype.applyMaximum = function(value) {
-  this.getRenderer().setMaximum(this, value);
+  var renderer = /** @type {npf.ui.progressBar.Renderer} */ (
+    this.getRenderer());
+  renderer.setMaximum(this, value);
 };
 
 /**
@@ -137,7 +140,9 @@ npf.ui.ProgressBar.prototype.setMinimumInternal = function(value) {
  * @protected
  */
 npf.ui.ProgressBar.prototype.applyMinimum = function(value) {
-  this.getRenderer().setMinimum(this, value);
+  var renderer = /** @type {npf.ui.progressBar.Renderer} */ (
+    this.getRenderer());
+  renderer.setMinimum(this, value);
 };
 
 /**
@@ -156,11 +161,14 @@ npf.ui.ProgressBar.prototype.setOrientation = function(orient) {
     var oldOrient = this.orientation_;
     this.orientation_ = orient;
 
-    this.getRenderer().updateOrientation(this.getElement, oldOrient, orient);
+    var renderer = /** @type {npf.ui.progressBar.Renderer} */ (
+      this.getRenderer());
+
+    renderer.updateOrientation(this.getElement(), oldOrient, orient);
 
     // Update the DOM
     if (this.getElement()) {
-      this.getRenderer().initializeUi(this);
+      renderer.initializeUi(this);
       this.updateUi();
     }
   }
@@ -213,7 +221,9 @@ npf.ui.ProgressBar.prototype.setValueInternal = function(value) {
  * @protected
  */
 npf.ui.ProgressBar.prototype.applyValue = function(value) {
-  this.getRenderer().setValue(this, value);
+  var renderer = /** @type {npf.ui.progressBar.Renderer} */ (
+    this.getRenderer());
+  renderer.setValue(this, value);
 };
 
 /**
@@ -233,12 +243,16 @@ npf.ui.ProgressBar.prototype.handleChange_ = function(e) {
  * @protected
  */
 npf.ui.ProgressBar.prototype.updateUi = function() {
-  this.getRenderer().updateUi(this);
+  var renderer = /** @type {npf.ui.progressBar.Renderer} */ (
+    this.getRenderer());
+  renderer.updateUi(this);
 };
 
 /**
  * @return {Element}
  */
 npf.ui.ProgressBar.prototype.getThumbElement = function() {
-  return this.getRenderer().getThumbElement(this.getElement());
+  var renderer = /** @type {npf.ui.progressBar.Renderer} */ (
+    this.getRenderer());
+  return renderer.getThumbElement(this.getElement());
 };

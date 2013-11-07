@@ -74,6 +74,7 @@ npf.ui.form.DatePickerRenderer.prototype.appendDayElement = function(component,
 
 /**
  * @param {npf.ui.form.DatePicker} component
+ * @param {Element} element
  * @return {Element}
  * @protected
  */
@@ -96,6 +97,7 @@ npf.ui.form.DatePickerRenderer.prototype.appendMonthElement = function(
 
 /**
  * @param {npf.ui.form.DatePicker} component
+ * @param {Element} element
  * @return {Element}
  * @protected
  */
@@ -119,12 +121,13 @@ npf.ui.form.DatePickerRenderer.prototype.appendYearElement = function(component,
 /** @inheritDoc */
 npf.ui.form.DatePickerRenderer.prototype.setDisabled = function(component,
     disable) {
+  var datePicker = /** @type {npf.ui.form.DatePicker} */ (component);
   /** @type {Element} */
-  var dayElement = component.getDayElement();
+  var dayElement = datePicker.getDayElement();
   /** @type {Element} */
-  var monthElement = component.getMonthElement();
+  var monthElement = datePicker.getMonthElement();
   /** @type {Element} */
-  var yearElement = component.getYearElement();
+  var yearElement = datePicker.getYearElement();
 
   if (dayElement) {
     goog.dom.forms.setDisabled(dayElement, disable);

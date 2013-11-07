@@ -2,11 +2,9 @@ goog.provide('npf.ui.imageCrop.PreviewRenderer');
 
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
-goog.require('goog.dom.classes');
 goog.require('goog.math.Rect');
 goog.require('goog.math.Size');
 goog.require('goog.style');
-goog.require('npf.graphics.Scale');
 goog.require('npf.ui.StatedRenderer');
 goog.require('npf.userAgent.support');
 

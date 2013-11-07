@@ -2,7 +2,9 @@ goog.provide('npf.ui.ContextPopup');
 
 goog.require('goog.dom');
 goog.require('goog.positioning.AnchoredPosition');
+goog.require('goog.positioning.Corner');
 goog.require('goog.ui.Popup');
+goog.require('goog.ui.PopupBase.EventType');
 goog.require('npf.fx.KeyframeAnimation');
 goog.require('npf.ui.RenderedComponent');
 goog.require('npf.ui.contextPopup.Renderer');
@@ -16,11 +18,11 @@ goog.require('npf.ui.contextPopup.Renderer');
  * @extends {npf.ui.RenderedComponent}
  */
 npf.ui.ContextPopup = function(opt_anchorElement, opt_renderer, opt_domHelper) {
-  goog.base(this, opt_renderer ||
-    npf.ui.contextPopup.Renderer.getInstance(), opt_domHelper);
+  var renderer = opt_renderer || npf.ui.contextPopup.Renderer.getInstance();
+  goog.base(this, renderer, opt_domHelper);
 
   this.anchorElement_ = opt_anchorElement || null;
-  this.fadeElement_ = this.getRenderer().createFaderElement(this);
+  this.fadeElement_ = renderer.createFaderElement(this);
 };
 goog.inherits(npf.ui.ContextPopup, npf.ui.RenderedComponent);
 

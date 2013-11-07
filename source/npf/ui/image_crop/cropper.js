@@ -4,9 +4,12 @@ goog.provide('npf.ui.imageCrop.Cropper.EventType');
 
 goog.require('goog.events');
 goog.require('goog.events.Event');
+goog.require('goog.events.EventType');
 goog.require('goog.fx.Dragger');
+goog.require('goog.fx.Dragger.EventType');
 goog.require('goog.math.Rect');
 goog.require('goog.math.Size');
+goog.require('npf.events.TouchHandler');
 goog.require('npf.ui.StatedComponent');
 goog.require('npf.ui.imageCrop.CropperRenderer');
 goog.require('npf.ui.imageCrop.Direction');

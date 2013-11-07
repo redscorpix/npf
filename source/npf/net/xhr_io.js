@@ -2,6 +2,7 @@ goog.provide('npf.net.XhrIo');
 
 goog.require('goog.Uri');
 goog.require('goog.array');
+goog.require('goog.net.EventType');
 goog.require('goog.net.XhrIo');
 goog.require('goog.object');
 goog.require('goog.structs');

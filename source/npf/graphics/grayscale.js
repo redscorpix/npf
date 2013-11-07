@@ -1,6 +1,5 @@
 goog.provide('npf.graphics.Grayscale');
 
-goog.require('goog.math');
 goog.require('npf.graphics.Effect');
 
 

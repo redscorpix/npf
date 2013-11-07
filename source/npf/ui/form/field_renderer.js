@@ -1,10 +1,12 @@
 goog.provide('npf.ui.form.FieldRenderer');
 
+goog.require('goog.array');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('goog.dom.classes');
 goog.require('goog.dom.forms');
 goog.require('goog.style');
+goog.require('goog.ui.Component.State');
 goog.require('goog.ui.IdGenerator');
 goog.require('npf.ui.StatedRenderer');
 
@@ -82,7 +84,9 @@ npf.ui.form.FieldRenderer.prototype.getContentElement = function(element) {
 
 /** @inheritDoc */
 npf.ui.form.FieldRenderer.prototype.getKeyEventTarget = function(component) {
-  return component.getValueElement();
+  var field = /** @type {npf.ui.form.Field} */ (component);
+
+  return field.getValueElement();
 };
 
 /**
@@ -192,11 +196,13 @@ npf.ui.form.FieldRenderer.prototype.setContent = function(element, content) {
       if (goog.isString(content)) {
         goog.dom.setTextContent(element, content);
       } else {
+        /** @type {function((string|Node))} */
         var childHandler = function(child) {
           if (child) {
+            /** @type {!Document} */
             var doc = goog.dom.getOwnerDocument(element);
             element.appendChild(goog.isString(child) ?
-              doc.createTextNode(child) : child);
+              doc.createTextNode(child) : /** @type {Node} */ (child));
           }
         };
 
@@ -210,8 +216,7 @@ npf.ui.form.FieldRenderer.prototype.setContent = function(element, content) {
           goog.array.forEach(goog.array.clone(/** @type {NodeList} */(content)),
             childHandler);
         } else {
-          // Node or string.
-          childHandler(content);
+          childHandler(/** @type {string|Node} */ (content));
         }
       }
     }

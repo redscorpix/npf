@@ -1,7 +1,5 @@
-/bin
-/lib
-/source/goog
-node_modules
-
 .DS_Store
 *~
+
+/bin
+node_modules

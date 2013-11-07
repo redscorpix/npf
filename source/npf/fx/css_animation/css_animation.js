@@ -1,16 +1,18 @@
 goog.provide('npf.fx.CssAnimation');
 goog.provide('npf.fx.CssAnimation.PreferredTimingFunction');
 
-goog.require('goog.array');
 goog.require('goog.events.EventHandler');
 goog.require('goog.fx.Transition');
 goog.require('goog.fx.TransitionBase');
+goog.require('goog.style');
 goog.require('npf.fx.Animation');
 goog.require('npf.fx.css3.easing');
 goog.require('npf.fx.cssAnimation.Keyframes');
 goog.require('npf.fx.cssAnimation.Event');
 goog.require('npf.fx.cssAnimation.EventType');
 goog.require('npf.style.animation');
+goog.require('npf.style.animation.Direction');
+goog.require('npf.style.animation.PlayState');
 goog.require('npf.userAgent.Support');
 goog.require('npf.userAgent.support');
 

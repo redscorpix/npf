@@ -1,8 +1,6 @@
 goog.provide('npf.graphics.Blend');
 goog.provide('npf.graphics.Blend.Mode');
 
-goog.require('goog.dom');
-goog.require('goog.dom.TagName');
 goog.require('goog.math');
 goog.require('npf.graphics.Effect');
 goog.require('npf.graphics.blend.functions');

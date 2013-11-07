@@ -2,16 +2,19 @@ goog.provide('npf.ui.PagePaginator');
 goog.provide('npf.ui.PagePaginator.EventType');
 
 goog.require('goog.events');
+goog.require('goog.events.EventType');
+goog.require('goog.ui.Component.Error');
 goog.require('npf.ui.RenderedComponent');
 goog.require('npf.ui.pagePaginator.Changer');
+goog.require('npf.ui.pagePaginator.Changer.EventType');
 goog.require('npf.ui.pagePaginator.Renderer');
 
 
 /**
  * @param {number} pageCount
  * @param {number=} opt_page
- * @param {npf.ui.pagePaginator.Renderer=} opt_renderer Renderer used to render or decorate the component.
- * @param {goog.dom.DomHelper=} opt_domHelper DOM helper, used for document interaction.
+ * @param {npf.ui.pagePaginator.Renderer=} opt_renderer
+ * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
  * @extends {npf.ui.RenderedComponent}
  */

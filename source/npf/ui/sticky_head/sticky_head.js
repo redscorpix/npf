@@ -1,5 +1,6 @@
 goog.provide('npf.ui.StickyHead');
 
+goog.require('goog.events.EventType');
 goog.require('goog.style');
 goog.require('npf.ui.RenderedComponent');
 goog.require('npf.ui.stickyHead.Body');

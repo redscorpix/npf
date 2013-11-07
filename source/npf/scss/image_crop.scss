@@ -3,10 +3,8 @@
 
   background: #fff;
   border: 5px solid #fff;
-  display: inline-block;
   margin: -5px 0 0 -5px;
   position: absolute;
-  vertical-align: top;
 }
 
 .npf-imageCrop-content {
@@ -203,17 +201,18 @@
   @include box-shadow(0 5px 20px #002544);
 
   background: #fff;
-  display: inline-block;
+  margin: -5px 0 0 20px;
   padding: 5px 5px 39px;
   position: absolute;
-  vertical-align: top;
 }
 
 .npf-imageCrop-preview-content {
   @include border-radius(2px);
 
+  height: 170px;
   overflow: hidden;
   position: relative;
+  width: 170px;
 }
 
 .npf-imageCrop-preview-image {

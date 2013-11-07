@@ -20,10 +20,10 @@ goog.addSingletonGetter(npf.ui.Renderer);
  * as the base CSS class to apply to all elements rendered by that renderer.
  * An example to use this function using a color palette:
  *
- * @param {Function} ctor The constructor of the renderer you are trying
- *                        to create.
+ * @param {function(new: npf.ui.Renderer, ...)} ctor The constructor of the
+ *    renderer you are trying to create.
  * @param {string} cssClassName The name of the CSS class for this renderer.
- * @return {npf.ui.Renderer} An instance of the desired
+ * @return {!npf.ui.Renderer} An instance of the desired
  *   renderer with its getCssClass() method overridden to return the supplied
  *   custom CSS class name.
  */
@@ -153,7 +153,8 @@ npf.ui.Renderer.prototype.decorate = function(component, element) {
   var hasRendererClassName = false;
   var hasStructuralClassName = false;
   var hasCombinedClassName = false;
-  var classNames = goog.dom.classes.get(element);
+  var classNames = /** @type {!Array.<string>} */ (
+    goog.dom.classes.get(element));
   var extraClassNames = component.getExtraClassNames();
 
   goog.array.forEach(classNames, function(className) {

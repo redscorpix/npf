@@ -510,11 +510,12 @@ npf.style.animation.setValue_ = function(element, key, value) {
 
 /**
  * @param {Element} element
- * @param {string} style
+ * @param {string} property
  * @return {string}
  * @private
  */
-npf.style.animation.getStyle_ = function(element, style) {
-  return goog.style.getComputedStyle(element, style) ||
-      goog.style.getCascadedStyle(element, style) || element.style[style];
+npf.style.animation.getStyle_ = function(element, property) {
+  return goog.style.getComputedStyle(element, property) ||
+      goog.style.getCascadedStyle(element, property) ||
+      /** @type {string} */ (element['style'][property]);
 };

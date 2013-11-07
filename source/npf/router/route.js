@@ -4,13 +4,12 @@ goog.require('goog.Uri');
 goog.require('goog.Uri.QueryData');
 goog.require('goog.array');
 goog.require('goog.object');
-goog.require('goog.string');
 goog.require('npf.string');
 
 
 /**
  * @param {string} fragment
- * @param {Object.<string,function(string):boolean|Array.<function(string):boolean>>=}
+ * @param {Object.<function(string):boolean|Array.<function(string):boolean>>=}
  *                                                             opt_validatorsMap
  *
  * @example
@@ -26,16 +25,19 @@ goog.require('npf.string');
 npf.router.Route = function(fragment, opt_validatorsMap) {
 
   /**
-   * @type {!Object.<string,Array.<function(string):boolean>>}
+   * @type {!Object.<Array.<function(string):boolean>>}
    * @private
    */
   this.validatorsMap_ = {};
 
   if (opt_validatorsMap) {
-    goog.object.forEach(opt_validatorsMap, function(validator, name) {
+    /** @type {function(this:npf.router.Route,(function(string):boolean|Array.<function(string):boolean>),string)} */
+    var addValidators = function(validator, name) {
+      /** @type {Array.<function(string):boolean>} */
       var validators = goog.isArray(validator) ? validator : [validator];
       this.validatorsMap_[name] = validators;
-    },  this);
+    };
+    goog.object.forEach(opt_validatorsMap, addValidators,  this);
   }
 
   /**
@@ -119,19 +121,19 @@ npf.router.Route.prototype.addRangeValidator_ = function(name, args) {
       var min = Math.min(from, to);
       var max = Math.max(from, to);
 
-      validator = function(value) {
+      validator = /** @type {function(string):boolean} */ (function(value) {
         var intValue = parseInt(value, 10);
 
         return min <= intValue && intValue <= max;
-      };
+      });
     } else if (goog.isNumber(from)) {
-      validator = function(value) {
+      validator = /** @type {function(string):boolean} */ (function(value) {
         return from <= parseInt(value, 10);
-      };
+      });
     } else if (goog.isNumber(to)) {
-      validator = function(value) {
+      validator = /** @type {function(string):boolean} */ (function(value) {
         return to >= parseInt(value, 10);
-      };
+      });
     }
   }
 

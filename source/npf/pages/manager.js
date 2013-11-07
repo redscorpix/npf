@@ -62,7 +62,7 @@ npf.pages.Manager.EventType = {
 
 
 /**
- * @private {Object.<Function>}
+ * @private {Object.<function(new:npf.pages.Page,...)>}
  */
 npf.pages.Manager.prototype.errorPageCtorsMap_;
 
@@ -82,7 +82,7 @@ npf.pages.Manager.prototype.helpersMap_;
 npf.pages.Manager.prototype.page_ = null;
 
 /**
- * @private {Object.<Function>}
+ * @private {Object.<function(new:npf.pages.Page,...)>}
  */
 npf.pages.Manager.prototype.pageCtorsMap_;
 
@@ -208,7 +208,7 @@ npf.pages.Manager.prototype.requestPage = function(request) {
 
   this.request_ = request;
 
-  /** @type {Function} */
+  /** @type {function(new:npf.pages.Page,...)?} */
   var Page = null;
   /** @type {string} */
   var pageType = '';
@@ -248,7 +248,7 @@ npf.pages.Manager.prototype.requestError = function(opt_status) {
  * @protected
  */
 npf.pages.Manager.prototype.requestErrorInternal = function(status, request) {
-  /** @type {Function} */
+  /** @type {function(new:npf.pages.Page,...)} */
   var Page = this.errorPageCtorsMap_[status] || null;
 
   if (Page) {
@@ -258,7 +258,7 @@ npf.pages.Manager.prototype.requestErrorInternal = function(status, request) {
 
 /**
  * @param {npf.pages.Request} request
- * @param {Function} Page
+ * @param {function(new:npf.pages.Page,...)} Page
  * @param {string} type
  * @protected
  */
@@ -273,7 +273,7 @@ npf.pages.Manager.prototype.processPage = function(request, Page, type) {
 
 /**
  * @param {npf.pages.Request} request
- * @param {Function} Page
+ * @param {function(new:npf.pages.Page,...)} Page
  * @param {string} type
  * @protected
  */
@@ -285,13 +285,13 @@ npf.pages.Manager.prototype.requestPageInternal = function(request, Page,
 
 /**
  * @param {npf.pages.Request} request
- * @param {Function} Page
+ * @param {function(new:npf.pages.Page,...)} Page
  * @param {string} type
  * @return {!npf.pages.Page}
  * @protected
  */
 npf.pages.Manager.prototype.loadPage = function(request, Page, type) {
-  this.page_ = /** @type {!npf.pages.Page} */ (new Page(this, type));
+  this.page_ = new Page(this, type);
   this.page_.listen(npf.pages.Page.EventType.ERROR,
     this.onPageError_, false, this);
   this.page_.listen(npf.pages.Page.EventType.TITLE_CHANGE,
@@ -325,6 +325,7 @@ npf.pages.Manager.prototype.unloadPage = function(page) {
 };
 
 /**
+ * @param {npf.pages.Page} page
  * @protected
  */
 npf.pages.Manager.prototype.unloadPageInternal = function(page) {
@@ -357,17 +358,20 @@ npf.pages.Manager.prototype.updateHelpers_ = function(page) {
 
   /** @type {!Object.<goog.Disposable>} */
   var removeHelpersMap = {};
-
-  goog.object.forEach(this.helpersMap_, function(helper, type) {
+  /** @type {function(goog.Disposable,string)} */
+  var addHelpers = function(helper, type) {
     if (!helperTypesMap[type]) {
       removeHelpersMap[type] = helper;
     }
-  }, this);
-
-  goog.object.forEach(removeHelpersMap, function(helper, type) {
+  };
+  /** @type {function(this:npf.pages.Manager,goog.Disposable,string)} */
+  var removeHelpers = function(helper, type) {
     goog.object.remove(this.helpersMap_, type);
     this.removeHelper(type, helper);
-  }, this);
+  };
+
+  goog.object.forEach(this.helpersMap_, addHelpers);
+  goog.object.forEach(removeHelpersMap, removeHelpers, this);
 };
 
 /**
@@ -407,7 +411,7 @@ npf.pages.Manager.prototype.onPageError_ = function(evt) {
 };
 
 /**
- * @param {Function} Page
+ * @param {function(new:npf.pages.Page,...)} Page
  * @param {string} pageType
  * @param {string|Array.<string>=} opt_routeNames
  */
@@ -435,7 +439,7 @@ npf.pages.Manager.prototype.removePageCtor = function(pageType) {
 };
 
 /**
- * @param {Function} Page
+ * @param {function(new:npf.pages.Page,...)} Page
  * @param {goog.net.HttpStatus} httpStatus
  */
 npf.pages.Manager.prototype.addErrorPageCtor = function(Page, httpStatus) {
@@ -581,7 +585,7 @@ npf.pages.Manager.prototype.hasPageCtor = function(pageType) {
 
 /**
  * @param {string} pageType
- * @return {Function}
+ * @return {function(new:npf.pages.Page,...)?}
  */
 npf.pages.Manager.prototype.getPageCtor = function(pageType) {
   return this.pageCtorsMap_[pageType] || null;
@@ -599,7 +603,7 @@ npf.pages.Manager.prototype.getPageTypeByRoute = function(name) {
 
 /**
  * @param {string} name
- * @return {Function}
+ * @return {function(new:npf.pages.Page,...)?}
  */
 npf.pages.Manager.prototype.getPageCtorByRoute = function(name) {
   /** @type {string|undefined} */

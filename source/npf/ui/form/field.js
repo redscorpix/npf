@@ -2,8 +2,8 @@ goog.provide('npf.ui.form.Field');
 goog.provide('npf.ui.form.FieldEvent');
 
 goog.require('goog.array');
-goog.require('goog.events');
 goog.require('goog.events.Event');
+goog.require('goog.ui.Component.State');
 goog.require('npf.ui.StatedComponent');
 goog.require('npf.ui.form.EventType');
 goog.require('npf.ui.form.FieldRenderer');
@@ -189,7 +189,8 @@ npf.ui.form.Field.prototype.setErrorInternal = function(visible) {
  * @protected
  */
 npf.ui.form.Field.prototype.applyError = function(visible) {
-  this.getRenderer().setError(this, visible);
+  var renderer = /** @type {npf.ui.form.FieldRenderer} */ (this.getRenderer());
+  renderer.setError(this, visible);
 };
 
 /**
@@ -236,7 +237,8 @@ npf.ui.form.Field.prototype.setErrorMessageInternal = function(message) {
  * @protected
  */
 npf.ui.form.Field.prototype.applyErrorMessage = function(message) {
-  this.getRenderer().setContent(this.getErrorMessageElement(), message);
+  var renderer = /** @type {npf.ui.form.FieldRenderer} */ (this.getRenderer());
+  renderer.setContent(this.getErrorMessageElement(), message);
 };
 
 /**
@@ -257,7 +259,8 @@ npf.ui.form.Field.prototype.setHiddenErrorOnChange = function(hide) {
  * @param {boolean=} opt_select
  */
 npf.ui.form.Field.prototype.focus = function(opt_select) {
-  this.getRenderer().focus(this.getValueElement(), opt_select);
+  var renderer = /** @type {npf.ui.form.FieldRenderer} */ (this.getRenderer());
+  renderer.focus(this.getValueElement(), opt_select);
 };
 
 /**
@@ -290,7 +293,8 @@ npf.ui.form.Field.prototype.setLabelInternal = function(label) {
  * @protected
  */
 npf.ui.form.Field.prototype.applyLabel = function(label) {
-  this.getRenderer().setContent(this.getLabelElement(), label);
+  var renderer = /** @type {npf.ui.form.FieldRenderer} */ (this.getRenderer());
+  renderer.setContent(this.getLabelElement(), label);
 };
 
 /**
@@ -369,7 +373,8 @@ npf.ui.form.Field.prototype.setLabelVisibleInternal = function(visible) {
  * @protected
  */
 npf.ui.form.Field.prototype.applyLabelVisible = function(visible) {
-  this.getRenderer().setLabelVisible(this, visible);
+  var renderer = /** @type {npf.ui.form.FieldRenderer} */ (this.getRenderer());
+  renderer.setLabelVisible(this, visible);
 };
 
 /**
@@ -407,7 +412,9 @@ npf.ui.form.Field.prototype.setNoticeInternal = function(notice) {
  * @param {string|Node|Array.<Node>|NodeList} notice
  */
 npf.ui.form.Field.prototype.applyNotice = function(notice) {
-  this.getRenderer().setContent(this.getNoticeElement(), notice);
+  var renderer = /** @type {npf.ui.form.FieldRenderer} */ (this.getRenderer());
+
+  renderer.setContent(this.getNoticeElement(), notice);
 };
 
 /**
@@ -442,7 +449,9 @@ npf.ui.form.Field.prototype.getValue = function() {
  * @return {*}
  */
 npf.ui.form.Field.prototype.getValueFromElement = function() {
-  return this.getRenderer().getValue(this);
+  var renderer = /** @type {npf.ui.form.FieldRenderer} */ (this.getRenderer());
+
+  return renderer.getValue(this);
 };
 
 /**
@@ -476,7 +485,9 @@ npf.ui.form.Field.prototype.setValueInternal = function(value) {
  */
 npf.ui.form.Field.prototype.applyValue = function(value, opt_noRender) {
   if (!opt_noRender) {
-    this.getRenderer().setValue(this, value);
+    var renderer = /** @type {npf.ui.form.FieldRenderer} */ (
+      this.getRenderer());
+    renderer.setValue(this, value);
   }
 
   if (this.isHiddenErrorOnChange()) {
@@ -608,28 +619,36 @@ npf.ui.form.Field.prototype.onValid = function() {
  * @return {Element}
  */
 npf.ui.form.Field.prototype.getErrorMessageElement = function() {
-  return this.getRenderer().getErrorMessageElement(this.getElement());
+  var renderer = /** @type {npf.ui.form.FieldRenderer} */ (this.getRenderer());
+
+  return renderer.getErrorMessageElement(this.getElement());
 };
 
 /**
  * @return {Element}
  */
 npf.ui.form.Field.prototype.getLabelElement = function() {
-  return this.getRenderer().getLabelElement(this.getElement());
+  var renderer = /** @type {npf.ui.form.FieldRenderer} */ (this.getRenderer());
+
+  return renderer.getLabelElement(this.getElement());
 };
 
 /**
  * @return {Element}
  */
 npf.ui.form.Field.prototype.getNoticeElement = function() {
-  return this.getRenderer().getNoticeElement(this.getElement());
+  var renderer = /** @type {npf.ui.form.FieldRenderer} */ (this.getRenderer());
+
+  return renderer.getNoticeElement(this.getElement());
 };
 
 /**
  * @return {Element}
  */
 npf.ui.form.Field.prototype.getValueElement = function() {
-  return this.getRenderer().getValueElement(this.getElement());
+  var renderer = /** @type {npf.ui.form.FieldRenderer} */ (this.getRenderer());
+
+  return renderer.getValueElement(this.getElement());
 };
 
 

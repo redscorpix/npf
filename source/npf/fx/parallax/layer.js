@@ -2,11 +2,11 @@ goog.provide('npf.fx.parallax.Layer');
 goog.provide('npf.fx.parallax.Layer.Event');
 goog.provide('npf.fx.parallax.Layer.EventType');
 
-goog.require('goog.array');
 goog.require('goog.events');
 goog.require('goog.events.Event');
 goog.require('goog.events.EventTarget');
 goog.require('goog.math');
+goog.require('npf.fx.Parallax.EventType');
 
 
 /**

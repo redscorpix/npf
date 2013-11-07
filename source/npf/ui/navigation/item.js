@@ -1,7 +1,7 @@
 goog.provide('npf.ui.navigation.Item');
 
-goog.require('goog.dom.classes');
 goog.require('goog.events.BrowserEvent');
+goog.require('goog.events.EventType');
 goog.require('goog.ui.Component.EventType');
 goog.require('npf.ui.RenderedComponent');
 goog.require('npf.ui.navigation.ItemRenderer');

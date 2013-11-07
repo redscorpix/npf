@@ -32,14 +32,15 @@ npf.ui.progressBar.Renderer.prototype.getCssClass = function() {
 
 /** @inheritDoc */
 npf.ui.progressBar.Renderer.prototype.createDom = function(component) {
+  var progressBar = /** @type {npf.ui.ProgressBar} */ (component);
   /** @type {npf.ui.ProgressBar.Orientation} */
-  var orientation = component.getOrientation();
+  var orientation = progressBar.getOrientation();
   var element = /** @type {!Element} */ (
     goog.base(this, 'createDom', component));
   goog.dom.classes.add(element, this.getOrientationCssClass(orientation));
 
   /** @type {Element} */
-  var thumbElement = this.createThumbElement(component);
+  var thumbElement = this.createThumbElement(progressBar);
   goog.dom.appendChild(element, thumbElement);
 
   // state live = polite will notify the user of updates,
@@ -54,15 +55,16 @@ npf.ui.progressBar.Renderer.prototype.createDom = function(component) {
 npf.ui.progressBar.Renderer.prototype.decorate = function(component, element) {
   element = goog.base(this, 'decorate', component, element);
 
+  var progressBar = /** @type {npf.ui.ProgressBar} */ (component);
   /** @type {npf.ui.ProgressBar.Orientation} */
-  var orientation = component.getOrientation();
+  var orientation = progressBar.getOrientation();
   goog.dom.classes.add(element, this.getOrientationCssClass(orientation));
 
   // find thumb
   var thumbElement = this.getThumbElement(element);
 
   if (!thumbElement) {
-    thumbElement = this.createThumbElement(component);
+    thumbElement = this.createThumbElement(progressBar);
     goog.dom.appendChild(element, thumbElement);
   }
 
@@ -177,7 +179,7 @@ npf.ui.progressBar.Renderer.prototype.setValue = function(component, value) {
 
 /**
  * This creates the thumb element.
- * @param {goog.ui.Component} component
+ * @param {npf.ui.ProgressBar} component
  * @return {!Element} The created thumb element.
  * @protected
  */

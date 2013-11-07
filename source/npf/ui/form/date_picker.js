@@ -3,7 +3,6 @@ goog.provide('npf.ui.form.DatePicker');
 goog.require('goog.date.Date');
 goog.require('goog.events.EventType');
 goog.require('goog.math');
-goog.require('goog.object');
 goog.require('npf.ui.form.DatePickerRenderer');
 goog.require('npf.ui.form.Field');
 
@@ -16,10 +15,11 @@ goog.require('npf.ui.form.Field');
  * @extends {npf.ui.form.Field}
  */
 npf.ui.form.DatePicker = function(name, opt_renderer, opt_domHelper) {
-  goog.base(this, name, opt_renderer ||
-    npf.ui.form.DatePickerRenderer.getInstance(), opt_domHelper);
+  var renderer = opt_renderer || npf.ui.form.DatePickerRenderer.getInstance();
 
-  this.addClassName(this.getRenderer().getFieldCssClass());
+  goog.base(this, name, renderer, opt_domHelper);
+
+  this.addClassName(renderer.getFieldCssClass());
 
   this.maxDate_ = new goog.date.Date();
   this.minDate_ = new goog.date.Date(1901, 1, 1);
@@ -291,21 +291,30 @@ npf.ui.form.DatePicker.prototype.setMinDate = function(minDate) {
  * @return {Element}
  */
 npf.ui.form.DatePicker.prototype.getDayElement = function() {
-  return this.getRenderer().getDayElement(this.getElement());
+  var renderer = /** @type {npf.ui.form.DatePickerRenderer} */ (
+    this.getRenderer());
+
+  return renderer.getDayElement(this.getElement());
 };
 
 /**
  * @return {Element}
  */
 npf.ui.form.DatePicker.prototype.getMonthElement = function() {
-  return this.getRenderer().getMonthElement(this.getElement());
+  var renderer = /** @type {npf.ui.form.DatePickerRenderer} */ (
+    this.getRenderer());
+
+  return renderer.getMonthElement(this.getElement());
 };
 
 /**
  * @return {Element}
  */
 npf.ui.form.DatePicker.prototype.getYearElement = function() {
-  return this.getRenderer().getYearElement(this.getElement());
+  var renderer = /** @type {npf.ui.form.DatePickerRenderer} */ (
+    this.getRenderer());
+
+  return renderer.getYearElement(this.getElement());
 };
 
 /**

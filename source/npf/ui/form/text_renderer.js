@@ -25,23 +25,24 @@ npf.ui.form.TextRenderer.CSS_CLASS = goog.getCssName('npf-form-text');
 /** @inheritDoc */
 npf.ui.form.TextRenderer.prototype.appendContent = function(component,
     element) {
+  var textContainer = /** @type {npf.ui.form.Text} */ (component);
   var properties = {
     'class': this.getValueCssClass(),
-    'name': component.getName(),
+    'name': textContainer.getName(),
     'type': 'text',
-    'value': component.getValue()
+    'value': textContainer.getValue()
   };
 
-  if (!component.isAutoComplete()) {
+  if (!textContainer.isAutoComplete()) {
     properties['autocomplete'] = 'off';
   }
 
   /** @type {!Element} */
-  var valueElement = component.getDomHelper().createDom(
+  var valueElement = textContainer.getDomHelper().createDom(
     goog.dom.TagName.INPUT, properties);
   goog.dom.appendChild(this.getContentElement(element), valueElement);
 
-  if (component.isLabelEnabled()) {
+  if (textContainer.isLabelEnabled()) {
     this.bindLabel(this.getLabelElement(element), valueElement);
   }
 };

@@ -72,11 +72,13 @@ npf.ui.RenderedComponent.prototype.decorateInternal = function(element) {
 npf.ui.RenderedComponent.prototype.enterDocument = function() {
   goog.base(this, 'enterDocument');
 
-  this.forEachChild(function(child) {
+  /** @type {function(this:npf.ui.RenderedComponent,goog.ui.Component)} */
+  var registerChilds = function(child) {
     if (child.isInDocument()) {
       this.registerChildId_(child);
     }
-  }, this);
+  };
+  this.forEachChild(registerChilds, this);
 };
 
 /** @inheritDoc */
@@ -227,7 +229,7 @@ npf.ui.RenderedComponent.prototype.getOwnerChild = function(node) {
     // using '!==' instead.
     // TODO(user): Possibly revert this change if/when IE9 fixes the issue.
     while (node && node !== element) {
-      var id = node.id;
+      var id = /** @type {string} */ (node['id']);
 
       if (id in this.childElementIdMap_) {
         return this.childElementIdMap_[id];

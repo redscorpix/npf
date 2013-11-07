@@ -23,7 +23,6 @@ goog.provide('npf.fx.dom.Transform');
 
 goog.require('goog.array');
 goog.require('goog.color');
-goog.require('goog.events');
 goog.require('goog.fx.Transition.EventType');
 goog.require('goog.object');
 goog.require('goog.style');

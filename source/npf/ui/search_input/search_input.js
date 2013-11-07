@@ -1,7 +1,10 @@
 goog.provide('npf.ui.SearchInput');
 goog.provide('npf.ui.SearchInput.EventType');
 
+goog.require('goog.events');
+goog.require('goog.events.EventType');
 goog.require('goog.events.InputHandler');
+goog.require('goog.events.InputHandler.EventType');
 goog.require('npf.ui.RenderedComponent');
 goog.require('npf.ui.searchInput.Renderer');
 
@@ -183,31 +186,39 @@ npf.ui.SearchInput.prototype.applyValue = function(value, oldValue, opt_noDom) {
   var oldEmpty = '' == oldValue;
   /** @type {boolean} */
   var newEmpty = '' == value;
+  var renderer = /** @type {npf.ui.searchInput.Renderer} */ (
+    this.getRenderer());
 
   if (oldEmpty != newEmpty) {
-    this.getRenderer().setVisible(this.getClearElement(), !newEmpty);
-    this.getRenderer().setVisible(this.getPlaceholderElement(), newEmpty);
+    renderer.setVisible(this.getClearElement(), !newEmpty);
+    renderer.setVisible(this.getPlaceholderElement(), newEmpty);
   }
 
   if (!opt_noDom) {
-    this.getRenderer().setValue(this.getQueryElement(), value);
+    renderer.setValue(this.getQueryElement(), value);
   }
 };
 
 npf.ui.SearchInput.prototype.blur = function() {
-  this.getRenderer().blur(this.getQueryElement());
+  var renderer = /** @type {npf.ui.searchInput.Renderer} */ (
+    this.getRenderer());
+  renderer.blur(this.getQueryElement());
 };
 
 /**
  * @param {boolean=} opt_select
  */
 npf.ui.SearchInput.prototype.focus = function(opt_select) {
-  this.getRenderer().focus(this.getQueryElement(), opt_select);
+  var renderer = /** @type {npf.ui.searchInput.Renderer} */ (
+    this.getRenderer());
+  renderer.focus(this.getQueryElement(), opt_select);
 };
 
 npf.ui.SearchInput.prototype.update = function() {
+  var renderer = /** @type {npf.ui.searchInput.Renderer} */ (
+    this.getRenderer());
   /** @type {string} */
-  var value = this.getRenderer().getValue(this.getQueryElement());
+  var value = renderer.getValue(this.getQueryElement());
   this.setValue(value);
 };
 
@@ -215,28 +226,40 @@ npf.ui.SearchInput.prototype.update = function() {
  * @return {Element}
  */
 npf.ui.SearchInput.prototype.getClearElement = function() {
-  return this.getRenderer().getClearElement(this.getElement());
+  var renderer = /** @type {npf.ui.searchInput.Renderer} */ (
+    this.getRenderer());
+
+  return renderer.getClearElement(this.getElement());
 };
 
 /**
  * @return {Element}
  */
 npf.ui.SearchInput.prototype.getIconElement = function() {
-  return this.getRenderer().getIconElement(this.getElement());
+  var renderer = /** @type {npf.ui.searchInput.Renderer} */ (
+    this.getRenderer());
+
+  return renderer.getIconElement(this.getElement());
 };
 
 /**
  * @return {Element}
  */
 npf.ui.SearchInput.prototype.getPlaceholderElement = function() {
-  return this.getRenderer().getPlaceholderElement(this.getElement());
+  var renderer = /** @type {npf.ui.searchInput.Renderer} */ (
+    this.getRenderer());
+
+  return renderer.getPlaceholderElement(this.getElement());
 };
 
 /**
  * @return {Element}
  */
 npf.ui.SearchInput.prototype.getQueryElement = function() {
-  return this.getRenderer().getQueryElement(this.getElement());
+  var renderer = /** @type {npf.ui.searchInput.Renderer} */ (
+    this.getRenderer());
+
+  return renderer.getQueryElement(this.getElement());
 };
 
 /**
@@ -258,7 +281,9 @@ npf.ui.SearchInput.prototype.dispatchClearEvent = function() {
  * @private
  */
 npf.ui.SearchInput.prototype.onIconClick_ = function(evt) {
-  this.getRenderer().focus(this.getQueryElement(), true);
+  var renderer = /** @type {npf.ui.searchInput.Renderer} */ (
+    this.getRenderer());
+  renderer.focus(this.getQueryElement(), true);
 };
 
 /**
@@ -266,8 +291,10 @@ npf.ui.SearchInput.prototype.onIconClick_ = function(evt) {
  * @private
  */
 npf.ui.SearchInput.prototype.onClearClick_ = function(evt) {
+  var renderer = /** @type {npf.ui.searchInput.Renderer} */ (
+    this.getRenderer());
   this.setValue('');
-  this.getRenderer().focus(this.getQueryElement());
+  renderer.focus(this.getQueryElement());
 };
 
 /**

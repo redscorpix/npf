@@ -1,6 +1,5 @@
 goog.provide('npf.string');
 
-goog.require('goog.format.EmailAddress');
 goog.require('goog.string');
 
 

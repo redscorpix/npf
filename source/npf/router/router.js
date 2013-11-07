@@ -6,7 +6,7 @@ goog.require('goog.array');
 goog.require('goog.events');
 goog.require('goog.events.Event');
 goog.require('goog.events.EventTarget');
-goog.require('goog.history.Html5History');
+goog.require('goog.history.EventType');
 goog.require('npf.History');
 
 
@@ -343,11 +343,12 @@ npf.Router.prototype.setEnabledInternal = function(enable) {
 };
 
 /**
- * @param {goog.events.Event} evt
+ * @param {goog.history.Event} evt
  * @private
  */
 npf.Router.prototype.onNavigate_ = function(evt) {
-  var token = /** @type {string} */ (evt.token);
+  /** @type {string} */
+  var token = evt.token;
   this.onNavigate(token);
 };
 

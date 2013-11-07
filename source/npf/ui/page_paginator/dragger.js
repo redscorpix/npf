@@ -1,5 +1,6 @@
 goog.provide('npf.ui.pagePaginator.Dragger');
 
+goog.require('goog.events.EventType');
 goog.require('goog.fx.Dragger');
 
 

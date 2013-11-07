@@ -18,28 +18,28 @@ npfTransition.JsAnimation = function(element, time, opt_acc) {
 
 	this._helper = new npf.fx.Animation([0], [1], 0);
 	this.registerDisposable(this._helper);
-	this._helper.addEventListener(goog.fx.Animation.EventType.ANIMATE, function(evt) {
+	this._helper.listen(goog.fx.Animation.EventType.ANIMATE, function(evt) {
 		this._runHandler(evt, this.onProgressHandler);
 	}, false, this);
-	this._helper.addEventListener(goog.fx.Transition.EventType.PLAY, function(evt) {
+	this._helper.listen(goog.fx.Transition.EventType.PLAY, function(evt) {
 		this._runHandler(evt, this.onPlayHandler);
 	}, false, this);
-	this._helper.addEventListener(goog.fx.Transition.EventType.BEGIN, function(evt) {
+	this._helper.listen(goog.fx.Transition.EventType.BEGIN, function(evt) {
 		this._runHandler(evt, this.onBeginHandler);
 	}, false, this);
-	this._helper.addEventListener(goog.fx.Transition.EventType.RESUME, function(evt) {
+	this._helper.listen(goog.fx.Transition.EventType.RESUME, function(evt) {
 		this._runHandler(evt, this.onResumeHandler);
 	}, false, this);
-	this._helper.addEventListener(goog.fx.Transition.EventType.END, function(evt) {
+	this._helper.listen(goog.fx.Transition.EventType.END, function(evt) {
 		this._runHandler(evt, this.onEndHandler);
 	}, false, this);
-	this._helper.addEventListener(goog.fx.Transition.EventType.STOP, function(evt) {
+	this._helper.listen(goog.fx.Transition.EventType.STOP, function(evt) {
 		this._runHandler(evt, this.onStopHandler);
 	}, false, this);
-	this._helper.addEventListener(goog.fx.Transition.EventType.FINISH, function(evt) {
+	this._helper.listen(goog.fx.Transition.EventType.FINISH, function(evt) {
 		this._runHandler(evt, this.onFinishHandler);
 	}, false, this);
-	this._helper.addEventListener(goog.fx.Transition.EventType.PAUSE, function(evt) {
+	this._helper.listen(goog.fx.Transition.EventType.PAUSE, function(evt) {
 		this._runHandler(evt, this.onPauseHandler);
 	}, false, this);
 	this.add(this._helper);
@@ -475,8 +475,8 @@ npfTransition.JsAnimation.prototype.addCustomEx = function(update, opt_time, opt
 	var func = function(evt) {
 		update(evt.x);
 	};
-	animation.addEventListener(goog.fx.Animation.EventType.ANIMATE, func);
-	animation.addEventListener(goog.fx.Transition.EventType.FINISH, func);
+	animation.listen(goog.fx.Animation.EventType.ANIMATE, func);
+	animation.listen(goog.fx.Transition.EventType.FINISH, func);
 
 	return this;
 };

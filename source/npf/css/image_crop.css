@@ -10,7 +10,6 @@
   display: inline-block;
   margin: -5px 0 0 -5px;
   position: relative;
-  vertical-align: top;
 }
 
 .npf-imageCrop-content {
@@ -228,7 +227,6 @@
   display: inline-block;
   padding: 5px;
   position: relative;
-  vertical-align: top;
 }
 
 .npf-imageCrop-preview-content {

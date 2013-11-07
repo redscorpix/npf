@@ -8,6 +8,7 @@ goog.require('goog.math.Rect');
 goog.require('goog.math.Size');
 goog.require('goog.object');
 goog.require('goog.style');
+goog.require('npf.userAgent.Support');
 goog.require('npf.userAgent.support');
 
 

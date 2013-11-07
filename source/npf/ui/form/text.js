@@ -1,6 +1,7 @@
 goog.provide('npf.ui.form.Text');
 
 goog.require('goog.events.InputHandler');
+goog.require('goog.events.InputHandler.EventType');
 goog.require('goog.string');
 goog.require('npf.ui.form.Field');
 goog.require('npf.ui.form.TextRenderer');
@@ -15,10 +16,11 @@ goog.require('npf.ui.form.validation.Email');
  * @extends {npf.ui.form.Field}
  */
 npf.ui.form.Text = function(name, opt_renderer, opt_domHelper) {
-  goog.base(this, name, opt_renderer ||
-    npf.ui.form.TextRenderer.getInstance(), opt_domHelper);
+  var renderer = opt_renderer || npf.ui.form.TextRenderer.getInstance();
 
-  this.addClassName(this.getRenderer().getFieldCssClass());
+  goog.base(this, name, renderer, opt_domHelper);
+
+  this.addClassName(renderer.getFieldCssClass());
   this.setValue('');
 };
 goog.inherits(npf.ui.form.Text, npf.ui.form.Field);
@@ -111,7 +113,8 @@ npf.ui.form.Text.prototype.setAutoCompleteInternal = function(autoComplete) {
  * @protected
  */
 npf.ui.form.Text.prototype.applyAutoComplete = function(autoComplete) {
-  this.getRenderer().setAutoComplete(this.getValueElement(), autoComplete);
+  var renderer = /** @type {npf.ui.form.TextRenderer} */ (this.getRenderer());
+  renderer.setAutoComplete(this.getValueElement(), autoComplete);
 };
 
 /**
@@ -152,7 +155,8 @@ npf.ui.form.Text.prototype.setMaxLengthInternal = function(maxLength) {
  * @protected
  */
 npf.ui.form.Text.prototype.applyMaxLength = function(maxLength) {
-  this.getRenderer().setMaxLength(this.getValueElement(), maxLength);
+  var renderer = /** @type {npf.ui.form.TextRenderer} */ (this.getRenderer());
+  renderer.setMaxLength(this.getValueElement(), maxLength);
 };
 
 /**

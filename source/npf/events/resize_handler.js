@@ -3,9 +3,11 @@ goog.provide('npf.events.ResizeHandler.EventType');
 
 goog.require('goog.dom');
 goog.require('goog.dom.FontSizeMonitor');
+goog.require('goog.dom.FontSizeMonitor.EventType');
 goog.require('goog.events');
 goog.require('goog.events.EventHandler');
 goog.require('goog.events.EventTarget');
+goog.require('goog.events.EventType');
 
 
 /**

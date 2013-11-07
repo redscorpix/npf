@@ -1,6 +1,6 @@
 goog.provide('npf.ui.Form');
 
-goog.require('goog.events');
+goog.require('goog.events.EventType');
 goog.require('goog.object');
 goog.require('goog.ui.Control');
 goog.require('npf.ui.StatedComponent');
@@ -194,18 +194,20 @@ npf.ui.Form.prototype.getValue = function(name) {
 };
 
 /**
- * @param {Function} f
- * @param {Object=} opt_obj
+ * @param {function(this:T,npf.ui.form.Field,number):?} f
+ * @param {T=} opt_obj
+ * @template T
  */
 npf.ui.Form.prototype.forEachField = function(f, opt_obj) {
   /** @type {number} */
   var index = 0;
-
-  this.forEachChild(function(child) {
+  /** @type {function(this:npf.ui.Form,goog.ui.Component)} */
+  var iterateFields = function(child) {
     if (child instanceof npf.ui.form.Field) {
       f.call(opt_obj, child, index++);
     }
-  }, this);
+  };
+  this.forEachChild(iterateFields, this);
 };
 
 /**

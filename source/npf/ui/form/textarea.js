@@ -1,7 +1,7 @@
 goog.provide('npf.ui.form.Textarea');
 
 goog.require('goog.events.InputHandler');
-goog.require('goog.format.EmailAddress');
+goog.require('goog.events.InputHandler.EventType');
 goog.require('goog.string');
 goog.require('npf.ui.form.Field');
 goog.require('npf.ui.form.TextareaRenderer');
