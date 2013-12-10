@@ -26,8 +26,25 @@ goog.require('npf.graphics.faceDetection.Detector');
 npf.graphics.FaceDetection = function(image, opt_scale, opt_domHelper) {
   goog.base(this);
 
+  /**
+   * @private {goog.dom.DomHelper}
+   */
   this.domHelper_ = opt_domHelper || goog.dom.getDomHelper();
+
+  /**
+   * @private {Array.<npf.graphics.FaceDetection.Face>}
+   */
+  this.faces_ = null;
+
+  /**
+   * @type {Image|HTMLCanvasElement}
+   * @private
+   */
   this.image_ = image;
+
+  /**
+   * @private {number}
+   */
   this.scale_ = opt_scale || 1;
 };
 goog.inherits(npf.graphics.FaceDetection, goog.events.EventTarget);
@@ -70,28 +87,6 @@ npf.graphics.FaceDetection.detect = function(image, callback, opt_scope) {
     });
   faceDetection.start();
 };
-
-
-/**
- * @private {goog.dom.DomHelper}
- */
-npf.graphics.FaceDetection.prototype.domHelper_;
-
-/**
- * @private {Array.<npf.graphics.FaceDetection.Face>}
- */
-npf.graphics.FaceDetection.prototype.faces_ = null;
-
-/**
- * @type {Image|HTMLCanvasElement}
- * @private
- */
-npf.graphics.FaceDetection.prototype.image_;
-
-/**
- * @private {number}
- */
-npf.graphics.FaceDetection.prototype.scale_;
 
 
 /** @inheritDoc */

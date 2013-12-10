@@ -34,14 +34,76 @@ npf.ui.pagePaginator.Changer = function(element, contentElement, page,
     pageCount) {
   goog.base(this);
 
-  this.contentElement_ = contentElement;
-  this.domHelper_ = goog.dom.getDomHelper(element);
-  this.element_ = element;
-  this.pageCount_ = pageCount;
-  this.pageIndex_ = page;
+  /**
+   * @private {npf.fx.KeyframeAnimation}
+   */
+  this.animation_ = null;
 
+  /**
+   * @private {Element}
+   */
+  this.contentElement_ = contentElement;
+
+  /**
+   * @private {goog.dom.DomHelper}
+   */
+  this.domHelper_ = goog.dom.getDomHelper(element);
+
+  /**
+   * @private {Array.<npf.ui.pagePaginator.Changer.Stamp>}
+   */
+  this.dragStamps_ = null;
+
+  /**
+   * @private {boolean}
+   */
+  this.draggable_ = true;
+
+  /**
+   * @private {npf.ui.pagePaginator.Dragger}
+   */
+  this.dragger_ = null;
+
+  /**
+   * @private {Element}
+   */
+  this.element_ = element;
+
+  /**
+   * @private {Element}
+   */
+  this.emptyElement_ = null;
+
+  /**
+   * @private {goog.events.EventHandler}
+   */
   this.handler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.handler_);
+
+  /**
+   * @private {boolean}
+   */
+  this.loopback_ = false;
+
+  /**
+   * @private {number}
+   */
+  this.pageCount_ = pageCount;
+
+  /**
+   * @private {number}
+   */
+  this.pageIndex_ = page;
+
+  /**
+   * @private {?boolean}
+   */
+  this.queueNext_ = null;
+
+  /**
+   * @private {number}
+   */
+  this.width_ = 0;
 };
 goog.inherits(npf.ui.pagePaginator.Changer, goog.events.EventTarget);
 
@@ -69,77 +131,6 @@ npf.ui.pagePaginator.Changer.EventType = {
  * }}
  */
 npf.ui.pagePaginator.Changer.Stamp;
-
-
-/**
- * @private {npf.fx.KeyframeAnimation}
- */
-npf.ui.pagePaginator.Changer.prototype.animation_ = null;
-
-/**
- * @private {Element}
- */
-npf.ui.pagePaginator.Changer.prototype.contentElement_;
-
-/**
- * @private {goog.dom.DomHelper}
- */
-npf.ui.pagePaginator.Changer.prototype.domHelper_ = null;
-
-/**
- * @private {Array.<npf.ui.pagePaginator.Changer.Stamp>}
- */
-npf.ui.pagePaginator.Changer.prototype.dragStamps_ = null;
-
-/**
- * @private {boolean}
- */
-npf.ui.pagePaginator.Changer.prototype.draggable_ = true;
-
-/**
- * @private {npf.ui.pagePaginator.Dragger}
- */
-npf.ui.pagePaginator.Changer.prototype.dragger_ = null;
-
-/**
- * @private {Element}
- */
-npf.ui.pagePaginator.Changer.prototype.element_;
-
-/**
- * @private {Element}
- */
-npf.ui.pagePaginator.Changer.prototype.emptyElement_ = null;
-
-/**
- * @private {goog.events.EventHandler}
- */
-npf.ui.pagePaginator.Changer.prototype.handler_;
-
-/**
- * @private {boolean}
- */
-npf.ui.pagePaginator.Changer.prototype.loopback_ = false;
-
-/**
- * @private {number}
- */
-npf.ui.pagePaginator.Changer.prototype.pageCount_;
-
-/**
- * @private {number}
- */
-npf.ui.pagePaginator.Changer.prototype.pageIndex_;
-
-/**
- * @private {?boolean}
- */
-npf.ui.pagePaginator.Changer.prototype.queueNext_ = null;
-
-/**
- * @private {number}
- */
-npf.ui.pagePaginator.Changer.prototype.width_;
 
 
 /** @inheritDoc */

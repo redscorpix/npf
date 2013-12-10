@@ -152,7 +152,7 @@ npf.router.Route.prototype.check = function(token) {
 
 /**
  * @param {string|goog.Uri} token
- * @return {Object.<string,string>}
+ * @return {Object.<string>}
  */
 npf.router.Route.prototype.getOptions = function(token) {
   var uri = goog.Uri.parse(token);
@@ -162,7 +162,7 @@ npf.router.Route.prototype.getOptions = function(token) {
 
 /**
  * @param {string} path
- * @return {Object.<string,string>}
+ * @return {Object.<string>}
  * @protected
  */
 npf.router.Route.prototype.getOptionsInternal = function(path) {
@@ -201,8 +201,8 @@ npf.router.Route.prototype.getOptionsInternal = function(path) {
 };
 
 /**
- * @param {Object.<string,number|string>=} opt_optionsMap
- * @param {string|goog.Uri.QueryData|Object.<string,string>=} opt_query
+ * @param {Object.<number|string>=} opt_optionsMap
+ * @param {string|goog.Uri.QueryData|Object.<string>=} opt_query
  * @return {string}
  */
 npf.router.Route.prototype.getUrl = function(opt_optionsMap, opt_query) {
@@ -210,8 +210,8 @@ npf.router.Route.prototype.getUrl = function(opt_optionsMap, opt_query) {
 };
 
 /**
- * @param {Object.<string,number|string>=} opt_optionsMap
- * @param {string|goog.Uri.QueryData|Object.<string,string>=} opt_query
+ * @param {Object.<number|string>=} opt_optionsMap
+ * @param {string|goog.Uri.QueryData|Object.<string>=} opt_query
  * @return {string}
  */
 npf.router.Route.prototype.getToken = function(opt_optionsMap, opt_query) {
@@ -219,8 +219,8 @@ npf.router.Route.prototype.getToken = function(opt_optionsMap, opt_query) {
 };
 
 /**
- * @param {Object.<string,number|string>=} opt_optionsMap
- * @param {string|goog.Uri.QueryData|Object.<string,string>=} opt_query
+ * @param {Object.<number|string>=} opt_optionsMap
+ * @param {string|goog.Uri.QueryData|Object.<string>=} opt_query
  * @return {goog.Uri}
  */
 npf.router.Route.prototype.getUri = function(opt_optionsMap, opt_query) {

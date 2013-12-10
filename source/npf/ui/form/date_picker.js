@@ -19,43 +19,39 @@ npf.ui.form.DatePicker = function(name, opt_renderer, opt_domHelper) {
 
   goog.base(this, name, renderer, opt_domHelper);
 
-  this.addClassName(renderer.getFieldCssClass());
+  /**
+   * @private {number?}
+   */
+  this.day_ = null;
 
+  /**
+   * @private {boolean}
+   */
+  this.emptyValue_ = false;
+
+  /**
+   * @private {goog.date.Date}
+   */
   this.maxDate_ = new goog.date.Date();
+
+  /**
+   * @private {goog.date.Date}
+   */
   this.minDate_ = new goog.date.Date(1901, 1, 1);
+
+  /**
+   * @private {number?}
+   */
+  this.month_ = null;
+
+  /**
+   * @private {number?}
+   */
+  this.year_ = null;
+
+  this.addClassName(renderer.getFieldCssClass());
 };
 goog.inherits(npf.ui.form.DatePicker, npf.ui.form.Field);
-
-
-/**
- * @private {number?}
- */
-npf.ui.form.DatePicker.prototype.day_ = null;
-
-/**
- * @private {boolean}
- */
-npf.ui.form.DatePicker.prototype.emptyValue_ = false;
-
-/**
- * @private {goog.date.Date}
- */
-npf.ui.form.DatePicker.prototype.maxDate_;
-
-/**
- * @private {goog.date.Date}
- */
-npf.ui.form.DatePicker.prototype.minDate_;
-
-/**
- * @private {number?}
- */
-npf.ui.form.DatePicker.prototype.month_ = null;
-
-/**
- * @private {number?}
- */
-npf.ui.form.DatePicker.prototype.year_ = null;
 
 
 /** @inheritDoc */

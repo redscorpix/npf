@@ -26,6 +26,41 @@ npf.ui.scrollable.ScrollBar = function(opt_renderer, opt_domHelper) {
   goog.base(this, opt_renderer ||
     npf.ui.scrollable.scrollBar.Renderer.getInstance(), opt_domHelper);
 
+  /**
+   * @private {npf.ui.scrollable.Container}
+   */
+  this.container_ = null;
+
+  /**
+   * @private {goog.math.Size}
+   */
+  this.containerContentSize_ = null;
+
+  /**
+   * @private {goog.math.Size}
+   */
+  this.containerSize_ = null;
+
+  /**
+   * @private {boolean}
+   */
+  this.draggable_ = true;
+
+  /**
+   * @private {goog.fx.Dragger}
+   */
+  this.dragger_ = null;
+
+  /**
+   * @private {number}
+   */
+  this.minSize_ = npf.ui.scrollable.ScrollBar.MIN_SIZE;
+
+  /**
+   * @private {number}
+   */
+  this.position_ = 0;
+
   this.setSupportedState(goog.ui.Component.State.DISABLED, true);
 };
 goog.inherits(npf.ui.scrollable.ScrollBar, npf.ui.StatedComponent);
@@ -46,43 +81,6 @@ npf.ui.scrollable.ScrollBar.EventType = {
    */
   SCROLL: goog.events.getUniqueId('scroll')
 };
-
-
-/**
- * @private {npf.ui.scrollable.Container}
- */
-npf.ui.scrollable.ScrollBar.prototype.container_ = null;
-
-/**
- * @private {goog.math.Size}
- */
-npf.ui.scrollable.ScrollBar.prototype.containerContentSize_ = null;
-
-/**
- * @private {goog.math.Size}
- */
-npf.ui.scrollable.ScrollBar.prototype.containerSize_ = null;
-
-/**
- * @private {boolean}
- */
-npf.ui.scrollable.ScrollBar.prototype.draggable_ = true;
-
-/**
- * @private {goog.fx.Dragger}
- */
-npf.ui.scrollable.ScrollBar.prototype.dragger_ = null;
-
-/**
- * @private {number}
- */
-npf.ui.scrollable.ScrollBar.prototype.minSize_ =
-  npf.ui.scrollable.ScrollBar.MIN_SIZE;
-
-/**
- * @private {number}
- */
-npf.ui.scrollable.ScrollBar.prototype.position_ = 0;
 
 
 /** @inheritDoc */

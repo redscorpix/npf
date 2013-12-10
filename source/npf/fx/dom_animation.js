@@ -36,27 +36,22 @@ goog.require('npf.fx.dom.Transform');
 npf.fx.DomAnimation = function(element, time, opt_acc) {
   goog.base(this);
 
+  /**
+   * @type {Element}
+   */
   this.element = element;
+
+  /**
+   * @type {number}
+   */
   this.time = time;
+
+  /**
+   * @type {Array.<number>|npf.fx.Animation.Timing|function(number):number|null}
+   */
   this.accel = opt_acc || null;
 };
 goog.inherits(npf.fx.DomAnimation, goog.fx.AnimationParallelQueue);
-
-
-/**
- * @type {Element}
- */
-npf.fx.DomAnimation.prototype.element;
-
-/**
- * @type {number}
- */
-npf.fx.DomAnimation.prototype.time;
-
-/**
- * @type {Array.<number>|npf.fx.Animation.Timing|function(number):number|null}
- */
-npf.fx.DomAnimation.prototype.accel;
 
 
 /** @inheritDoc */

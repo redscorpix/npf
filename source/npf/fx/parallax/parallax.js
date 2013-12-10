@@ -20,8 +20,24 @@ goog.require('goog.math');
 npf.fx.Parallax = function(opt_maxPosition, opt_position, opt_domHelper) {
   goog.base(this);
 
+  /**
+   * @private {boolean}
+   */
+  this.documentMonitoring_ = false;
+
+  /**
+   * @private {goog.dom.DomHelper}
+   */
   this.domHelper_ = opt_domHelper || goog.dom.getDomHelper();
+
+  /**
+   * @private {number}
+   */
   this.maxPosition_ = Math.max(opt_maxPosition || 0, 0);
+
+  /**
+   * @private {number}
+   */
   this.position_ = goog.math.clamp(opt_position || 0, 0, this.maxPosition_);
 };
 goog.inherits(npf.fx.Parallax, goog.events.EventTarget);
@@ -37,27 +53,6 @@ npf.fx.Parallax.EventType = {
    */
   UPDATE: goog.events.getUniqueId('update')
 };
-
-
-/**
- * @private {boolean}
- */
-npf.fx.Parallax.prototype.documentMonitoring_ = false;
-
-/**
- * @private {goog.dom.DomHelper}
- */
-npf.fx.Parallax.prototype.domHelper_;
-
-/**
- * @private {number}
- */
-npf.fx.Parallax.prototype.maxPosition_;
-
-/**
- * @private {number}
- */
-npf.fx.Parallax.prototype.position_;
 
 
 /** @inheritDoc */

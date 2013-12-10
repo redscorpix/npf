@@ -8,6 +8,110 @@ goog.require('npf.arch.deflate.inflator.HuftBuild');
  */
 npf.arch.deflate.Inflator = function() {
 
+  /**
+   * @private {Array.<number>}
+   */
+  this.slide_ = null;
+
+  /**
+   * current position in slide
+   * @private {number}
+   */
+  this.wp_ = undefined;
+
+  /**
+   * inflate static
+   * @private {npf.arch.deflate.inflator.HuftList}
+   */
+  this.fixedTl_ = null;
+
+  /**
+   * Inflate static.
+   * @private {npf.arch.deflate.inflator.HuftList}
+   */
+  this.fixedTd_ = undefined;
+
+  /**
+   * Inflate static.
+   * @type {npf.arch.deflate.inflator.HuftList|number}
+   * @private
+   */
+  this.fixedBl_ = undefined;
+
+  /**
+   * Inflate static.
+   * @type {npf.arch.deflate.inflator.HuftList|number}
+   * @private
+   */
+  this.fixedBd_ = undefined;
+
+  /**
+   * bit buffer
+   * @private {number}
+   */
+  this.bitBuf_ = undefined;
+
+  /**
+   * bits in bit buffer
+   * @private {number}
+   */
+  this.bitLen_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.method_ = undefined;
+
+  /**
+   * @private {boolean}
+   */
+  this.eof_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.copyLeng_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.copyDist_ = undefined;
+
+  /**
+   * Literal length decoder table.
+   * @private {npf.arch.deflate.inflator.HuftList}
+   */
+  this.tl_ = undefined;
+
+  /**
+   * Literal distance decoder table.
+   * @private {npf.arch.deflate.inflator.HuftList}
+   */
+  this.td_ = undefined;
+
+  /**
+   * Number of bits decoded by tl.
+   * @type {npf.arch.deflate.inflator.HuftList|number}
+   * @private
+   */
+  this.bl_ = undefined;
+
+  /**
+   * Number of bits decoded by td.
+   * @type {npf.arch.deflate.inflator.HuftList|number}
+   * @private
+   */
+  this.bd_ = undefined;
+
+  /**
+   * @private {Array.<number>}
+   */
+  this.inflateData_ = null;
+
+  /**
+   * @private {number}
+   */
+  this.inflatePos_ = undefined;
 };
 
 
@@ -98,112 +202,6 @@ npf.arch.deflate.Inflator.CPDEXT = [
 npf.arch.deflate.Inflator.BORDER = [
   16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15
 ];
-
-/**
- * @private {Array.<number>}
- */
-npf.arch.deflate.Inflator.prototype.slide_;
-
-/**
- * current position in slide
- * @private {number}
- */
-npf.arch.deflate.Inflator.prototype.wp_;
-
-/**
- * inflate static
- * @private {npf.arch.deflate.inflator.HuftList}
- */
-npf.arch.deflate.Inflator.prototype.fixedTl_ = null;
-
-/**
- * Inflate static.
- * @private {npf.arch.deflate.inflator.HuftList}
- */
-npf.arch.deflate.Inflator.prototype.fixedTd_;
-
-/**
- * Inflate static.
- * @type {npf.arch.deflate.inflator.HuftList|number}
- * @private
- */
-npf.arch.deflate.Inflator.prototype.fixedBl_;
-
-/**
- * Inflate static.
- * @type {npf.arch.deflate.inflator.HuftList|number}
- * @private
- */
-npf.arch.deflate.Inflator.prototype.fixedBd_;
-
-/**
- * bit buffer
- * @private {number}
- */
-npf.arch.deflate.Inflator.prototype.bitBuf_;
-
-/**
- * bits in bit buffer
- * @private {number}
- */
-npf.arch.deflate.Inflator.prototype.bitLen_;
-
-/**
- * @private {number}
- */
-npf.arch.deflate.Inflator.prototype.method_;
-
-/**
- * @private {boolean}
- */
-npf.arch.deflate.Inflator.prototype.eof_;
-
-/**
- * @private {number}
- */
-npf.arch.deflate.Inflator.prototype.copyLeng_;
-
-/**
- * @private {number}
- */
-npf.arch.deflate.Inflator.prototype.copyDist_;
-
-/**
- * Literal length decoder table.
- * @private {npf.arch.deflate.inflator.HuftList}
- */
-npf.arch.deflate.Inflator.prototype.tl_;
-
-/**
- * Literal distance decoder table.
- * @private {npf.arch.deflate.inflator.HuftList}
- */
-npf.arch.deflate.Inflator.prototype.td_;
-
-/**
- * Number of bits decoded by tl.
- * @type {npf.arch.deflate.inflator.HuftList|number}
- * @private
- */
-npf.arch.deflate.Inflator.prototype.bl_;
-
-/**
- * Number of bits decoded by td.
- * @type {npf.arch.deflate.inflator.HuftList|number}
- * @private
- */
-npf.arch.deflate.Inflator.prototype.bd_;
-
-/**
- * @private {Array.<number>}
- */
-npf.arch.deflate.Inflator.prototype.inflateData_;
-
-/**
- * @private {number}
- */
-npf.arch.deflate.Inflator.prototype.inflatePos_;
-
 
 /**
  * @return {number}

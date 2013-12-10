@@ -29,13 +29,72 @@ goog.require('npf.userAgent.support');
 npf.fx.CssAnimation = function(keyframes, element, duration, opt_acc) {
   goog.base(this);
 
-  this.accel_ = opt_acc || npf.fx.css3.easing.LINEAR;
-  this.duration = duration;
-  this.element = element;
+  /**
+   * @private {npf.fx.cssAnimation.Keyframes}
+   */
   this.keyframes_ = keyframes;
 
+  /**
+   * @protected {Element}
+   */
+  this.element = element;
+
+  /**
+   * @protected {number}
+   */
+  this.duration = duration;
+
+  /**
+   * @private {Array.<number>}
+   */
+  this.accel_ = opt_acc || npf.fx.css3.easing.LINEAR;
+
+  /**
+   * @private {boolean}
+   */
+  this.cleared_ = true;
+
+  /**
+   * @private {number}
+   */
+  this.delay_ = 0;
+
+  /**
+   * @private {npf.style.animation.Direction}
+   */
+  this.direction_ = npf.style.animation.Direction.NORMAL;
+
+  /**
+   * @private {boolean}
+   */
+  this.domSet_ = false;
+
+  /**
+   * @private {boolean}
+   */
+  this.endStylesUsed_ = false;
+
+  /**
+   * @private {boolean}
+   */
+  this.finished_ = false;
+
+  /**
+   * @private {goog.events.EventHandler}
+   */
   this.handler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.handler_);
+
+  /**
+   * 0 — infinite.
+   * @private {number}
+   */
+  this.iterationCount_ = 1;
+
+  /**
+   * @private {npf.style.animation.PlayState}
+   */
+  this.playState_ = npf.style.animation.PlayState.PAUSED;
 };
 goog.inherits(npf.fx.CssAnimation, goog.fx.TransitionBase);
 
@@ -60,74 +119,6 @@ npf.fx.CssAnimation.isSupported = function() {
 
   return supported && npf.fx.Animation.enabled;
 };
-
-
-/**
- * @private {Array.<number>}
- */
-npf.fx.CssAnimation.prototype.accel_;
-
-/**
- * @private {boolean}
- */
-npf.fx.CssAnimation.prototype.cleared_ = true;
-
-/**
- * @private {number}
- */
-npf.fx.CssAnimation.prototype.delay_ = 0;
-
-/**
- * @private {npf.style.animation.Direction}
- */
-npf.fx.CssAnimation.prototype.direction_ =
-  npf.style.animation.Direction.NORMAL;
-
-/**
- * @private {boolean}
- */
-npf.fx.CssAnimation.prototype.domSet_ = false;
-
-/**
- * @protected {number}
- */
-npf.fx.CssAnimation.prototype.duration;
-
-/**
- * @protected {Element}
- */
-npf.fx.CssAnimation.prototype.element;
-
-/**
- * @private {boolean}
- */
-npf.fx.CssAnimation.prototype.endStylesUsed_ = false;
-
-/**
- * @private {boolean}
- */
-npf.fx.CssAnimation.prototype.finished_ = false;
-
-/**
- * @private {goog.events.EventHandler}
- */
-npf.fx.CssAnimation.prototype.handler_;
-
-/**
- * 0 — infinite.
- * @private {number}
- */
-npf.fx.CssAnimation.prototype.iterationCount_ = 1;
-
-/**
- * @private {npf.fx.cssAnimation.Keyframes}
- */
-npf.fx.CssAnimation.prototype.keyframes_;
-
-/**
- * @private {npf.style.animation.PlayState}
- */
-npf.fx.CssAnimation.prototype.playState_ = npf.style.animation.PlayState.PAUSED;
 
 
 /** @inheritDoc */
@@ -332,7 +323,7 @@ npf.fx.CssAnimation.prototype.setDom = function() {
   });
 
   if (this.endStylesUsed_) {
-    /** @type {Object.<string,string>} */
+    /** @type {Object.<string>} */
     var endStyles = this.getKeyframes().getEndStyles();
 
     if (endStyles) {

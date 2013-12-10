@@ -32,7 +32,7 @@ npf.graphics.Effect = function(source, destination) {
  * @return {!HTMLCanvasElement}
  */
 npf.graphics.Effect.createCanvasElement = function(opt_attrs, opt_domHelper) {
-  /** @type {!Object.<string,number|string>} */
+  /** @type {!Object.<number|string>} */
   var attrs = opt_attrs ? goog.object.clone(opt_attrs) : {};
   /** @type {!goog.dom.DomHelper} */
   var domHelper = opt_domHelper || goog.dom.getDomHelper();

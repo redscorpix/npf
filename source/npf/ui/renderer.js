@@ -3,7 +3,7 @@ goog.provide('npf.ui.Renderer');
 goog.require('goog.array');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
-goog.require('goog.dom.classes');
+goog.require('goog.dom.classlist');
 
 
 /**
@@ -67,8 +67,7 @@ npf.ui.Renderer.prototype.createDom = function(component) {
  * @protected
  */
 npf.ui.Renderer.prototype.applyClassNames = function(component, element) {
-  goog.dom.classes.add.apply(this,
-    [element].concat(this.getClassNames(component)));
+  goog.dom.classlist.addAll(element, this.getClassNames(component));
 };
 
 /**
@@ -99,7 +98,7 @@ npf.ui.Renderer.prototype.enableClassName = function(component, className,
     component.getElement() : component);
 
   if (element) {
-    goog.dom.classes.enable(element, className, enable);
+    goog.dom.classlist.enable(element, className, enable);
   }
 };
 
@@ -154,7 +153,7 @@ npf.ui.Renderer.prototype.decorate = function(component, element) {
   var hasStructuralClassName = false;
   var hasCombinedClassName = false;
   var classNames = /** @type {!Array.<string>} */ (
-    goog.dom.classes.get(element));
+    goog.dom.classlist.get(element));
   var extraClassNames = component.getExtraClassNames();
 
   goog.array.forEach(classNames, function(className) {
@@ -188,9 +187,11 @@ npf.ui.Renderer.prototype.decorate = function(component, element) {
   }
 
   // Only write to the DOM if new class names had to be added to the element.
-  if (!hasRendererClassName || !hasStructuralClassName || extraClassNames ||
-    hasCombinedClassName) {
-    goog.dom.classes.set(element, classNames.join(' '));
+  if (
+    !hasRendererClassName || !hasStructuralClassName ||
+    extraClassNames || hasCombinedClassName
+  ) {
+    goog.dom.classlist.addAll(element, classNames);
   }
 
   return element;

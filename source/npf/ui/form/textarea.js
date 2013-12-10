@@ -18,16 +18,15 @@ npf.ui.form.Textarea = function(name, opt_renderer, opt_domHelper) {
   goog.base(this, name, opt_renderer ||
     npf.ui.form.TextareaRenderer.getInstance(), opt_domHelper);
 
+  /**
+   * @private {boolean}
+   */
+  this.trimedValue_ = true;
+
   this.addClassName(this.getRenderer().getFieldCssClass());
   this.setValue('');
 };
 goog.inherits(npf.ui.form.Textarea, npf.ui.form.Field);
-
-
-/**
- * @private {boolean}
- */
-npf.ui.form.Textarea.prototype.trimedValue_ = true;
 
 
 /** @inheritDoc */

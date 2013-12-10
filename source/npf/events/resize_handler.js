@@ -20,11 +20,20 @@ goog.require('goog.events.EventType');
 npf.events.ResizeHandler = function(opt_domHelper) {
   goog.base(this);
 
+  /**
+   * @private {goog.dom.DomHelper}
+   */
   this.domHelper_ = opt_domHelper || goog.dom.getDomHelper();
 
+  /**
+   * @private {goog.events.EventHandler}
+   */
   this.eventHandler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.eventHandler_);
 
+  /**
+   * @private {goog.dom.FontSizeMonitor}
+   */
   this.fontSizeMonitor_ = new goog.dom.FontSizeMonitor(this.domHelper_);
   this.registerDisposable(this.fontSizeMonitor_);
 
@@ -42,21 +51,6 @@ goog.inherits(npf.events.ResizeHandler, goog.events.EventTarget);
 npf.events.ResizeHandler.EventType = {
   RESIZE: goog.events.getUniqueId('resize')
 };
-
-/**
- * @private {goog.dom.DomHelper}
- */
-npf.events.ResizeHandler.prototype.domHelper_;
-
-/**
- * @private {goog.events.EventHandler}
- */
-npf.events.ResizeHandler.prototype.eventHandler_;
-
-/**
- * @private {goog.dom.FontSizeMonitor}
- */
-npf.events.ResizeHandler.prototype.fontSizeMonitor_;
 
 
 /** @inheritDoc */

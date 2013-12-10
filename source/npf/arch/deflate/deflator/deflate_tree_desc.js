@@ -13,16 +13,10 @@ npf.arch.deflate.deflator.DeflateTreeDesc = function() {
   this.dynTree = null;
 
   /**
-   * corresponding static tree or NULL
-   * @type {Array.<npf.arch.deflate.deflator.DeflateCt>}
+   * Max number of elements in the tree
+   * @type {number}
    */
-  this.staticTree = null;
-
-  /**
-   * Extra bits for each code or NULL
-   * @type {Array.<number>}
-   */
-  this.extraBits = null;
+  this.elems = 0;
 
   /**
    * Base index for extraBits
@@ -31,10 +25,16 @@ npf.arch.deflate.deflator.DeflateTreeDesc = function() {
   this.extraBase = 0;
 
   /**
-   * Max number of elements in the tree
+   * Extra bits for each code or NULL
+   * @type {Array.<number>}
+   */
+  this.extraBits = null;
+
+  /**
+   * Largest code with non zero frequency
    * @type {number}
    */
-  this.elems = 0;
+  this.maxCode = 0;
 
   /**
    * Max bit length for the codes
@@ -43,8 +43,8 @@ npf.arch.deflate.deflator.DeflateTreeDesc = function() {
   this.maxLength = 0;
 
   /**
-   * Largest code with non zero frequency
-   * @type {number}
+   * corresponding static tree or NULL
+   * @type {Array.<npf.arch.deflate.deflator.DeflateCt>}
    */
-  this.maxCode = 0;
+  this.staticTree = null;
 };

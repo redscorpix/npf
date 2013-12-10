@@ -16,6 +16,11 @@ goog.require('goog.structs');
  */
 npf.net.XhrIo = function(opt_xmlHttpFactory) {
   goog.base(this, opt_xmlHttpFactory);
+
+  /**
+   * @private {XMLHttpRequest}
+   */
+  this.nativeXhr_ = null;
 };
 goog.inherits(npf.net.XhrIo, goog.net.XhrIo);
 
@@ -125,11 +130,6 @@ npf.net.XhrIo.cleanup = function() {
     instances.pop().dispose();
   }
 };
-
-/**
- * @private {XMLHttpRequest}
- */
-npf.net.XhrIo.prototype.nativeXhr_ = null;
 
 
 /** @inheritDoc */

@@ -22,28 +22,25 @@ npf.ui.Form = function(opt_renderer, opt_domHelper) {
   goog.base(
     this, opt_renderer || npf.ui.form.Renderer.getInstance(), opt_domHelper);
 
+  /**
+   * @private {Object.<npf.ui.form.Field>}
+   */
   this.fieldsMap_ = {};
+
+  /**
+   * @private {boolean}
+   */
+  this.prevented_ = true;
+
+  /**
+   * @type {goog.ui.Control|npf.ui.StatedComponent|npf.ui.form.SubmitButton}
+   * @private
+   */
+  this.submitButton_ = null;
 
   this.setAllowTextSelection(true);
 };
 goog.inherits(npf.ui.Form, npf.ui.StatedComponent);
-
-
-/**
- * @private {Object.<npf.ui.form.Field>}
- */
-npf.ui.Form.prototype.fieldsMap_;
-
-/**
- * @private {boolean}
- */
-npf.ui.Form.prototype.prevented_ = true;
-
-/**
- * @type {goog.ui.Control|npf.ui.StatedComponent|npf.ui.form.SubmitButton}
- * @private
- */
-npf.ui.Form.prototype.submitButton_ = null;
 
 
 /** @inheritDoc */

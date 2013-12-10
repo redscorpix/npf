@@ -3,7 +3,7 @@ goog.provide('npf.ui.imageCrop.CropperRenderer');
 goog.require('goog.array');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
-goog.require('goog.dom.classes');
+goog.require('goog.dom.classlist');
 goog.require('goog.math.Size');
 goog.require('goog.object');
 goog.require('goog.style');
@@ -17,6 +17,12 @@ goog.require('npf.ui.imageCrop.Direction');
  */
 npf.ui.imageCrop.CropperRenderer = function() {
   goog.base(this);
+
+  /**
+   * @type {Object.<npf.ui.imageCrop.Direction,string>}
+   * @private
+   */
+  this.directionCssClassesMap_ = null;
 };
 goog.inherits(npf.ui.imageCrop.CropperRenderer, npf.ui.StatedRenderer);
 goog.addSingletonGetter(npf.ui.imageCrop.CropperRenderer);
@@ -27,12 +33,6 @@ goog.addSingletonGetter(npf.ui.imageCrop.CropperRenderer);
  */
 npf.ui.imageCrop.CropperRenderer.CSS_CLASS =
   goog.getCssName('npf-imageCrop-cropper');
-
-/**
- * @type {Object.<npf.ui.imageCrop.Direction,string>}
- * @private
- */
-npf.ui.imageCrop.CropperRenderer.prototype.directionCssClassesMap_;
 
 
 /** @inheritDoc */
@@ -137,7 +137,7 @@ npf.ui.imageCrop.CropperRenderer.prototype.getDirection = function(element) {
   if (element) {
     goog.object.every(
       this.directionCssClassesMap_, function(className, dir) {
-        if (goog.dom.classes.has(element, className)) {
+        if (goog.dom.classlist.contains(element, className)) {
           direction = /** @type {npf.ui.imageCrop.Direction} */ (
             parseInt(dir, 10));
 

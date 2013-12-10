@@ -7,6 +7,11 @@ goog.provide('npf.arch.deflate.deflator.DeflateBuffer');
 npf.arch.deflate.deflator.DeflateBuffer = function() {
 
   /**
+   * @type {number}
+   */
+  this.len = 0;
+
+  /**
    * @type {npf.arch.deflate.deflator.DeflateBuffer}
    */
   this.next = null;
@@ -14,15 +19,10 @@ npf.arch.deflate.deflator.DeflateBuffer = function() {
   /**
    * @type {number}
    */
-  this.len = 0;
+  this.off = 0;
 
   /**
    * @type {Array.<number>}
    */
   this.ptr = []; // new Array(OUTBUFSIZ); // ptr.length is never read
-
-  /**
-   * @type {number}
-   */
-  this.off = 0;
 };

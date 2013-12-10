@@ -36,7 +36,7 @@ npf.string.hisDuration = function(duration) {
 
 /**
  * @param {string} template
- * @param {Object.<string,string|number>=} opt_scope
+ * @param {Object.<string|number>=} opt_scope
  * @return {string}
  */
 npf.string.supplant = function(template, opt_scope) {

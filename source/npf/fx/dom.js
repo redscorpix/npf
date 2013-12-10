@@ -686,13 +686,13 @@ goog.inherits(npf.fx.dom.Transform, npf.fx.dom.PredefinedEffect);
 
 
 /**
- * @type {Object.<string,Array.<number>>}
+ * @type {Object.<Array.<number>>}
  * @private
  */
 npf.fx.dom.Transform.prototype.startParameters_;
 
 /**
- * @type {Object.<string,Array.<number>>}
+ * @type {Object.<Array.<number>>}
  * @private
  */
 npf.fx.dom.Transform.prototype.endParameters_;

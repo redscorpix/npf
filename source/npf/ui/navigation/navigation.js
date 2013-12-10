@@ -18,27 +18,23 @@ npf.ui.Navigation = function(opt_renderer, opt_domHelper) {
   goog.base(this, opt_renderer ||
     npf.ui.navigation.Renderer.getInstance(), opt_domHelper);
 
+  /**
+   * @private {Object.<npf.ui.navigation.Item>}
+   */
   this.itemsMap_ = {};
+
+  /**
+   * @private {npf.ui.navigation.Item}
+   */
+  this.selectedItem_ = null;
+
+  /**
+   * @type {Object.<string>}
+   * @private
+   */
   this.uidToType_ = {};
 };
 goog.inherits(npf.ui.Navigation, npf.ui.RenderedComponent);
-
-
-/**
- * @private {Object.<npf.ui.navigation.Item>}
- */
-npf.ui.Navigation.prototype.itemsMap_;
-
-/**
- * @private {npf.ui.navigation.Item}
- */
-npf.ui.Navigation.prototype.selectedItem_ = null;
-
-/**
- * @type {Object.<string,string>}
- * @private
- */
-npf.ui.Navigation.prototype.uidToType_;
 
 
 /** @inheritDoc */

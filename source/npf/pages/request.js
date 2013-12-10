@@ -8,7 +8,7 @@ goog.require('npf.router.Route');
  * @param {goog.Uri} uri
  * @param {npf.router.Route=} opt_route
  * @param {string=} opt_name
- * @param {Object.<string,string>=} opt_options
+ * @param {Object.<string>=} opt_options
  * @constructor
  */
 npf.pages.Request = function(uri, opt_route, opt_name, opt_options) {

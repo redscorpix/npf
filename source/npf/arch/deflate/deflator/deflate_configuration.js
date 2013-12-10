@@ -21,6 +21,11 @@ npf.arch.deflate.deflator.DeflateConfiguration = function(a, b, c, d) {
   this.goodLength = a;
 
   /**
+   * @type {number}
+   */
+  this.maxChain = d;
+
+  /**
    * Do not perform lazy search above this match length
    * @type {number}
    */
@@ -31,9 +36,4 @@ npf.arch.deflate.deflator.DeflateConfiguration = function(a, b, c, d) {
    * @type {number}
    */
   this.niceLength = c;
-
-  /**
-   * @type {number}
-   */
-  this.maxChain = d;
 };

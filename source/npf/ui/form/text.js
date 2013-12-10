@@ -20,26 +20,25 @@ npf.ui.form.Text = function(name, opt_renderer, opt_domHelper) {
 
   goog.base(this, name, renderer, opt_domHelper);
 
+  /**
+   * @private {boolean}
+   */
+  this.autoComplete_ = true;
+
+  /**
+   * @private {number}
+   */
+  this.maxLength_ = 0;
+
+  /**
+   * @private {boolean}
+   */
+  this.trimedValue_ = true;
+
   this.addClassName(renderer.getFieldCssClass());
   this.setValue('');
 };
 goog.inherits(npf.ui.form.Text, npf.ui.form.Field);
-
-
-/**
- * @private {boolean}
- */
-npf.ui.form.Text.prototype.autoComplete_ = true;
-
-/**
- * @private {number}
- */
-npf.ui.form.Text.prototype.maxLength_ = 0;
-
-/**
- * @private {boolean}
- */
-npf.ui.form.Text.prototype.trimedValue_ = true;
 
 
 /** @inheritDoc */

@@ -5,7 +5,7 @@ goog.require('goog.a11y.aria.State');
 goog.require('goog.array');
 goog.require('goog.asserts');
 goog.require('goog.dom');
-goog.require('goog.dom.classes');
+goog.require('goog.dom.classlist');
 goog.require('goog.object');
 goog.require('goog.style');
 goog.require('goog.ui.Component.State');
@@ -108,7 +108,7 @@ npf.ui.StatedRenderer.prototype.decorate = function(component, element) {
   var hasStructuralClassName = false;
   var hasCombinedClassName = false;
   var classNames = /** @type {!Array.<string>} */ (
-    goog.dom.classes.get(element));
+    goog.dom.classlist.get(element));
 
   goog.array.forEach(classNames, function(className) {
     if (!hasRendererClassName && className == rendererClassName) {
@@ -147,7 +147,7 @@ npf.ui.StatedRenderer.prototype.decorate = function(component, element) {
   // Only write to the DOM if new class names had to be added to the element.
   if (!hasRendererClassName || !hasStructuralClassName ||
       extraClassNames || hasCombinedClassName) {
-    goog.dom.classes.set(element, classNames.join(' '));
+    goog.dom.classlist.addAll(element, classNames);
   }
 
   this.setAriaStates(statedComponent, element);

@@ -15,30 +15,29 @@ goog.require('npf.ui.imageCrop.PreviewRenderer');
 npf.ui.imageCrop.Preview = function(opt_renderer, opt_domHelper) {
   goog.base(this, opt_renderer ||
     npf.ui.imageCrop.PreviewRenderer.getInstance(), opt_domHelper);
+
+  /**
+   * Обрезаемая часть изображения.
+   * @private {goog.math.Rect}
+   */
+  this.croppedRect_ = null;
+
+  /**
+   * @private {Image}
+   */
+  this.image_ = null;
+
+  /**
+   * @private {number}
+   */
+  this.maxHeight_ = Infinity;
+
+  /**
+   * @private {number}
+   */
+  this.maxWidth_ = Infinity;
 };
 goog.inherits(npf.ui.imageCrop.Preview, npf.ui.StatedComponent);
-
-
-/**
- * Обрезаемая часть изображения.
- * @private {goog.math.Rect}
- */
-npf.ui.imageCrop.Preview.prototype.croppedRect_ = null;
-
-/**
- * @private {Image}
- */
-npf.ui.imageCrop.Preview.prototype.image_ = null;
-
-/**
- * @private {number}
- */
-npf.ui.imageCrop.Preview.prototype.maxHeight_ = Infinity;
-
-/**
- * @private {number}
- */
-npf.ui.imageCrop.Preview.prototype.maxWidth_ = Infinity;
 
 
 /** @inheritDoc */

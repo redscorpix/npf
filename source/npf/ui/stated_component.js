@@ -44,81 +44,80 @@ goog.require('npf.ui.StatedRenderer');
 npf.ui.StatedComponent = function(opt_renderer, opt_domHelper) {
   goog.base(this, opt_renderer || npf.ui.StatedRenderer.getInstance(),
     opt_domHelper);
+
+  /**
+   * Current component state; a bit mask of {@link goog.ui.Component.State}s.
+   * @private {number}
+   */
+  this.state_ = 0x00;
+
+  /**
+   * A bit mask of {@link goog.ui.Component.State}s this component supports.
+   * @private {number}
+   */
+  this.supportedStates_ = 0x00;
+
+  /**
+   * A bit mask of {@link goog.ui.Component.State}s for which this component
+   * provides default event handling.  For example, a component that handles
+   * the HOVER state automatically will highlight itself on mouseover, whereas
+   * a component that doesn't handle HOVER automatically will only dispatch
+   * ENTER and LEAVE events but not call {@link setHighlighted} on itself.
+   * By default, components provide default event handling for all states.
+   * Components hosted in containers (e.g. menu items in a menu, or buttons in a
+   * toolbar) will typically want to have their container manage their highlight
+   * state.  Selectable components managed by a selection model will also
+   * typically want their selection state to be managed by the model.
+   * @private {number}
+   */
+  this.autoStates_ = goog.ui.Component.State.ALL;
+
+  /**
+   * A bit mask of {@link goog.ui.Component.State}s for which this component
+   * dispatches state transition events. Because events are expensive, the
+   * default behavior is to not dispatch any state transition events at all.
+   * Use the {@link #setDispatchTransitionEvents} API to request transition
+   * events  as needed.  Subclasses may enable transition events by default.
+   * Components hosted in containers or managed by a selection model will
+   * typically want to dispatch transition events.
+   * @private {number}
+   */
+  this.statesWithTransitionEvents_ = 0x00;
+
+  /**
+   * Component visibility.
+   * @private {boolean}
+   */
+  this.visible_ = true;
+
+  /**
+   * Keyboard event handler.
+   * @private {goog.events.KeyHandler}
+   */
+  this.keyHandler_ = null;
+
+  /**
+   * Whether the component should listen for and handle mouse events; defaults to
+   * true.
+   * @private {boolean}
+   */
+  this.handleMouseEvents_ = true;
+
+
+  /**
+   * Whether the component allows text selection within its DOM.  Defaults to
+   * false.
+   * @private {boolean}
+   */
+  this.allowTextSelection_ = false;
+
+  /**
+   * The component's preferred ARIA role.
+   * @private {?goog.a11y.aria.Role}
+   */
+  this.preferredAriaRole_ = null;
 };
 goog.inherits(npf.ui.StatedComponent, npf.ui.RenderedComponent);
-
-
-/**
- * Current component state; a bit mask of {@link goog.ui.Component.State}s.
- * @private {number}
- */
-npf.ui.StatedComponent.prototype.state_ = 0x00;
-
-/**
- * A bit mask of {@link goog.ui.Component.State}s this component supports.
- * @private {number}
- */
-npf.ui.StatedComponent.prototype.supportedStates_ = 0x00;
-
-/**
- * A bit mask of {@link goog.ui.Component.State}s for which this component
- * provides default event handling.  For example, a component that handles
- * the HOVER state automatically will highlight itself on mouseover, whereas
- * a component that doesn't handle HOVER automatically will only dispatch
- * ENTER and LEAVE events but not call {@link setHighlighted} on itself.
- * By default, components provide default event handling for all states.
- * Components hosted in containers (e.g. menu items in a menu, or buttons in a
- * toolbar) will typically want to have their container manage their highlight
- * state.  Selectable components managed by a selection model will also
- * typically want their selection state to be managed by the model.
- * @private {number}
- */
-npf.ui.StatedComponent.prototype.autoStates_ = goog.ui.Component.State.ALL;
-
-/**
- * A bit mask of {@link goog.ui.Component.State}s for which this component
- * dispatches state transition events. Because events are expensive, the
- * default behavior is to not dispatch any state transition events at all.
- * Use the {@link #setDispatchTransitionEvents} API to request transition
- * events  as needed.  Subclasses may enable transition events by default.
- * Components hosted in containers or managed by a selection model will
- * typically want to dispatch transition events.
- * @private {number}
- */
-npf.ui.StatedComponent.prototype.statesWithTransitionEvents_ = 0x00;
-
-/**
- * Component visibility.
- * @private {boolean}
- */
-npf.ui.StatedComponent.prototype.visible_ = true;
-
-/**
- * Keyboard event handler.
- * @private {goog.events.KeyHandler}
- */
-npf.ui.StatedComponent.prototype.keyHandler_;
-
-/**
- * Whether the component should listen for and handle mouse events; defaults to
- * true.
- * @private {boolean}
- */
-npf.ui.StatedComponent.prototype.handleMouseEvents_ = true;
-
-
-/**
- * Whether the component allows text selection within its DOM.  Defaults to
- * false.
- * @private {boolean}
- */
-npf.ui.StatedComponent.prototype.allowTextSelection_ = false;
-
-/**
- * The component's preferred ARIA role.
- * @private {?goog.a11y.aria.Role}
- */
-npf.ui.StatedComponent.prototype.preferredAriaRole_ = null;
 
 
 /** @inheritDoc */

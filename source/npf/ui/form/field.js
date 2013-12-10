@@ -22,89 +22,85 @@ npf.ui.form.Field = function(name, opt_renderer, opt_domHelper) {
   goog.base(this, opt_renderer || npf.ui.form.FieldRenderer.getInstance(),
     opt_domHelper);
 
+  /**
+   * @private {boolean}
+   */
+  this.error_ = false;
+
+  /**
+   * @private {boolean}
+   */
+  this.errorEnabled_ = true;
+
+  /**
+   * @type {string|Node|Array.<Node>|NodeList}
+   * @private
+   */
+  this.errorMessage_ = '';
+
+  /**
+   * @private {boolean}
+   */
+  this.hideErrorOnChange_ = true;
+
+  /**
+   * @type {string|Node|Array.<Node>|NodeList}
+   * @private
+   */
+  this.label_ = '';
+
+  /**
+   * @private {boolean}
+   */
+  this.labelAsPlaceholder_ = false;
+
+  /**
+   * @private {boolean}
+   */
+  this.labelEnabled_ = true;
+
+  /**
+   * @private {boolean}
+   */
+  this.labelVisible_ = true;
+
+  /**
+   * @private {string}
+   */
+  this.name_ = name;
+
+  /**
+   * @type {string|Node|Array.<Node>|NodeList}
+   * @private
+   */
+  this.notice_ = '';
+
+  /**
+   * @private {boolean}
+   */
+  this.noticeEnabled_ = true;
+
+  /**
+   * @private {boolean}
+   */
+  this.valid_ = true;
+
+  /**
+   * @private {Array.<npf.ui.form.validation.Base>}
+   */
+  this.validators_ = [];
+
+  /**
+   * @type {*}
+   * @private
+   */
+  this.value_ = undefined;
+
   this.setAllowTextSelection(true);
   this.setSupportedState(goog.ui.Component.State.DISABLED, true);
   this.setSupportedState(goog.ui.Component.State.FOCUSED, true);
-
-  this.name_ = name;
-  this.validators_ = [];
 };
 goog.inherits(npf.ui.form.Field, npf.ui.StatedComponent);
-
-
-/**
- * @private {boolean}
- */
-npf.ui.form.Field.prototype.error_ = false;
-
-/**
- * @private {boolean}
- */
-npf.ui.form.Field.prototype.errorEnabled_ = true;
-
-/**
- * @type {string|Node|Array.<Node>|NodeList}
- * @private
- */
-npf.ui.form.Field.prototype.errorMessage_ = '';
-
-/**
- * @private {boolean}
- */
-npf.ui.form.Field.prototype.hideErrorOnChange_ = true;
-
-/**
- * @type {string|Node|Array.<Node>|NodeList}
- * @private
- */
-npf.ui.form.Field.prototype.label_ = '';
-
-/**
- * @private {boolean}
- */
-npf.ui.form.Field.prototype.labelAsPlaceholder_ = false;
-
-/**
- * @private {boolean}
- */
-npf.ui.form.Field.prototype.labelEnabled_ = true;
-
-/**
- * @private {boolean}
- */
-npf.ui.form.Field.prototype.labelVisible_ = true;
-
-/**
- * @private {string}
- */
-npf.ui.form.Field.prototype.name_;
-
-/**
- * @type {string|Node|Array.<Node>|NodeList}
- * @private
- */
-npf.ui.form.Field.prototype.notice_ = '';
-
-/**
- * @private {boolean}
- */
-npf.ui.form.Field.prototype.noticeEnabled_ = true;
-
-/**
- * @private {boolean}
- */
-npf.ui.form.Field.prototype.valid_ = true;
-
-/**
- * @private {Array.<npf.ui.form.validation.Base>}
- */
-npf.ui.form.Field.prototype.validators_;
-
-/**
- * @type {*}
- * @private
- */
-npf.ui.form.Field.prototype.value_;
 
 
 /** @inheritDoc */

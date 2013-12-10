@@ -18,11 +18,38 @@ goog.require('npf.History');
 npf.Router = function(opt_history) {
   goog.base(this);
 
+  /**
+   * @private {string}
+   */
+  this.currentRouteName_ = '';
+
+  /**
+   * @private {boolean}
+   */
+  this.enabled_ = false;
+
+  /**
+   * @type {goog.History|npf.History}
+   * @private
+   */
   this.history_ = opt_history || new npf.History();
   this.registerDisposable(this.history_);
 
+  /**
+   * @private {Array.<npf.Router.NamedRoute>}
+   */
   this.namedRoutes_ = [];
+
+  /**
+   * @type {Object.<npf.router.Route>}
+   * @private
+   */
   this.routesMap_ = {};
+
+  /**
+   * @private {boolean}
+   */
+  this.slashSuffixEnabled_ = true;
 
   this.history_.listen(
     goog.history.EventType.NAVIGATE, this.onNavigate_, false, this);
@@ -87,39 +114,6 @@ npf.Router.normalizeRootPath = function() {
 
   return true;
 };
-
-
-/**
- * @private {string}
- */
-npf.Router.prototype.currentRouteName_ = '';
-
-/**
- * @type {goog.History|npf.History}
- * @private
- */
-npf.Router.prototype.history_;
-
-/**
- * @private {boolean}
- */
-npf.Router.prototype.enabled_ = false;
-
-/**
- * @private {Array.<npf.Router.NamedRoute>}
- */
-npf.Router.prototype.namedRoutes_;
-
-/**
- * @type {Object.<string,npf.router.Route>}
- * @private
- */
-npf.Router.prototype.routesMap_;
-
-/**
- * @private {boolean}
- */
-npf.Router.prototype.slashSuffixEnabled_ = true;
 
 
 /** @inheritDoc */
@@ -372,7 +366,7 @@ npf.Router.prototype.onNavigate = function(token) {
     }
   }
 
-  /** @type {{route:?npf.router.Route,name:string,uri:!goog.Uri,options:?Object.<string,string>}} */
+  /** @type {{route:?npf.router.Route,name:string,uri:!goog.Uri,options:?Object.<string>}} */
   var info = this.parseToken(token);
   var event = new npf.RouterEvent(npf.Router.EventType.NAVIGATE, info.uri,
     info.route, info.name, info.options);
@@ -381,14 +375,14 @@ npf.Router.prototype.onNavigate = function(token) {
 
 /**
  * @param {string|goog.Uri} token
- * @return {{route:?npf.router.Route,name:string,uri:!goog.Uri,options:?Object.<string,string>}}
+ * @return {{route:?npf.router.Route,name:string,uri:!goog.Uri,options:?Object.<string>}}
  */
 npf.Router.prototype.parseToken = function(token) {
   /** @type {!goog.Uri} */
   var uri = goog.Uri.parse(token);
   /** @type {string} */
   var name = '';
-  /** @type {Object.<string,string>} */
+  /** @type {Object.<string>} */
   var options = null;
 
   for (var i = this.namedRoutes_.length - 1; i >= 0; i--) {

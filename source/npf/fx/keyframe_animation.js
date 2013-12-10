@@ -565,8 +565,8 @@ npf.fx.KeyframeAnimation.prototype.setTransform = function(transform, position,
 };
 
 /**
- * @param {Object.<string,string|number>} fromRules
- * @param {Object.<string,string|number>} toRules
+ * @param {Object.<string|number>} fromRules
+ * @param {Object.<string|number>} toRules
  * @param {Array.<number>=} opt_fromAcc
  * @param {Array.<number>=} opt_toAcc
  * @return {!npf.fx.KeyframeAnimation}
@@ -579,7 +579,7 @@ npf.fx.KeyframeAnimation.prototype.fromTo = function(fromRules, toRules,
 };
 
 /**
- * @param {Object.<string,string|number>} rules
+ * @param {Object.<string|number>} rules
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.KeyframeAnimation}
  */
@@ -588,7 +588,7 @@ npf.fx.KeyframeAnimation.prototype.from = function(rules, opt_acc) {
 };
 
 /**
- * @param {Object.<string,string|number>} rules
+ * @param {Object.<string|number>} rules
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.KeyframeAnimation}
  */
@@ -597,7 +597,7 @@ npf.fx.KeyframeAnimation.prototype.to = function(rules, opt_acc) {
 };
 
 /**
- * @param {Object.<string,string|number>} rules
+ * @param {Object.<string|number>} rules
  * @param {number} position from 0 to 100
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.KeyframeAnimation}

@@ -7,7 +7,7 @@ goog.require('goog.events.EventType');
 goog.require('goog.math');
 goog.require('goog.object');
 goog.require('goog.userAgent');
-goog.require('npf.dom.svg.Ns');
+goog.require('npf.svg.Ns');
 
 
 /**
@@ -15,8 +15,20 @@ goog.require('npf.dom.svg.Ns');
  * @constructor
  */
 npf.userAgent.Support = function() {
+  /**
+   * @type {!Object.<npf.userAgent.Support.Property_,*>}
+   * @private
+   */
   this.checks_ = {};
+
+  /**
+   * @private {CSSStyleDeclaration}
+   */
   this.mStyle_ = goog.dom.createElement(npf.userAgent.Support.MOD).style;
+
+  /**
+   * @private {!Object.<string>}
+   */
   this.cssPropertyNames_ = {};
 };
 goog.addSingletonGetter(npf.userAgent.Support);
@@ -163,22 +175,6 @@ npf.userAgent.Support.domPrefixes =
  */
 npf.userAgent.Support.cssomPrefixes =
   npf.userAgent.Support.omPrefixes_.split(' ');
-
-/**
- * @type {!Object.<npf.userAgent.Support.Property_,*>}
- * @private
- */
-npf.userAgent.Support.prototype.checks_;
-
-/**
- * @private {CSSStyleDeclaration}
- */
-npf.userAgent.Support.prototype.mStyle_;
-
-/**
- * @private {!Object.<string>}
- */
-npf.userAgent.Support.prototype.cssPropertyNames_;
 
 
 /**
@@ -1747,7 +1743,7 @@ npf.userAgent.Support.prototype.getInlineSvg = function() {
     div.innerHTML = '<svg/>';
 
     this.checks_[propName] = (div.firstChild && div.firstChild.namespaceURI) ==
-      npf.dom.svg.Ns.SVG;
+      npf.svg.Ns.SVG;
   }
 
   return /** @type {boolean} */ (this.checks_[propName]);
@@ -2029,20 +2025,20 @@ npf.userAgent.Support.prototype.getMath = function() {
       div.style.position = 'absolute';
 
       /** @type {!Element} */
-      var mathElement = doc.createElementNS(npf.dom.svg.Ns.MATH_ML, 'math');
+      var mathElement = doc.createElementNS(npf.svg.Ns.MATH_ML, 'math');
       goog.dom.appendChild(div, mathElement);
 
       /** @type {!Element} */
-      var mfracElement = doc.createElementNS(npf.dom.svg.Ns.MATH_ML, 'mfrac');
+      var mfracElement = doc.createElementNS(npf.svg.Ns.MATH_ML, 'mfrac');
       goog.dom.appendChild(mathElement, mfracElement);
 
       /** @type {!Element} */
-      var mi1Element = doc.createElementNS(npf.dom.svg.Ns.MATH_ML, 'mi');
+      var mi1Element = doc.createElementNS(npf.svg.Ns.MATH_ML, 'mi');
       goog.dom.appendChild(mi1Element, doc.createTextNode('xx'));
       goog.dom.appendChild(mfracElement, mi1Element);
 
       /** @type {!Element} */
-      var mi2Element = doc.createElementNS(npf.dom.svg.Ns.MATH_ML, 'mi');
+      var mi2Element = doc.createElementNS(npf.svg.Ns.MATH_ML, 'mi');
       goog.dom.appendChild(mi2Element, doc.createTextNode('yy'));
       goog.dom.appendChild(mfracElement, mi2Element);
 
@@ -2278,7 +2274,7 @@ npf.userAgent.Support.prototype.getSmil = function() {
     var doc = goog.dom.getDomHelper().getDocument();
     this.checks_[propName] = !!doc.createElementNS &&
       /SVGAnimate/.test({}.toString.call(
-        doc.createElementNS(npf.dom.svg.Ns.SVG, 'animate')));
+        doc.createElementNS(npf.svg.Ns.SVG, 'animate')));
   }
 
   return /** @type {boolean} */ (this.checks_[propName]);
@@ -2317,7 +2313,7 @@ npf.userAgent.Support.prototype.getSvg = function() {
     /** @type {!Document} */
     var doc = goog.dom.getDomHelper().getDocument();
     this.checks_[propName] = !!doc.createElementNS &&
-      !!doc.createElementNS(npf.dom.svg.Ns.SVG, 'svg')['createSVGRect'];
+      !!doc.createElementNS(npf.svg.Ns.SVG, 'svg')['createSVGRect'];
   }
 
   return /** @type {boolean} */ (this.checks_[propName]);
@@ -2341,7 +2337,7 @@ npf.userAgent.Support.prototype.getSvgClipPaths = function() {
     var doc = goog.dom.getDomHelper().getDocument();
     this.checks_[propName] = !!doc.createElementNS &&
       /SVGClipPath/.test({}.toString.call(
-        doc.createElementNS(npf.dom.svg.Ns.SVG, 'clipPath')));
+        doc.createElementNS(npf.svg.Ns.SVG, 'clipPath')));
   }
 
   return /** @type {boolean} */ (this.checks_[propName]);

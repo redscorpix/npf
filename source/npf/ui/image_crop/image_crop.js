@@ -29,7 +29,56 @@ npf.ui.ImageCrop = function(opt_image, opt_renderer, opt_domHelper) {
   goog.base(this, opt_renderer ||
     npf.ui.imageCrop.Renderer.getInstance(), opt_domHelper);
 
+  /**
+   * Обрезаемая часть изображения.
+   * @private {goog.math.Rect}
+   */
+  this.croppedRect_ = null;
+
+  /**
+   * @private {npf.ui.imageCrop.Cropper}
+   */
+  this.cropper_ = null;
+
+  /**
+   * @private {Image}
+   */
   this.image_ = opt_image || null;
+
+  /**
+   * @private {goog.math.Size}
+   */
+  this.defaultCroppedSize_ = null;
+
+  /**
+   * @private {goog.math.Size}
+   */
+  this.maxCroppedSize_ = null;
+
+  /**
+   * @private {number}
+   */
+  this.maxHeight_ = Infinity;
+
+  /**
+   * @private {number}
+   */
+  this.maxWidth_ = Infinity;
+
+  /**
+   * @private {goog.math.Size}
+   */
+  this.minCroppedSize_ = null;
+
+  /**
+   * @private {boolean}
+   */
+  this.onlySquare_ = false;
+
+  /**
+   * @private {npf.ui.imageCrop.Preview}
+   */
+  this.preview_ = null;
 };
 goog.inherits(npf.ui.ImageCrop, npf.ui.RenderedComponent);
 
@@ -44,57 +93,6 @@ npf.ui.ImageCrop.EventType = {
    */
   CROP: goog.events.getUniqueId('crop')
 };
-
-/**
- * Обрезаемая часть изображения.
- * @private {goog.math.Rect}
- */
-npf.ui.ImageCrop.prototype.croppedRect_ = null;
-
-/**
- * @private {npf.ui.imageCrop.Cropper}
- */
-npf.ui.ImageCrop.prototype.cropper_ = null;
-
-/**
- * @private {Image}
- */
-npf.ui.ImageCrop.prototype.image_;
-
-/**
- * @private {goog.math.Size}
- */
-npf.ui.ImageCrop.prototype.defaultCroppedSize_ = null;
-
-/**
- * @private {goog.math.Size}
- */
-npf.ui.ImageCrop.prototype.maxCroppedSize_ = null;
-
-/**
- * @private {number}
- */
-npf.ui.ImageCrop.prototype.maxHeight_ = Infinity;
-
-/**
- * @private {number}
- */
-npf.ui.ImageCrop.prototype.maxWidth_ = Infinity;
-
-/**
- * @private {goog.math.Size}
- */
-npf.ui.ImageCrop.prototype.minCroppedSize_ = null;
-
-/**
- * @private {boolean}
- */
-npf.ui.ImageCrop.prototype.onlySquare_ = false;
-
-/**
- * @private {npf.ui.imageCrop.Preview}
- */
-npf.ui.ImageCrop.prototype.preview_ = null;
 
 
 /** @inheritDoc */

@@ -11,14 +11,13 @@ goog.require('goog.ui.Component');
  */
 npf.ui.Component = function(opt_domHelper) {
   goog.base(this, opt_domHelper);
+
+  /**
+   * @private {Array.<goog.Disposable>}
+   */
+  this.disposeOnExitDocument_ = null;
 };
 goog.inherits(npf.ui.Component, goog.ui.Component);
-
-
-/**
- * @private {Array.<goog.Disposable>}
- */
-npf.ui.Component.prototype.disposeOnExitDocument_ = null;
 
 
 /** @inheritDoc */

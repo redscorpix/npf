@@ -18,66 +18,65 @@ goog.require('npf.ui.spinner.Renderer');
 npf.ui.Spinner = function(opt_renderer, opt_domHelper) {
   goog.base(this, opt_renderer ||
     npf.ui.spinner.Renderer.getInstance(), opt_domHelper);
+
+  /**
+   * @private {Array.<npf.fx.KeyframeAnimation>}
+   */
+  this.animations_ = null;
+
+  /**
+   * Frames per second when using setTimeout()
+   * @private {number}
+   */
+  this.fps_ = 20;
+
+  /**
+   * Opacity of the lines
+   * @private {number}
+   */
+  this.opacity_ = 1 / 4;
+
+  /**
+   * @private {boolean}
+   */
+  this.playing_ = true;
+
+  /**
+   * The radius of the inner circle
+   * @private {number}
+   */
+  this.radius_ = 10;
+
+  /**
+   * Rotation offset
+   * @private {number}
+   */
+  this.rotation_ = 0;
+
+  /**
+   * The number of lines to draw
+   * @private {number}
+   */
+  this.segmentCount_ = 12;
+
+  /**
+   * Rounds per second
+   * @private {number}
+   */
+  this.speed_ = 1;
+
+  /**
+   * @private {number}
+   */
+  this.timeoutId_ = 0;
+
+  /**
+   * Afterglow percentage
+   * @private {number}
+   */
+  this.trail_ = 100;
 };
 goog.inherits(npf.ui.Spinner, npf.ui.RenderedComponent);
-
-
-/**
- * @private {Array.<npf.fx.KeyframeAnimation>}
- */
-npf.ui.Spinner.prototype.animations_ = null;
-
-/**
- * Frames per second when using setTimeout()
- * @private {number}
- */
-npf.ui.Spinner.prototype.fps_ = 20;
-
-/**
- * Opacity of the lines
- * @private {number}
- */
-npf.ui.Spinner.prototype.opacity_ = 1 / 4;
-
-/**
- * @private {boolean}
- */
-npf.ui.Spinner.prototype.playing_ = true;
-
-/**
- * The radius of the inner circle
- * @private {number}
- */
-npf.ui.Spinner.prototype.radius_ = 10;
-
-/**
- * Rotation offset
- * @private {number}
- */
-npf.ui.Spinner.prototype.rotation_ = 0;
-
-/**
- * The number of lines to draw
- * @private {number}
- */
-npf.ui.Spinner.prototype.segmentCount_ = 12;
-
-/**
- * Rounds per second
- * @private {number}
- */
-npf.ui.Spinner.prototype.speed_ = 1;
-
-/**
- * @private {number}
- */
-npf.ui.Spinner.prototype.timeoutId_;
-
-/**
- * Afterglow percentage
- * @private {number}
- */
-npf.ui.Spinner.prototype.trail_ = 100;
 
 
 /** @inheritDoc */

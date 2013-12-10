@@ -22,8 +22,25 @@ npf.ui.SearchInput = function(opt_value, opt_placeholder, opt_renderer,
   goog.base(this, opt_renderer ||
     npf.ui.searchInput.Renderer.getInstance(), opt_domHelper);
 
-  this.value_ = opt_value || '';
+  /**
+   * @private {boolean}
+   */
+  this.clearable_ = true;
+
+  /**
+   * @private {boolean}
+   */
+  this.hasIcon_ = true;
+
+  /**
+   * @private {string}
+   */
   this.placeholderValue_ = opt_placeholder || '';
+
+  /**
+   * @private {string}
+   */
+  this.value_ = opt_value || '';
 };
 goog.inherits(npf.ui.SearchInput, npf.ui.RenderedComponent);
 
@@ -42,27 +59,6 @@ npf.ui.SearchInput.EventType = {
    */
   CHANGE: goog.events.getUniqueId('change')
 };
-
-
-/**
- * @private {boolean}
- */
-npf.ui.SearchInput.prototype.clearable_ = true;
-
-/**
- * @private {boolean}
- */
-npf.ui.SearchInput.prototype.hasIcon_ = true;
-
-/**
- * @private {string}
- */
-npf.ui.SearchInput.prototype.placeholderValue_ = '';
-
-/**
- * @private {string}
- */
-npf.ui.SearchInput.prototype.value_ = '';
 
 
 /** @inheritDoc */

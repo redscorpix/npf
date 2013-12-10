@@ -16,45 +16,49 @@ npf.ui.SimpleComponent = function(opt_className, opt_contentClassName,
     opt_domHelper) {
   goog.base(this, opt_domHelper);
 
+  /** @type {Array.<string>} */
+  var classNames = null;
+  /** @type {Array.<string>} */
+  var contentClassNames = null;
+
   if (goog.isArray(opt_className)) {
-    this.classNames_ = opt_className;
+    classNames = opt_className;
   } else if (goog.isString(opt_className)) {
-    this.classNames_ = [opt_className];
+    classNames = [opt_className];
   }
 
   if (goog.isArray(opt_contentClassName)) {
-    this.contentClassNames_ = opt_contentClassName;
+    contentClassNames = opt_contentClassName;
   } else if (goog.isString(opt_contentClassName)) {
-    this.contentClassNames_ = [opt_contentClassName];
+    contentClassNames = [opt_contentClassName];
   }
+
+  /**
+   * @private {Array.<string>}
+   */
+  this.classNames_ = classNames;
+
+  /**
+   * @private {Array.<string>}
+   */
+  this.contentClassNames_ = contentClassNames;
+
+  /**
+   * @private {Element}
+   */
+  this.contentElement_ = null;
+
+  /**
+   * @private {string}
+   */
+  this.contentTagName_ = goog.dom.TagName.DIV;
+
+  /**
+   * @private {string}
+   */
+  this.tagName_ = goog.dom.TagName.DIV;
 };
 goog.inherits(npf.ui.SimpleComponent, npf.ui.Component);
-
-
-/**
- * @private {Array.<string>}
- */
-npf.ui.SimpleComponent.prototype.classNames_ = null;
-
-/**
- * @private {Array.<string>}
- */
-npf.ui.SimpleComponent.prototype.contentClassNames_ = null;
-
-/**
- * @private {Element}
- */
-npf.ui.SimpleComponent.prototype.contentElement_ = null;
-
-/**
- * @private {string}
- */
-npf.ui.SimpleComponent.prototype.contentTagName_ = goog.dom.TagName.DIV;
-
-/**
- * @private {string}
- */
-npf.ui.SimpleComponent.prototype.tagName_ = goog.dom.TagName.DIV;
 
 
 /** @inheritDoc */
@@ -69,6 +73,15 @@ npf.ui.SimpleComponent.prototype.createDom = function() {
     goog.dom.appendChild(element, this.contentElement_);
   } else {
     this.contentElement_ = element;
+  }
+};
+
+/** @inheritDoc */
+npf.ui.SimpleComponent.prototype.decorateInternal = function(element) {
+  goog.base(this, 'decorateInternal', element);
+
+  if (this.contentClassNames_) {
+    this.contentElement_ = this.getElementByClass(this.contentClassNames_[0]);
   }
 };
 

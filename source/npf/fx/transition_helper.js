@@ -12,15 +12,14 @@ goog.require('goog.object');
  */
 npf.fx.TransitionHelper = function() {
   goog.base(this);
+
+  /**
+   * @type {Object.<goog.fx.TransitionBase>}
+   * @private
+   */
+  this.transitionsMap_ = null;
 };
 goog.inherits(npf.fx.TransitionHelper, goog.Disposable);
-
-
-/**
- * @type {Object.<goog.fx.TransitionBase>}
- * @private
- */
-npf.fx.TransitionHelper.prototype.transitionsMap_ = null;
 
 
 /** @inheritDoc */

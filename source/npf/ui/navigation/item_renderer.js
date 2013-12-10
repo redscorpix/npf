@@ -2,7 +2,7 @@ goog.provide('npf.ui.navigation.ItemRenderer');
 
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
-goog.require('goog.dom.classes');
+goog.require('goog.dom.classlist');
 goog.require('npf.ui.Renderer');
 
 
@@ -59,7 +59,7 @@ npf.ui.navigation.ItemRenderer.prototype.setCaption = function(element,
 npf.ui.navigation.ItemRenderer.prototype.setEnabled = function(element,
     enable) {
   if (element) {
-    goog.dom.classes.enable(element, this.getDisabledCssClass(), !enable);
+    goog.dom.classlist.enable(element, this.getDisabledCssClass(), !enable);
   }
 };
 
@@ -70,7 +70,7 @@ npf.ui.navigation.ItemRenderer.prototype.setEnabled = function(element,
 npf.ui.navigation.ItemRenderer.prototype.setSelected = function(element,
     select) {
   if (element) {
-    goog.dom.classes.enable(element, this.getSelectedCssClass(), select);
+    goog.dom.classlist.enable(element, this.getSelectedCssClass(), select);
   }
 };
 

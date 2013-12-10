@@ -13,8 +13,8 @@ goog.require('npf.userAgent.support');
 
 
 /**
- * @param {Object.<string,string|number>=} opt_from
- * @param {Object.<string,string|number>=} opt_to
+ * @param {Object.<string|number>=} opt_from
+ * @param {Object.<string|number>=} opt_to
  * @param {Array.<number>=} opt_fromAcc
  * @param {Array.<number>=} opt_toAcc
  * @param {goog.dom.DomHelper=} opt_domHelper
@@ -25,10 +25,38 @@ npf.fx.cssAnimation.Keyframes = function(opt_from, opt_to, opt_fromAcc,
     opt_toAcc, opt_domHelper) {
   goog.base(this);
 
+  /**
+   * @private {goog.dom.DomHelper}
+   */
   this.domHelper_ = opt_domHelper || goog.dom.getDomHelper();
+
+  /**
+   * @private {string}
+   */
   this.name_ = npf.fx.cssAnimation.Keyframes.getNextKeyframeName();
 
+  /**
+   * @type {Object.<string>}
+   * @private
+   */
+  this.endStyles_ = null;
+
+  /**
+   * @private {boolean}
+   */
+  this.inited_ = false;
+
+  /**
+   * @type {Object.<Object>}
+   * @private
+   */
   this.keyframesMap_ = {};
+
+  /**
+   * @type {Element|StyleSheet}
+   * @private
+   */
+  this.styleElement_ = null;
 
   if (opt_from) {
     this.from(opt_from, opt_fromAcc);
@@ -93,40 +121,6 @@ npf.fx.cssAnimation.Keyframes.getVendorPrefix = function() {
 };
 
 
-/**
- * @private {goog.dom.DomHelper}
- */
-npf.fx.cssAnimation.Keyframes.domHelper_;
-
-/**
- * @type {Object.<string,string>}
- * @private
- */
-npf.fx.cssAnimation.Keyframes.prototype.endStyles_ = null;
-
-/**
- * @private {boolean}
- */
-npf.fx.cssAnimation.Keyframes.prototype.inited_ = false;
-
-/**
- * @type {Object.<number,Object>}
- * @private
- */
-npf.fx.cssAnimation.Keyframes.prototype.keyframesMap_;
-
-/**
- * @private {string}
- */
-npf.fx.cssAnimation.Keyframes.prototype.name_;
-
-/**
- * @type {Element|StyleSheet}
- * @private
- */
-npf.fx.cssAnimation.Keyframes.prototype.styleElement_;
-
-
 /** @inheritDoc */
 npf.fx.cssAnimation.Keyframes.prototype.disposeInternal = function() {
   if (this.styleElement_) {
@@ -163,7 +157,7 @@ npf.fx.cssAnimation.Keyframes.prototype.getElement = function() {
 };
 
 /**
- * @return {Object.<string,string>}
+ * @return {Object.<string>}
  */
 npf.fx.cssAnimation.Keyframes.prototype.getEndStyles = function() {
   return this.endStyles_;
@@ -822,8 +816,8 @@ npf.fx.cssAnimation.Keyframes.prototype.setTransform = function(transform,
 };
 
 /**
- * @param {Object.<string,string|number>} fromRules
- * @param {Object.<string,string|number>} toRules
+ * @param {Object.<string|number>} fromRules
+ * @param {Object.<string|number>} toRules
  * @param {Array.<number>=} opt_fromAcc
  * @param {Array.<number>=} opt_toAcc
  * @return {!npf.fx.cssAnimation.Keyframes}
@@ -836,7 +830,7 @@ npf.fx.cssAnimation.Keyframes.prototype.fromTo = function(fromRules, toRules,
 };
 
 /**
- * @param {Object.<string,string|number>} rules
+ * @param {Object.<string|number>} rules
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.cssAnimation.Keyframes}
  */
@@ -845,7 +839,7 @@ npf.fx.cssAnimation.Keyframes.prototype.from = function(rules, opt_acc) {
 };
 
 /**
- * @param {Object.<string,string|number>} rules
+ * @param {Object.<string|number>} rules
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.cssAnimation.Keyframes}
  */
@@ -854,7 +848,7 @@ npf.fx.cssAnimation.Keyframes.prototype.to = function(rules, opt_acc) {
 };
 
 /**
- * @param {Object.<string,string|number>} rules
+ * @param {Object.<string|number>} rules
  * @param {number} position from 0 to 100
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.cssAnimation.Keyframes}
@@ -864,7 +858,7 @@ npf.fx.cssAnimation.Keyframes.prototype.insertKeyframe = function(rules,
   position = parseInt(position, 10);
 
   if (0 <= position && position <= 100) {
-    /** @type {Object.<string,string>} */
+    /** @type {Object.<string>} */
     var properties = goog.object.clone(rules);
 
     if (opt_acc) {

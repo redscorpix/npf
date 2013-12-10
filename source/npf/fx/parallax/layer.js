@@ -17,10 +17,36 @@ goog.require('npf.fx.Parallax.EventType');
 npf.fx.parallax.Layer = function(viewport) {
   goog.base(this);
 
+  /**
+   * @private {npf.fx.Parallax}
+   */
+  this.viewport_ = viewport;
+
+  /**
+   * @private {Array.<number>}
+   */
   this.end_ = [];
+
+  /**
+   * @private {number}
+   */
+  this.maxPosition_ = 0;
+
+  /**
+   * @private {number}
+   */
+  this.minPosition_ = 0;
+
+  /**
+   * @private {number}
+   */
+  this.position_ = 0;
+
+  /**
+   * @private {Array.<number>}
+   */
   this.start_ = [];
 
-  this.viewport_ = viewport;
   this.viewport_.listen(
     npf.fx.Parallax.EventType.UPDATE, this.onUpdate_, false, this);
 };
@@ -37,37 +63,6 @@ npf.fx.parallax.Layer.EventType = {
    */
   UPDATE: goog.events.getUniqueId('update')
 };
-
-
-/**
- * @private {Array.<number>}
- */
-npf.fx.parallax.Layer.prototype.end_;
-
-/**
- * @private {number}
- */
-npf.fx.parallax.Layer.prototype.maxPosition_ = 0;
-
-/**
- * @private {number}
- */
-npf.fx.parallax.Layer.prototype.minPosition_ = 0;
-
-/**
- * @private {number}
- */
-npf.fx.parallax.Layer.prototype.position_ = 0;
-
-/**
- * @private {Array.<number>}
- */
-npf.fx.parallax.Layer.prototype.start_;
-
-/**
- * @private {npf.fx.Parallax}
- */
-npf.fx.parallax.Layer.prototype.viewport_;
 
 
 /** @inheritDoc */

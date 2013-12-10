@@ -3,7 +3,7 @@ goog.provide('npf.ui.progressBar.Renderer');
 goog.require('goog.a11y.aria');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
-goog.require('goog.dom.classes');
+goog.require('goog.dom.classlist');
 goog.require('goog.style');
 goog.require('npf.ui.Renderer');
 
@@ -37,7 +37,7 @@ npf.ui.progressBar.Renderer.prototype.createDom = function(component) {
   var orientation = progressBar.getOrientation();
   var element = /** @type {!Element} */ (
     goog.base(this, 'createDom', component));
-  goog.dom.classes.add(element, this.getOrientationCssClass(orientation));
+  goog.dom.classlist.add(element, this.getOrientationCssClass(orientation));
 
   /** @type {Element} */
   var thumbElement = this.createThumbElement(progressBar);
@@ -58,7 +58,7 @@ npf.ui.progressBar.Renderer.prototype.decorate = function(component, element) {
   var progressBar = /** @type {npf.ui.ProgressBar} */ (component);
   /** @type {npf.ui.ProgressBar.Orientation} */
   var orientation = progressBar.getOrientation();
-  goog.dom.classes.add(element, this.getOrientationCssClass(orientation));
+  goog.dom.classlist.add(element, this.getOrientationCssClass(orientation));
 
   // find thumb
   var thumbElement = this.getThumbElement(element);
@@ -160,7 +160,7 @@ npf.ui.progressBar.Renderer.prototype.updateOrientation = function(element,
     var oldCssClass = this.getOrientationCssClass(oldOrient);
     /** @type {string} */
     var newCssClass = this.getOrientationCssClass(newOrient);
-    goog.dom.classes.swap(element, oldCssClass, newCssClass);
+    goog.dom.classlist.addRemove(element, oldCssClass, newCssClass);
   }
 };
 

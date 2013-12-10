@@ -23,37 +23,32 @@ npf.ui.navigation.Item = function(type, url, caption, opt_renderer,
   goog.base(this, opt_renderer ||
     npf.ui.navigation.ItemRenderer.getInstance(), opt_domHelper);
 
+  /**
+   * @private {string}
+   */
   this.caption_ = caption;
+
+  /**
+   * @private {boolean}
+   */
+  this.enabled_ = true;
+
+  /**
+   * @private {boolean}
+   */
+  this.selected_ = false;
+
+  /**
+   * @private {string}
+   */
   this.type_ = type;
+
+  /**
+   * @private {string}
+   */
   this.url_ = url;
 };
 goog.inherits(npf.ui.navigation.Item, npf.ui.RenderedComponent);
-
-
-/**
- * @private {string}
- */
-npf.ui.navigation.Item.prototype.caption_;
-
-/**
- * @private {boolean}
- */
-npf.ui.navigation.Item.prototype.enabled_ = true;
-
-/**
- * @private {boolean}
- */
-npf.ui.navigation.Item.prototype.selected_ = false;
-
-/**
- * @private {string}
- */
-npf.ui.navigation.Item.prototype.type_;
-
-/**
- * @private {string}
- */
-npf.ui.navigation.Item.prototype.url_;
 
 
 /** @inheritDoc */

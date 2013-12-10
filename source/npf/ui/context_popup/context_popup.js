@@ -21,8 +21,30 @@ npf.ui.ContextPopup = function(opt_anchorElement, opt_renderer, opt_domHelper) {
   var renderer = opt_renderer || npf.ui.contextPopup.Renderer.getInstance();
   goog.base(this, renderer, opt_domHelper);
 
+  /**
+   * @private {Element}
+   */
   this.anchorElement_ = opt_anchorElement || null;
+
+  /**
+   * @private {Element}
+   */
   this.fadeElement_ = renderer.createFaderElement(this);
+
+  /**
+   * @private {goog.ui.Popup}
+   */
+  this.popup_ = null;
+
+  /**
+   * @private {npf.fx.KeyframeAnimation}
+   */
+  this.showTransition_ = null;
+
+  /**
+   * @private {boolean}
+   */
+  this.visible_ = false;
 };
 goog.inherits(npf.ui.ContextPopup, npf.ui.RenderedComponent);
 
@@ -31,32 +53,6 @@ goog.inherits(npf.ui.ContextPopup, npf.ui.RenderedComponent);
  * @const {number}
  */
 npf.ui.ContextPopup.ANIMATION_DURATION = 300;
-
-
-/**
- * @private {Element}
- */
-npf.ui.ContextPopup.prototype.anchorElement_;
-
-/**
- * @private {Element}
- */
-npf.ui.ContextPopup.prototype.fadeElement_;
-
-/**
- * @private {goog.ui.Popup}
- */
-npf.ui.ContextPopup.prototype.popup_ = null;
-
-/**
- * @private {npf.fx.KeyframeAnimation}
- */
-npf.ui.ContextPopup.prototype.showTransition_ = null;
-
-/**
- * @private {boolean}
- */
-npf.ui.ContextPopup.prototype.visible_ = false;
 
 
 /** @inheritDoc */

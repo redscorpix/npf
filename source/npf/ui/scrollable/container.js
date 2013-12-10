@@ -33,8 +33,66 @@ npf.ui.scrollable.Container = function(opt_renderer, opt_domHelper) {
   goog.base(this, opt_renderer ||
     npf.ui.scrollable.ContainerRenderer.getInstance(), opt_domHelper);
 
+  /**
+   * @private {goog.fx.Animation}
+   */
+  this.animation_ = null;
+
+  /**
+   * @private {number}
+   */
+  this.contentHeight_ = 0;
+
+  /**
+   * @private {boolean}
+   */
+  this.contentSizeFromElement_ = true;
+
+  /**
+   * @private {number}
+   */
+  this.contentWidth_ = 0;
+
+  /**
+   * @private {number}
+   */
+  this.height_ = 0;
+
+  /**
+   * @private {npf.ui.scrollable.scrollBar.Horizontal}
+   */
+  this.horizScrollBar_ = null;
+
+  /**
+   * @private {number}
+   */
+  this.scrollLeft_ = 0;
+
+  /**
+   * @private {number}
+   */
+  this.scrollTop_ = 0;
+
+  /**
+   * @private {boolean}
+   */
+  this.sizeFromElement_ = true;
+
+  /**
+   * @private {goog.async.Delay}
+   */
   this.updateDelay_ = new goog.async.Delay(this.update, 0, this);
   this.registerDisposable(this.updateDelay_);
+
+  /**
+   * @private {npf.ui.scrollable.scrollBar.Vertical}
+   */
+  this.vertScrollBar_ = null;
+
+  /**
+   * @private {number}
+   */
+  this.width_ = 0;
 
   this.setSupportedState(goog.ui.Component.State.DISABLED, true);
 };
@@ -55,67 +113,6 @@ npf.ui.scrollable.Container.EventType = {
    */
   SCROLL: goog.events.getUniqueId('scroll')
 };
-
-
-/**
- * @private {goog.fx.Animation}
- */
-npf.ui.scrollable.Container.prototype.animation_ = null;
-
-/**
- * @private {number}
- */
-npf.ui.scrollable.Container.prototype.contentHeight_ = 0;
-
-/**
- * @private {boolean}
- */
-npf.ui.scrollable.Container.prototype.contentSizeFromElement_ = true;
-
-/**
- * @private {number}
- */
-npf.ui.scrollable.Container.prototype.contentWidth_ = 0;
-
-/**
- * @private {number}
- */
-npf.ui.scrollable.Container.prototype.height_ = 0;
-
-/**
- * @private {npf.ui.scrollable.scrollBar.Horizontal}
- */
-npf.ui.scrollable.Container.prototype.horizScrollBar_ = null;
-
-/**
- * @private {number}
- */
-npf.ui.scrollable.Container.prototype.scrollLeft_ = 0;
-
-/**
- * @private {number}
- */
-npf.ui.scrollable.Container.prototype.scrollTop_ = 0;
-
-/**
- * @private {boolean}
- */
-npf.ui.scrollable.Container.prototype.sizeFromElement_ = true;
-
-/**
- * @private {goog.async.Delay}
- */
-npf.ui.scrollable.Container.prototype.updateDelay_;
-
-/**
- * @private {npf.ui.scrollable.scrollBar.Vertical}
- */
-npf.ui.scrollable.Container.prototype.vertScrollBar_ = null;
-
-/**
- * @private {number}
- */
-npf.ui.scrollable.Container.prototype.width_ = 0;
 
 
 /** @inheritDoc */

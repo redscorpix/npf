@@ -8,7 +8,7 @@ goog.require('goog.debug.Logger');
 goog.require('goog.debug.entryPointRegistry');
 goog.require('goog.events.BrowserEvent');
 goog.require('goog.events.EventTarget');
-goog.require('goog.json');
+goog.require('goog.json.hybrid');
 goog.require('goog.net.ErrorCode');
 goog.require('goog.net.EventType');
 goog.require('goog.net.HttpStatus');
@@ -37,14 +37,129 @@ npf.net.XhrIo2 = function(opt_xmlHttpFactory) {
   /**
    * Map of default headers to add to every request, use:
    * XhrIo.headers.set(name, value)
-   * @type {goog.structs.Map}
+   * @type {!goog.structs.Map}
    */
   this.headers = new goog.structs.Map();
 
   /**
+   * Optional XmlHttpFactory
    * @private {goog.net.XmlHttpFactory}
    */
   this.xmlHttpFactory_ = opt_xmlHttpFactory || null;
+
+  /**
+   * Whether XMLHttpRequest is active.  A request is active from the time send()
+   * is called until onReadyStateChange() is complete, or error() or abort()
+   * is called.
+   * @private {boolean}
+   */
+  this.active_ = false;
+
+  /**
+   * The XMLHttpRequest object that is being used for the transfer.
+   * @private {goog.net.XhrLike.OrNative|GearsHttpRequest}
+   */
+  this.xhr_ = null;
+
+  /**
+   * The options to use with the current XMLHttpRequest object.
+   * @private {Object}
+   */
+  this.xhrOptions_ = null;
+
+  /**
+   * Last URL that was requested.
+   * @type {string|goog.Uri}
+   * @private
+   */
+  this.lastUri_ = '';
+
+  /**
+   * Method for the last request.
+   * @private {string}
+   */
+  this.lastMethod_ = '';
+
+  /**
+   * Last error code.
+   * @private {!goog.net.ErrorCode}
+   */
+  this.lastErrorCode_ = goog.net.ErrorCode.NO_ERROR;
+
+  /**
+   * Last error message.
+   * @type {Error|string}
+   * @private
+   */
+  this.lastError_ = '';
+
+  /**
+   * Used to ensure that we don't dispatch an multiple ERROR events. This can
+   * happen in IE when it does a synchronous load and one error is handled in
+   * the ready statte change and one is handled due to send() throwing an
+   * exception.
+   * @private {boolean}
+   */
+  this.errorDispatched_ = false;
+
+  /**
+   * Used to make sure we don't fire the complete event from inside a send call.
+   * @private {boolean}
+   */
+  this.inSend_ = false;
+
+  /**
+   * Used in determining if a call to {@link #onReadyStateChange_} is from
+   * within a call to this.xhr_.open.
+   * @private {boolean}
+   */
+  this.inOpen_ = false;
+
+  /**
+   * Used in determining if a call to {@link #onReadyStateChange_} is from
+   * within a call to this.xhr_.abort.
+   * @private {boolean}
+   */
+  this.inAbort_ = false;
+
+  /**
+   * Number of milliseconds after which an incomplete request will be aborted
+   * and a {@link goog.net.EventType.TIMEOUT} event raised; 0 means no timeout
+   * is set.
+   * @private {number}
+   */
+  this.timeoutInterval_ = 0;
+
+  /**
+   * Timer to track request timeout.
+   * @private {?number}
+   */
+  this.timeoutId_ = null;
+
+  /**
+   * The requested type for the response. The empty string means use the default
+   * XHR behavior.
+   * @private {npf.net.XhrIo2.ResponseType}
+   */
+  this.responseType_ = npf.net.XhrIo2.ResponseType.DEFAULT;
+
+  /**
+   * Whether a "credentialed" request is to be sent (one that is aware of
+   * cookies and authentication). This is applicable only for cross-domain
+   * requests and more recent browsers that support this part of the HTTP Access
+   * Control standard.
+   *
+   * @see http://www.w3.org/TR/XMLHttpRequest/#the-withcredentials-attribute
+   *
+   * @private {boolean}
+   */
+  this.withCredentials_ = false;
+
+  /**
+   * True if we can use XMLHttpRequest's timeout directly.
+   * @private {boolean}
+   */
+  this.useXhr2Timeout_ = false;
 };
 goog.inherits(npf.net.XhrIo2, goog.events.EventTarget);
 
@@ -55,12 +170,13 @@ goog.inherits(npf.net.XhrIo2, goog.events.EventTarget);
  * @see http://www.w3.org/TR/XMLHttpRequest/#the-responsetype-attribute
  */
 npf.net.XhrIo2.ResponseType = {
-  DEFAULT: '',
-  TEXT: 'text',
-  DOCUMENT: 'document',
+  ARRAY_BUFFER: 'arraybuffer',
   // Not supported as of Chrome 10.0.612.1 dev
   BLOB: 'blob',
-  ARRAY_BUFFER: 'arraybuffer'
+  DEFAULT: '',
+  DOCUMENT: 'document',
+  JSON: 'json',
+  TEXT: 'text'
 };
 
 
@@ -100,6 +216,26 @@ npf.net.XhrIo2.METHODS_WITH_FORM_DATA = ['POST', 'PUT'];
 npf.net.XhrIo2.FORM_CONTENT_TYPE =
   'application/x-www-form-urlencoded;charset=utf-8';
 
+/**
+ * The XMLHttpRequest Level two timeout delay ms property name.
+ *
+ * @see http://www.w3.org/TR/XMLHttpRequest/#the-timeout-attribute
+ *
+ * @private {string}
+ * @const
+ */
+npf.net.XhrIo2.XHR2_TIMEOUT_ = 'timeout';
+
+/**
+ * The XMLHttpRequest Level two ontimeout handler property name.
+ *
+ * @see http://www.w3.org/TR/XMLHttpRequest/#the-timeout-attribute
+ *
+ * @private {string}
+ * @const
+ */
+npf.net.XhrIo2.XHR2_ON_TIMEOUT_ = 'ontimeout';
+
 
 /**
  * @private {number}
@@ -112,33 +248,11 @@ npf.net.XhrIo2.globalHandleCounter_ = 0;
  */
 npf.net.XhrIo2.globalHandles_ = {};
 
-
-/**
- * The XMLHttpRequest Level two timeout delay ms property name.
- *
- * @see http://www.w3.org/TR/XMLHttpRequest/#the-timeout-attribute
- *
- * @private {string}
- * @const
- */
-npf.net.XhrIo2.XHR2_TIMEOUT_ = 'timeout';
-
-
-/**
- * The XMLHttpRequest Level two ontimeout handler property name.
- *
- * @see http://www.w3.org/TR/XMLHttpRequest/#the-timeout-attribute
- *
- * @private {string}
- * @const
- */
-npf.net.XhrIo2.XHR2_ON_TIMEOUT_ = 'ontimeout';
-
 /**
  * All non-disposed instances of npf.net.XhrIo2 created
  * by {@link npf.net.XhrIo2.send} are in this Array.
  * @see npf.net.XhrIo2.cleanup
- * @private {Array.<!npf.net.XhrIo2>}
+ * @private {!Array.<!npf.net.XhrIo2>}
  */
 npf.net.XhrIo2.sendInstances_ = [];
 
@@ -248,137 +362,6 @@ npf.net.XhrIo2.prototype.cleanupSend_ = function() {
   goog.array.remove(npf.net.XhrIo2.sendInstances_, this);
 };
 
-
-/**
- * Whether XMLHttpRequest is active.  A request is active from the time send()
- * is called until onReadyStateChange() is complete, or error() or abort()
- * is called.
- * @private {boolean}
- */
-npf.net.XhrIo2.prototype.active_ = false;
-
-
-/**
- * Reference to an XMLHttpRequest object that is being used for the transfer.
- * @type {XMLHttpRequest|GearsHttpRequest}
- * @private
- */
-npf.net.XhrIo2.prototype.xhr_ = null;
-
-
-/**
- * The options to use with the current XMLHttpRequest object.
- * @private {Object}
- */
-npf.net.XhrIo2.prototype.xhrOptions_ = null;
-
-
-/**
- * Last URL that was requested.
- * @type {string|goog.Uri}
- * @private
- */
-npf.net.XhrIo2.prototype.lastUri_ = '';
-
-
-/**
- * Method for the last request.
- * @private {string}
- */
-npf.net.XhrIo2.prototype.lastMethod_ = '';
-
-
-/**
- * Last error code.
- * @private {goog.net.ErrorCode}
- */
-npf.net.XhrIo2.prototype.lastErrorCode_ = goog.net.ErrorCode.NO_ERROR;
-
-
-/**
- * Last error message.
- * @type {Error|string}
- * @private
- */
-npf.net.XhrIo2.prototype.lastError_ = '';
-
-
-/**
- * This is used to ensure that we don't dispatch an multiple ERROR events. This
- * can happen in IE when it does a synchronous load and one error is handled in
- * the ready statte change and one is handled due to send() throwing an
- * exception.
- * @private {boolean}
- */
-npf.net.XhrIo2.prototype.errorDispatched_ = false;
-
-
-/**
- * Used to make sure we don't fire the complete event from inside a send call.
- * @private {boolean}
- */
-npf.net.XhrIo2.prototype.inSend_ = false;
-
-
-/**
- * Used in determining if a call to {@link #onReadyStateChange_} is from within
- * a call to this.xhr_.open.
- * @private {boolean}
- */
-npf.net.XhrIo2.prototype.inOpen_ = false;
-
-
-/**
- * Used in determining if a call to {@link #onReadyStateChange_} is from within
- * a call to this.xhr_.abort.
- * @private {boolean}
- */
-npf.net.XhrIo2.prototype.inAbort_ = false;
-
-
-/**
- * Number of milliseconds after which an incomplete request will be aborted and
- * a {@link goog.net.EventType.TIMEOUT} event raised; 0 means no timeout is set.
- * @private {number}
- */
-npf.net.XhrIo2.prototype.timeoutInterval_ = 0;
-
-
-/**
- * Window timeout ID used to cancel the timeout event handler if the request
- * completes successfully.
- * @private {?number}
- */
-npf.net.XhrIo2.prototype.timeoutId_ = null;
-
-
-/**
- * The requested type for the response. The empty string means use the default
- * XHR behavior.
- * @private {npf.net.XhrIo2.ResponseType}
- */
-npf.net.XhrIo2.prototype.responseType_ = npf.net.XhrIo2.ResponseType.DEFAULT;
-
-
-/**
- * Whether a "credentialed" request is to be sent (one that is aware of cookies
- * and authentication) . This is applicable only for cross-domain requests and
- * more recent browsers that support this part of the HTTP Access Control
- * standard.
- *
- * @see http://www.w3.org/TR/XMLHttpRequest/#the-withcredentials-attribute
- *
- * @private {boolean}
- */
-npf.net.XhrIo2.prototype.withCredentials_ = false;
-
-/**
- * True if we can use XMLHttpRequest's timeout directly.
- * @private {boolean}
- */
-npf.net.XhrIo2.prototype.useXhr2Timeout_ = false;
-
-
 /**
  * Returns the number of milliseconds after which an incomplete request will be
  * aborted, or 0 if no timeout is set.
@@ -424,7 +407,9 @@ npf.net.XhrIo2.prototype.getResponseType = function() {
 
 /**
  * Sets whether a "credentialed" request that is aware of cookie and
- * authentication information should be made.
+ * authentication information should be made. This option is only supported by
+ * browsers that support HTTP Access Control. As of this writing, this option
+ * is not supported in IE.
  * @param {boolean} withCredentials Whether this should be a "credentialed"
  *     request.
  */
@@ -604,7 +589,7 @@ npf.net.XhrIo2.prototype.parseRequestHeaders = function(opt_headers) {
  * @see http://www.w3.org/TR/XMLHttpRequest/#the-timeout-attribute
  * @see https://bugzilla.mozilla.org/show_bug.cgi?id=525816
  *
- * @param {!XMLHttpRequest|!GearsHttpRequest} xhr The request.
+ * @param {!goog.net.XhrLike.OrNative|!GearsHttpRequest} xhr The request.
  * @return {boolean} True if the request supports level 2 timeout.
  * @private
  */
@@ -630,7 +615,8 @@ npf.net.XhrIo2.isContentTypeHeader_ = function(header) {
 
 /**
  * Creates a new XHR object.
- * @return {XMLHttpRequest|GearsHttpRequest} The newly created XHR object.
+ * @return {goog.net.XhrLike.OrNative|GearsHttpRequest} The newly created XHR
+ *     object.
  * @protected
  */
 npf.net.XhrIo2.prototype.createXhr = function() {
@@ -885,6 +871,9 @@ npf.net.XhrIo2.prototype.cleanUpXhr_ = function(opt_fromDispose) {
     // Save reference so we can mark it as closed after the READY event.  The
     // READY event may trigger another request, thus we must nullify this.xhr_
     var xhr = this.xhr_;
+    var clearedOnReadyStateChange =
+        this.xhrOptions_[goog.net.XmlHttp.OptionType.USE_NULL_FUNCTION] ?
+            goog.nullFunction : null;
     this.xhr_ = null;
     this.xhrOptions_ = null;
 
@@ -894,8 +883,10 @@ npf.net.XhrIo2.prototype.cleanUpXhr_ = function(opt_fromDispose) {
 
     try {
       // NOTE(user): Not nullifying in FireFox can still leak if the callbacks
-      // are defined in the same scope as the instance of XhrIo.
-      xhr.onreadystatechange = null;
+      // are defined in the same scope as the instance of XhrIo. But, IE doesn't
+      // allow you to set the onreadystatechange to NULL so nullFunction is
+      // used.
+      xhr.onreadystatechange = clearedOnReadyStateChange;
     } catch (e) {
       // This seems to occur with a Gears HTTP request. Delayed the setting of
       // this onreadystatechange until after READY is sent out and catching the
@@ -1072,6 +1063,13 @@ npf.net.XhrIo2.prototype.getResponseXml = function() {
  * @return {Object|undefined} JavaScript object.
  */
 npf.net.XhrIo2.prototype.getResponseJson = function(opt_xssiPrefix) {
+  if (
+    this.xhr_ &&
+    npf.net.XhrIo2.ResponseType.JSON == this.xhr_.responseType
+  ) {
+    return /** @type {Object|undefined} */ (this.xhr_.response);
+  }
+
   /** @type {string} */
   var responseText = this.getResponseText();
 
@@ -1083,7 +1081,7 @@ npf.net.XhrIo2.prototype.getResponseJson = function(opt_xssiPrefix) {
     responseText = responseText.substring(opt_xssiPrefix.length);
   }
 
-  return goog.json.parse(responseText);
+  return goog.json.hybrid.parse(responseText);
 };
 
 
@@ -1145,7 +1143,7 @@ npf.net.XhrIo2.prototype.getAllResponseHeaders = function() {
  * include any case normalization logic, it will just return a key-value
  * representation of the headers.
  * See: http://www.w3.org/TR/XMLHttpRequest/#the-getresponseheader()-method
- * @return {!Object.<string, string>} An object with the header keys as keys
+ * @return {!Object.<string>} An object with the header keys as keys
  *     and header values as values.
  */
 npf.net.XhrIo2.prototype.getResponseHeaders = function() {

@@ -1,6 +1,6 @@
 goog.provide('npf.ui.stickyHead.HeadRenderer');
 
-goog.require('goog.dom.classes');
+goog.require('goog.dom.classlist');
 goog.require('goog.style');
 goog.require('npf.ui.Renderer');
 
@@ -33,7 +33,7 @@ npf.ui.stickyHead.HeadRenderer.prototype.createDom = function(component) {
 	var element = goog.base(this, 'createDom', component);
 
 	if (component.isSticky()) {
-		goog.dom.classes.add(element, this.getStickyCssClass());
+		goog.dom.classlist.add(element, this.getStickyCssClass());
 	}
 
 	return element;

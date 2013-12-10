@@ -29,8 +29,29 @@ npf.ui.imageCrop.Cropper = function(image, scale, rect, opt_renderer,
   goog.base(this, opt_renderer ||
     npf.ui.imageCrop.CropperRenderer.getInstance(), opt_domHelper);
 
+  /**
+   * @private {goog.math.Rect}
+   */
   this.croppedRect_ = rect;
+
+  /**
+   * @private {number}
+   */
+  this.direction_ = npf.ui.imageCrop.Direction.ALL;
+
+  /**
+   * @private {goog.fx.Dragger}
+   */
+  this.dragger_ = null;
+
+  /**
+   * @private {Image}
+   */
   this.image_ = image;
+
+  /**
+   * @private {number}
+   */
   this.scale_ = scale;
 };
 goog.inherits(npf.ui.imageCrop.Cropper, npf.ui.StatedComponent);
@@ -46,32 +67,6 @@ npf.ui.imageCrop.Cropper.EventType = {
    */
   UPDATE: goog.events.getUniqueId('update')
 };
-
-
-/**
- * @private {goog.math.Rect}
- */
-npf.ui.imageCrop.Cropper.prototype.croppedRect_;
-
-/**
- * @private {number}
- */
-npf.ui.imageCrop.Cropper.prototype.direction_ = npf.ui.imageCrop.Direction.ALL;
-
-/**
- * @private {goog.fx.Dragger}
- */
-npf.ui.imageCrop.Cropper.prototype.dragger_ = null;
-
-/**
- * @private {Image}
- */
-npf.ui.imageCrop.Cropper.prototype.image_;
-
-/**
- * @private {number}
- */
-npf.ui.imageCrop.Cropper.prototype.scale_;
 
 
 /** @inheritDoc */

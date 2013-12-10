@@ -20,14 +20,52 @@ goog.require('goog.style');
 npf.net.FileInput = function(buttonElement, opt_parentElement) {
   goog.base(this);
 
+  /**
+   * @private {Element}
+   */
   this.buttonElement_ = buttonElement;
+
+  /**
+   * @private {Element}
+   */
   this.parentElement_ = opt_parentElement || this.buttonElement_;
+
+  /**
+   * @private {goog.dom.DomHelper}
+   */
   this.domHelper_ = goog.dom.getDomHelper(this.parentElement_);
+
+  /**
+   * If disabled clicking on button won't do anything
+   * @private {boolean}
+   */
+  this.enabled_ = false;
+
+  /**
+   * @private {string}
+   */
+  this.ext_ = '';
+
+  /**
+   * @private {string}
+   */
+  this.fileName_ = '';
+
+  /**
+   * @private {Element}
+   */
   this.element_ = this.createElement_();
+
+  /**
+   * @private {HTMLInputElement}
+   */
   this.inputElement_ = this.createInputElement_();
   goog.dom.appendChild(this.element_, this.inputElement_);
   goog.dom.appendChild(this.parentElement_, this.element_);
 
+  /**
+   * @private {goog.events.EventHandler}
+   */
   this.handler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.handler_);
 };
@@ -59,53 +97,6 @@ npf.net.FileInput.fileFromPath = function(file) {
 npf.net.FileInput.getExt = function(file) {
   return (-1 !== file.indexOf('.')) ? file.replace(/.*[.]/, '') : '';
 };
-
-
-/**
- * @private {Element}
- */
-npf.net.FileInput.prototype.buttonElement_;
-
-/**
- * @private {goog.dom.DomHelper}
- */
-npf.net.FileInput.prototype.domHelper_;
-
-/**
- * @private {Element}
- */
-npf.net.FileInput.prototype.element_ = null;
-
-/**
- * If disabled clicking on button won't do anything
- * @private {boolean}
- */
-npf.net.FileInput.prototype.enabled_ = false;
-
-/**
- * @private {string}
- */
-npf.net.FileInput.prototype.ext_ = '';
-
-/**
- * @private {string}
- */
-npf.net.FileInput.prototype.fileName_ = '';
-
-/**
- * @private {goog.events.EventHandler}
- */
-npf.net.FileInput.prototype.handler_;
-
-/**
- * @private {HTMLInputElement}
- */
-npf.net.FileInput.prototype.inputElement_;
-
-/**
- * @private {Element}
- */
-npf.net.FileInput.prototype.parentElement_;
 
 
 /** @inheritDoc */

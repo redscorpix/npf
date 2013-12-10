@@ -14,9 +14,21 @@ goog.require('goog.events.EventType');
 npf.events.MouseSimulator = function(element) {
   goog.base(this);
 
+  /**
+   * @private {Node}
+   */
   this.element_ = element;
+
+  /**
+   * @private {goog.events.EventHandler}
+   */
   this.handler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.handler_);
+
+  /**
+   * @private {boolean}
+   */
+  this.moved_ = false;
 
   this.handler_.
     listen(this.element_, goog.events.EventType.TOUCHSTART, this.onStart_).
@@ -24,22 +36,6 @@ npf.events.MouseSimulator = function(element) {
     listen(this.element_, goog.events.EventType.TOUCHEND, this.onEnd_);
 };
 goog.inherits(npf.events.MouseSimulator, goog.Disposable);
-
-
-/**
- * @private {Node}
- */
-npf.events.MouseSimulator.prototype.element_;
-
-/**
- * @private {goog.events.EventHandler}
- */
-npf.events.MouseSimulator.prototype.handler_;
-
-/**
- * @private {boolean}
- */
-npf.events.MouseSimulator.prototype.moved_ = false;
 
 
 /** @inheritDoc */

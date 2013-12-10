@@ -18,30 +18,27 @@ goog.require('npf.ui.Renderer');
 npf.ui.RenderedComponent = function(opt_renderer, opt_domHelper) {
   goog.base(this, opt_domHelper);
 
+  /**
+   * Map of DOM IDs to child components.  Each key is the DOM ID of a child
+   * component's root element; each value is a reference to the child component
+   * itself.  Used for looking up the child component corresponding to a DOM
+   * node in O(1) time.
+   * @private {Object.<goog.ui.Component>}
+   */
+  this.childElementIdMap_ = null;
+
+  /**
+   * Additional class name(s) to apply to the component's root element, if any.
+   * @private {Array.<string>?}
+   */
+  this.extraClassNames_ = null;
+
+  /**
+   * @private {npf.ui.Renderer}
+   */
   this.renderer_ = opt_renderer || npf.ui.Renderer.getInstance();
 };
 goog.inherits(npf.ui.RenderedComponent, npf.ui.Component);
-
-
-/**
- * Map of DOM IDs to child components.  Each key is the DOM ID of a child
- * component's root element; each value is a reference to the child component
- * itself.  Used for looking up the child component corresponding to a DOM
- * node in O(1) time.
- * @private {Object.<goog.ui.Component>}
- */
-npf.ui.RenderedComponent.prototype.childElementIdMap_ = null;
-
-/**
- * Additional class name(s) to apply to the component's root element, if any.
- * @private {Array.<string>?}
- */
-npf.ui.RenderedComponent.prototype.extraClassNames_ = null;
-
-/**
- * @private {npf.ui.Renderer}
- */
-npf.ui.RenderedComponent.prototype.renderer_;
 
 
 /**

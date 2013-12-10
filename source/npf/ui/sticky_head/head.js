@@ -17,20 +17,17 @@ npf.ui.stickyHead.Head = function(sticky, opt_renderer, opt_domHelper) {
 	goog.base(this, opt_renderer ||
 		npf.ui.stickyHead.HeadRenderer.getInstance(), opt_domHelper);
 
+	/**
+	 * @private {boolean}
+	 */
 	this.sticky_ = sticky;
+
+	/**
+	 * @private {boolean}
+	 */
+	this.visible_ = true;
 };
 goog.inherits(npf.ui.stickyHead.Head, npf.ui.RenderedComponent);
-
-
-/**
- * @private {boolean}
- */
-npf.ui.stickyHead.Head.prototype.sticky_;
-
-/**
- * @private {boolean}
- */
-npf.ui.stickyHead.Head.prototype.visible_ = true;
 
 
 /** @inheritDoc */

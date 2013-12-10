@@ -1,6 +1,6 @@
 goog.provide('npf.ui.Image');
 
-goog.require('goog.dom.classes');
+goog.require('goog.dom.classlist');
 goog.require('goog.dom.TagName');
 goog.require('goog.math.Size');
 goog.require('npf.ui.Component');
@@ -16,37 +16,32 @@ goog.require('npf.ui.Component');
 npf.ui.Image = function(src, width, height) {
   goog.base(this);
 
+  /**
+   * @private {string}
+   */
+  this.caption_ = '';
+
+  /**
+   * @private {Array.<string>}
+   */
+  this.cssClass_ = null;
+
+  /**
+   * @private {number}
+   */
   this.height_ = height;
+
+  /**
+   * @private {string}
+   */
   this.src_ = src;
+
+  /**
+   * @private {number}
+   */
   this.width_ = width;
 };
 goog.inherits(npf.ui.Image, npf.ui.Component);
-
-
-/**
- * @private {string}
- */
-npf.ui.Image.prototype.caption_ = '';
-
-/**
- * @private {Array.<string>}
- */
-npf.ui.Image.prototype.cssClass_ = null;
-
-/**
- * @private {number}
- */
-npf.ui.Image.prototype.height_;
-
-/**
- * @private {string}
- */
-npf.ui.Image.prototype.src_;
-
-/**
- * @private {number}
- */
-npf.ui.Image.prototype.width_;
 
 
 /** @inheritDoc */
@@ -60,7 +55,7 @@ npf.ui.Image.prototype.createDom = function() {
   });
 
   if (this.cssClass_) {
-    goog.dom.classes.add(element, this.cssClass_.join(' '));
+    goog.dom.classlist.addAll(element, this.cssClass_);
   }
 
   this.setElementInternal(element);

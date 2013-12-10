@@ -15,30 +15,68 @@ goog.require('npf.string');
  * @extends {goog.events.EventTarget}
  */
 npf.application.Settings = function(opt_urlKeys, opt_optionKeys) {
+  var optionKeys;
+  var urlKeys;
+
   if (opt_urlKeys) {
     if (goog.isArray(opt_urlKeys)) {
-      this.urlKeys_ = opt_urlKeys;
+      urlKeys = opt_urlKeys;
     } else {
-      this.urlKeys_ = goog.object.getValues(opt_urlKeys);
+      urlKeys = goog.object.getValues(opt_urlKeys);
     }
   } else {
-    this.urlKeys_ = [];
+    urlKeys = [];
   }
 
   if (opt_optionKeys) {
     if (goog.isArray(opt_optionKeys)) {
-      this.optionKeys_ = opt_optionKeys;
+      optionKeys = opt_optionKeys;
     } else {
-      this.optionKeys_ = goog.object.getValues(opt_optionKeys);
+      optionKeys = goog.object.getValues(opt_optionKeys);
     }
   } else {
-    this.optionKeys_ = [];
+    optionKeys = [];
   }
 
+  /**
+   * @private {Object}
+   */
   this.defaultsMap_ = {};
+
+  /**
+   * @private {Array.<string>}
+   */
+  this.optionKeys_ = optionKeys;
+
+  /**
+   * @private {Object}
+   */
   this.optionsMap_ = {};
+
+  /**
+   * @type {string}
+   */
+  this.optionsRootKey = npf.application.Settings.OPTIONS;
+
+  /**
+   * @private {Array.<string>}
+   */
   this.undefinedSettings_ = [];
+
+  /**
+   * @private {Array.<string>}
+   */
+  this.urlKeys_ = urlKeys;
+
+  /**
+   * @private {Object.<string>}
+   */
   this.urlsMap_ = {};
+
+  /**
+   * @type {string}
+   */
+  this.urlsRootKey = npf.application.Settings.URLS;
 };
 goog.inherits(npf.application.Settings, goog.events.EventTarget);
 
@@ -52,48 +90,6 @@ npf.application.Settings.OPTIONS = 'options';
  * @const {string}
  */
 npf.application.Settings.URLS = 'urls';
-
-
-/**
- * @private {Object}
- */
-npf.application.Settings.prototype.defaultsMap_;
-
-/**
- * @private {Array.<string>}
- */
-npf.application.Settings.prototype.optionKeys_;
-
-/**
- * @private {Object}
- */
-npf.application.Settings.prototype.optionsMap_;
-
-/**
- * @type {string}
- */
-npf.application.Settings.prototype.optionsRootKey =
-  npf.application.Settings.OPTIONS;
-
-/**
- * @private {Array.<string>}
- */
-npf.application.Settings.prototype.undefinedSettings_;
-
-/**
- * @private {Array.<string>}
- */
-npf.application.Settings.prototype.urlKeys_;
-
-/**
- * @private {Object.<string>}
- */
-npf.application.Settings.prototype.urlsMap_;
-
-/**
- * @type {string}
- */
-npf.application.Settings.prototype.urlsRootKey = npf.application.Settings.URLS;
 
 
 /** @inheritDoc */

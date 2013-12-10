@@ -20,29 +20,28 @@ goog.require('npf.ui.stickyHead.Renderer');
 npf.ui.StickyHead = function(opt_renderer, opt_domHelper) {
 	goog.base(this, opt_renderer ||
 		npf.ui.stickyHead.Renderer.getInstance(), opt_domHelper);
+
+	/**
+	 * @private {npf.ui.stickyHead.Body}
+	 */
+	this.body_ = null;
+
+	/**
+	 * @private {npf.ui.stickyHead.Head}
+	 */
+	this.head_ = null;
+
+	/**
+	 * @private {npf.ui.stickyHead.Head}
+	 */
+	this.stickyHead_ = null;
+
+	/**
+	 * @private {Element}
+	 */
+	this.viewportElement_ = null;
 };
 goog.inherits(npf.ui.StickyHead, npf.ui.RenderedComponent);
-
-
-/**
- * @private {npf.ui.stickyHead.Body}
- */
-npf.ui.StickyHead.prototype.body_ = null;
-
-/**
- * @private {npf.ui.stickyHead.Head}
- */
-npf.ui.StickyHead.prototype.head_ = null;
-
-/**
- * @private {npf.ui.stickyHead.Head}
- */
-npf.ui.StickyHead.prototype.stickyHead_ = null;
-
-/**
- * @private {Element}
- */
-npf.ui.StickyHead.prototype.viewportElement_ = null;
 
 
 /** @inheritDoc */

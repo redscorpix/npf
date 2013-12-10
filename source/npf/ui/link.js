@@ -17,30 +17,23 @@ goog.require('npf.ui.Component');
 npf.ui.Link = function(caption, opt_url) {
   goog.base(this);
 
+  /**
+   * @type {Object|string|Array|NodeList}
+   * @private
+   */
   this.caption_ = caption;
 
-  if (opt_url) {
-    this.uri_ = new goog.Uri(opt_url);
-  }
+  /**
+   * @private {Array.<string>}
+   */
+  this.cssClass_ = null;
+
+  /**
+   * @private {goog.Uri}
+   */
+  this.uri_ = opt_url ? new goog.Uri(opt_url) : null;
 };
 goog.inherits(npf.ui.Link, npf.ui.Component);
-
-
-/**
- * @type {Object|string|Array|NodeList}
- * @private
- */
-npf.ui.Link.prototype.caption_;
-
-/**
- * @private {Array.<string>}
- */
-npf.ui.Link.prototype.cssClass_ = null;
-
-/**
- * @private {goog.Uri}
- */
-npf.ui.Link.prototype.uri_ = null;
 
 
 /** @inheritDoc */

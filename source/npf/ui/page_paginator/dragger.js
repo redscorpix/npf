@@ -15,19 +15,18 @@ goog.require('goog.fx.Dragger');
  */
 npf.ui.pagePaginator.Dragger = function(target, opt_handle, opt_limits) {
   goog.base(this, target, opt_handle, opt_limits);
+
+  /**
+   * @private {boolean}
+   */
+  this.isLeftLimit_ = false;
+
+  /**
+   * @private {boolean}
+   */
+  this.isRightLimit_ = false;
 };
 goog.inherits(npf.ui.pagePaginator.Dragger, goog.fx.Dragger);
-
-
-/**
- * @private {boolean}
- */
-npf.ui.pagePaginator.Dragger.prototype.isLeftLimit_ = false;
-
-/**
- * @private {boolean}
- */
-npf.ui.pagePaginator.Dragger.prototype.isRightLimit_ = false;
 
 
 /** @inheritDoc */

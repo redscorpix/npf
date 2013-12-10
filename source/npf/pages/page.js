@@ -20,11 +20,31 @@ goog.require('npf.pages.Request');
 npf.pages.Page = function(manager, type) {
   goog.base(this);
 
+  /**
+   * @private {npf.pages.Manager}
+   */
   this.manager_ = manager;
+
+  /**
+   * @private {string}
+   */
   this.type_ = type;
 
+  /**
+   * @private {goog.events.EventHandler}
+   */
   this.handler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.handler_);
+
+  /**
+   * @private {boolean}
+   */
+  this.loaded_ = false;
+
+  /**
+   * @private {string}
+   */
+  this.title_ = '';
 };
 goog.inherits(npf.pages.Page, goog.events.EventTarget);
 
@@ -40,31 +60,6 @@ npf.pages.Page.EventType = {
 
   TITLE_CHANGE: goog.events.getUniqueId('titleChange')
 };
-
-/**
- * @private {goog.events.EventHandler}
- */
-npf.pages.Page.prototype.handler_;
-
-/**
- * @private {boolean}
- */
-npf.pages.Page.prototype.loaded_ = false;
-
-/**
- * @private {npf.pages.Manager}
- */
-npf.pages.Page.prototype.manager_;
-
-/**
- * @private {string}
- */
-npf.pages.Page.prototype.title_ = '';
-
-/**
- * @private {string}
- */
-npf.pages.Page.prototype.type_;
 
 
 /** @inheritDoc */
@@ -217,7 +212,7 @@ npf.pages.Page.prototype.getUsingHelperTypes = function() {
 };
 
 /**
- * @return {Object.<string,goog.Disposable>}
+ * @return {Object.<goog.Disposable>}
  */
 npf.pages.Page.prototype.getHelpersMap = function() {
   return this.getManager().getHelpersMap();
@@ -306,8 +301,8 @@ npf.pages.Page.prototype.getRouteNameAt = function(index) {
 
 /**
  * @param {string|npf.router.Route} routeName
- * @param {Object.<string,number|string>=} opt_optionsMap
- * @param {string|goog.Uri.QueryData|Object.<string,string>=} opt_query
+ * @param {Object.<number|string>=} opt_optionsMap
+ * @param {string|goog.Uri.QueryData|Object.<string>=} opt_query
  * @param {boolean=} opt_replace
  */
 npf.pages.Page.prototype.navigateRoute = function(routeName, opt_optionsMap,

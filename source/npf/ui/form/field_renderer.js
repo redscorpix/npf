@@ -3,7 +3,7 @@ goog.provide('npf.ui.form.FieldRenderer');
 goog.require('goog.array');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
-goog.require('goog.dom.classes');
+goog.require('goog.dom.classlist');
 goog.require('goog.dom.forms');
 goog.require('goog.style');
 goog.require('goog.ui.Component.State');
@@ -245,7 +245,7 @@ npf.ui.form.FieldRenderer.prototype.setError = function(component, error) {
   var element = component.getElement();
 
   if (element) {
-    goog.dom.classes.enable(element, this.getErrorCssClass(), error);
+    goog.dom.classlist.enable(element, this.getErrorCssClass(), error);
   }
 };
 

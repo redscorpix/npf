@@ -19,7 +19,16 @@ npf.ui.ProgressBar = function(opt_renderer, opt_domHelper) {
   goog.base(this, opt_renderer ||
     npf.ui.progressBar.Renderer.getInstance(), opt_domHelper);
 
-  this.rangeModel_ = new goog.ui.RangeModel;
+  /**
+   * @private {npf.ui.ProgressBar.Orientation}
+   */
+  this.orientation_ = npf.ui.ProgressBar.Orientation.HORIZONTAL;
+
+  /**
+   * The underlying data model for the progress bar.
+   * @private {goog.ui.RangeModel}
+   */
+  this.rangeModel_ = new goog.ui.RangeModel();
   this.registerDisposable(this.rangeModel_);
   this.rangeModel_.listen(
     goog.ui.Component.EventType.CHANGE, this.handleChange_, false, this);
@@ -35,19 +44,6 @@ npf.ui.ProgressBar.Orientation = {
   HORIZONTAL: 'horizontal',
   VERTICAL: 'vertical'
 };
-
-
-/**
- * @private {npf.ui.ProgressBar.Orientation}
- */
-npf.ui.ProgressBar.prototype.orientation_ =
-  npf.ui.ProgressBar.Orientation.HORIZONTAL;
-
-/**
- * The underlying data model for the progress bar.
- * @private {goog.ui.RangeModel}
- */
-npf.ui.ProgressBar.prototype.rangeModel_;
 
 
 /** @inheritDoc */

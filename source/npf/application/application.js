@@ -15,29 +15,24 @@ goog.require('npf.application.Settings');
 npf.Application = function(opt_settings, opt_domHelper) {
   goog.base(this);
 
+  /**
+   * @private {goog.dom.DomHelper}
+   */
   this.domHelper_ = opt_domHelper || goog.dom.getDomHelper();
 
+  /**
+   * @private {boolean}
+   */
+  this.inited_ = false;
+
+  /**
+   * @private {npf.application.Settings}
+   */
   this.settings_ = opt_settings || new npf.application.Settings();
   this.registerDisposable(this.settings_);
   this.settings_.setParentEventTarget(this);
 };
 goog.inherits(npf.Application, goog.events.EventTarget);
-
-
-/**
- * @private {goog.dom.DomHelper}
- */
-npf.Application.prototype.domHelper_;
-
-/**
- * @private {boolean}
- */
-npf.Application.prototype.inited_ = false;
-
-/**
- * @private {npf.application.Settings}
- */
-npf.Application.prototype.settings_;
 
 
 /** @inheritDoc */
