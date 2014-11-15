@@ -2,7 +2,7 @@ goog.provide('npf.ui.pagePaginator.Renderer');
 
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
-goog.require('goog.dom.classes');
+goog.require('goog.dom.classlist');
 goog.require('goog.style');
 goog.require('npf.ui.Renderer');
 
@@ -182,7 +182,7 @@ npf.ui.pagePaginator.Renderer.prototype.setPrevEnabled = function(component,
   var prevElement = component.getPrevElement();
 
   if (prevElement) {
-    goog.dom.classes.enable(prevElement, this.getPrevDisabledCssClass(),
+    goog.dom.classlist.enable(prevElement, this.getPrevDisabledCssClass(),
       !enable);
   }
 };
@@ -197,7 +197,7 @@ npf.ui.pagePaginator.Renderer.prototype.setNextEnabled = function(component,
   var nextElement = component.getNextElement();
 
   if (nextElement) {
-    goog.dom.classes.enable(nextElement, this.getNextDisabledCssClass(),
+    goog.dom.classlist.enable(nextElement, this.getNextDisabledCssClass(),
       !enable);
   }
 };
@@ -303,11 +303,11 @@ npf.ui.pagePaginator.Renderer.prototype.setSelected = function(component, index,
   var element = component.getElement();
 
   if (element) {
-    /** @type {{length:number}} */
+    /** @type {{length:number}?} */
     var indicatorElements = this.getPageIndicatorElements(element);
 
-    if (indicatorElements[index]) {
-      goog.dom.classes.enable(indicatorElements[index],
+    if (indicatorElements && indicatorElements[index]) {
+      goog.dom.classlist.enable(indicatorElements[index],
         this.getSelectedPageIndicatorCssClass(), select);
     }
   }

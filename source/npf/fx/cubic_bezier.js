@@ -52,8 +52,9 @@ npf.fx.CubicBezier = function(t, p1x, p1y, p2x, p2y, duration) {
     return (3.0 * ax * t + 2.0 * bx) * t + cx;
   }
 
-  // The epsilon value to pass given that the animation is going to run over |dur| seconds. The longer the
-  // animation, the more precision is needed in the timing function result to avoid ugly discontinuities.
+  // The epsilon value to pass given that the animation is going to run over
+  // |dur| seconds. The longer the animation, the more precision is needed
+  // in the timing function result to avoid ugly discontinuities.
 
   /**
    * @param {number} duration
@@ -142,7 +143,8 @@ npf.fx.CubicBezier = function(t, p1x, p1y, p2x, p2y, duration) {
     return t2; // Failure.
   }
 
-  // Calculate the polynomial coefficients, implicit first and last control points are (0,0) and (1,1).
+  // Calculate the polynomial coefficients, implicit first and last control
+  // points are (0,0) and (1,1).
   cx = 3.0 * p1x;
   bx = 3.0 * (p2x - p1x) - cx;
   ax = 1.0 - cx - bx;
@@ -150,6 +152,7 @@ npf.fx.CubicBezier = function(t, p1x, p1y, p2x, p2y, duration) {
   by = 3.0 * (p2y - p1y) - cy;
   ay = 1.0 - cy - by;
 
-  // Convert from input time to parametric value in curve, then from that to output time.
+  // Convert from input time to parametric value in curve, then from that
+  // to output time.
   return solve(t, solveEpsilon(duration));
 };

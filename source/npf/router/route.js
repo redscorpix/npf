@@ -4,13 +4,13 @@ goog.require('goog.Uri');
 goog.require('goog.Uri.QueryData');
 goog.require('goog.array');
 goog.require('goog.object');
-goog.require('goog.string');
 goog.require('npf.string');
 
 
 /**
  * @param {string} fragment
- * @param {Object.<string,function(string):boolean|Array.<function(string):boolean>>=} opt_validatorsMap
+ * @param {Object.<function(string):boolean|Array.<function(string):boolean>>=}
+ *                                                             opt_validatorsMap
  *
  * @example
  * new npf.router.Route('/user/{id:int}', {
@@ -25,23 +25,25 @@ goog.require('npf.string');
 npf.router.Route = function(fragment, opt_validatorsMap) {
 
   /**
-   * @type {!Object.<string,Array.<function(string):boolean>>}
+   * @type {!Object.<Array.<function(string):boolean>>}
    * @private
    */
-  this._validatorsMap = {};
+  this.validatorsMap_ = {};
 
   if (opt_validatorsMap) {
-    goog.object.forEach(opt_validatorsMap, function(validator, name) {
+    /** @type {function(this:npf.router.Route,(function(string):boolean|Array.<function(string):boolean>),string)} */
+    var addValidators = function(validator, name) {
+      /** @type {Array.<function(string):boolean>} */
       var validators = goog.isArray(validator) ? validator : [validator];
-      this._validatorsMap[name] = validators;
-    },  this);
+      this.validatorsMap_[name] = validators;
+    };
+    goog.object.forEach(opt_validatorsMap, addValidators,  this);
   }
 
   /**
-   * @type {!Array.<string>}
-   * @private
+   * @private {!Array.<string>}
    */
-  this._optionNames = [];
+  this.optionNames_ = [];
 
   /** @type {string} */
   var replacedFragment = fragment;
@@ -71,7 +73,7 @@ npf.router.Route = function(fragment, opt_validatorsMap) {
         npf.router.Route.FRAGMENT_REPLACE_REGEX, '(\\w+)');
     }
 
-    this._optionNames.push(name);
+    this.optionNames_.push(name);
 
     var regExp = new RegExp('\\{(' + name +
       ')(?:\\:(\\w+)(?:\\(([\\w\\,]+)\\))?)?\\}');
@@ -79,30 +81,27 @@ npf.router.Route = function(fragment, opt_validatorsMap) {
   }
 
   /**
-   * @type {RegExp}
-   * @private
+   * @private {RegExp}
    */
-  this._regex = new RegExp('^' + replacedFragment + '$');
+  this.regex_ = new RegExp('^' + replacedFragment + '$');
 
   /**
-   * @type {string}
-   * @private
+   * @private {string}
    */
-  this._generateFragment = generateFragment;
+  this.generateFragment_ = generateFragment;
 };
 
 
 /**
- * @type {RegExp}
- * @const
+ * @const {RegExp}
  */
 npf.router.Route.MATCH_REGEX = /\{(\w+)(?:\:(\w+)(?:\(([\w\,]+)\))?)?\}/;
 
 /**
- * @type {RegExp}
- * @const
+ * @const {RegExp}
  */
 npf.router.Route.FRAGMENT_REPLACE_REGEX = /\{[\w\:\,\(\)]+\}/;
+
 
 /**
  * @param {string} name
@@ -122,24 +121,24 @@ npf.router.Route.prototype.addRangeValidator_ = function(name, args) {
       var min = Math.min(from, to);
       var max = Math.max(from, to);
 
-      validator = function(value) {
+      validator = /** @type {function(string):boolean} */ (function(value) {
         var intValue = parseInt(value, 10);
 
         return min <= intValue && intValue <= max;
-      };
+      });
     } else if (goog.isNumber(from)) {
-      validator = function(value) {
+      validator = /** @type {function(string):boolean} */ (function(value) {
         return from <= parseInt(value, 10);
-      };
+      });
     } else if (goog.isNumber(to)) {
-      validator = function(value) {
+      validator = /** @type {function(string):boolean} */ (function(value) {
         return to >= parseInt(value, 10);
-      };
+      });
     }
   }
 
   if (validator) {
-    this._validatorsMap[name].push(validator);
+    this.validatorsMap_[name].push(validator);
   }
 };
 
@@ -153,7 +152,7 @@ npf.router.Route.prototype.check = function(token) {
 
 /**
  * @param {string|goog.Uri} token
- * @return {Object.<string,string>}
+ * @return {Object.<string>}
  */
 npf.router.Route.prototype.getOptions = function(token) {
   var uri = goog.Uri.parse(token);
@@ -163,12 +162,12 @@ npf.router.Route.prototype.getOptions = function(token) {
 
 /**
  * @param {string} path
- * @return {Object.<string,string>}
+ * @return {Object.<string>}
  * @protected
  */
 npf.router.Route.prototype.getOptionsInternal = function(path) {
   /** @type {Array.<string>} */
-  var values = this._regex.exec(path);
+  var values = this.regex_.exec(path);
   /** @type {Object.<string>} */
   var valuesMap = null;
 
@@ -176,15 +175,15 @@ npf.router.Route.prototype.getOptionsInternal = function(path) {
     valuesMap = {};
 
     /** @type {number} */
-    var count = Math.min(values.length - 1, this._optionNames.length);
+    var count = Math.min(values.length - 1, this.optionNames_.length);
 
     for (var i = 0; i < count; i++) {
-      var key = this._optionNames[i];
+      var key = this.optionNames_[i];
       var value = values[i + 1];
       var match = true;
 
-      if (this._validatorsMap[key]) {
-        match = goog.array.every(this._validatorsMap[key], function(validator) {
+      if (this.validatorsMap_[key]) {
+        match = goog.array.every(this.validatorsMap_[key], function(validator) {
           return validator(value);
         }, this);
       }
@@ -202,8 +201,8 @@ npf.router.Route.prototype.getOptionsInternal = function(path) {
 };
 
 /**
- * @param {Object.<string,number|string>=} opt_optionsMap
- * @param {string|goog.Uri.QueryData|Object.<string,string>=} opt_query
+ * @param {Object.<number|string>=} opt_optionsMap
+ * @param {string|goog.Uri.QueryData|Object.<string>=} opt_query
  * @return {string}
  */
 npf.router.Route.prototype.getUrl = function(opt_optionsMap, opt_query) {
@@ -211,8 +210,8 @@ npf.router.Route.prototype.getUrl = function(opt_optionsMap, opt_query) {
 };
 
 /**
- * @param {Object.<string,number|string>=} opt_optionsMap
- * @param {string|goog.Uri.QueryData|Object.<string,string>=} opt_query
+ * @param {Object.<number|string>=} opt_optionsMap
+ * @param {string|goog.Uri.QueryData|Object.<string>=} opt_query
  * @return {string}
  */
 npf.router.Route.prototype.getToken = function(opt_optionsMap, opt_query) {
@@ -220,12 +219,12 @@ npf.router.Route.prototype.getToken = function(opt_optionsMap, opt_query) {
 };
 
 /**
- * @param {Object.<string,number|string>=} opt_optionsMap
- * @param {string|goog.Uri.QueryData|Object.<string,string>=} opt_query
+ * @param {Object.<number|string>=} opt_optionsMap
+ * @param {string|goog.Uri.QueryData|Object.<string>=} opt_query
  * @return {goog.Uri}
  */
 npf.router.Route.prototype.getUri = function(opt_optionsMap, opt_query) {
-  var fragment = npf.string.supplant(this._generateFragment, opt_optionsMap);
+  var fragment = npf.string.supplant(this.generateFragment_, opt_optionsMap);
   var uri = new goog.Uri(fragment);
 
   if (opt_query) {

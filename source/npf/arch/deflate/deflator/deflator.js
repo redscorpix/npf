@@ -11,221 +11,470 @@ goog.require('npf.arch.deflate.deflator.DeflateTreeDesc');
  */
 npf.arch.deflate.Deflator = function() {
 
+  /**
+   * @private {npf.arch.deflate.deflator.DeflateBuffer}
+   */
+  this.freeQueue_ = undefined;
+
+  /**
+   * @private {npf.arch.deflate.deflator.DeflateBuffer}
+   */
+  this.qhead_ = undefined;
+
+  /**
+   * @private {npf.arch.deflate.deflator.DeflateBuffer}
+   */
+  this.qtail_ = undefined;
+
+  /**
+   * @private {boolean}
+   */
+  this.initFlag_ = undefined;
+
+  /**
+   * @private {Array.<number>}
+   */
+  this.outBuf_ = null;
+
+  /**
+   * @private {number}
+   */
+  this.outcnt_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.outoff_ = undefined;
+
+  /**
+   * @private {boolean}
+   */
+  this.complete_ = undefined;
+
+  /**
+   * @private {Array.<number>}
+   */
+  this.window_ = undefined;
+
+  /**
+   * @private {Array.<number>}
+   */
+  this.dBuf_ = undefined;
+
+  /**
+   * @private {Array.<number>}
+   */
+  this.lBuf_ = undefined;
+
+  /**
+   * @private {Array.<number>}
+   */
+  this.prev_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.biBuf_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.biValid_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.blockStart_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.insH_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.hashHead_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.prevMatch_ = undefined;
+
+  /**
+   * @private {boolean}
+   */
+  this.matchAvailable_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.matchLength_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.prevLength_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.strStart_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.matchStart_ = undefined;
+
+  /**
+   * @private {boolean}
+   */
+  this.eofile_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.lookAhead_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.maxChainLength_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.maxLazyMatch_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.comprLevel_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.goodMatch_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.niceMatch_ = undefined;
+
+  /**
+   * @private {Array.<npf.arch.deflate.deflator.DeflateCt>}
+   */
+  this.dynLtree_ = null;
+
+  /**
+   * @private {Array.<npf.arch.deflate.deflator.DeflateCt>}
+   */
+  this.dynDtree_ = null;
+
+  /**
+   * @private {Array.<npf.arch.deflate.deflator.DeflateCt>}
+   */
+  this.staticLtree_ = null;
+
+  /**
+   * @private {Array.<npf.arch.deflate.deflator.DeflateCt>}
+   */
+  this.staticDtree_ = null;
+
+  /**
+   * @private {Array.<npf.arch.deflate.deflator.DeflateCt>}
+   */
+  this.blTree_ = null;
+
+  /**
+   * @private {npf.arch.deflate.deflator.DeflateTreeDesc}
+   */
+  this.lDesc_ = undefined;
+
+  /**
+   * @private {npf.arch.deflate.deflator.DeflateTreeDesc}
+   */
+  this.dDesc_ = undefined;
+
+  /**
+   * @private {npf.arch.deflate.deflator.DeflateTreeDesc}
+   */
+  this.blDesc_ = undefined;
+
+  /**
+   * @private {Array.<number>}
+   */
+  this.blCount_ = null;
+
+  /**
+   * @private {Array.<number>}
+   */
+  this.heap_ = null;
+
+  /**
+   * @private {number}
+   */
+  this.heapLen_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.heapMax_ = undefined;
+
+  /**
+   * @private {Array.<number>}
+   */
+  this.depth_ = null;
+
+  /**
+   * @private {Array.<number>}
+   */
+  this.lengthCode_ = null;
+
+  /**
+   * @private {Array.<number>}
+   */
+  this.distCode_ = null;
+
+  /**
+   * @private {Array.<number>}
+   */
+  this.baseLength_ = null;
+
+  /**
+   * @private {Array.<number>}
+   */
+  this.baseDist_ = null;
+
+  /**
+   * @private {Array.<number>}
+   */
+  this.flagBuf_ = null;
+
+  /**
+   * @private {number}
+   */
+  this.lastLit_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.lastDist_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.lastFlags_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.flags_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.flagBit_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.optLen_ = undefined;
+
+  /**
+   * @private {number}
+   */
+  this.staticLen_ = undefined;
+
+  /**
+   * @private {Array.<number>}
+   */
+  this.deflateData_ = null;
+
+  /**
+   * @private {number}
+   */
+  this.deflatePos_ = undefined;
 };
 
 
 /**
  * Sliding Window size.
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.WSIZE = 32768;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.STORED_BLOCK = 0;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.STATIC_TREES = 1;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.DYN_TREES = 2;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.DEFAULT_LEVEL = 6;
 
 /**
- * @type {boolean}
- * @const
+ * @const {boolean}
  */
 npf.arch.deflate.Deflator.FULL_SEARCH = false;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.OUTBUFSIZ = 1024 * 8;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.WINDOW_SIZE = 2 * npf.arch.deflate.Deflator.WSIZE;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.MIN_MATCH = 3;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.MAX_MATCH = 258;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.BITS = 16;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.LIT_BUFSIZE = 0x2000;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.HASH_BITS = 15;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.DIST_BUFSIZE = npf.arch.deflate.Deflator.LIT_BUFSIZE;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.HASH_SIZE = 1 << npf.arch.deflate.Deflator.HASH_BITS;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.HASH_MASK = npf.arch.deflate.Deflator.HASH_SIZE - 1;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.WMASK = npf.arch.deflate.Deflator.WSIZE - 1;
 
 /**
  * Tail of hash chains
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.NIL = 0;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.TOO_FAR = 4096;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.MIN_LOOKAHEAD =
   npf.arch.deflate.Deflator.MAX_MATCH + npf.arch.deflate.Deflator.MIN_MATCH + 1;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.MAX_DIST =
   npf.arch.deflate.Deflator.WSIZE - npf.arch.deflate.Deflator.MIN_LOOKAHEAD;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.SMALLEST = 1;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.MAX_BITS = 15;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.MAX_BL_BITS = 7;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.LENGTH_CODES = 29;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.LITERALS = 256;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.END_BLOCK = 256;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.L_CODES =
   npf.arch.deflate.Deflator.LITERALS + 1 + npf.arch.deflate.Deflator.LENGTH_CODES;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.D_CODES = 30;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.BL_CODES = 19;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.REP_3_6 = 16;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.REPZ_3_10 = 17;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.REPZ_11_138 = 18;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.HEAP_SIZE = 2 * npf.arch.deflate.Deflator.L_CODES + 1;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.H_SHIFT = parseInt(
   (npf.arch.deflate.Deflator.HASH_BITS + npf.arch.deflate.Deflator.MIN_MATCH - 1) /
@@ -234,14 +483,12 @@ npf.arch.deflate.Deflator.H_SHIFT = parseInt(
 
 /**
  * Bit size of this.biBuf_.
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.Deflator.BUFFER_SIZE = 16;
 
 /**
- * @type {!Array.<number>}
- * @private
+ * @private {!Array.<number>}
  */
 npf.arch.deflate.Deflator.extraLbits_ = [
   0, 0, 0, 0, 0, 0, 0, 0,
@@ -254,8 +501,7 @@ npf.arch.deflate.Deflator.extraLbits_ = [
 ];
 
 /**
- * @type {!Array.<number>}
- * @private
+ * @private {!Array.<number>}
  */
 npf.arch.deflate.Deflator.extraDbits_ = [
   0, 0, 0, 0,
@@ -265,22 +511,19 @@ npf.arch.deflate.Deflator.extraDbits_ = [
 ];
 
 /**
- * @type {!Array.<number>}
- * @private
+ * @private {!Array.<number>}
  */
 npf.arch.deflate.Deflator.extraBlbits_ = [
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 7];
 
 /**
- * @type {!Array.<number>}
- * @private
+ * @private {!Array.<number>}
  */
 npf.arch.deflate.Deflator.blOrder_ = [
   16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15];
 
 /**
- * @type {!Array.<npf.arch.deflate.deflator.DeflateConfiguration>}
- * @private
+ * @private {!Array.<npf.arch.deflate.deflator.DeflateConfiguration>}
  */
 npf.arch.deflate.Deflator.configurationTable_ = [
   new npf.arch.deflate.deflator.DeflateConfiguration(0, 0, 0, 0),
@@ -294,349 +537,6 @@ npf.arch.deflate.Deflator.configurationTable_ = [
   new npf.arch.deflate.deflator.DeflateConfiguration(32, 128, 258, 1024),
   new npf.arch.deflate.deflator.DeflateConfiguration(32, 258, 258, 4096)
 ];
-
-
-/**
- * @type {npf.arch.deflate.deflator.DeflateBuffer}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.freeQueue_;
-
-/**
- * @type {npf.arch.deflate.deflator.DeflateBuffer}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.qhead_;
-
-/**
- * @type {npf.arch.deflate.deflator.DeflateBuffer}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.qtail_;
-
-/**
- * @type {boolean}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.initFlag_;
-
-/**
- * @type {Array.<number>}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.outBuf_ = null;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.outcnt_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.outoff_;
-
-/**
- * @type {boolean}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.complete_;
-
-/**
- * @type {Array.<number>}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.window_;
-
-/**
- * @type {Array.<number>}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.dBuf_;
-
-/**
- * @type {Array.<number>}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.lBuf_;
-
-/**
- * @type {Array.<number>}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.prev_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.biBuf_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.biValid_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.blockStart_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.insH_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.hashHead_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.prevMatch_;
-
-/**
- * @type {boolean}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.matchAvailable_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.matchLength_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.prevLength_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.strStart_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.matchStart_;
-
-/**
- * @type {boolean}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.eofile_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.lookAhead_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.maxChainLength_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.maxLazyMatch_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.comprLevel_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.goodMatch_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.niceMatch_;
-
-/**
- * @type {Array.<npf.arch.deflate.deflator.DeflateCt>}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.dynLtree_;
-
-/**
- * @type {Array.<npf.arch.deflate.deflator.DeflateCt>}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.dynDtree_;
-
-/**
- * @type {Array.<npf.arch.deflate.deflator.DeflateCt>}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.staticLtree_;
-
-/**
- * @type {Array.<npf.arch.deflate.deflator.DeflateCt>}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.staticDtree_;
-
-/**
- * @type {Array.<npf.arch.deflate.deflator.DeflateCt>}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.blTree_;
-
-/**
- * @type {npf.arch.deflate.deflator.DeflateTreeDesc}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.lDesc_;
-
-/**
- * @type {npf.arch.deflate.deflator.DeflateTreeDesc}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.dDesc_;
-
-/**
- * @type {npf.arch.deflate.deflator.DeflateTreeDesc}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.blDesc_;
-
-/**
- * @type {Array.<number>}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.blCount_;
-
-/**
- * @type {Array.<number>}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.heap_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.heapLen_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.heapMax_;
-
-/**
- * @type {Array.<number>}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.depth_;
-
-/**
- * @type {Array.<number>}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.lengthCode_;
-
-/**
- * @type {Array.<number>}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.distCode_;
-
-/**
- * @type {Array.<number>}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.baseLength_;
-
-/**
- * @type {Array.<number>}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.baseDist_;
-
-/**
- * @type {Array.<number>}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.flagBuf_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.lastLit_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.lastDist_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.lastFlags_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.flags_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.flagBit_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.optLen_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.staticLen_;
-
-/**
- * @type {Array.<number>}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.deflateData_;
-
-/**
- * @type {number}
- * @private
- */
-npf.arch.deflate.Deflator.prototype.deflatePos_;
 
 
 /**

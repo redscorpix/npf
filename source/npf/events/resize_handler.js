@@ -3,9 +3,11 @@ goog.provide('npf.events.ResizeHandler.EventType');
 
 goog.require('goog.dom');
 goog.require('goog.dom.FontSizeMonitor');
+goog.require('goog.dom.FontSizeMonitor.EventType');
 goog.require('goog.events');
 goog.require('goog.events.EventHandler');
 goog.require('goog.events.EventTarget');
+goog.require('goog.events.EventType');
 
 
 /**
@@ -18,17 +20,26 @@ goog.require('goog.events.EventTarget');
 npf.events.ResizeHandler = function(opt_domHelper) {
   goog.base(this);
 
+  /**
+   * @private {goog.dom.DomHelper}
+   */
   this.domHelper_ = opt_domHelper || goog.dom.getDomHelper();
 
+  /**
+   * @private {goog.events.EventHandler}
+   */
   this.eventHandler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.eventHandler_);
 
+  /**
+   * @private {goog.dom.FontSizeMonitor}
+   */
   this.fontSizeMonitor_ = new goog.dom.FontSizeMonitor(this.domHelper_);
   this.registerDisposable(this.fontSizeMonitor_);
 
-  this.eventHandler_
-    .listen(this.domHelper_.getWindow(), goog.events.EventType.RESIZE, this)
-    .listen(this.fontSizeMonitor_, goog.dom.FontSizeMonitor.EventType.CHANGE,
+  this.eventHandler_.
+    listen(this.domHelper_.getWindow(), goog.events.EventType.RESIZE, this).
+    listen(this.fontSizeMonitor_, goog.dom.FontSizeMonitor.EventType.CHANGE,
       this);
 };
 goog.inherits(npf.events.ResizeHandler, goog.events.EventTarget);
@@ -41,32 +52,14 @@ npf.events.ResizeHandler.EventType = {
   RESIZE: goog.events.getUniqueId('resize')
 };
 
-/**
- * @type {goog.dom.DomHelper}
- * @private
- */
-npf.events.ResizeHandler.prototype.domHelper_;
-
-/**
- * @type {goog.dom.FontSizeMonitor}
- * @private
- */
-npf.events.ResizeHandler.prototype.fontSizeMonitor_;
-
-/**
- * @type {goog.events.EventHandler}
- * @private
- */
-npf.events.ResizeHandler.prototype.eventHandler_;
-
 
 /** @inheritDoc */
 npf.events.ResizeHandler.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
   this.domHelper_ = null;
-  this.fontSizeMonitor_ = null;
   this.eventHandler_ = null;
+  this.fontSizeMonitor_ = null;
 };
 
 /**

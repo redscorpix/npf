@@ -6,6 +6,8 @@
   },
   "devDependencies": {
     "async": ">=0.1.22",
+    "closurebuilder": "git://github.com/redscorpix/node-closurebuilder.git",
+    "dive": "*",
     "optimist": ">= 0.3.5",
     "tasker": "git://github.com/redscorpix/tasker.git"
   },

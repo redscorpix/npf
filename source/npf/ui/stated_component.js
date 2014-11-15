@@ -5,6 +5,7 @@ goog.require('goog.events.EventType');
 goog.require('goog.events.KeyCodes');
 goog.require('goog.events.KeyHandler');
 goog.require('goog.events.KeyHandler.EventType');
+goog.require('goog.ui.Component');
 goog.require('goog.ui.Component.Error');
 goog.require('goog.ui.Component.EventType');
 goog.require('goog.ui.Component.State');
@@ -29,11 +30,10 @@ goog.require('npf.ui.StatedRenderer');
           events, and
  *    <li>default mouse and keyboard event handling.
  *  </ul>
- * This class has sufficient built-in functionality for most simple UI components.
- * All components dispatch SHOW, HIDE, ENTER, LEAVE, and ACTION events on show,
- * hide, mouseover, mouseout, and user action, respectively.  Additional states
- * are also supported.
- * for example usage.
+ * This class has sufficient built-in functionality for most simple UI
+ * components. All components dispatch SHOW, HIDE, ENTER, LEAVE, and ACTION
+ * events on show, hide, mouseover, mouseout, and user action, respectively.
+ * Additional states are also supported.
  * @param {npf.ui.StatedRenderer=} opt_renderer Renderer used to render or
  *     decorate the component; defaults to {@link npf.ui.StatedRenderer}.
  * @param {goog.dom.DomHelper=} opt_domHelper Optional DOM helper, used for
@@ -44,89 +44,80 @@ goog.require('npf.ui.StatedRenderer');
 npf.ui.StatedComponent = function(opt_renderer, opt_domHelper) {
   goog.base(this, opt_renderer || npf.ui.StatedRenderer.getInstance(),
     opt_domHelper);
+
+  /**
+   * Current component state; a bit mask of {@link goog.ui.Component.State}s.
+   * @private {number}
+   */
+  this.state_ = 0x00;
+
+  /**
+   * A bit mask of {@link goog.ui.Component.State}s this component supports.
+   * @private {number}
+   */
+  this.supportedStates_ = 0x00;
+
+  /**
+   * A bit mask of {@link goog.ui.Component.State}s for which this component
+   * provides default event handling.  For example, a component that handles
+   * the HOVER state automatically will highlight itself on mouseover, whereas
+   * a component that doesn't handle HOVER automatically will only dispatch
+   * ENTER and LEAVE events but not call {@link setHighlighted} on itself.
+   * By default, components provide default event handling for all states.
+   * Components hosted in containers (e.g. menu items in a menu, or buttons in a
+   * toolbar) will typically want to have their container manage their highlight
+   * state.  Selectable components managed by a selection model will also
+   * typically want their selection state to be managed by the model.
+   * @private {number}
+   */
+  this.autoStates_ = goog.ui.Component.State.ALL;
+
+  /**
+   * A bit mask of {@link goog.ui.Component.State}s for which this component
+   * dispatches state transition events. Because events are expensive, the
+   * default behavior is to not dispatch any state transition events at all.
+   * Use the {@link #setDispatchTransitionEvents} API to request transition
+   * events  as needed.  Subclasses may enable transition events by default.
+   * Components hosted in containers or managed by a selection model will
+   * typically want to dispatch transition events.
+   * @private {number}
+   */
+  this.statesWithTransitionEvents_ = 0x00;
+
+  /**
+   * Component visibility.
+   * @private {boolean}
+   */
+  this.visible_ = true;
+
+  /**
+   * Keyboard event handler.
+   * @private {goog.events.KeyHandler}
+   */
+  this.keyHandler_ = null;
+
+  /**
+   * Whether the component should listen for and handle mouse events; defaults to
+   * true.
+   * @private {boolean}
+   */
+  this.handleMouseEvents_ = true;
+
+
+  /**
+   * Whether the component allows text selection within its DOM.  Defaults to
+   * false.
+   * @private {boolean}
+   */
+  this.allowTextSelection_ = false;
+
+  /**
+   * The component's preferred ARIA role.
+   * @private {?goog.a11y.aria.Role}
+   */
+  this.preferredAriaRole_ = null;
 };
 goog.inherits(npf.ui.StatedComponent, npf.ui.RenderedComponent);
-
-
-/**
- * Current component state; a bit mask of {@link goog.ui.Component.State}s.
- * @type {number}
- * @private
- */
-npf.ui.StatedComponent.prototype.state_ = 0x00;
-
-/**
- * A bit mask of {@link goog.ui.Component.State}s this component supports.
- * @type {number}
- * @private
- */
-npf.ui.StatedComponent.prototype.supportedStates_ = 0x00;
-
-/**
- * A bit mask of {@link goog.ui.Component.State}s for which this component
- * provides default event handling.  For example, a component that handles
- * the HOVER state automatically will highlight itself on mouseover, whereas
- * a component that doesn't handle HOVER automatically will only dispatch
- * ENTER and LEAVE events but not call {@link setHighlighted} on itself.
- * By default, components provide default event handling for all states.
- * Components hosted in containers (e.g. menu items in a menu, or buttons in a
- * toolbar) will typically want to have their container manage their highlight
- * state.  Selectable components managed by a selection model will also typically
- * want their selection state to be managed by the model.
- * @type {number}
- * @private
- */
-npf.ui.StatedComponent.prototype.autoStates_ = goog.ui.Component.State.ALL;
-
-/**
- * A bit mask of {@link goog.ui.Component.State}s for which this component
- * dispatches state transition events. Because events are expensive, the
- * default behavior is to not dispatch any state transition events at all.
- * Use the {@link #setDispatchTransitionEvents} API to request transition
- * events  as needed.  Subclasses may enable transition events by default.
- * Components hosted in containers or managed by a selection model will typically
- * want to dispatch transition events.
- * @type {number}
- * @private
- */
-npf.ui.StatedComponent.prototype.statesWithTransitionEvents_ = 0x00;
-
-/**
- * Component visibility.
- * @type {boolean}
- * @private
- */
-npf.ui.StatedComponent.prototype.visible_ = true;
-
-/**
- * Keyboard event handler.
- * @type {goog.events.KeyHandler}
- * @private
- */
-npf.ui.StatedComponent.prototype.keyHandler_;
-
-/**
- * Whether the component should listen for and handle mouse events; defaults to
- * true.
- * @type {boolean}
- * @private
- */
-npf.ui.StatedComponent.prototype.handleMouseEvents_ = true;
-
-
-/**
- * Whether the component allows text selection within its DOM.  Defaults to false.
- * @type {boolean}
- * @private
- */
-npf.ui.StatedComponent.prototype.allowTextSelection_ = false;
-
-/**
- * The component's preferred ARIA role.
- * @type {?goog.a11y.aria.Role}
- * @private
- */
-npf.ui.StatedComponent.prototype.preferredAriaRole_ = null;
 
 
 /** @inheritDoc */
@@ -135,7 +126,7 @@ npf.ui.StatedComponent.prototype.createDom = function() {
 
   /** @type {Element} */
   var element = this.getElement();
-  var renderer = this.getRenderer();
+  var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
 
   // Initialize ARIA role.
   renderer.setAriaRole(element, this.getPreferredAriaRole());
@@ -166,7 +157,7 @@ npf.ui.StatedComponent.prototype.createDom = function() {
 npf.ui.StatedComponent.prototype.decorateInternal = function(element) {
   goog.base(this, 'decorateInternal', element);
 
-  var renderer = this.getRenderer();
+  var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
 
   // Initialize ARIA role.
   renderer.setAriaRole(element, this.getPreferredAriaRole());
@@ -177,16 +168,18 @@ npf.ui.StatedComponent.prototype.decorateInternal = function(element) {
   }
 
   // Initialize visibility based on the decorated element's styling.
-  this.visible_ = this.getRenderer().isElementShown(element);
+  this.visible_ = renderer.isElementShown(element);
 };
 
 /** @inheritDoc */
 npf.ui.StatedComponent.prototype.enterDocument = function() {
   goog.base(this, 'enterDocument');
 
+  var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
+
   // Call the renderer's initializeDom method to configure properties of the
   // component's DOM that can only be done once it's in the document.
-  this.getRenderer().initializeDom(this);
+  renderer.initializeDom(this);
 
   // Initialize event handling if at least one state other than DISABLED is
   // supported.
@@ -255,7 +248,9 @@ npf.ui.StatedComponent.prototype.setHandleMouseEvents = function(enable) {
  *     events.
  */
 npf.ui.StatedComponent.prototype.getKeyEventTarget = function() {
-  return this.getRenderer().getKeyEventTarget(this);
+  var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
+
+  return renderer.getKeyEventTarget(this);
 };
 
 
@@ -273,13 +268,14 @@ npf.ui.StatedComponent.prototype.getKeyHandler = function() {
 
 
 /**
- * Returns the component's preferred ARIA role. This can be used by a component to
- * override the role that would be assigned by the renderer.  This is useful in
- * cases where a different ARIA role is appropriate for a component because of the
- * context in which it's used.  E.g., a {@link goog.ui.MenuButton} added to a
- * {@link goog.ui.Select} should have an ARIA role of LISTBOX and not MENUITEM.
- * @return {?goog.a11y.aria.Role} This component's preferred ARIA role or null if
- *     no preferred ARIA role is set.
+ * Returns the component's preferred ARIA role. This can be used by a component
+ * to override the role that would be assigned by the renderer.  This is useful
+ * in cases where a different ARIA role is appropriate for a component because
+ * of the context in which it's used.  E.g., a {@link goog.ui.MenuButton} added
+ * to a {@link goog.ui.Select} should have an ARIA role of LISTBOX and not
+ * MENUITEM.
+ * @return {?goog.a11y.aria.Role} This component's preferred ARIA role or null
+ *    if no preferred ARIA role is set.
  */
 npf.ui.StatedComponent.prototype.getPreferredAriaRole = function() {
   return this.preferredAriaRole_;
@@ -287,8 +283,8 @@ npf.ui.StatedComponent.prototype.getPreferredAriaRole = function() {
 
 
 /**
- * Sets the component's preferred ARIA role. This can be used to override the role
- * that would be assigned by the renderer.  This is useful in cases where a
+ * Sets the component's preferred ARIA role. This can be used to override the
+ * role that would be assigned by the renderer.  This is useful in cases where a
  * different ARIA role is appropriate for a component because of the
  * context in which it's used.  E.g., a {@link goog.ui.MenuButton} added to a
  * {@link goog.ui.Select} should have an ARIA role of LISTBOX and not MENUITEM.
@@ -314,10 +310,12 @@ npf.ui.StatedComponent.prototype.enableMouseEventHandling_ = function(enable) {
 
   if (enable) {
     handler
-      .listen(hoverableElement, goog.events.EventType.MOUSEOVER, this.handleMouseOver)
+      .listen(hoverableElement, goog.events.EventType.MOUSEOVER,
+        this.handleMouseOver)
       .listen(element, goog.events.EventType.MOUSEDOWN, this.handleMouseDown)
       .listen(element, goog.events.EventType.MOUSEUP, this.handleMouseUp)
-      .listen(hoverableElement, goog.events.EventType.MOUSEOUT, this.handleMouseOut);
+      .listen(hoverableElement, goog.events.EventType.MOUSEOUT,
+        this.handleMouseOut);
 
     if (goog.userAgent.IE) {
       handler.listen(element, goog.events.EventType.DBLCLICK,
@@ -325,10 +323,12 @@ npf.ui.StatedComponent.prototype.enableMouseEventHandling_ = function(enable) {
     }
   } else {
     handler
-      .unlisten(hoverableElement, goog.events.EventType.MOUSEOVER, this.handleMouseOver)
+      .unlisten(hoverableElement, goog.events.EventType.MOUSEOVER,
+        this.handleMouseOver)
       .unlisten(element, goog.events.EventType.MOUSEDOWN, this.handleMouseDown)
       .unlisten(element, goog.events.EventType.MOUSEUP, this.handleMouseUp)
-      .unlisten(hoverableElement, goog.events.EventType.MOUSEOUT, this.handleMouseOut);
+      .unlisten(hoverableElement, goog.events.EventType.MOUSEOUT,
+        this.handleMouseOut);
 
     if (goog.userAgent.IE) {
       handler.unlisten(element, goog.events.EventType.DBLCLICK,
@@ -340,9 +340,9 @@ npf.ui.StatedComponent.prototype.enableMouseEventHandling_ = function(enable) {
 
 /**
  * Cleans up the component before its DOM is removed from the document, and
- * removes event handlers.  Overrides {@link npf.ui.RenderedComponent#exitDocument}
- * by making sure that components that are removed from the document aren't
- * focusable (i.e. have no tab index).
+ * removes event handlers.  Overrides
+ * {@link npf.ui.RenderedComponent#exitDocument} by making sure that components
+ * that are removed from the document aren't focusable (i.e. have no tab index).
  * @override
  */
 npf.ui.StatedComponent.prototype.exitDocument = function() {
@@ -353,7 +353,8 @@ npf.ui.StatedComponent.prototype.exitDocument = function() {
   }
 
   if (this.isVisible() && this.isEnabled()) {
-    this.getRenderer().setFocusable(this, false);
+    var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
+    renderer.setFocusable(this, false);
   }
 };
 
@@ -374,7 +375,8 @@ npf.ui.StatedComponent.prototype.setRightToLeft = function(rightToLeft) {
   var element = this.getElement();
 
   if (element) {
-    this.getRenderer().setRightToLeft(element, rightToLeft);
+    var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
+    renderer.setRightToLeft(element, rightToLeft);
   }
 };
 
@@ -402,7 +404,8 @@ npf.ui.StatedComponent.prototype.setAllowTextSelection = function(allow) {
   var element = this.getElement();
 
   if (element) {
-    this.getRenderer().setAllowTextSelection(element, allow);
+    var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
+    renderer.setAllowTextSelection(element, allow);
   }
 };
 
@@ -436,13 +439,14 @@ npf.ui.StatedComponent.prototype.setVisible = function(visible, opt_force) {
   if (opt_force || (this.visible_ != visible && this.dispatchEvent(visible ?
       goog.ui.Component.EventType.SHOW : goog.ui.Component.EventType.HIDE))) {
     var element = this.getElement();
+    var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
 
     if (element) {
-      this.getRenderer().setVisible(element, visible);
+      renderer.setVisible(element, visible);
     }
 
     if (this.isEnabled()) {
-      this.getRenderer().setFocusable(this, visible);
+      renderer.setFocusable(this, visible);
     }
 
     this.visible_ = visible;
@@ -481,7 +485,8 @@ npf.ui.StatedComponent.prototype.setEnabled = function(enable) {
       this.setHighlighted(false);
     }
     if (this.isVisible()) {
-      this.getRenderer().setFocusable(this, enable);
+      var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
+      renderer.setFocusable(this, enable);
     }
     this.setState(goog.ui.Component.State.DISABLED, !enable);
   }
@@ -658,8 +663,9 @@ npf.ui.StatedComponent.prototype.hasState = function(state) {
  */
 npf.ui.StatedComponent.prototype.setState = function(state, enable) {
   if (this.isSupportedState(state) && enable != this.hasState(state)) {
+    var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
     // Delegate actual styling to the renderer, since it is DOM-specific.
-    this.getRenderer().setState(this, state, enable);
+    renderer.setState(this, state, enable);
     this.state_ = enable ? this.state_ | state : this.state_ & ~state;
   }
 };
@@ -671,8 +677,10 @@ npf.ui.StatedComponent.prototype.setState = function(state, enable) {
  * update the component's styling, and doesn't reject unsupported states.
  * Called by renderers during element decoration.  Considered protected;
  * should only be used within this package and by subclasses.
+ *
+ * This should only be used by subclasses and its associated renderers.
+ *
  * @param {number} state Bit mask representing component state.
- * @protected
  */
 npf.ui.StatedComponent.prototype.setStateInternal = function(state) {
   this.state_ = state;
@@ -694,7 +702,8 @@ npf.ui.StatedComponent.prototype.isSupportedState = function(state) {
  * for a state while the component is in that state is an error.
  * @param {goog.ui.Component.State} state State to support or de-support.
  * @param {boolean} support Whether the component should support the state.
- * @throws {Error} If disabling support for a state the component is currently in.
+ * @throws {Error} If disabling support for a state the component is currently
+ *    in.
  */
 npf.ui.StatedComponent.prototype.setSupportedState = function(state, support) {
   if (this.isInDocument() && this.hasState(state) && !support) {
@@ -782,7 +791,8 @@ npf.ui.StatedComponent.prototype.setDispatchTransitionEvents = function(states,
  * subclasses.
  * @param {goog.ui.Component.State} state State to/from which the component is
  *     transitioning.
- * @param {boolean} enable Whether the component is entering or leaving the state.
+ * @param {boolean} enable Whether the component is entering or leaving the
+ *    state.
  * @return {boolean} Whether the state transition is allowed to proceed.
  * @protected
  */
@@ -803,9 +813,11 @@ npf.ui.StatedComponent.prototype.isTransitionAllowed = function(state, enable) {
  * @param {goog.events.BrowserEvent} e Mouse event to handle.
  */
 npf.ui.StatedComponent.prototype.handleMouseOver = function(e) {
+  var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
+
   // Ignore mouse moves between descendants.
   if (
-    !this.getRenderer().isMouseEventWithinElement(e, this.getHoverableElement()) &&
+    !renderer.isMouseEventWithinElement(e, this.getHoverableElement()) &&
     this.dispatchEvent(goog.ui.Component.EventType.ENTER) &&
     this.isEnabled() &&
     this.isAutoState(goog.ui.Component.State.HOVER)
@@ -823,8 +835,10 @@ npf.ui.StatedComponent.prototype.handleMouseOver = function(e) {
  * @param {goog.events.BrowserEvent} e Mouse event to handle.
  */
 npf.ui.StatedComponent.prototype.handleMouseOut = function(e) {
+  var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
+
   if (
-    !this.getRenderer().isMouseEventWithinElement(e, this.getHoverableElement()) &&
+    !renderer.isMouseEventWithinElement(e, this.getHoverableElement()) &&
     this.dispatchEvent(goog.ui.Component.EventType.LEAVE)
   ) {
     if (this.isAutoState(goog.ui.Component.State.ACTIVE)) {
@@ -850,7 +864,7 @@ npf.ui.StatedComponent.prototype.getHoverableElement = function() {
  * activates it.  If the component isn't configured for keyboard access,
  * prevents it from receiving keyboard focus.  Considered protected; should
  * only be used within this package andy by subclasses.
- * @param {goog.events.Event} e Mouse event to handle.
+ * @param {goog.events.BrowserEvent} e Mouse event to handle.
  */
 npf.ui.StatedComponent.prototype.handleMouseDown = function(e) {
   if (this.isEnabled()) {
@@ -866,7 +880,9 @@ npf.ui.StatedComponent.prototype.handleMouseDown = function(e) {
         this.setActive(true);
       }
 
-      if (this.getRenderer().isFocusable(this)) {
+      var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
+
+      if (renderer.isFocusable(this)) {
         this.getKeyEventTarget().focus();
       }
     }
@@ -884,7 +900,7 @@ npf.ui.StatedComponent.prototype.handleMouseDown = function(e) {
  * the component has previously been activated, performs its associated action
  * by calling {@link performActionInternal}, then deactivates it.  Considered
  * protected; should only be used within this package and by subclasses.
- * @param {goog.events.Event} e Mouse event to handle.
+ * @param {goog.events.BrowserEvent} e Mouse event to handle.
  */
 npf.ui.StatedComponent.prototype.handleMouseUp = function(e) {
   if (this.isEnabled()) {
@@ -911,7 +927,7 @@ npf.ui.StatedComponent.prototype.handleMouseUp = function(e) {
  * won't ever trigger the ACTIVE state.  This is roughly the same behaviour as
  * if this were a 'button' element with a listener on mouseup.  Considered
  * protected; should only be used within this package and by subclasses.
- * @param {goog.events.Event} e Mouse event to handle.
+ * @param {goog.events.BrowserEvent} e Mouse event to handle.
  */
 npf.ui.StatedComponent.prototype.handleDblClick = function(e) {
   if (this.isEnabled()) {
@@ -946,6 +962,7 @@ npf.ui.StatedComponent.prototype.performActionInternal = function(e) {
     this);
 
   if (e) {
+    /** @type {!Array.<string>} */
     var properties = [
       'altKey', 'ctrlKey', 'metaKey', 'shiftKey', 'platformModifierKey'
     ];

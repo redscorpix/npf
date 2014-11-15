@@ -2,20 +2,17 @@ goog.provide('npf.graphics.faceDetection.cascade');
 
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.graphics.faceDetection.cascade.COUNT = 16;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.graphics.faceDetection.cascade.WIDTH = 24;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.graphics.faceDetection.cascade.HEIGHT = 24;
 

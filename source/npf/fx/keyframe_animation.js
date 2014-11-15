@@ -34,9 +34,7 @@ npf.fx.KeyframeAnimation.prototype.disposeInternal = function() {
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.fromToOpacity = function(fromOpacity,
-                                                            toOpacity,
-                                                            opt_fromAcc,
-                                                            opt_toAcc) {
+    toOpacity, opt_fromAcc, opt_toAcc) {
   this.setOpacity(fromOpacity, 0, opt_fromAcc);
 
   return this.setOpacity(toOpacity, 100, opt_toAcc);
@@ -67,7 +65,7 @@ npf.fx.KeyframeAnimation.prototype.toOpacity = function(opacity, opt_acc) {
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.setOpacity = function(opacity, position,
-                                                         opt_acc) {
+    opt_acc) {
   this.getKeyframes().setOpacity(opacity, position, opt_acc);
 
   return this;
@@ -81,9 +79,7 @@ npf.fx.KeyframeAnimation.prototype.setOpacity = function(opacity, position,
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.fromToPosition = function(fromCoords,
-                                                             toCoords,
-                                                             opt_fromAcc,
-                                                             opt_toAcc) {
+    toCoords, opt_fromAcc, opt_toAcc) {
   this.setPosition(fromCoords, 0, opt_fromAcc);
 
   return this.setPosition(toCoords, 100, opt_toAcc);
@@ -114,7 +110,7 @@ npf.fx.KeyframeAnimation.prototype.toPosition = function(coords, opt_acc) {
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.setPosition = function(coords, position,
-                                                          opt_acc) {
+    opt_acc) {
   this.getKeyframes().setPosition(coords, position, opt_acc);
 
   return this;
@@ -128,8 +124,7 @@ npf.fx.KeyframeAnimation.prototype.setPosition = function(coords, position,
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.fromToLeft = function(fromLeft, toLeft,
-                                                         opt_fromAcc,
-                                                         opt_toAcc) {
+    opt_fromAcc, opt_toAcc) {
   this.setLeft(fromLeft, 0, opt_fromAcc);
 
   return this.setLeft(toLeft, 100, opt_toAcc);
@@ -173,8 +168,7 @@ npf.fx.KeyframeAnimation.prototype.setLeft = function(left, position, opt_acc) {
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.fromToTop = function(fromTop, toTop,
-                                                        opt_fromAcc,
-                                                        opt_toAcc) {
+    opt_fromAcc, opt_toAcc) {
   this.setTop(fromTop, 0, opt_fromAcc);
 
   return this.setTop(toTop, 100, opt_toAcc);
@@ -218,8 +212,7 @@ npf.fx.KeyframeAnimation.prototype.setTop = function(top, position, opt_acc) {
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.fromToRight = function(fromRight, toRight,
-                                                          opt_fromAcc,
-                                                          opt_toAcc) {
+    opt_fromAcc, opt_toAcc) {
   this.setRight(fromRight, 0, opt_fromAcc);
 
   return this.setRight(toRight, 100, opt_toAcc);
@@ -250,7 +243,7 @@ npf.fx.KeyframeAnimation.prototype.toRight = function(right, opt_acc) {
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.setRight = function(right, position,
-                                                       opt_acc) {
+    opt_acc) {
   this.getKeyframes().setRight(right, position, opt_acc);
 
   return this;
@@ -264,9 +257,7 @@ npf.fx.KeyframeAnimation.prototype.setRight = function(right, position,
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.fromToBottom = function(fromBottom,
-                                                           toBottom,
-                                                           opt_fromAcc,
-                                                           opt_toAcc) {
+    toBottom, opt_fromAcc, opt_toAcc) {
   this.setBottom(fromBottom, 0, opt_fromAcc);
 
   return this.setBottom(toBottom, 100, opt_toAcc);
@@ -297,7 +288,7 @@ npf.fx.KeyframeAnimation.prototype.toBottom = function(bottom, opt_acc) {
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.setBottom = function(bottom, position,
-                                                        opt_acc) {
+    opt_acc) {
   this.getKeyframes().setBottom(bottom, position, opt_acc);
 
   return this;
@@ -311,8 +302,7 @@ npf.fx.KeyframeAnimation.prototype.setBottom = function(bottom, position,
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.fromToSize = function(fromSize, toSize,
-                                                         opt_fromAcc,
-                                                         opt_toAcc) {
+    opt_fromAcc, opt_toAcc) {
   this.setSize(fromSize, 0, opt_fromAcc);
 
   return this.setSize(toSize, 100, opt_toAcc);
@@ -356,8 +346,7 @@ npf.fx.KeyframeAnimation.prototype.setSize = function(size, position, opt_acc) {
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.fromToWidth = function(fromWidth, toWidth,
-                                                          opt_fromAcc,
-                                                          opt_toAcc) {
+    opt_fromAcc, opt_toAcc) {
   this.setWidth(fromWidth, 0, opt_fromAcc);
 
   return this.setWidth(toWidth, 100, opt_toAcc);
@@ -388,7 +377,7 @@ npf.fx.KeyframeAnimation.prototype.toWidth = function(width, opt_acc) {
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.setWidth = function(width, position,
-                                                       opt_acc) {
+    opt_acc) {
   this.getKeyframes().setWidth(width, position, opt_acc);
 
   return this;
@@ -402,8 +391,7 @@ npf.fx.KeyframeAnimation.prototype.setWidth = function(width, position,
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.fromToHeight = function(fromHeight, toHeight,
-                                                           opt_fromAcc,
-                                                           opt_toAcc) {
+    opt_fromAcc, opt_toAcc) {
   this.setHeight(fromHeight, 0, opt_fromAcc);
 
   return this.setHeight(toHeight, 100, opt_toAcc);
@@ -434,7 +422,7 @@ npf.fx.KeyframeAnimation.prototype.toHeight = function(height, opt_acc) {
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.setHeight = function(height, position,
-                                                        opt_acc) {
+    opt_acc) {
   this.getKeyframes().setHeight(height, position, opt_acc);
 
   return this;
@@ -448,8 +436,7 @@ npf.fx.KeyframeAnimation.prototype.setHeight = function(height, position,
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.fromToColor = function(fromColor, toColor,
-                                                          opt_fromAcc,
-                                                          opt_toAcc) {
+    opt_fromAcc, opt_toAcc) {
   this.setColor(fromColor, 0, opt_fromAcc);
 
   return this.setColor(toColor, 100, opt_toAcc);
@@ -480,7 +467,7 @@ npf.fx.KeyframeAnimation.prototype.toColor = function(color, opt_acc) {
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.setColor = function(color, position,
-                                                       opt_acc) {
+    opt_acc) {
   this.getKeyframes().setColor(color, position, opt_acc);
 
   return this;
@@ -494,9 +481,7 @@ npf.fx.KeyframeAnimation.prototype.setColor = function(color, position,
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.fromToBgColor = function(fromBgColor,
-                                                            toBgColor,
-                                                            opt_fromAcc,
-                                                            opt_toAcc) {
+    toBgColor, opt_fromAcc, opt_toAcc) {
   this.setBgColor(fromBgColor, 0, opt_fromAcc);
 
   return this.setBgColor(toBgColor, 100, opt_toAcc);
@@ -527,7 +512,7 @@ npf.fx.KeyframeAnimation.prototype.toBgColor = function(bgColor, opt_acc) {
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.setBgColor = function(bgColor, position,
-                                                         opt_acc) {
+    opt_acc) {
   this.getKeyframes().setBgColor(bgColor, position, opt_acc);
 
   return this;
@@ -541,9 +526,7 @@ npf.fx.KeyframeAnimation.prototype.setBgColor = function(bgColor, position,
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.fromToTransform = function(fromTransform,
-                                                              toTransform,
-                                                              opt_fromAcc,
-                                                              opt_toAcc) {
+    toTransform, opt_fromAcc, opt_toAcc) {
   this.setTransform(fromTransform, 0, opt_fromAcc);
 
   return this.setTransform(toTransform, 100, opt_toAcc);
@@ -555,7 +538,7 @@ npf.fx.KeyframeAnimation.prototype.fromToTransform = function(fromTransform,
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.fromTransform = function(transform,
-                                                            opt_acc) {
+    opt_acc) {
   return this.setTransform(transform, 0, opt_acc);
 };
 
@@ -575,28 +558,28 @@ npf.fx.KeyframeAnimation.prototype.toTransform = function(transform, opt_acc) {
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.setTransform = function(transform, position,
-                                                           opt_acc) {
+    opt_acc) {
   this.getKeyframes().setTransform(transform, position, opt_acc);
 
   return this;
 };
 
 /**
- * @param {Object.<string,string|number>} fromRules
- * @param {Object.<string,string|number>} toRules
+ * @param {Object.<string|number>} fromRules
+ * @param {Object.<string|number>} toRules
  * @param {Array.<number>=} opt_fromAcc
  * @param {Array.<number>=} opt_toAcc
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.fromTo = function(fromRules, toRules,
-                                                     opt_fromAcc, opt_toAcc) {
+    opt_fromAcc, opt_toAcc) {
   this.from(fromRules, opt_fromAcc);
 
   return this.to(toRules, opt_toAcc);
 };
 
 /**
- * @param {Object.<string,string|number>} rules
+ * @param {Object.<string|number>} rules
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.KeyframeAnimation}
  */
@@ -605,7 +588,7 @@ npf.fx.KeyframeAnimation.prototype.from = function(rules, opt_acc) {
 };
 
 /**
- * @param {Object.<string,string|number>} rules
+ * @param {Object.<string|number>} rules
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.KeyframeAnimation}
  */
@@ -614,13 +597,13 @@ npf.fx.KeyframeAnimation.prototype.to = function(rules, opt_acc) {
 };
 
 /**
- * @param {Object.<string,string|number>} rules
+ * @param {Object.<string|number>} rules
  * @param {number} position from 0 to 100
  * @param {Array.<number>=} opt_acc
  * @return {!npf.fx.KeyframeAnimation}
  */
 npf.fx.KeyframeAnimation.prototype.insertKeyframe = function(rules, position,
-                                                             opt_acc) {
+    opt_acc) {
   this.getKeyframes().insertKeyframe(rules, position, opt_acc);
 
   return this;

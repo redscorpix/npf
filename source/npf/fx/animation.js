@@ -55,8 +55,8 @@ npf.fx.Animation.enabled = true;
  */
 npf.fx.Animation.getAcceleration = function(accel, duration) {
   return function(t) {
-    return npf.fx.CubicBezier(t, accel[0], accel[1], accel[2], accel[3],
-      duration);
+    return npf.fx.CubicBezier(
+      t, accel[0], accel[1], accel[2], accel[3], duration);
   };
 };
 
@@ -73,8 +73,14 @@ npf.fx.Animation.getCssAcceleration = function(accel) {
  * @param {number} now The current time.
  */
 npf.fx.Animation.prototype.cycle = function(now) {
-  /** @type {?number} */
-  var time =
-    npf.fx.Animation.enabled || now == this.startTime ? now: this.endTime;
+  /** @type {number?} */
+  var time;
+
+  if (npf.fx.Animation.enabled || now == this.startTime) {
+    time = now;
+  } else {
+    time = this.endTime;
+  }
+
   goog.base(this, 'cycle', time || 0);
 };

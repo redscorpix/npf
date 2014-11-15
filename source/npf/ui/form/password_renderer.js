@@ -17,12 +17,14 @@ goog.addSingletonGetter(npf.ui.form.PasswordRenderer);
 
 
 /**
- * @param {npf.ui.form.Password} component
- * @param {Element} element
- * @protected
+ * @type {string}
  */
-npf.ui.form.PasswordRenderer.prototype.appendFieldElement = function(component,
-                                                                     element) {
+npf.ui.form.PasswordRenderer.CSS_CLASS = goog.getCssName('npf-form-password');
+
+
+/** @inheritDoc */
+npf.ui.form.PasswordRenderer.prototype.appendContent = function(component,
+    element) {
   /** @type {!Element} */
   var valueElement = component.getDomHelper().createDom(
     goog.dom.TagName.INPUT, {
@@ -31,4 +33,11 @@ npf.ui.form.PasswordRenderer.prototype.appendFieldElement = function(component,
       'type': 'password'
     });
   goog.dom.appendChild(this.getContentElement(element), valueElement);
+};
+
+/**
+ * @return {string}
+ */
+npf.ui.form.PasswordRenderer.prototype.getFieldCssClass = function() {
+  return npf.ui.form.PasswordRenderer.CSS_CLASS;
 };

@@ -3,6 +3,7 @@ goog.provide('npfTransition');
 goog.require('npfTransition.AnimationParallelQueue');
 goog.require('npfTransition.AnimationQueue');
 goog.require('goog.debug.ErrorHandler');
+goog.require('goog.events.EventWrapper');
 goog.require('npf.fx.KeyframeAnimation');
 goog.require('npf.userAgent.support');
 goog.require('npfTransition.CssAnimation');
@@ -20,7 +21,7 @@ goog.require('npfTransition.SerialQueue');
  */
 npfTransition.createCssAnimation = function(element, time, opt_acc) {
 	var animation = new npfTransition.CssAnimation(element, time, opt_acc);
-	animation.addEventListener(goog.fx.Transition.EventType.END, function(evt) {
+	animation.listen(goog.fx.Transition.EventType.END, function(evt) {
 		setTimeout(function() {
 			animation.dispose();
 		}, 0);
@@ -37,7 +38,7 @@ npfTransition.createCssAnimation = function(element, time, opt_acc) {
  */
 npfTransition.createJsAnimation = function(element, time, opt_acc) {
 	var animation = new npfTransition.JsAnimation(element, time, opt_acc);
-	animation.addEventListener(goog.fx.Transition.EventType.END, function(evt) {
+	animation.listen(goog.fx.Transition.EventType.END, function(evt) {
 		setTimeout(function() {
 			animation.dispose();
 		}, 0);

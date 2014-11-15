@@ -36,9 +36,9 @@ npf.ui.scrollable.scrollBar.Horizontal.prototype.setContainer = function(
 
   if (oldContainer !== container) {
     this.setContainerInternal(null);
-    this.setListenedContainer(oldContainer, false);
 
     if (oldContainer) {
+      this.setListenedContainer(oldContainer, false);
       oldContainer.setHorizontalScrollBar(null);
     }
 
@@ -53,8 +53,8 @@ npf.ui.scrollable.scrollBar.Horizontal.prototype.setContainer = function(
 };
 
 /** @inheritDoc */
-npf.ui.scrollable.scrollBar.Horizontal.prototype.getValueFromCoordinate = function(
-    coordinate) {
+npf.ui.scrollable.scrollBar.Horizontal.prototype.getValueFromCoordinate =
+    function(coordinate) {
   return coordinate ? coordinate.x : 0;
 };
 

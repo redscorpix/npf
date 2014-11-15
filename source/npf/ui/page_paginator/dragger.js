@@ -1,5 +1,6 @@
 goog.provide('npf.ui.pagePaginator.Dragger');
 
+goog.require('goog.events.EventType');
 goog.require('goog.fx.Dragger');
 
 
@@ -14,21 +15,18 @@ goog.require('goog.fx.Dragger');
  */
 npf.ui.pagePaginator.Dragger = function(target, opt_handle, opt_limits) {
   goog.base(this, target, opt_handle, opt_limits);
+
+  /**
+   * @private {boolean}
+   */
+  this.isLeftLimit_ = false;
+
+  /**
+   * @private {boolean}
+   */
+  this.isRightLimit_ = false;
 };
 goog.inherits(npf.ui.pagePaginator.Dragger, goog.fx.Dragger);
-
-
-/**
- * @type {boolean}
- * @private
- */
-npf.ui.pagePaginator.Dragger.prototype.isLeftLimit_ = false;
-
-/**
- * @type {boolean}
- * @private
- */
-npf.ui.pagePaginator.Dragger.prototype.isRightLimit_ = false;
 
 
 /** @inheritDoc */
@@ -42,7 +40,7 @@ npf.ui.pagePaginator.Dragger.prototype.startDrag = function(e) {
 
 /** @inheritDoc */
 npf.ui.pagePaginator.Dragger.prototype.doDrag = function(e, x, y,
-                                                         dragFromScroll) {
+    dragFromScroll) {
   goog.base(this, 'doDrag', e, x, y, dragFromScroll);
 
   if (goog.events.EventType.TOUCHMOVE == e.type) {

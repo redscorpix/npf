@@ -3,7 +3,7 @@ goog.provide('npf.ui.progressBar.Renderer');
 goog.require('goog.a11y.aria');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
-goog.require('goog.dom.classes');
+goog.require('goog.dom.classlist');
 goog.require('goog.style');
 goog.require('npf.ui.Renderer');
 
@@ -32,13 +32,15 @@ npf.ui.progressBar.Renderer.prototype.getCssClass = function() {
 
 /** @inheritDoc */
 npf.ui.progressBar.Renderer.prototype.createDom = function(component) {
+  var progressBar = /** @type {npf.ui.ProgressBar} */ (component);
   /** @type {npf.ui.ProgressBar.Orientation} */
-  var orientation = component.getOrientation();
+  var orientation = progressBar.getOrientation();
   var element = /** @type {!Element} */ (
     goog.base(this, 'createDom', component));
-  goog.dom.classes.add(element, this.getOrientationCssClass(orientation));
+  goog.dom.classlist.add(element, this.getOrientationCssClass(orientation));
 
-  var thumbElement = this.createThumbElement(component);
+  /** @type {Element} */
+  var thumbElement = this.createThumbElement(progressBar);
   goog.dom.appendChild(element, thumbElement);
 
   // state live = polite will notify the user of updates,
@@ -53,15 +55,16 @@ npf.ui.progressBar.Renderer.prototype.createDom = function(component) {
 npf.ui.progressBar.Renderer.prototype.decorate = function(component, element) {
   element = goog.base(this, 'decorate', component, element);
 
+  var progressBar = /** @type {npf.ui.ProgressBar} */ (component);
   /** @type {npf.ui.ProgressBar.Orientation} */
-  var orientation = component.getOrientation();
-  goog.dom.classes.add(element, this.getOrientationCssClass(orientation));
+  var orientation = progressBar.getOrientation();
+  goog.dom.classlist.add(element, this.getOrientationCssClass(orientation));
 
   // find thumb
   var thumbElement = this.getThumbElement(element);
 
   if (!thumbElement) {
-    thumbElement = this.createThumbElement(component);
+    thumbElement = this.createThumbElement(progressBar);
     goog.dom.appendChild(element, thumbElement);
   }
 
@@ -123,12 +126,12 @@ npf.ui.progressBar.Renderer.prototype.updateUi = function(component) {
  * @param {npf.ui.ProgressBar} component
  * @param {number} value
  */
-npf.ui.progressBar.Renderer.prototype.setValue = function(component, value) {
+npf.ui.progressBar.Renderer.prototype.setMaximum = function(component, value) {
   /** @type {Element} */
   var element = component.getElement();
 
   if (element) {
-    goog.a11y.aria.setState(element, 'valuenow', value);
+    goog.a11y.aria.setState(element, 'valuemax', value);
   }
 };
 
@@ -146,42 +149,43 @@ npf.ui.progressBar.Renderer.prototype.setMinimum = function(component, value) {
 };
 
 /**
- * @param {npf.ui.ProgressBar} component
- * @param {number} value
- */
-npf.ui.progressBar.Renderer.prototype.setMaximum = function(component, value) {
-  /** @type {Element} */
-  var element = component.getElement();
-
-  if (element) {
-    goog.a11y.aria.setState(element, 'valuemax', value);
-  }
-};
-
-/**
  * @param {Element} element
  * @param {npf.ui.ProgressBar.Orientation} oldOrient
  * @param {npf.ui.ProgressBar.Orientation} newOrient
  */
 npf.ui.progressBar.Renderer.prototype.updateOrientation = function(element,
-                                                                   oldOrient,
-                                                                   newOrient) {
+    oldOrient, newOrient) {
   if (element) {
+    /** @type {string} */
     var oldCssClass = this.getOrientationCssClass(oldOrient);
+    /** @type {string} */
     var newCssClass = this.getOrientationCssClass(newOrient);
-    goog.dom.classes.swap(element, oldCssClass, newCssClass);
+    goog.dom.classlist.addRemove(element, oldCssClass, newCssClass);
+  }
+};
+
+/**
+ * @param {npf.ui.ProgressBar} component
+ * @param {number} value
+ */
+npf.ui.progressBar.Renderer.prototype.setValue = function(component, value) {
+  /** @type {Element} */
+  var element = component.getElement();
+
+  if (element) {
+    goog.a11y.aria.setState(element, 'valuenow', value);
   }
 };
 
 /**
  * This creates the thumb element.
- * @param {goog.ui.Component} component
+ * @param {npf.ui.ProgressBar} component
  * @return {!Element} The created thumb element.
  * @protected
  */
 npf.ui.progressBar.Renderer.prototype.createThumbElement = function(component) {
-  return component.getDomHelper().createDom(goog.dom.TagName.DIV,
-    this.getThumbCssClass());
+  return component.getDomHelper().createDom(
+    goog.dom.TagName.DIV, this.getThumbCssClass());
 };
 
 /**
@@ -203,7 +207,8 @@ npf.ui.progressBar.Renderer.prototype.getThumbCssClass = function() {
  * @param {npf.ui.ProgressBar.Orientation} orientation
  * @return {string}
  */
-npf.ui.progressBar.Renderer.prototype.getOrientationCssClass = function(orientation) {
+npf.ui.progressBar.Renderer.prototype.getOrientationCssClass = function(
+    orientation) {
   if (npf.ui.ProgressBar.Orientation.VERTICAL == orientation) {
     return goog.getCssName(this.getStructuralCssClass(), 'vertical');
   } else {

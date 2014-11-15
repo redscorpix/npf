@@ -7,21 +7,22 @@ goog.require('goog.object');
 
 
 /**
- * @param {HTMLCanvasElement|Image|HTMLImageElement} source Canvas or loaded image.
+ * @param {HTMLCanvasElement|Image|HTMLImageElement} source Canvas or loaded
+ *                                                          image.
  * @param {HTMLCanvasElement} destination
  * @constructor
  */
 npf.graphics.Effect = function(source, destination) {
 
   /**
-   * @type {Image|HTMLCanvasElement|HTMLImageElement}
-   */
-  this.source = source;
-
-  /**
    * @type {HTMLCanvasElement}
    */
   this.destination = destination;
+
+  /**
+   * @type {Image|HTMLCanvasElement|HTMLImageElement}
+   */
+  this.source = source;
 };
 
 
@@ -31,7 +32,7 @@ npf.graphics.Effect = function(source, destination) {
  * @return {!HTMLCanvasElement}
  */
 npf.graphics.Effect.createCanvasElement = function(opt_attrs, opt_domHelper) {
-  /** @type {!Object.<string,number|string>} */
+  /** @type {!Object.<number|string>} */
   var attrs = opt_attrs ? goog.object.clone(opt_attrs) : {};
   /** @type {!goog.dom.DomHelper} */
   var domHelper = opt_domHelper || goog.dom.getDomHelper();
@@ -81,18 +82,18 @@ npf.graphics.Effect.prototype.drawImage = function(source, destination,
     }
 
     return false;
-  } else {
-    // Изображение масштабируется, если sourceRect != destRect.
-
-    var image = /** @type {!Image|HTMLImageElement} */ (source);
-    ctx.drawImage(
-      image,
-      sourceRect.left, sourceRect.top, sourceRect.width, sourceRect.height,
-      destRect.left, destRect.top, destRect.width, destRect.height
-    );
-
-    return true;
   }
+
+  // Изображение масштабируется, если sourceRect != destRect.
+
+  var image = /** @type {!Image|HTMLImageElement} */ (source);
+  ctx.drawImage(
+    image,
+    sourceRect.left, sourceRect.top, sourceRect.width, sourceRect.height,
+    destRect.left, destRect.top, destRect.width, destRect.height
+  );
+
+  return true;
 };
 
 /**

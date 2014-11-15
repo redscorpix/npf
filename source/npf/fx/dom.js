@@ -23,7 +23,6 @@ goog.provide('npf.fx.dom.Transform');
 
 goog.require('goog.array');
 goog.require('goog.color');
-goog.require('goog.events');
 goog.require('goog.fx.Transition.EventType');
 goog.require('goog.object');
 goog.require('goog.style');
@@ -38,8 +37,8 @@ goog.require('npf.fx.Animation');
  * @param {Array.<number>} start Array for start coordinates.
  * @param {Array.<number>} end Array for end coordinates.
  * @param {number} time Length of animation in milliseconds.
- * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=} opt_acc Acceleration
- *          function, returns 0-1 for inputs 0-1.
+ * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
+ *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.Animation}
  * @constructor
  */
@@ -88,8 +87,8 @@ npf.fx.dom.PredefinedEffect.prototype.onBegin = function() {
  * @param {Array.<number>} start 2D array for start coordinates (X, Y).
  * @param {Array.<number>} end 2D array for end coordinates (X, Y).
  * @param {number} time Length of animation in milliseconds.
- * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=} opt_acc Acceleration
- *          function, returns 0-1 for inputs 0-1.
+ * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
+ *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.PredefinedEffect}
  * @constructor
  */
@@ -115,8 +114,8 @@ npf.fx.dom.Slide.prototype.updateStyle = function() {
  * @param {number} start
  * @param {number} end
  * @param {number} time Length of animation in milliseconds.
- * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=} opt_acc Acceleration
- *          function, returns 0-1 for inputs 0-1.
+ * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
+ *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.PredefinedEffect}
  * @constructor
  */
@@ -135,8 +134,8 @@ npf.fx.dom.SlideLeft.prototype.updateStyle = function() {
  * @param {number} start
  * @param {number} end
  * @param {number} time Length of animation in milliseconds.
- * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=} opt_acc Acceleration
- *          function, returns 0-1 for inputs 0-1.
+ * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
+ *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.PredefinedEffect}
  * @constructor
  */
@@ -155,8 +154,8 @@ npf.fx.dom.SlideRight.prototype.updateStyle = function() {
  * @param {number} start
  * @param {number} end
  * @param {number} time Length of animation in milliseconds.
- * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=} opt_acc Acceleration
- *          function, returns 0-1 for inputs 0-1.
+ * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
+ *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.PredefinedEffect}
  * @constructor
  */
@@ -176,8 +175,8 @@ npf.fx.dom.SlideTop.prototype.updateStyle = function() {
  * @param {Element} element DOM node to be used in the animation.
  * @param {Array.<number>} end 2D array for end coordinates (X, Y).
  * @param {number} time Length of animation in milliseconds.
- * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=} opt_acc Acceleration
- *          function, returns 0-1 for inputs 0-1.
+ * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
+ *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.Slide}
  * @constructor
  */
@@ -198,8 +197,8 @@ npf.fx.dom.SlideFrom.prototype.onBegin = function() {
  * @param {Element} element DOM node to be used in the animation.
  * @param {number} end
  * @param {number} time Length of animation in milliseconds.
- * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=} opt_acc Acceleration
- *          function, returns 0-1 for inputs 0-1.
+ * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
+ *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.SlideLeft}
  * @constructor
  */
@@ -220,8 +219,8 @@ npf.fx.dom.SlideLeftFrom.prototype.onBegin = function() {
  * @param {Element} element DOM node to be used in the animation.
  * @param {number} end
  * @param {number} time Length of animation in milliseconds.
- * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=} opt_acc Acceleration
- *          function, returns 0-1 for inputs 0-1.
+ * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
+ *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.SlideTop}
  * @constructor
  */
@@ -238,14 +237,14 @@ npf.fx.dom.SlideTopFrom.prototype.onBegin = function() {
 };
 
 /**
- * Creates an animation object that will slide an element into its final size. Requires that the
- * element is absolutely positioned.
+ * Creates an animation object that will slide an element into its final size.
+ * Requires that the element is absolutely positioned.
  * @param {Element} element Dom Node to be used in the animation.
  * @param {Array.<number>} start 2D array for start size (W, H).
  * @param {Array.<number>} end 2D array for end size (W, H).
  * @param {number} time Length of animation in milliseconds.
- * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=} opt_acc Acceleration
- *          function, returns 0-1 for inputs 0-1.
+ * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
+ *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.PredefinedEffect}
  * @constructor
  */
@@ -271,7 +270,8 @@ npf.fx.dom.Swipe = function(element, start, end, time, opt_acc) {
 goog.inherits(npf.fx.dom.Swipe, npf.fx.dom.PredefinedEffect);
 
 /**
- * Animation event handler that will resize an element by setting its width, height and clipping.
+ * Animation event handler that will resize an element by setting its width,
+ * height and clipping.
  * @protected
  * @override
  */
@@ -293,7 +293,8 @@ npf.fx.dom.Swipe.prototype.updateStyle = function() {
  * @private
  */
 npf.fx.dom.Swipe.prototype.clip_ = function(x, y, w, h) {
-  this.element.style.clip = 'rect(' + (h - y) + 'px ' + w + 'px ' + h + 'px ' + (w - x) + 'px)';
+  this.element.style.clip = 'rect(' + (h - y) + 'px ' + w + 'px ' + h + 'px ' +
+    (w - x) + 'px)';
 };
 
 /**
@@ -303,8 +304,8 @@ npf.fx.dom.Swipe.prototype.clip_ = function(x, y, w, h) {
  * @param {Array.<number>} start 2D array for start scroll left and top.
  * @param {Array.<number>} end 2D array for end scroll left and top.
  * @param {number} time Length of animation in milliseconds.
- * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=} opt_acc Acceleration
- *          function, returns 0-1 for inputs 0-1.
+ * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
+ *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.PredefinedEffect}
  * @constructor
  */
@@ -328,14 +329,14 @@ npf.fx.dom.Scroll.prototype.updateStyle = function() {
 };
 
 /**
- * Creates an animation object that will resize an element between two widths and heights.
- * Start and End should be 2 dimensional arrays
+ * Creates an animation object that will resize an element between two widths
+ * and heights. Start and End should be 2 dimensional arrays
  * @param {Element} element Dom Node to be used in the animation.
  * @param {Array.<number>} start 2D array for start width and height.
  * @param {Array.<number>} end 2D array for end width and height.
  * @param {number} time Length of animation in milliseconds.
- * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=} opt_acc Acceleration
- *          function, returns 0-1 for inputs 0-1.
+ * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
+ *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.PredefinedEffect}
  * @constructor
  */
@@ -349,7 +350,8 @@ npf.fx.dom.Resize = function(element, start, end, time, opt_acc) {
 goog.inherits(npf.fx.dom.Resize, npf.fx.dom.PredefinedEffect);
 
 /**
- * Animation event handler that will resize an element by setting its width and height.
+ * Animation event handler that will resize an element by setting its width
+ * and height.
  * @protected
  * @override
  */
@@ -365,8 +367,8 @@ npf.fx.dom.Resize.prototype.updateStyle = function() {
  * @param {number} start Start width.
  * @param {number} end End width.
  * @param {number} time Length of animation in milliseconds.
- * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=} opt_acc Acceleration
- *          function, returns 0-1 for inputs 0-1.
+ * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
+ *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.PredefinedEffect}
  * @constructor
  */
@@ -391,8 +393,8 @@ npf.fx.dom.ResizeWidth.prototype.updateStyle = function() {
  * @param {number} start Start height.
  * @param {number} end End height.
  * @param {number} time Length of animation in milliseconds.
- * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=} opt_acc Acceleration
- *          function, returns 0-1 for inputs 0-1.
+ * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
+ *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.PredefinedEffect}
  * @constructor
  */
@@ -411,14 +413,14 @@ npf.fx.dom.ResizeHeight.prototype.updateStyle = function() {
 };
 
 /**
- * Creates an animation object that fades the opacity of an element between two limits.
- * Start and End should be floats between 0 and 1
+ * Creates an animation object that fades the opacity of an element between
+ * two limits. Start and End should be floats between 0 and 1
  * @param {Element} element Dom Node to be used in the animation.
  * @param {Array.<number>|number} start 1D Array or Number with start opacity.
  * @param {Array.<number>|number} end 1D Array or Number for end opacity.
  * @param {number} time Length of animation in milliseconds.
- * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=} opt_acc Acceleration
- *          function, returns 0-1 for inputs 0-1.
+ * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
+ *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.PredefinedEffect}
  * @constructor
  */
@@ -438,6 +440,7 @@ npf.fx.dom.Fade = function(element, start, end, time, opt_acc) {
   }
 };
 goog.inherits(npf.fx.dom.Fade, npf.fx.dom.PredefinedEffect);
+
 
 /**
  * Animation event handler that will set the opacity of an element.
@@ -462,13 +465,14 @@ npf.fx.dom.Fade.prototype.hide = function() {
   goog.style.setElementShown(this.element, false);
 };
 
+
 /**
  * Fades an element out from full opacity to completely transparent.
  *
  * @param {Element} element Dom Node to be used in the animation.
  * @param {number} time Length of animation in milliseconds.
- * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=} opt_acc Acceleration
- *          function, returns 0-1 for inputs 0-1.
+ * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
+ *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.Fade}
  * @constructor
  */
@@ -477,12 +481,13 @@ npf.fx.dom.FadeOut = function(element, time, opt_acc) {
 };
 goog.inherits(npf.fx.dom.FadeOut, npf.fx.dom.Fade);
 
+
 /**
  * Fades an element in from completely transparent to fully opacity.
  * @param {Element} element Dom Node to be used in the animation.
  * @param {number} time Length of animation in milliseconds.
- * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=} opt_acc Acceleration
- *          function, returns 0-1 for inputs 0-1.
+ * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
+ *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.Fade}
  * @constructor
  */
@@ -492,12 +497,12 @@ npf.fx.dom.FadeIn = function(element, time, opt_acc) {
 goog.inherits(npf.fx.dom.FadeIn, npf.fx.dom.Fade);
 
 /**
- * Fades an element out from full opacity to completely transparent and then sets the display to
- * 'none'
+ * Fades an element out from full opacity to completely transparent and then
+ * sets the display to 'none'.
  * @param {Element} element Dom Node to be used in the animation.
  * @param {number} time Length of animation in milliseconds.
- * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=} opt_acc Acceleration
- *          function, returns 0-1 for inputs 0-1.
+ * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
+ *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.Fade}
  * @constructor
  */
@@ -518,13 +523,14 @@ npf.fx.dom.FadeOutAndHide.prototype.onEnd = function() {
   goog.base(this, 'onEnd');
 };
 
+
 /**
- * Sets an element's display to be visible and then fades an element in from completely transparent
- * to fully opacity
+ * Sets an element's display to be visible and then fades an element in from
+ * completely transparent to fully opacity.
  * @param {Element} element Dom Node to be used in the animation.
  * @param {number} time Length of animation in milliseconds.
- * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=} opt_acc Acceleration
- *          function, returns 0-1 for inputs 0-1.
+ * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
+ *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.Fade}
  * @constructor
  */
@@ -533,11 +539,13 @@ npf.fx.dom.FadeInAndShow = function(element, time, opt_acc) {
 };
 goog.inherits(npf.fx.dom.FadeInAndShow, npf.fx.dom.Fade);
 
+
 /** @override */
 npf.fx.dom.FadeInAndShow.prototype.onBegin = function() {
   this.show();
   goog.base(this, 'onBegin');
 };
+
 
 /**
  * Provides a transformation of an elements background-color.
@@ -546,8 +554,8 @@ npf.fx.dom.FadeInAndShow.prototype.onBegin = function() {
  * @param {Array.<number>} start 3D Array for RGB of start color.
  * @param {Array.<number>} end 3D Array for RGB of end color.
  * @param {number} time Length of animation in milliseconds.
- * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=} opt_acc Acceleration
- *          function, returns 0-1 for inputs 0-1.
+ * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
+ *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.PredefinedEffect}
  * @constructor
  */
@@ -559,6 +567,7 @@ npf.fx.dom.BgColorTransform = function(element, start, end, time, opt_acc) {
   goog.base(this, element, start, end, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.BgColorTransform, npf.fx.dom.PredefinedEffect);
+
 
 /**
  * Animation event handler that will set the background-color of an element
@@ -579,13 +588,15 @@ npf.fx.dom.BgColorTransform.prototype.updateStyle = function() {
   this.setColor();
 };
 
+
 /**
- * Fade elements background color from start color to the element's current background color.
- * Start should be a 3D array representing R,G,B
+ * Fade elements background color from start color to the element's current
+ * background color. Start should be a 3D array representing R,G,B.
  * @param {Element} element Dom Node to be used in the animation.
  * @param {Array.<number>} start 3D Array for RGB of start color.
  * @param {number} time Length of animation in milliseconds.
- * @param {goog.events.EventHandler=} opt_eventHandler Optional event handler to use when listening for events.
+ * @param {goog.events.EventHandler=} opt_eventHandler Optional event handler
+ *                                             to use when listening for events.
  */
 npf.fx.dom.bgColorFadeIn = function(element, start, time, opt_eventHandler) {
   var initialBgColor = element.style.backgroundColor || '';
@@ -611,11 +622,12 @@ npf.fx.dom.bgColorFadeIn = function(element, start, time, opt_eventHandler) {
   if (opt_eventHandler) {
     opt_eventHandler.listen(anim, goog.fx.Transition.EventType.END, setBgColor);
   } else {
-    goog.events.listen(anim, goog.fx.Transition.EventType.END, setBgColor);
+    anim.listen(goog.fx.Transition.EventType.END, setBgColor);
   }
 
   anim.play();
 };
+
 
 /**
  * Provides a transformation of an elements color.
@@ -623,8 +635,8 @@ npf.fx.dom.bgColorFadeIn = function(element, start, time, opt_eventHandler) {
  * @param {Array.<number>} start 3D Array representing R,G,B.
  * @param {Array.<number>} end 3D Array representing R,G,B.
  * @param {number} time Length of animation in milliseconds.
- * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=} opt_acc Acceleration
- *          function, returns 0-1 for inputs 0-1.
+ * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
+ *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @constructor
  * @extends {npf.fx.dom.PredefinedEffect}
  */
@@ -636,6 +648,7 @@ npf.fx.dom.ColorTransform = function(element, start, end, time, opt_acc) {
   goog.base(this, element, start, end, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.ColorTransform, npf.fx.dom.PredefinedEffect);
+
 
 /**
  * Animation event handler that will set the color of an element.
@@ -658,38 +671,39 @@ npf.fx.dom.ColorTransform.prototype.updateStyle = function() {
  * Provides a CSS3 transformation.
  * @param {Element} element Dom Node to be used in the animation.
  * @param {number} time Length of animation in milliseconds.
- * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=} opt_acc Acceleration
- *          function, returns 0-1 for inputs 0-1.
+ * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
+ *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @constructor
  * @extends {npf.fx.dom.PredefinedEffect}
  */
 npf.fx.dom.Transform = function(element, time, opt_acc) {
   goog.base(this, element, [0], [1], time, opt_acc);
 
-  this._startParameters = {};
-  this._endParameters = {};
+  this.startParameters_ = {};
+  this.endParameters_ = {};
 };
 goog.inherits(npf.fx.dom.Transform, npf.fx.dom.PredefinedEffect);
 
-/**
- * @type {Object.<string,Array.<number>>}
- * @private
- */
-npf.fx.dom.Transform.prototype._startParameters;
 
 /**
- * @type {Object.<string,Array.<number>>}
+ * @type {Object.<Array.<number>>}
  * @private
  */
-npf.fx.dom.Transform.prototype._endParameters;
+npf.fx.dom.Transform.prototype.startParameters_;
+
+/**
+ * @type {Object.<Array.<number>>}
+ * @private
+ */
+npf.fx.dom.Transform.prototype.endParameters_;
 
 
 /** @inheritDoc */
 npf.fx.dom.Transform.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
-  this._startParameters = null;
-  this._endParameters = null;
+  this.startParameters_ = null;
+  this.endParameters_ = null;
 };
 
 /**
@@ -705,7 +719,7 @@ npf.fx.dom.Transform.prototype.setMatrix = function(start, end) {
     throw Error('End matrix parameters must be 2D');
   }
 
-  this._setProperties('matrix', start, end);
+  this.setProperties_('matrix', start, end);
 };
 
 /**
@@ -721,7 +735,7 @@ npf.fx.dom.Transform.prototype.setMatrix3d = function(start, end) {
     throw Error('End matrix3d parameters must be 2D');
   }
 
-  this._setProperties('matrix3d', start, end);
+  this.setProperties_('matrix3d', start, end);
 };
 
 /**
@@ -742,7 +756,7 @@ npf.fx.dom.Transform.prototype.setTranslate = function(start, end) {
     throw Error('End translate parameters must be 1D or 2D');
   }
 
-  this._setProperties('translate', from, to);
+  this.setProperties_('translate', from, to);
 };
 
 /**
@@ -758,7 +772,7 @@ npf.fx.dom.Transform.prototype.setTranslate3d = function(start, end) {
     throw Error('End translate3d parameters must be 3D');
   }
 
-  this._setProperties('translate3d', start, end);
+  this.setProperties_('translate3d', start, end);
 };
 
 /**
@@ -766,7 +780,7 @@ npf.fx.dom.Transform.prototype.setTranslate3d = function(start, end) {
  * @param {number} end
  */
 npf.fx.dom.Transform.prototype.setTranslateX = function(start, end) {
-  this._setProperties('translateX', [start], [end]);
+  this.setProperties_('translateX', [start], [end]);
 };
 
 /**
@@ -774,7 +788,7 @@ npf.fx.dom.Transform.prototype.setTranslateX = function(start, end) {
  * @param {number} end
  */
 npf.fx.dom.Transform.prototype.setTranslateY = function(start, end) {
-  this._setProperties('translateY', [start], [end]);
+  this.setProperties_('translateY', [start], [end]);
 };
 
 /**
@@ -782,7 +796,7 @@ npf.fx.dom.Transform.prototype.setTranslateY = function(start, end) {
  * @param {number} end
  */
 npf.fx.dom.Transform.prototype.setTranslateZ = function(start, end) {
-  this._setProperties('translateZ', [start], [end]);
+  this.setProperties_('translateZ', [start], [end]);
 };
 
 /**
@@ -803,7 +817,7 @@ npf.fx.dom.Transform.prototype.setScale = function(start, end) {
     throw Error('End scale parameters must be 1D or 2D');
   }
 
-  this._setProperties('scale', from, to);
+  this.setProperties_('scale', from, to);
 };
 
 /**
@@ -819,7 +833,7 @@ npf.fx.dom.Transform.prototype.setScale3d = function(start, end) {
     throw Error('End scale3d parameters must be 3D');
   }
 
-  this._setProperties('scale3d', start, end);
+  this.setProperties_('scale3d', start, end);
 };
 
 /**
@@ -827,7 +841,7 @@ npf.fx.dom.Transform.prototype.setScale3d = function(start, end) {
  * @param {number} end
  */
 npf.fx.dom.Transform.prototype.setScaleX = function(start, end) {
-  this._setProperties('scaleX', [start], [end]);
+  this.setProperties_('scaleX', [start], [end]);
 };
 
 /**
@@ -835,7 +849,7 @@ npf.fx.dom.Transform.prototype.setScaleX = function(start, end) {
  * @param {number} end
  */
 npf.fx.dom.Transform.prototype.setScaleY = function(start, end) {
-  this._setProperties('scaleY', [start], [end]);
+  this.setProperties_('scaleY', [start], [end]);
 };
 
 /**
@@ -843,7 +857,7 @@ npf.fx.dom.Transform.prototype.setScaleY = function(start, end) {
  * @param {number} end
  */
 npf.fx.dom.Transform.prototype.setScaleZ = function(start, end) {
-  this._setProperties('scaleZ', [start], [end]);
+  this.setProperties_('scaleZ', [start], [end]);
 };
 
 /**
@@ -851,7 +865,7 @@ npf.fx.dom.Transform.prototype.setScaleZ = function(start, end) {
  * @param {number} end
  */
 npf.fx.dom.Transform.prototype.setRotate = function(start, end) {
-  this._setProperties('rotate', [start], [end]);
+  this.setProperties_('rotate', [start], [end]);
 };
 
 /**
@@ -867,7 +881,7 @@ npf.fx.dom.Transform.prototype.setRotate3d = function(start, end) {
     throw Error('End rotate3d parameters must be 4D');
   }
 
-  this._setProperties('rotate3d', start, end);
+  this.setProperties_('rotate3d', start, end);
 };
 
 /**
@@ -875,7 +889,7 @@ npf.fx.dom.Transform.prototype.setRotate3d = function(start, end) {
  * @param {number} end
  */
 npf.fx.dom.Transform.prototype.setRotateX = function(start, end) {
-  this._setProperties('rotateX', [start], [end]);
+  this.setProperties_('rotateX', [start], [end]);
 };
 
 /**
@@ -883,7 +897,7 @@ npf.fx.dom.Transform.prototype.setRotateX = function(start, end) {
  * @param {number} end
  */
 npf.fx.dom.Transform.prototype.setRotateY = function(start, end) {
-  this._setProperties('rotateY', [start], [end]);
+  this.setProperties_('rotateY', [start], [end]);
 };
 
 /**
@@ -891,7 +905,7 @@ npf.fx.dom.Transform.prototype.setRotateY = function(start, end) {
  * @param {number} end
  */
 npf.fx.dom.Transform.prototype.setRotateZ = function(start, end) {
-  this._setProperties('rotateZ', [start], [end]);
+  this.setProperties_('rotateZ', [start], [end]);
 };
 
 /**
@@ -912,7 +926,7 @@ npf.fx.dom.Transform.prototype.setSkew = function(start, end) {
     throw Error('End skew parameters must be 1D or 2D');
   }
 
-  this._setProperties('skew', from, to);
+  this.setProperties_('skew', from, to);
 };
 
 /**
@@ -920,7 +934,7 @@ npf.fx.dom.Transform.prototype.setSkew = function(start, end) {
  * @param {number} end
  */
 npf.fx.dom.Transform.prototype.setSkewX = function(start, end) {
-  this._setProperties('skewX', [start], [end]);
+  this.setProperties_('skewX', [start], [end]);
 };
 
 /**
@@ -928,7 +942,7 @@ npf.fx.dom.Transform.prototype.setSkewX = function(start, end) {
  * @param {number} end
  */
 npf.fx.dom.Transform.prototype.setSkewY = function(start, end) {
-  this._setProperties('skewY', [start], [end]);
+  this.setProperties_('skewY', [start], [end]);
 };
 
 /**
@@ -937,9 +951,9 @@ npf.fx.dom.Transform.prototype.setSkewY = function(start, end) {
  * @param {Array.<number>} end
  * @private
  */
-npf.fx.dom.Transform.prototype._setProperties = function(key, start, end) {
-  this._startParameters[key] = start;
-  this._endParameters[key] = end;
+npf.fx.dom.Transform.prototype.setProperties_ = function(key, start, end) {
+  this.startParameters_[key] = start;
+  this.endParameters_[key] = end;
 };
 
 /**
@@ -973,9 +987,9 @@ npf.fx.dom.Transform.prototype.updateStyle = function() {
   /** @type {Array.<string>} */
   var styles = [];
 
-  goog.object.forEach(this._startParameters, function(startValues, key) {
+  goog.object.forEach(this.startParameters_, function(startValues, key) {
     /** @type {Array.<number>} */
-    var endValues = this._endParameters[key];
+    var endValues = this.endParameters_[key];
     /** @type {!Array.<string>} */
     var values = goog.array.map(startValues, function(startValue, i) {
       var value = startValue + (endValues[i] - startValue) * position;

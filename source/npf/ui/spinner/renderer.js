@@ -88,13 +88,13 @@ npf.ui.spinner.Renderer.prototype.getSegmentElements = function(element) {
 /**
  * @return {string}
  */
-npf.ui.spinner.Renderer.prototype.getSegmentCssClass = function() {
-  return goog.getCssName(this.getStructuralCssClass(), 'segment');
+npf.ui.spinner.Renderer.prototype.getLineCssClass = function() {
+  return goog.getCssName(this.getStructuralCssClass(), 'line');
 };
 
 /**
  * @return {string}
  */
-npf.ui.spinner.Renderer.prototype.getLineCssClass = function() {
-  return goog.getCssName(this.getStructuralCssClass(), 'line');
+npf.ui.spinner.Renderer.prototype.getSegmentCssClass = function() {
+  return goog.getCssName(this.getStructuralCssClass(), 'segment');
 };

@@ -5,19 +5,18 @@ goog.require('goog.dom.TagName');
 goog.require('goog.math.Coordinate');
 goog.require('goog.math.Size');
 goog.require('goog.style');
-goog.require('goog.userAgent');
-goog.require('npf.ui.Renderer');
+goog.require('npf.ui.StatedRenderer');
 
 
 /**
  * @constructor
- * @extends {npf.ui.Renderer}
+ * @extends {npf.ui.StatedRenderer}
  */
 npf.ui.scrollable.ContainerRenderer = function() {
   goog.base(this);
 };
 goog.inherits(
-  npf.ui.scrollable.ContainerRenderer, npf.ui.Renderer);
+  npf.ui.scrollable.ContainerRenderer, npf.ui.StatedRenderer);
 goog.addSingletonGetter(npf.ui.scrollable.ContainerRenderer);
 
 
@@ -65,6 +64,29 @@ npf.ui.scrollable.ContainerRenderer.prototype.createDom = function(component) {
   return element;
 };
 
+/** @inheritDoc */
+npf.ui.scrollable.ContainerRenderer.prototype.decorate = function(component,
+    element) {
+  goog.base(this, 'decorate', component, element);
+
+  /** @type {number} */
+  var scrollBarWidth = this.getScrollBarWidth();
+
+  if (scrollBarWidth) {
+    /** @type {Element} */
+    var scrollElement = this.getScrollElement(element);
+
+    if (scrollElement) {
+      goog.style.setStyle(scrollElement, {
+        'right': -scrollBarWidth + 'px',
+        'bottom': -scrollBarWidth + 'px'
+      });
+    }
+  }
+
+  return element;
+};
+
 /**
  * @return {number}
  * @protected
@@ -103,8 +125,8 @@ npf.ui.scrollable.ContainerRenderer.prototype.setSize = function(element, width,
 npf.ui.scrollable.ContainerRenderer.prototype.resetSize = function(element) {
   if (element) {
     goog.style.setStyle(element, {
-      'width': '',
-      'height': ''
+      'height': '',
+      'width': ''
     });
   }
 };

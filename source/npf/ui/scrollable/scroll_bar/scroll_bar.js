@@ -4,11 +4,15 @@ goog.provide('npf.ui.scrollable.ScrollBarEvent');
 
 goog.require('goog.events');
 goog.require('goog.events.Event');
+goog.require('goog.events.EventType');
 goog.require('goog.fx.Dragger');
+goog.require('goog.fx.Dragger.EventType');
 goog.require('goog.math');
+goog.require('goog.math.Coordinate');
 goog.require('goog.math.Size');
 goog.require('goog.style');
-goog.require('npf.ui.RenderedComponent');
+goog.require('goog.ui.Component.State');
+goog.require('npf.ui.StatedComponent');
 goog.require('npf.ui.scrollable.scrollBar.Renderer');
 
 
@@ -16,14 +20,56 @@ goog.require('npf.ui.scrollable.scrollBar.Renderer');
  * @param {npf.ui.scrollable.scrollBar.Renderer=} opt_renderer
  * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
- * @extends {npf.ui.RenderedComponent}
+ * @extends {npf.ui.StatedComponent}
  */
 npf.ui.scrollable.ScrollBar = function(opt_renderer, opt_domHelper) {
   goog.base(this, opt_renderer ||
     npf.ui.scrollable.scrollBar.Renderer.getInstance(), opt_domHelper);
-};
-goog.inherits(npf.ui.scrollable.ScrollBar, npf.ui.RenderedComponent);
 
+  /**
+   * @private {npf.ui.scrollable.Container}
+   */
+  this.container_ = null;
+
+  /**
+   * @private {goog.math.Size}
+   */
+  this.containerContentSize_ = null;
+
+  /**
+   * @private {goog.math.Size}
+   */
+  this.containerSize_ = null;
+
+  /**
+   * @private {boolean}
+   */
+  this.draggable_ = true;
+
+  /**
+   * @private {goog.fx.Dragger}
+   */
+  this.dragger_ = null;
+
+  /**
+   * @private {number}
+   */
+  this.minSize_ = npf.ui.scrollable.ScrollBar.MIN_SIZE;
+
+  /**
+   * @private {number}
+   */
+  this.position_ = 0;
+
+  this.setSupportedState(goog.ui.Component.State.DISABLED, true);
+};
+goog.inherits(npf.ui.scrollable.ScrollBar, npf.ui.StatedComponent);
+
+
+/**
+ * @const {number}
+ */
+npf.ui.scrollable.ScrollBar.MIN_SIZE = 20;
 
 /**
  * @enum {string}
@@ -36,70 +82,14 @@ npf.ui.scrollable.ScrollBar.EventType = {
   SCROLL: goog.events.getUniqueId('scroll')
 };
 
-/**
- * @type {number}
- * @const
- */
-npf.ui.scrollable.ScrollBar.MIN_SIZE = 20;
-
-/**
- * @type {number}
- * @private
- */
-npf.ui.scrollable.ScrollBar.prototype.minSize_ =
-  npf.ui.scrollable.ScrollBar.MIN_SIZE;
-
-/**
- * @type {boolean}
- * @private
- */
-npf.ui.scrollable.ScrollBar.prototype.draggable_ = true;
-
-/**
- * @type {goog.fx.Dragger}
- * @private
- */
-npf.ui.scrollable.ScrollBar.prototype.dragger_ = null;
-
-/**
- * @type {number}
- * @private
- */
-npf.ui.scrollable.ScrollBar.prototype.position_ = 0;
-
-/**
- * @type {npf.ui.scrollable.Container}
- * @private
- */
-npf.ui.scrollable.ScrollBar.prototype.container_ = null;
-
-/**
- * @type {goog.math.Size}
- * @private
- */
-npf.ui.scrollable.ScrollBar.prototype.containerSize_ = null;
-
-/**
- * @type {goog.math.Size}
- * @private
- */
-npf.ui.scrollable.ScrollBar.prototype.containerContentSize_ = null;
-
-/**
- * @type {boolean}
- * @private
- */
-npf.ui.scrollable.ScrollBar.prototype.visible_ = false;
-
 
 /** @inheritDoc */
 npf.ui.scrollable.ScrollBar.prototype.createDom = function() {
   goog.base(this, 'createDom');
 
-  this.setSizeInternal(this.getSize());
-  this.setRunnerSizeInternal(this.getRunnerSize());
-  this.setDraggableInternal(this.draggable_);
-  this.setVisibleInternal(this.visible_);
+  this.applySize(this.getSize());
+  this.applyRunnerSize(this.getRunnerSize());
+  this.applyDraggable(this.isDraggable());
 };
 
 /** @inheritDoc */
@@ -135,71 +125,20 @@ npf.ui.scrollable.ScrollBar.prototype.disposeInternal = function() {
 
   goog.base(this, 'disposeInternal');
 
-  this.dragger_ = null;
   this.container_ = null;
-  this.containerSize_ = null;
   this.containerContentSize_ = null;
-};
-
-npf.ui.scrollable.ScrollBar.prototype.update = function() {
-  if (this.container_) {
-    /** @type {goog.math.Size} */
-    var size = this.container_.getSize();
-    /** @type {goog.math.Size} */
-    var contentSize = this.container_.getContentSize();
-
-    if (!(
-      size && contentSize &&
-      goog.math.Size.equals(this.containerSize_, size) &&
-      goog.math.Size.equals(this.containerContentSize_, contentSize)
-    )) {
-      this.containerSize_ = size;
-      this.containerContentSize_ = contentSize;
-
-      /** @type {number} */
-      var containerSize = this.getValueFromSize(size);
-      /** @type {number} */
-      var containerContentSize = this.getValueFromSize(contentSize);
-
-      this.setSizeInternal(this.getSize());
-      this.setRunnerSizeInternal(this.getRunnerSize());
-      this.setVisible(0 < containerContentSize - containerSize);
-      this.setPositionInternal(this.position_);
-
-      if (this.dragger_) {
-        this.dragger_.setLimits(this.getLimits());
-      }
-    }
-
-    /** @type {goog.math.Coordinate} */
-    var scrollPosition = this.container_.getScrollPosition();
-    this.setPosition(this.getValueFromCoordinate(scrollPosition));
-  } else {
-    this.setVisible(false);
-  }
+  this.containerSize_ = null;
+  this.dragger_ = null;
 };
 
 /**
- * @param {npf.ui.scrollable.Container} container
- * @param {boolean} listen
- * @protected
+ * @return {Element}
  */
-npf.ui.scrollable.ScrollBar.prototype.setListenedContainer = function(
-    container, listen) {
-  if (this.isInDocument()) {
-    /** @type {goog.events.EventHandler} */
-    var handler = this.getHandler();
-    var eventTypes = [
-      npf.ui.scrollable.Container.EventType.RESIZE,
-      npf.ui.scrollable.Container.EventType.SCROLL
-    ];
+npf.ui.scrollable.ScrollBar.prototype.getBackgroundElement = function() {
+  var renderer = /** @type {npf.ui.scrollable.scrollBar.Renderer} */ (
+    this.getRenderer());
 
-    if (listen) {
-      handler.listen(container, eventTypes, this.onContainerUpdate_);
-    } else {
-      handler.unlisten(container, eventTypes, this.onContainerUpdate_);
-    }
-  }
+  return renderer.getBackgroundElement(this.getElement());
 };
 
 /**
@@ -238,63 +177,126 @@ npf.ui.scrollable.ScrollBar.prototype.getContainerContentSize = function() {
 };
 
 /**
- * @return {number}
+ * @return {boolean}
  */
-npf.ui.scrollable.ScrollBar.prototype.getPosition = function() {
-  return this.position_;
+npf.ui.scrollable.ScrollBar.prototype.isDraggable = function() {
+  return this.draggable_;
 };
 
 /**
- * @param {number} position
+ * @param {boolean} drag
  */
-npf.ui.scrollable.ScrollBar.prototype.setPosition = function(position) {
-  /** @type {number} */
-  var containerSize = this.getValueFromSize(this.getContainerSize());
-  /** @type {number} */
-  var containerContentSize = this.getValueFromSize(
-    this.getContainerContentSize());
-  /** @type {number} */
-  var maxScroll = Math.max(0, containerContentSize - containerSize);
-
-  position = goog.math.clamp(position, 0, maxScroll);
-
-  if (this.position_ != position) {
-    this.position_ = position;
-    this.setPositionInternal(this.position_);
+npf.ui.scrollable.ScrollBar.prototype.setDraggable = function(drag) {
+  if (this.isDraggable() != drag) {
+    this.setDraggableInternal(drag);
+    this.applyDraggable(this.isDraggable());
   }
 };
 
 /**
- * @param {number} position
+ * @param {boolean} drag
  * @protected
  */
-npf.ui.scrollable.ScrollBar.prototype.setPositionInternal = function(position) {
-  /** @type {number} */
-  var runnerPosition = this.getRunnerPositionInternal(position);
-  this.getRenderer().setPosition(this.getRunnerElement(), runnerPosition);
+npf.ui.scrollable.ScrollBar.prototype.setDraggableInternal = function(drag) {
+  this.draggable_ = drag;
 };
+
+/**
+ * @param {boolean} drag
+ * @protected
+ */
+npf.ui.scrollable.ScrollBar.prototype.applyDraggable = function(drag) {
+  if (this.getElement()) {
+    if (drag) {
+      this.dragger_ = new goog.fx.Dragger(this.getRunnerElement(),
+        this.getElement(), this.getLimits());
+
+      if (this.isInDocument()) {
+        var EventType = goog.fx.Dragger.EventType;
+
+        this.getHandler()
+          .listen(this.dragger_, EventType.START, this.onDragStart_)
+          .listen(this.dragger_, EventType.DRAG, this.onDrag_)
+          .listen(this.dragger_, EventType.END, this.onDragEnd_);
+      }
+    } else if (this.dragger_) {
+      this.dragger_.dispose();
+      this.dragger_ = null;
+    }
+  }
+};
+
+/**
+ * @param {goog.events.BrowserEvent} evt
+ * @private
+ */
+npf.ui.scrollable.ScrollBar.prototype.onBeforeDrag_ = function(evt) {
+  if (this.isEnabled()) {
+    /** @type {!goog.math.Coordinate} */
+    var position = goog.style.getRelativePosition(evt, this.getElement());
+    /** @type {number} */
+    var diff = Math.round(this.getRunnerSize() / 2);
+
+    if (this.onDrag(position.x - diff, position.y - diff)) {
+      this.applyPosition(this.getPosition());
+    }
+  }
+};
+
+/**
+ * @param {goog.fx.DragEvent} evt
+ * @private
+ */
+npf.ui.scrollable.ScrollBar.prototype.onDragStart_ = function(evt) {
+  if (this.isEnabled()) {
+    var renderer = /** @type {npf.ui.scrollable.scrollBar.Renderer} */ (
+      this.getRenderer());
+    renderer.setUnselectable(this.getDomHelper().getDocument().body, true);
+  } else {
+    evt.preventDefault();
+  }
+};
+
+/**
+ * @param {goog.fx.DragEvent} evt
+ * @private
+ */
+npf.ui.scrollable.ScrollBar.prototype.onDrag_ = function(evt) {
+  if (this.isEnabled()) {
+    this.onDrag(evt.left, evt.top);
+  }
+};
+
+/**
+ * @param {goog.fx.DragEvent} evt
+ * @private
+ */
+npf.ui.scrollable.ScrollBar.prototype.onDragEnd_ = function(evt) {
+  if (!this.isEnabled()) {
+    evt.preventDefault();
+  }
+
+  var renderer = /** @type {npf.ui.scrollable.scrollBar.Renderer} */ (
+    this.getRenderer());
+  renderer.setUnselectable(this.getDomHelper().getDocument().body, false);
+};
+
+/**
+ * @return {goog.math.Rect}
+ * @protected
+ */
+npf.ui.scrollable.ScrollBar.prototype.getLimits = goog.abstractMethod;
 
 /**
  * @return {number}
  */
-npf.ui.scrollable.ScrollBar.prototype.getSize = function() {
-  return this.getValueFromSize(this.getContainerSize());
-};
+npf.ui.scrollable.ScrollBar.prototype.getMaxRunnerPosition = function() {
+  /** @type {number} */
+  var size = this.getSize();
+  /** @type {number} */
+  var runnerSize = this.getRunnerSize();
 
-/**
- * @param {number} size
- * @protected
- */
-npf.ui.scrollable.ScrollBar.prototype.setSizeInternal = function(size) {
-  this.getRenderer().setSize(this.getElement(), size);
-};
-
-/**
- * @param {number} size
- * @protected
- */
-npf.ui.scrollable.ScrollBar.prototype.setRunnerSizeInternal = function(size) {
-  this.getRenderer().setSize(this.getRunnerElement(), size);
+  return Math.max(0, size - runnerSize);
 };
 
 /**
@@ -314,31 +316,50 @@ npf.ui.scrollable.ScrollBar.prototype.setMinSize = function(size) {
 /**
  * @return {number}
  */
-npf.ui.scrollable.ScrollBar.prototype.getRunnerPosition = function() {
-  return this.getRunnerPositionInternal(this.position_);
+npf.ui.scrollable.ScrollBar.prototype.getPosition = function() {
+  return this.position_;
 };
 
 /**
- * @return {number}
+ * @param {number} position
+ */
+npf.ui.scrollable.ScrollBar.prototype.setPosition = function(position) {
+  if (this.isEnabled()) {
+    /** @type {number} */
+    var containerSize = this.getValueFromSize(this.getContainerSize());
+    /** @type {number} */
+    var containerContentSize = this.getValueFromSize(
+      this.getContainerContentSize());
+    /** @type {number} */
+    var maxScroll = Math.max(0, containerContentSize - containerSize);
+
+    position = goog.math.clamp(position, 0, maxScroll);
+
+    if (this.getPosition() != position) {
+      this.setPositionInternal(position);
+      this.applyPosition(this.getPosition());
+    }
+  }
+};
+
+/**
+ * @param {number} position
  * @protected
  */
-npf.ui.scrollable.ScrollBar.prototype.getRunnerPositionInternal = function(
-    position) {
-  /** @type {number} */
-  var containerSize = this.getValueFromSize(this.getContainerSize());
-  /** @type {number} */
-  var containerContentSize = this.getValueFromSize(
-    this.getContainerContentSize());
-  /** @type {number} */
-  var maxScroll = Math.max(0, containerContentSize - containerSize);
-  /** @type {number} */
-  var maxRunnerScroll = this.getMaxRunnerPosition();
+npf.ui.scrollable.ScrollBar.prototype.setPositionInternal = function(position) {
+  this.position_ = position;
+};
 
-  if (maxScroll) {
-    return Math.round(position / maxScroll * maxRunnerScroll);
-  }
-
-  return 0;
+/**
+ * @param {number} position
+ * @protected
+ */
+npf.ui.scrollable.ScrollBar.prototype.applyPosition = function(position) {
+  /** @type {number} */
+  var runnerPosition = this.getRunnerPositionByPosition(position);
+  var renderer = /** @type {npf.ui.scrollable.scrollBar.Renderer} */ (
+    this.getRenderer());
+  renderer.setPosition(this.getRunnerElement(), runnerPosition);
 };
 
 /**
@@ -365,15 +386,43 @@ npf.ui.scrollable.ScrollBar.prototype.getPositionByRunner = function(
 };
 
 /**
+ * @return {Element}
+ */
+npf.ui.scrollable.ScrollBar.prototype.getRunnerElement = function() {
+  var renderer = /** @type {npf.ui.scrollable.scrollBar.Renderer} */ (
+    this.getRenderer());
+
+  return renderer.getRunnerElement(this.getElement());
+};
+
+/**
  * @return {number}
  */
-npf.ui.scrollable.ScrollBar.prototype.getMaxRunnerPosition = function() {
-  /** @type {number} */
-  var size = this.getSize();
-  /** @type {number} */
-  var runnerSize = this.getRunnerSize();
+npf.ui.scrollable.ScrollBar.prototype.getRunnerPosition = function() {
+  return this.getRunnerPositionByPosition(this.getPosition());
+};
 
-  return Math.max(0, size - runnerSize);
+/**
+ * @param {number} position
+ * @return {number}
+ */
+npf.ui.scrollable.ScrollBar.prototype.getRunnerPositionByPosition = function(
+    position) {
+  /** @type {number} */
+  var containerSize = this.getValueFromSize(this.getContainerSize());
+  /** @type {number} */
+  var containerContentSize = this.getValueFromSize(
+    this.getContainerContentSize());
+  /** @type {number} */
+  var maxScroll = Math.max(0, containerContentSize - containerSize);
+  /** @type {number} */
+  var maxRunnerScroll = this.getMaxRunnerPosition();
+
+  if (maxScroll) {
+    return Math.round(position / maxScroll * maxRunnerScroll);
+  }
+
+  return 0;
 };
 
 /**
@@ -390,107 +439,113 @@ npf.ui.scrollable.ScrollBar.prototype.getRunnerSize = function() {
   /** @type {number} */
   var runnerSize = Math.round(containerSize / containerContentSize * size);
 
-  return Math.max(this.minSize_, runnerSize);
+  return Math.max(this.getMinSize(), runnerSize);
 };
 
 /**
- * @return {boolean}
- */
-npf.ui.scrollable.ScrollBar.prototype.isVisible = function() {
-  return this.visible_;
-};
-
-/**
- * @param {boolean} visible
- */
-npf.ui.scrollable.ScrollBar.prototype.setVisible = function(visible) {
-  if (this.visible_ != visible) {
-    this.visible_ = visible;
-    this.setVisibleInternal(this.visible_);
-  }
-};
-
-/**
- * @param {boolean} visible
- */
-npf.ui.scrollable.ScrollBar.prototype.setVisibleInternal = function(visible) {
-  this.getRenderer().setVisible(this.getElement(), visible);
-};
-
-/**
- * @param {boolean} drag
- */
-npf.ui.scrollable.ScrollBar.prototype.setDraggable = function(drag) {
-  if (this.draggable_ != drag) {
-    this.draggable_ = drag;
-    this.setDraggableInternal(this.draggable_);
-  }
-};
-
-/**
- * @param {boolean} drag
+ * @param {number} size
  * @protected
  */
-npf.ui.scrollable.ScrollBar.prototype.setDraggableInternal = function(drag) {
-  if (this.getElement()) {
-    if (drag) {
-      this.dragger_ = new goog.fx.Dragger(this.getRunnerElement(),
-        this.getElement(), this.getLimits());
+npf.ui.scrollable.ScrollBar.prototype.applyRunnerSize = function(size) {
+  var renderer = /** @type {npf.ui.scrollable.scrollBar.Renderer} */ (
+    this.getRenderer());
+  renderer.setSize(this.getRunnerElement(), size);
+};
 
-      if (this.isInDocument()) {
-        var EventType = goog.fx.Dragger.EventType;
+/**
+ * @return {number}
+ */
+npf.ui.scrollable.ScrollBar.prototype.getSize = function() {
+  return this.getValueFromSize(this.getContainerSize());
+};
 
-        this.getHandler()
-          .listen(this.dragger_, EventType.START, this.onDragStart_)
-          .listen(this.dragger_, EventType.DRAG, this.onDrag_)
-          .listen(this.dragger_, EventType.END, this.onDragEnd_);
+/**
+ * @param {number} size
+ * @protected
+ */
+npf.ui.scrollable.ScrollBar.prototype.applySize = function(size) {
+  var renderer = /** @type {npf.ui.scrollable.scrollBar.Renderer} */ (
+    this.getRenderer());
+  renderer.setSize(this.getElement(), size);
+};
+
+/**
+ * @param {goog.math.Coordinate} coordinate
+ * @return {number}
+ * @protected
+ */
+npf.ui.scrollable.ScrollBar.prototype.getValueFromCoordinate =
+  goog.abstractMethod;
+
+/**
+ * @param {goog.math.Size} size
+ * @return {number}
+ * @protected
+ */
+npf.ui.scrollable.ScrollBar.prototype.getValueFromSize = goog.abstractMethod;
+
+npf.ui.scrollable.ScrollBar.prototype.update = function() {
+  if (this.container_) {
+    /** @type {goog.math.Size} */
+    var size = this.container_.getSize();
+    /** @type {goog.math.Size} */
+    var contentSize = this.container_.getContentSize();
+
+    if (!(
+      size && contentSize &&
+      goog.math.Size.equals(this.containerSize_, size) &&
+      goog.math.Size.equals(this.containerContentSize_, contentSize)
+    )) {
+      this.containerSize_ = size;
+      this.containerContentSize_ = contentSize;
+
+      /** @type {number} */
+      var containerSize = this.getValueFromSize(size);
+      /** @type {number} */
+      var containerContentSize = this.getValueFromSize(contentSize);
+
+      this.applySize(this.getSize());
+      this.applyRunnerSize(this.getRunnerSize());
+      this.setVisible(0 < containerContentSize - containerSize);
+
+      if (this.isEnabled()) {
+        this.applyPosition(this.getPosition());
       }
-    } else if (this.dragger_) {
-      this.dragger_.dispose();
-      this.dragger_ = null;
+
+      if (this.dragger_) {
+        this.dragger_.setLimits(this.getLimits());
+      }
+    }
+
+    /** @type {goog.math.Coordinate} */
+    var scrollPosition = this.container_.getScrollPosition();
+    this.setPosition(this.getValueFromCoordinate(scrollPosition));
+  } else {
+    this.setVisible(false);
+  }
+};
+
+/**
+ * @param {npf.ui.scrollable.Container} container
+ * @param {boolean} listen
+ * @protected
+ */
+npf.ui.scrollable.ScrollBar.prototype.setListenedContainer = function(
+    container, listen) {
+  if (this.isInDocument()) {
+    /** @type {goog.events.EventHandler} */
+    var handler = this.getHandler();
+    var eventTypes = [
+      npf.ui.scrollable.Container.EventType.RESIZE,
+      npf.ui.scrollable.Container.EventType.SCROLL
+    ];
+
+    if (listen) {
+      handler.listen(container, eventTypes, this.onContainerUpdate_);
+    } else {
+      handler.unlisten(container, eventTypes, this.onContainerUpdate_);
     }
   }
-};
-
-/**
- * @param {goog.events.BrowserEvent} evt
- * @private
- */
-npf.ui.scrollable.ScrollBar.prototype.onBeforeDrag_ = function(evt) {
-  /** @type {!goog.math.Coordinate} */
-  var position = goog.style.getRelativePosition(evt, this.getElement());
-  /** @type {number} */
-  var diff = Math.round(this.getRunnerSize() / 2);
-
-  if (this.onDrag(position.x - diff, position.y - diff)) {
-    this.setPositionInternal(this.position_);
-  }
-};
-
-/**
- * @param {goog.fx.DragEvent} evt
- * @private
- */
-npf.ui.scrollable.ScrollBar.prototype.onDragStart_ = function(evt) {
-  this.getRenderer().setUnselectable(
-    this.getDomHelper().getDocument().body, true);
-};
-
-/**
- * @param {goog.fx.DragEvent} evt
- * @private
- */
-npf.ui.scrollable.ScrollBar.prototype.onDrag_ = function(evt) {
-  this.onDrag(evt.left, evt.top);
-};
-
-/**
- * @param {goog.fx.DragEvent} evt
- * @private
- */
-npf.ui.scrollable.ScrollBar.prototype.onDragEnd_ = function(evt) {
-  this.getRenderer().setUnselectable(
-    this.getDomHelper().getDocument().body, false);
 };
 
 /**
@@ -514,11 +569,11 @@ npf.ui.scrollable.ScrollBar.prototype.onDrag = function(left, top) {
   /** @type {number} */
   var position = this.getPositionByRunner(runnerPosition);
 
-  if (this.position_ != position) {
-    this.position_ = position;
+  if (this.getPosition() != position) {
+    this.setPositionInternal(position);
 
     var event = new npf.ui.scrollable.ScrollBarEvent(
-      npf.ui.scrollable.ScrollBar.EventType.SCROLL, this.position_);
+      npf.ui.scrollable.ScrollBar.EventType.SCROLL, this.getPosition());
     this.dispatchEvent(event);
 
     return true;
@@ -526,41 +581,6 @@ npf.ui.scrollable.ScrollBar.prototype.onDrag = function(left, top) {
 
   return false;
 };
-
-/**
- * @return {Element}
- */
-npf.ui.scrollable.ScrollBar.prototype.getRunnerElement = function() {
-  return this.getRenderer().getRunnerElement(this.getElement());
-};
-
-/**
- * @return {Element}
- */
-npf.ui.scrollable.ScrollBar.prototype.getBackgroundElement = function() {
-  return this.getRenderer().getBackgroundElement(this.getElement());
-};
-
-/**
- * @param {goog.math.Coordinate} coordinate
- * @return {number}
- * @protected
- */
-npf.ui.scrollable.ScrollBar.prototype.getValueFromCoordinate =
-  goog.abstractMethod;
-
-/**
- * @param {goog.math.Size} size
- * @return {number}
- * @protected
- */
-npf.ui.scrollable.ScrollBar.prototype.getValueFromSize = goog.abstractMethod;
-
-/**
- * @return {goog.math.Rect}
- * @protected
- */
-npf.ui.scrollable.ScrollBar.prototype.getLimits = goog.abstractMethod;
 
 
 /**

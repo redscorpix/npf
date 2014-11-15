@@ -13,17 +13,38 @@ goog.require('npf.pages.Request');
 
 /**
  * @param {npf.pages.Manager} manager
+ * @param {string} type
  * @constructor
  * @extends {goog.events.EventTarget}
  */
-npf.pages.Page = function(manager) {
+npf.pages.Page = function(manager, type) {
   goog.base(this);
 
+  /**
+   * @private {npf.pages.Manager}
+   */
   this.manager_ = manager;
-  this.helpersMap_ = {};
 
+  /**
+   * @private {string}
+   */
+  this.type_ = type;
+
+  /**
+   * @private {goog.events.EventHandler}
+   */
   this.handler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.handler_);
+
+  /**
+   * @private {boolean}
+   */
+  this.loaded_ = false;
+
+  /**
+   * @private {string}
+   */
+  this.title_ = '';
 };
 goog.inherits(npf.pages.Page, goog.events.EventTarget);
 
@@ -40,36 +61,6 @@ npf.pages.Page.EventType = {
   TITLE_CHANGE: goog.events.getUniqueId('titleChange')
 };
 
-/**
- * @type {npf.pages.Manager}
- * @private
- */
-npf.pages.Page.prototype.manager_;
-
-/**
- * @type {Object.<string,goog.Disposable>}
- * @private
- */
-npf.pages.Page.prototype.helpersMap_;
-
-/**
- * @type {goog.events.EventHandler}
- * @private
- */
-npf.pages.Page.prototype.handler_;
-
-/**
- * @type {boolean}
- * @private
- */
-npf.pages.Page.prototype.loaded_ = false;
-
-/**
- * @type {string}
- * @private
- */
-npf.pages.Page.prototype.title_ = '';
-
 
 /** @inheritDoc */
 npf.pages.Page.prototype.disposeInternal = function() {
@@ -77,13 +68,13 @@ npf.pages.Page.prototype.disposeInternal = function() {
 
   goog.base(this, 'disposeInternal');
 
-  this.manager_ = null;
-  this.helpersMap_ = null;
   this.handler_ = null;
+  this.manager_ = null;
 };
 
 /**
  * @param {npf.pages.Request} request
+ * @throws {Error}
  */
 npf.pages.Page.prototype.load = function(request) {
   if (!this.loaded_) {
@@ -109,6 +100,9 @@ npf.pages.Page.prototype.loadInternal = function(request) {
   this.initHelpers(request);
 };
 
+/**
+ * @throws {Error}
+ */
 npf.pages.Page.prototype.unload = function() {
   if (!this.loaded_) {
     return;
@@ -131,9 +125,7 @@ npf.pages.Page.prototype.unload = function() {
 /**
  * @protected
  */
-npf.pages.Page.prototype.unloadInternal = function() {
-  this.removeHelpers();
-};
+npf.pages.Page.prototype.unloadInternal = goog.nullFunction;
 
 /**
  * @param {npf.pages.Request} request
@@ -220,10 +212,10 @@ npf.pages.Page.prototype.getUsingHelperTypes = function() {
 };
 
 /**
- * @return {Object.<string,goog.Disposable>}
+ * @return {Object.<goog.Disposable>}
  */
 npf.pages.Page.prototype.getHelpersMap = function() {
-  return this.helpersMap_;
+  return this.getManager().getHelpersMap();
 };
 
 /**
@@ -231,15 +223,7 @@ npf.pages.Page.prototype.getHelpersMap = function() {
  * @return {goog.Disposable}
  */
 npf.pages.Page.prototype.getHelper = function(type) {
-  return this.helpersMap_[type] || null;
-};
-
-/**
- * @param {goog.Disposable} helper
- * @param {string} type
- */
-npf.pages.Page.prototype.setHelper = function(helper, type) {
-  this.helpersMap_[type] = helper;
+  return this.getManager().getHelper(type);
 };
 
 /**
@@ -247,13 +231,6 @@ npf.pages.Page.prototype.setHelper = function(helper, type) {
  * @protected
  */
 npf.pages.Page.prototype.initHelpers = function(request) {};
-
-/**
- * @protected
- */
-npf.pages.Page.prototype.removeHelpers = function() {
-  this.helpersMap_ = {};
-};
 
 /**
  * @return {npf.pages.Manager}
@@ -324,8 +301,8 @@ npf.pages.Page.prototype.getRouteNameAt = function(index) {
 
 /**
  * @param {string|npf.router.Route} routeName
- * @param {Object.<string,number|string>=} opt_optionsMap
- * @param {string|goog.Uri.QueryData|Object.<string,string>=} opt_query
+ * @param {Object.<number|string>=} opt_optionsMap
+ * @param {string|goog.Uri.QueryData|Object.<string>=} opt_query
  * @param {boolean=} opt_replace
  */
 npf.pages.Page.prototype.navigateRoute = function(routeName, opt_optionsMap,
@@ -371,6 +348,13 @@ npf.pages.Page.prototype.getRequest = function() {
  */
 npf.pages.Page.prototype.getRequestFromHistory = function(opt_index) {
   return this.manager_ ? this.manager_.getRequestFromHistory(opt_index) : null;
+};
+
+/**
+ * @return {string}
+ */
+npf.pages.Page.prototype.getType = function() {
+  return this.type_;
 };
 
 /**

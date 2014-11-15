@@ -1,11 +1,6 @@
-/bin
-/lib
-/source/goog
-node_modules
-
 .DS_Store
 *~
 npf.sublime-project
 npf.sublime-workspace
-
 bin
+node_modules

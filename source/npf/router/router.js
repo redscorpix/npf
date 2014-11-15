@@ -6,7 +6,7 @@ goog.require('goog.array');
 goog.require('goog.events');
 goog.require('goog.events.Event');
 goog.require('goog.events.EventTarget');
-goog.require('goog.history.Html5History');
+goog.require('goog.history.EventType');
 goog.require('npf.History');
 
 
@@ -18,14 +18,41 @@ goog.require('npf.History');
 npf.Router = function(opt_history) {
   goog.base(this);
 
+  /**
+   * @private {string}
+   */
+  this.currentRouteName_ = '';
+
+  /**
+   * @private {boolean}
+   */
+  this.enabled_ = false;
+
+  /**
+   * @type {goog.History|npf.History}
+   * @private
+   */
   this.history_ = opt_history || new npf.History();
   this.registerDisposable(this.history_);
 
-  goog.events.listen(this.history_, goog.history.EventType.NAVIGATE,
-  	this.onNavigate_, false, this);
-
-  this.routesMap_ = {};
+  /**
+   * @private {Array.<npf.Router.NamedRoute>}
+   */
   this.namedRoutes_ = [];
+
+  /**
+   * @type {Object.<npf.router.Route>}
+   * @private
+   */
+  this.routesMap_ = {};
+
+  /**
+   * @private {boolean}
+   */
+  this.slashSuffixEnabled_ = true;
+
+  this.history_.listen(
+    goog.history.EventType.NAVIGATE, this.onNavigate_, false, this);
 };
 goog.inherits(npf.Router, goog.events.EventTarget);
 
@@ -88,54 +115,16 @@ npf.Router.normalizeRootPath = function() {
   return true;
 };
 
-/**
- * @type {goog.History|npf.History}
- * @private
- */
-npf.Router.prototype.history_;
-
-/**
- * @type {Object.<string,npf.router.Route>}
- * @private
- */
-npf.Router.prototype.routesMap_;
-
-/**
- * @type {Array.<npf.Router.NamedRoute>}
- * @private
- */
-npf.Router.prototype.namedRoutes_;
-
-/**
- * @type {string}
- * @private
- */
-npf.Router.prototype.currentRouteName_ = '';
-
-/**
- * @type {boolean}
- * @private
- */
-npf.Router.prototype.enabled_ = false;
-
-/**
- * @type {boolean}
- * @private
- */
-npf.Router.prototype.slashSuffixEnabled_ = true;
-
 
 /** @inheritDoc */
 npf.Router.prototype.disposeInternal = function() {
-  goog.events.unlisten(this.history_, goog.history.EventType.NAVIGATE,
-  	this.onNavigate_, false, this);
   this.setEnabled(false);
 
   goog.base(this, 'disposeInternal');
 
   this.history_ = null;
-  this.routesMap_ = null;
   this.namedRoutes_ = null;
+  this.routesMap_ = null;
 };
 
 /**
@@ -262,12 +251,12 @@ npf.Router.prototype.removeRoute = function(name) {
 
 /**
  * @param {string|npf.router.Route} routeName
- * @param {Object.<string,number|string>=} opt_optionsMap
- * @param {string|goog.Uri.QueryData|Object.<string,string>=} opt_query
+ * @param {Object.<number|string>=} opt_optionsMap
+ * @param {string|goog.Uri.QueryData|Object.<string>=} opt_query
  * @param {boolean=} opt_replace
  */
 npf.Router.prototype.navigateRoute = function(routeName, opt_optionsMap,
-																							opt_query, opt_replace) {
+    opt_query, opt_replace) {
   /** @type {npf.router.Route} */
   var route = goog.isString(routeName) ? this.getRoute(routeName) : routeName;
 
@@ -348,11 +337,12 @@ npf.Router.prototype.setEnabledInternal = function(enable) {
 };
 
 /**
- * @param {goog.events.Event} evt
+ * @param {goog.history.Event} evt
  * @private
  */
 npf.Router.prototype.onNavigate_ = function(evt) {
-  var token = /** @type {string} */ (evt.token);
+  /** @type {string} */
+  var token = evt.token;
   this.onNavigate(token);
 };
 
@@ -376,7 +366,7 @@ npf.Router.prototype.onNavigate = function(token) {
     }
   }
 
-  /** @type {{route:?npf.router.Route,name:string,uri:!goog.Uri,options:?Object.<string,string>}} */
+  /** @type {{route:?npf.router.Route,name:string,uri:!goog.Uri,options:?Object.<string>}} */
   var info = this.parseToken(token);
   var event = new npf.RouterEvent(npf.Router.EventType.NAVIGATE, info.uri,
     info.route, info.name, info.options);
@@ -385,14 +375,14 @@ npf.Router.prototype.onNavigate = function(token) {
 
 /**
  * @param {string|goog.Uri} token
- * @return {{route:?npf.router.Route,name:string,uri:!goog.Uri,options:?Object.<string,string>}}
+ * @return {{route:?npf.router.Route,name:string,uri:!goog.Uri,options:?Object.<string>}}
  */
 npf.Router.prototype.parseToken = function(token) {
   /** @type {!goog.Uri} */
   var uri = goog.Uri.parse(token);
   /** @type {string} */
   var name = '';
-  /** @type {Object.<string,string>} */
+  /** @type {Object.<string>} */
   var options = null;
 
   for (var i = this.namedRoutes_.length - 1; i >= 0; i--) {

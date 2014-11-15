@@ -1,9 +1,9 @@
 goog.provide('npf.ui.Image');
 
-goog.require('goog.dom.classes');
+goog.require('goog.dom.classlist');
 goog.require('goog.dom.TagName');
 goog.require('goog.math.Size');
-goog.require('goog.ui.Component');
+goog.require('npf.ui.Component');
 
 
 /**
@@ -11,54 +11,51 @@ goog.require('goog.ui.Component');
  * @param {number} width
  * @param {number} height
  * @constructor
- * @extends {goog.ui.Component}
+ * @extends {npf.ui.Component}
  */
 npf.ui.Image = function(src, width, height) {
   goog.base(this);
 
+  /**
+   * @private {string}
+   */
+  this.caption_ = '';
+
+  /**
+   * @private {Array.<string>}
+   */
+  this.cssClass_ = null;
+
+  /**
+   * @private {number}
+   */
+  this.height_ = height;
+
+  /**
+   * @private {string}
+   */
   this.src_ = src;
-  this.size_ = new goog.math.Size(width, height);
+
+  /**
+   * @private {number}
+   */
+  this.width_ = width;
 };
-goog.inherits(npf.ui.Image, goog.ui.Component);
-
-
-/**
- * @type {string}
- * @private
- */
-npf.ui.Image.prototype.src_;
-
-/**
- * @type {goog.math.Size}
- * @private
- */
-npf.ui.Image.prototype.size_;
-
-/**
- * @type {Array.<string>}
- * @private
- */
-npf.ui.Image.prototype.cssClass_ = null;
-
-/**
- * @type {?string}
- * @private
- */
-npf.ui.Image.prototype.caption_ = null;
+goog.inherits(npf.ui.Image, npf.ui.Component);
 
 
 /** @inheritDoc */
 npf.ui.Image.prototype.createDom = function() {
   /** @type {!Element} */
   var element = this.getDomHelper().createDom(goog.dom.TagName.IMG, {
-    'alt': this.caption_ || '',
+    'alt': this.caption_,
     'src': this.src_,
-    'width': this.size_.width,
-    'height': this.size_.height
+    'width': this.width_,
+    'height': this.height_
   });
 
   if (this.cssClass_) {
-    goog.dom.classes.add(element, this.cssClass_.join(' '));
+    goog.dom.classlist.addAll(element, this.cssClass_);
   }
 
   this.setElementInternal(element);
@@ -68,22 +65,21 @@ npf.ui.Image.prototype.createDom = function() {
 npf.ui.Image.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
-  this.size_ = null;
   this.cssClass_ = null;
 };
 
 /**
  * @return {string}
  */
-npf.ui.Image.prototype.getSrc = function() {
-  return this.src_;
+npf.ui.Image.prototype.getCaption = function() {
+  return this.caption_;
 };
 
 /**
- * @return {goog.math.Size}
+ * @param {string} caption
  */
-npf.ui.Image.prototype.getSize = function() {
-  return this.size_;
+npf.ui.Image.prototype.setCaption = function(caption) {
+  this.caption_ = caption;
 };
 
 /**
@@ -105,15 +101,15 @@ npf.ui.Image.prototype.setCssClass = function(cssClass) {
 };
 
 /**
- * @param {?string} caption
+ * @return {!goog.math.Size}
  */
-npf.ui.Image.prototype.setCaption = function(caption) {
-  this.caption_ = caption;
+npf.ui.Image.prototype.getSize = function() {
+  return new goog.math.Size(this.width_, this.height_);
 };
 
 /**
- * @return {?string}
+ * @return {string}
  */
-npf.ui.Image.prototype.getCaption = function() {
-  return this.caption_;
+npf.ui.Image.prototype.getSrc = function() {
+  return this.src_;
 };

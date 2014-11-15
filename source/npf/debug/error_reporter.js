@@ -8,16 +8,17 @@ goog.require('goog.debug.ErrorReporter');
  * reporter see the {@see #install} method below.
  *
  * @param {string} handlerUrl The URL to which all errors will be reported.
- * @param {function(!Error, !Object.<string, string>)=}
- *     opt_contextProvider When a report is to be sent to the server,
- *     this method will be called, and given an opportunity to modify the
- *     context object before submission to the server.
+ * @param {function(!Error, !Object.<string>)=} opt_contextProvider When
+ *     a report is to be sent to the server, this method will be called,
+ *     and given an opportunity to modify the context object before submission
+ *     to the server.
  * @param {boolean=} opt_noAutoProtect Whether to automatically add handlers for
  *     onerror and to protect entry points.  If apps have other error reporting
  *     facilities, it may make sense for them to set these up themselves and use
  *     the ErrorReporter just for transmission of reports.
  * @constructor
  * @extends {goog.debug.ErrorReporter}
+ * @deprecated
  */
 npf.debug.ErrorReporter = function(handlerUrl, opt_contextProvider,
 																   opt_noAutoProtect) {
@@ -31,10 +32,10 @@ goog.inherits(npf.debug.ErrorReporter, goog.debug.ErrorReporter);
  *
  * @param {string} loggingUrl The URL to which the errors caught will be
  *     reported.
- * @param {function(!Error, !Object.<string, string>)=}
- *     opt_contextProvider When a report is to be sent to the server,
- *     this method will be called, and given an opportunity to modify the
- *     context object before submission to the server.
+ * @param {function(!Error, !Object.<string>)=} opt_contextProvider When
+ *     a report is to be sent to the server, this method will be called,
+ *     and given an opportunity to modify the context object before submission
+ *     to the server.
  * @param {boolean=} opt_noAutoProtect Whether to automatically add handlers for
  *     onerror and to protect entry points.  If apps have other error reporting
  *     facilities, it may make sense for them to set these up themselves and use

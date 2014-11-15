@@ -2,7 +2,7 @@ goog.provide('npf.arch.deflate.deflator.DeflateConfiguration');
 
 
 /**
- * Values for this._maxLazyMatch, this._goodMatch and this._maxChainLength,
+ * Values for this.maxLazyMatch, this.goodMatch and this.maxChainLength,
  * depending on the desired pack level (0..9). The values given below have
  * been tuned to exclude worst case performance for pathological files.
  * Better values may be found for specific files.
@@ -21,6 +21,11 @@ npf.arch.deflate.deflator.DeflateConfiguration = function(a, b, c, d) {
   this.goodLength = a;
 
   /**
+   * @type {number}
+   */
+  this.maxChain = d;
+
+  /**
    * Do not perform lazy search above this match length
    * @type {number}
    */
@@ -31,9 +36,4 @@ npf.arch.deflate.deflator.DeflateConfiguration = function(a, b, c, d) {
    * @type {number}
    */
   this.niceLength = c;
-
-  /**
-   * @type {number}
-   */
-  this.maxChain = d;
 };

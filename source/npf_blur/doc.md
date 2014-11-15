@@ -2,11 +2,10 @@
 
 Источник: StackBlur, (www.quasimondo.com)[http://www.quasimondo.com], author: Mario Klingemann
 
-`npfBlur(img: HTMLImageElement, canvas: HTMLCanvasElement, radius: number, opt_blurAlphaChannel: boolean=): boolean`
+`npfBlur(img: Image|HTMLImageElement|HTMLCanvasElement, radius: number, opt_blurAlphaChannel: boolean=): HTMLCanvasElement`
 
-Блюрит изображение. Если получилось, возвращает true.
+Блюрит изображение. Если получилось, возвращает элемент `canvas`.
 
 * `img` — картинка.
-* `canvas` — элемент, куда заблюрится картинка.
 * `radius` — радиус блюра.
 * `opt_blurAlphaChannel` — что-то с альфа-каналом.

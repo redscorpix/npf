@@ -7,7 +7,7 @@ goog.require('goog.events.EventType');
 goog.require('goog.math');
 goog.require('goog.object');
 goog.require('goog.userAgent');
-goog.require('npf.dom.svg.Ns');
+goog.require('npf.svg.Ns');
 
 
 /**
@@ -15,8 +15,20 @@ goog.require('npf.dom.svg.Ns');
  * @constructor
  */
 npf.userAgent.Support = function() {
+  /**
+   * @type {!Object.<npf.userAgent.Support.Property_,*>}
+   * @private
+   */
   this.checks_ = {};
+
+  /**
+   * @private {CSSStyleDeclaration}
+   */
   this.mStyle_ = goog.dom.createElement(npf.userAgent.Support.MOD).style;
+
+  /**
+   * @private {!Object.<string>}
+   */
   this.cssPropertyNames_ = {};
 };
 goog.addSingletonGetter(npf.userAgent.Support);
@@ -87,30 +99,36 @@ npf.userAgent.Support.Property_ = {
 };
 
 /**
+ * @typedef {{m4a:string,mp3:string,ogg:string,wav:string}}
+ */
+npf.userAgent.Support.AudioFeature;
+
+/**
+ * @typedef {{ogg:string,h264:string,webm:string}}
+ */
+npf.userAgent.Support.VideoFeature;
+
+/**
  * @type {!Object.<string>}
  */
-npf.userAgent.Support.eventTagNames = function() {
-  return goog.object.create(
-    goog.events.EventType.SELECT, goog.dom.TagName.INPUT,
-    goog.events.EventType.CHANGE, goog.dom.TagName.INPUT,
-    goog.events.EventType.SUBMIT, goog.dom.TagName.FORM,
-    'reset', goog.dom.TagName.FORM,
-    goog.events.EventType.ERROR, goog.dom.TagName.IMG,
-    goog.events.EventType.LOAD, goog.dom.TagName.IMG,
-    'abort', goog.dom.TagName.IMG
-  );
-}();
+npf.userAgent.Support.eventTagNames = goog.object.create(
+  goog.events.EventType.SELECT, goog.dom.TagName.INPUT,
+  goog.events.EventType.CHANGE, goog.dom.TagName.INPUT,
+  goog.events.EventType.SUBMIT, goog.dom.TagName.FORM,
+  'reset', goog.dom.TagName.FORM,
+  goog.events.EventType.ERROR, goog.dom.TagName.IMG,
+  goog.events.EventType.LOAD, goog.dom.TagName.IMG,
+  'abort', goog.dom.TagName.IMG
+);
 
 /**
  * Create our element that we do most feature tests on.
- * @type {string}
- * @const
+ * @const {string}
  */
 npf.userAgent.Support.MOD = 'useragentsupport_' + goog.math.randomInt(1000000);
 
 /**
- * @type {string}
- * @const
+ * @const {string}
  */
 npf.userAgent.Support.SMILE = ':)';
 
@@ -134,8 +152,7 @@ npf.userAgent.Support.prefixes = (npf.userAgent.Support.vendorPrefix ? ' -' +
   npf.userAgent.Support.vendorPrefix + '- ' : ' ').split(' ');
 
 /**
- * @type {string}
- * @private
+ * @private {string}
  */
 npf.userAgent.Support.omPrefixes_ = 'Webkit Moz O ms';
 
@@ -161,24 +178,6 @@ npf.userAgent.Support.domPrefixes =
 npf.userAgent.Support.cssomPrefixes =
   npf.userAgent.Support.omPrefixes_.split(' ');
 
-/**
- * @type {!Object.<npf.userAgent.Support.Property_,*>}
- * @private
- */
-npf.userAgent.Support.prototype.checks_;
-
-/**
- * @type {CSSStyleDeclaration}
- * @private
- */
-npf.userAgent.Support.prototype.mStyle_;
-
-/**
- * @type {!Object.<string>}
- * @private
- */
-npf.userAgent.Support.prototype.cssPropertyNames_;
-
 
 /**
  * Returns property name with proper browser prefix.
@@ -190,10 +189,12 @@ npf.userAgent.Support.prototype.getCssPropertyName = function(str) {
   if (!goog.isDef(this.cssPropertyNames_[str])) {
     /** @type {!Element} */
     var element = goog.dom.createElement(goog.dom.TagName.DIV);
-    /** @type {string} */
-    var str1 = str.replace(/\-[a-z]/g, function(str, m1) {
+    /** @type {function(string):string} */
+    var replaceFunc = function(str) {
       return str.charAt(1).toUpperCase();
-    });
+    };
+    /** @type {string} */
+    var str1 = str.replace(/\-[a-z]/g, replaceFunc);
     /** @type {string} */
     var str2 = str1.charAt(0).toUpperCase() + str1.substr(1);
 
@@ -247,10 +248,13 @@ npf.userAgent.support.getCssPropertyName = function(str) {
  * @return {boolean}
  */
 npf.userAgent.Support.prototype.mq = function(mq) {
-  var matchMedia = goog.global['matchMedia'] || goog.global['msMatchMedia'];
+  /** @type {function(string):MediaQueryList} */
+  var matchMedia = goog.global.matchMedia ||
+    /** @type {function(string):MediaQueryList} */ (
+      goog.global['msMatchMedia']);
 
   if (matchMedia) {
-    return matchMedia(mq)['matches'];
+    return matchMedia(mq).matches;
   }
 
   /** @type {boolean} */
@@ -259,10 +263,14 @@ npf.userAgent.Support.prototype.mq = function(mq) {
   var cssText = '@media ' + mq + ' { #' + npf.userAgent.Support.MOD +
     ' { position: absolute; } }';
 
-  this.testStyles_(cssText, function(node) {
-    bool = (goog.global.getComputedStyle ?
-      goog.global.getComputedStyle(node, null) :
-      node.currentStyle)['position'] == 'absolute';
+  this.testStyles_(cssText, function(element) {
+    /** @type {!Window} */
+    var win = goog.dom.getWindow();
+    /** @type {Object} */
+    var style = win.getComputedStyle ?
+      win.getComputedStyle(element, null) :
+      /** @type {Object} */ (element['currentStyle']);
+    bool = 'absolute' == style['position'];
   });
 
   return bool;
@@ -383,8 +391,10 @@ npf.userAgent.Support.prototype.getAnimatedPng = function(callback, opt_scope) {
   } else {
     var image = new Image();
     image.onload = goog.bind(function () {
-      var ctx = goog.dom.createElement(goog.dom.TagName.CANVAS)
-        .getContext('2d');
+      var canvasElement = /** @type {!HTMLCanvasElement} */ (
+        goog.dom.createElement(goog.dom.TagName.CANVAS));
+      var ctx = /** @type {CanvasRenderingContext2D} */ (
+        canvasElement.getContext('2d'));
       ctx.drawImage(image, 0, 0);
 
       this.checks_[propName] = 0 === ctx.getImageData(0, 0, 1, 1).data[3];
@@ -403,7 +413,8 @@ npf.userAgent.Support.prototype.getAnimatedPng = function(callback, opt_scope) {
  * @param {Object=} opt_scope
  */
 npf.userAgent.support.getAnimatedPng = function(callback, opt_scope) {
-  return npf.userAgent.Support.getInstance().getAnimatedPng(callback, opt_scope);
+  return npf.userAgent.Support.getInstance().getAnimatedPng(
+    callback, opt_scope);
 };
 
 /**
@@ -437,76 +448,92 @@ npf.userAgent.support.getAudioData = function() {
 };
 
 /**
- * @return {boolean}
+ * @return {string} 'probably', 'maybe' or empty string.
  */
 npf.userAgent.Support.prototype.getAudioOgg = function() {
   if (this.getAudio()) {
-    return /** @type {boolean} */ (
-      this.checks_[npf.userAgent.Support.Property_.AUDIO].ogg);
+    var features = /** @type {npf.userAgent.Support.AudioFeature?} */ (
+      this.checks_[npf.userAgent.Support.Property_.AUDIO]);
+
+    if (features) {
+      return features.ogg;
+    }
   }
 
-  return false;
+  return '';
 };
 
 /**
- * @return {boolean}
+ * @return {string} 'probably', 'maybe' or empty string.
  */
 npf.userAgent.support.getAudioOgg = function() {
   return npf.userAgent.Support.getInstance().getAudioOgg();
 };
 
 /**
- * @return {boolean}
+ * @return {string} 'probably', 'maybe' or empty string.
  */
 npf.userAgent.Support.prototype.getAudioMp3 = function() {
   if (this.getAudio()) {
-    return /** @type {boolean} */ (
-      this.checks_[npf.userAgent.Support.Property_.AUDIO].mp3);
+    var features = /** @type {npf.userAgent.Support.AudioFeature?} */ (
+      this.checks_[npf.userAgent.Support.Property_.AUDIO]);
+
+    if (features) {
+      return features.mp3;
+    }
   }
 
-  return false;
+  return '';
 };
 
 /**
- * @return {boolean}
+ * @return {string} 'probably', 'maybe' or empty string.
  */
 npf.userAgent.support.getAudioMp3 = function() {
   return npf.userAgent.Support.getInstance().getAudioMp3();
 };
 
 /**
- * @return {boolean}
+ * @return {string} 'probably', 'maybe' or empty string.
  */
 npf.userAgent.Support.prototype.getAudioWav = function() {
   if (this.getAudio()) {
-    return /** @type {boolean} */ (
-      this.checks_[npf.userAgent.Support.Property_.AUDIO].wav);
+    var features = /** @type {npf.userAgent.Support.AudioFeature?} */ (
+      this.checks_[npf.userAgent.Support.Property_.AUDIO]);
+
+    if (features) {
+      return features.wav;
+    }
   }
 
-  return false;
+  return '';
 };
 
 /**
- * @return {boolean}
+ * @return {string} 'probably', 'maybe' or empty string.
  */
 npf.userAgent.support.getAudioWav = function() {
   return npf.userAgent.Support.getInstance().getAudioWav();
 };
 
 /**
- * @return {boolean}
+ * @return {string} 'probably', 'maybe' or empty string.
  */
 npf.userAgent.Support.prototype.getAudioM4a = function() {
   if (this.getAudio()) {
-    return /** @type {boolean} */ (
-      this.checks_[npf.userAgent.Support.Property_.AUDIO].m4a);
+    var features = /** @type {npf.userAgent.Support.AudioFeature?} */ (
+      this.checks_[npf.userAgent.Support.Property_.AUDIO]);
+
+    if (features) {
+      return features.m4a;
+    }
   }
 
-  return false;
+  return '';
 };
 
 /**
- * @return {boolean}
+ * @return {string} 'probably', 'maybe' or empty string.
  */
 npf.userAgent.support.getAudioM4a = function() {
   return npf.userAgent.Support.getInstance().getAudioM4a();
@@ -517,24 +544,24 @@ npf.userAgent.support.getAudioM4a = function() {
  */
 npf.userAgent.Support.prototype.getAudio = function() {
   if (!goog.isDef(this.checks_[npf.userAgent.Support.Property_.AUDIO])) {
-    /** @type {!Element} */
-    var elem = goog.dom.createElement('audio');
-    /** @type {{ogg:boolean,mp3:boolean,wav:boolean,m4a:boolean}?} */
+    var elem = /** @type {!HTMLAudioElement} */ (
+      goog.dom.createElement('audio'));
+    /** @type {npf.userAgent.Support.AudioFeature?} */
     var types = null;
 
     try {
       if (elem.canPlayType) {
-        types = {};
-        types.ogg = elem.canPlayType('audio/ogg; codecs="vorbis"')
-          .replace(/^no$/, '');
-        types.mp3 = elem.canPlayType('audio/mpeg;').replace(/^no$/, '');
-
         // Mimetypes accepted:
         //   https://developer.mozilla.org/En/Media_formats_supported_by_the_audio_and_video_elements
         //   http://bit.ly/iphoneoscodecs
-        types.wav = elem.canPlayType('audio/wav; codecs="1"').replace(/^no$/, '');
-        types.m4a = elem.canPlayType('audio/x-m4a;') ||
-          elem.canPlayType('audio/aac;').replace(/^no$/, '');
+        types = {
+          m4a: elem.canPlayType('audio/x-m4a;') ||
+            elem.canPlayType('audio/aac;').replace(/^no$/, ''),
+          mp3: elem.canPlayType('audio/mpeg;').replace(/^no$/, ''),
+          ogg: elem.canPlayType('audio/ogg; codecs="vorbis"').
+            replace(/^no$/, ''),
+          wav: elem.canPlayType('audio/wav; codecs="1"').replace(/^no$/, '')
+        };
       }
     } catch(e) { }
 
@@ -591,10 +618,12 @@ npf.userAgent.Support.prototype.getBackgroundRepeatRound = function() {
       ' { background-repeat: round; }';
 
     this.testStyles_(style, function(elem, rule) {
-      var getComputedStyle = goog.global['getComputedStyle'];
-      var value = getComputedStyle
-        ? getComputedStyle(elem, null)['getPropertyValue']('background')
-        : elem.currentStyle['background'];
+      /** @type {!Window} */
+      var win = goog.dom.getWindow();
+      /** @type {string|undefined} */
+      var value = win.getComputedStyle ?
+        win.getComputedStyle(elem, null).getPropertyValue('background') :
+        /** @type {string|undefined} */ (elem['currentStyle']['background']);
       supported = 'round' == value;
     });
     this.checks_[propName] = supported;
@@ -624,9 +653,13 @@ npf.userAgent.Support.prototype.getBackgroundRepeatSpace = function() {
       ' { background-repeat: space; }';
 
     this.testStyles_(style, function(elem, rule) {
-      var value = goog.global.getComputedStyle
-        ? goog.global.getComputedStyle(elem, null)['getPropertyValue']('background')
-        : elem.currentStyle['background'];
+      /** @type {!Window} */
+      var win = goog.dom.getWindow();
+      /** @type {string|undefined} */
+      var value = win.getComputedStyle ?
+        win.getComputedStyle(elem, null).getPropertyValue('background') :
+        /** @type {string|undefined} */ (elem['currentStyle']['background']);
+
       supported = 'space' == value;
     });
     this.checks_[propName] = supported;
@@ -679,8 +712,11 @@ npf.userAgent.Support.prototype.getBackgroundSizeCover = function() {
     var style = '#' + npf.userAgent.Support.MOD + '{background-size:cover}';
 
     this.testStyles_(style, function(elem) {
-      var style = goog.global.getComputedStyle ?
-        goog.global.getComputedStyle(elem, null) : elem.currentStyle;
+      /** @type {!Window} */
+      var win = goog.dom.getWindow();
+      /** @type {Object} */
+      var style = win.getComputedStyle ? win.getComputedStyle(elem, null) :
+        /** @type {Object} */ (elem['currentStyle']);
 
       supported = 'cover' == style['backgroundSize'];
     });
@@ -733,7 +769,7 @@ npf.userAgent.Support.prototype.getBlobConstructor = function() {
     var supported = false;
 
     try {
-      supported = !!new goog.global['Blob']();
+      supported = !!(new goog.global.Blob());
     } catch (e) { }
 
     this.checks_[propName] = supported;
@@ -808,9 +844,9 @@ npf.userAgent.Support.prototype.getBoxSizing = function() {
   if (!goog.isDef(this.checks_[propName])) {
     /** @type {!Document} */
     var doc = goog.dom.getDomHelper().getDocument();
-
-    this.checks_[propName] = this.testPropsAll_('boxSizing') &&
-      (!goog.isDef(doc.documentMode) || doc.documentMode > 7);
+    this.checks_[propName] = this.testPropsAll_('boxSizing') && (
+      !goog.isDef(doc['documentMode']) || 7 < doc['documentMode']
+    );
   }
 
   return /** @type {boolean} */ (this.checks_[propName]);
@@ -830,9 +866,8 @@ npf.userAgent.Support.prototype.getCanvas = function() {
   var propName = npf.userAgent.Support.Property_.CANVAS;
 
   if (!goog.isDef(this.checks_[propName])) {
-    /** @type {!Element} */
-    var elem = goog.dom.createElement(goog.dom.TagName.CANVAS);
-
+    var elem = /** @type {!HTMLCanvasElement} */ (
+      goog.dom.createElement(goog.dom.TagName.CANVAS));
     this.checks_[propName] = !!(elem.getContext && elem.getContext('2d'));
   }
 
@@ -852,7 +887,7 @@ npf.userAgent.support.getCanvas = function() {
  */
 npf.userAgent.Support.prototype.getCanvasToJpeg = function(callback,
     opt_scope) {
-  this._canvasToDataUrl(
+  this.canvasToDataUrl_(
     npf.userAgent.Support.Property_.CANVAS_TO_JPEG, callback, opt_scope);
 };
 
@@ -871,7 +906,7 @@ npf.userAgent.support.getCanvasToJpeg = function(callback, opt_scope) {
  */
 npf.userAgent.Support.prototype.getCanvasToWebp = function(callback,
     opt_scope) {
-  this._canvasToDataUrl(
+  this.canvasToDataUrl_(
     npf.userAgent.Support.Property_.CANVAS_TO_WEBP, callback, opt_scope);
 };
 
@@ -892,7 +927,7 @@ npf.userAgent.support.getCanvasToWebp = function(callback, opt_scope) {
  * @param {Object=} opt_scope
  * @private
  */
-npf.userAgent.Support.prototype._canvasToDataUrl = function(propName, callback,
+npf.userAgent.Support.prototype.canvasToDataUrl_ = function(propName, callback,
     opt_scope) {
   var Property = npf.userAgent.Support.Property_;
 
@@ -905,8 +940,10 @@ npf.userAgent.Support.prototype._canvasToDataUrl = function(propName, callback,
   } else {
     var image = new Image();
     image.onload = goog.bind(function() {
-      var canvas = goog.dom.createElement(goog.dom.TagName.CANVAS);
-      var ctx = canvas.getContext('2d');
+      var canvas = /** @type {!HTMLCanvasElement} */ (
+        goog.dom.createElement(goog.dom.TagName.CANVAS));
+      var ctx = /** @type {CanvasRenderingContext2D} */ (
+        canvas.getContext('2d'));
       ctx.drawImage(image, 0, 0);
 
       this.checks_[Property.CANVAS_TO_JPEG] =
@@ -928,8 +965,17 @@ npf.userAgent.Support.prototype.getCanvasText = function() {
   var propName = npf.userAgent.Support.Property_.CANVAS_TEXT;
 
   if (!goog.isDef(this.checks_[propName])) {
-    this.checks_[propName] = this.getCanvas() && goog.isFunction(
-      goog.dom.createElement(goog.dom.TagName.CANVAS).getContext('2d').fillText);
+    var support = false;
+
+    if (this.getCanvas()) {
+      var element = /** @type {!HTMLCanvasElement} */ (
+        goog.dom.createElement(goog.dom.TagName.CANVAS));
+      var ctx = /** @type {CanvasRenderingContext2D} */ (
+        element.getContext('2d'));
+      support = goog.isFunction(ctx.fillText);
+    }
+
+    this.checks_[propName] = support;
   }
 
   return /** @type {boolean} */ (this.checks_[propName]);
@@ -1125,7 +1171,8 @@ npf.userAgent.Support.prototype.getCssTransforms3d = function() {
       isPropertySupported &&
       'webkitPerspective' in doc.documentElement.style
     ) {
-      // Webkit allows this media query to succeed only if the feature is enabled.
+      // Webkit allows this media query to succeed only if the feature
+      // is enabled.
       // `@media (transform-3d),(-o-transform-3d),(-moz-transform-3d),
       // (-ms-transform-3d),(-webkit-transform-3d),(MOD){ ... }`
 
@@ -1406,9 +1453,12 @@ npf.userAgent.Support.prototype.getFileInput = function() {
   var propName = npf.userAgent.Support.Property_.FILE_INPUT;
 
   if (!goog.isDef(this.checks_[propName])) {
-    this.checks_[propName] = !goog.dom.createDom(goog.dom.TagName.INPUT, {
-      'type': 'file'
-    }).disabled;
+    var inputElement = /** @type {HTMLInputElement} */ (
+      goog.dom.createDom(goog.dom.TagName.INPUT, {
+        'type': 'file'
+      })
+    );
+    this.checks_[propName] = !inputElement.disabled;
   }
 
   return /** @type {boolean} */ (this.checks_[propName]);
@@ -1475,14 +1525,26 @@ npf.userAgent.Support.prototype.getFontFace = function() {
     /** @type {string} */
     var style = '@font-face {font-family:"font";src:url("https://")}';
 
-    this.testStyles_(style, function(node, rule) {
-      var style = goog.dom.getElement('s' + npf.userAgent.Support.MOD);
-      var sheet = style.sheet || style.styleSheet;
-      var cssText = sheet ? (
-        sheet.cssRules && sheet.cssRules[0]
-          ? sheet.cssRules[0].cssText
-          : sheet.cssText || ''
-      ) : '';
+    this.testStyles_(style, function(element, rule) {
+      var style = /** @type {HTMLStyleElement} */ (
+        goog.dom.getElement('s' + npf.userAgent.Support.MOD));
+      /** @type {StyleSheet} */
+      var sheet = /** @type {StyleSheet} */ (style['sheet']) ||
+        style.styleSheet;
+      /** @type {string} */
+      var cssText = '';
+
+      if (sheet['cssRules']) {
+        var cssSheet = /** @type {CSSStyleSheet} */ (sheet);
+        /** @type {CSSRule} */
+        var cssItem = cssSheet.cssRules.item(0);
+
+        if (cssItem) {
+          cssText = cssItem.cssText;
+        }
+      } else if (sheet.cssText) {
+        cssText = sheet.cssText;
+      }
 
       isPropertySupported =
         /src/i.test(cssText) && cssText.indexOf(rule.split(' ')[0]) === 0;
@@ -1608,7 +1670,7 @@ npf.userAgent.support.getHashChange = function() {
  * @return {boolean}
  */
 npf.userAgent.Support.prototype.getHistory = function() {
-  return !!(goog.global['history'] && goog.global['history']['pushState']);
+  return !!(goog.global.history && goog.global.history.pushState);
 };
 
 /**
@@ -1683,7 +1745,7 @@ npf.userAgent.Support.prototype.getInlineSvg = function() {
     div.innerHTML = '<svg/>';
 
     this.checks_[propName] = (div.firstChild && div.firstChild.namespaceURI) ==
-      npf.dom.svg.Ns.SVG;
+      npf.svg.Ns.SVG;
   }
 
   return /** @type {boolean} */ (this.checks_[propName]);
@@ -1743,8 +1805,8 @@ npf.userAgent.support.getInputTypes = function() {
  * @private
  */
 npf.userAgent.Support.prototype.webForms_ = function() {
-  /** @type {!Element} */
-  var inputElement = goog.dom.createElement(goog.dom.TagName.INPUT);
+  var inputElement = /** @type {!HTMLInputElement} */ (
+    goog.dom.createElement(goog.dom.TagName.INPUT));
 
   // Run through HTML5's new input attributes to see if the UA understands any.
   // We're using f which is the <input> element created early on
@@ -1756,23 +1818,8 @@ npf.userAgent.Support.prototype.webForms_ = function() {
   // Only input placeholder is tested while textarea's placeholder is not.
   // Currently Safari 4 and Opera 11 have support only for the input placeholder
   // Both tests are available in feature-detects/forms-placeholder.js
-  this.checks_[npf.userAgent.Support.Property_.INPUT] = (function(props) {
-    /** @type {!Object.<boolean>} */
-    var attrs = {};
-
-    for (var i = 0, len = props.length; i < len; i++) {
-      attrs[props[i]] = !!(props[i] in inputElement);
-    }
-
-    if (attrs['list']) {
-      // safari false positive's on datalist: webk.it/74252
-      // see also github.com/Modernizr/Modernizr/issues/146
-      attrs['list'] = !!(goog.dom.createElement('datalist') &&
-        goog.global['HTMLDataListElement']);
-    }
-
-    return attrs;
-  })('autocomplete autofocus list placeholder max min multiple pattern required step'.split(' '));
+  this.checks_[npf.userAgent.Support.Property_.INPUT] =
+    this.webFormsInput_(inputElement);
 
   // Run through HTML5's new input types to see if the UA understands any.
   //   This is put behind the tests runloop because it doesn't return a
@@ -1780,61 +1827,111 @@ npf.userAgent.Support.prototype.webForms_ = function() {
   //   containing each input type with its corresponding true/false value
 
   // Big thanks to @miketaylr for the html5 forms expertise. http://miketaylr.com/
-  this.checks_[npf.userAgent.Support.Property_.INPUT_TYPES] = (function(props) {
-    /** @type {!Object.<string,boolean>} */
-    var inputs = {};
+  this.checks_[npf.userAgent.Support.Property_.INPUT_TYPES] =
+    this.webFormsInputTypes_(inputElement);
+};
 
-    for (var i = 0, len = props.length; i < len; i++) {
-      /** @type {string} */
-      var inputElemType = props[i];
-      inputElement.setAttribute('type', inputElemType);
+/**
+ * @param {!HTMLInputElement} inputElement
+ * @return {!Object.<boolean>}
+ * @private
+ */
+npf.userAgent.Support.prototype.webFormsInput_ = function(inputElement) {
+  /** @type {!Array.<string>} */
+  var props = ['autocomplete', 'autofocus', 'list', 'placeholder', 'max', 'min',
+    'multiple', 'pattern', 'required', 'step'];
+  /** @type {!Object.<boolean>} */
+  var attrs = {};
 
-      /** @type {boolean} */
-      var bool = inputElement.type !== 'text';
+  for (var i = 0, len = props.length; i < len; i++) {
+    attrs[props[i]] = !!(props[i] in inputElement);
+  }
 
-      // We first check to see if the type we give it sticks..
-      // If the type does, we feed it a textual value, which shouldn't be valid.
-      // If the value doesn't stick, we know there's input sanitization which infers a custom UI
-      if (bool) {
-        inputElement.value = npf.userAgent.Support.SMILE;
-        inputElement.style.cssText = 'position:absolute;visibility:hidden;';
+  if (attrs['list']) {
+    /** @type {!Element} */
+    var dataListElement = goog.dom.createElement('datalist');
+    var dataListClass = /** @type {Function|undefined} */ (
+      goog.global['HTMLDataListElement']);
+    // safari false positive's on datalist: webk.it/74252
+    // see also github.com/Modernizr/Modernizr/issues/146
+    attrs['list'] = !!(dataListElement && dataListClass);
+  }
 
-        if (
-          /^range$/.test(inputElemType) &&
-          goog.isDef(inputElement.style['WebkitAppearance'])
-        ) {
-          /** @type {!Document} */
-          var doc = goog.dom.getDomHelper().getDocument();
-          goog.dom.appendChild(doc.documentElement, inputElement);
+  return attrs;
+};
 
-          // Safari 2-4 allows the smiley as a value, despite making a slider
-          bool = doc.defaultView.getComputedStyle &&
-            doc.defaultView.getComputedStyle(inputElement, null)['WebkitAppearance'] !== 'textfield' &&
+/**
+ * @param {!HTMLInputElement} inputElement
+ * @return {!Object.<boolean>}
+ * @private
+ */
+npf.userAgent.Support.prototype.webFormsInputTypes_ = function(inputElement) {
+  /** @type {!Array.<string>} */
+  var props = ['search', 'tel', 'url', 'email', 'datetime', 'date', 'month',
+    'week', 'time', 'datetime-local', 'number', 'range', 'color'];
+  /** @type {!Object.<boolean>} */
+  var inputs = {};
+
+  for (var i = 0, len = props.length; i < len; i++) {
+    /** @type {string} */
+    var inputElemType = props[i];
+    inputElement.setAttribute('type', inputElemType);
+
+    /** @type {boolean} */
+    var bool = inputElement.type !== 'text';
+
+    // We first check to see if the type we give it sticks..
+    // If the type does, we feed it a textual value, which shouldn't be valid.
+    // If the value doesn't stick, we know there's input sanitization which
+    // infers a custom UI
+    if (bool) {
+      inputElement.value = npf.userAgent.Support.SMILE;
+      inputElement.style.cssText = 'position:absolute;visibility:hidden;';
+
+      if (
+        /^range$/.test(inputElemType) &&
+        goog.isDef(inputElement.style['WebkitAppearance'])
+      ) {
+        /** @type {!Document} */
+        var doc = goog.dom.getDomHelper().getDocument();
+        var defaultView = /** @type {ViewCSS} */ (doc['defaultView']);
+        goog.dom.appendChild(doc.documentElement, inputElement);
+
+        // Safari 2-4 allows the smiley as a value, despite making a slider
+        if (defaultView.getComputedStyle) {
+          /** @type {CSSStyleDeclaration} */
+          var styleDeclaration = defaultView.getComputedStyle(
+            inputElement, null);
+          /** @type {string|undefined} */
+          var webkitAppearanceStyle = styleDeclaration['WebkitAppearance'];
+          bool = webkitAppearanceStyle !== 'textfield' &&
             // Mobile android web browser has false positive, so must
             // check the height to see if the widget is actually there.
             0 !== inputElement.offsetHeight;
-          goog.dom.removeNode(inputElement);
-        } else if (/^(search|tel)$/.test(inputElemType)) {
-          // Spec doesnt define any special parsing or detectable UI
-          //   behaviors so we pass these through as true
-
-          // Interestingly, opera fails the earlier test, so it doesn't
-          //  even make it here.
-        } else if (/^(url|email)$/.test(inputElemType)) {
-          // Real url and email support comes with prebaked validation.
-          bool = inputElement['checkValidity'] &&
-            false === inputElement['checkValidity']();
         } else {
-          // If the upgraded input compontent rejects the :) text, we got a winner
-          bool = inputElement.value != npf.userAgent.Support.SMILE;
+          bool = false;
         }
-      }
 
-      inputs[props[i]] = !!bool;
+        goog.dom.removeNode(inputElement);
+      } else if (/^(search|tel)$/.test(inputElemType)) {
+        // Spec doesnt define any special parsing or detectable UI
+        //   behaviors so we pass these through as true
+
+        // Interestingly, opera fails the earlier test, so it doesn't
+        //  even make it here.
+      } else if (/^(url|email)$/.test(inputElemType)) {
+        // Real url and email support comes with prebaked validation.
+        bool = !!inputElement.checkValidity && !inputElement.checkValidity();
+      } else {
+        // If the upgraded input compontent rejects the :) text, we got a winner
+        bool = inputElement.value != npf.userAgent.Support.SMILE;
+      }
     }
 
-    return inputs;
-  })('search tel url email datetime date month week time datetime-local number range color'.split(' '));
+    inputs[props[i]] = !!bool;
+  }
+
+  return inputs;
 };
 
 /**
@@ -1925,25 +2022,25 @@ npf.userAgent.Support.prototype.getMath = function() {
     var doc = goog.dom.getDomHelper().getDocument();
 
     if (doc.createElementNS) {
-      /** @type {!Element} */
-      var div = goog.dom.createElement(goog.dom.TagName.DIV);
+      var div = /** @type {!HTMLElement} */ (
+        goog.dom.createElement(goog.dom.TagName.DIV));
       div.style.position = 'absolute';
 
       /** @type {!Element} */
-      var mathElement = doc.createElementNS(npf.dom.svg.Ns.MATH_ML, 'math');
+      var mathElement = doc.createElementNS(npf.svg.Ns.MATH_ML, 'math');
       goog.dom.appendChild(div, mathElement);
 
       /** @type {!Element} */
-      var mfracElement = doc.createElementNS(npf.dom.svg.Ns.MATH_ML, 'mfrac');
+      var mfracElement = doc.createElementNS(npf.svg.Ns.MATH_ML, 'mfrac');
       goog.dom.appendChild(mathElement, mfracElement);
 
       /** @type {!Element} */
-      var mi1Element = doc.createElementNS(npf.dom.svg.Ns.MATH_ML, 'mi');
+      var mi1Element = doc.createElementNS(npf.svg.Ns.MATH_ML, 'mi');
       goog.dom.appendChild(mi1Element, doc.createTextNode('xx'));
       goog.dom.appendChild(mfracElement, mi1Element);
 
       /** @type {!Element} */
-      var mi2Element = doc.createElementNS(npf.dom.svg.Ns.MATH_ML, 'mi');
+      var mi2Element = doc.createElementNS(npf.svg.Ns.MATH_ML, 'mi');
       goog.dom.appendChild(mi2Element, doc.createTextNode('yy'));
       goog.dom.appendChild(mfracElement, mi2Element);
 
@@ -1978,8 +2075,9 @@ npf.userAgent.Support.prototype.getMultipleBackgrounds = function() {
 
     this.setCss_('background:url(https://),url(https://),red url(https://)');
 
-    // If the UA supports multiple backgrounds, there should be three occurrences
-    //   of the string "url(" in the return value for elemStyle.background
+    // If the UA supports multiple backgrounds, there should be three
+    // occurrences of the string "url(" in the return value
+    // for elemStyle.background
     this.checks_[propName] = /(url\s*\(.*?){3}/.test(this.mStyle_.background);
   }
 
@@ -2178,7 +2276,7 @@ npf.userAgent.Support.prototype.getSmil = function() {
     var doc = goog.dom.getDomHelper().getDocument();
     this.checks_[propName] = !!doc.createElementNS &&
       /SVGAnimate/.test({}.toString.call(
-        doc.createElementNS(npf.dom.svg.Ns.SVG, 'animate')));
+        doc.createElementNS(npf.svg.Ns.SVG, 'animate')));
   }
 
   return /** @type {boolean} */ (this.checks_[propName]);
@@ -2217,7 +2315,7 @@ npf.userAgent.Support.prototype.getSvg = function() {
     /** @type {!Document} */
     var doc = goog.dom.getDomHelper().getDocument();
     this.checks_[propName] = !!doc.createElementNS &&
-      !!doc.createElementNS(npf.dom.svg.Ns.SVG, 'svg')['createSVGRect'];
+      !!doc.createElementNS(npf.svg.Ns.SVG, 'svg')['createSVGRect'];
   }
 
   return /** @type {boolean} */ (this.checks_[propName]);
@@ -2241,7 +2339,7 @@ npf.userAgent.Support.prototype.getSvgClipPaths = function() {
     var doc = goog.dom.getDomHelper().getDocument();
     this.checks_[propName] = !!doc.createElementNS &&
       /SVGClipPath/.test({}.toString.call(
-        doc.createElementNS(npf.dom.svg.Ns.SVG, 'clipPath')));
+        doc.createElementNS(npf.svg.Ns.SVG, 'clipPath')));
   }
 
   return /** @type {boolean} */ (this.checks_[propName]);
@@ -2265,7 +2363,7 @@ npf.userAgent.Support.prototype.getSvgFilters = function() {
     var supported = false;
 
     try {
-      var el = goog.global['SVGFEColorMatrixElement'];
+      var el = /** @type {Function|undefined} */ (goog.global['SVGFEColorMatrixElement']);
       supported = goog.isDef(el) && 2 == el['SVG_FECOLORMATRIX_TYPE_SATURATE'];
     } catch(e) {}
 
@@ -2317,7 +2415,8 @@ npf.userAgent.Support.prototype.getTouch = function() {
 
     if (
       ('ontouchstart' in goog.global) ||
-      goog.global['DocumentTouch'] && doc instanceof goog.global['DocumentTouch']
+      /** @type {*} */ (goog.global['DocumentTouch']) &&
+      doc instanceof goog.global['DocumentTouch']
     ) {
       this.checks_[propName] = true;
     } else {
@@ -2329,9 +2428,8 @@ npf.userAgent.Support.prototype.getTouch = function() {
         npf.userAgent.Support.MOD, '){#' + npf.userAgent.Support.MOD +
         '{top:9px;position:absolute}}'
       ].join('');
-
-      this.testStyles_(rule, function(node) {
-        bool = 9 === node.offsetTop;
+      this.testStyles_(rule, function(element, rule) {
+        bool = 9 === element.offsetTop;
       });
 
       this.checks_[propName] = bool;
@@ -2349,57 +2447,63 @@ npf.userAgent.support.getTouch = function() {
 };
 
 /**
- * @return {boolean}
+ * @return {string} 'probably', 'maybe' or empty string.
  */
 npf.userAgent.Support.prototype.getVideoH264 = function() {
   if (this.getVideo()) {
-    return /** @type {boolean} */ (
-      this.checks_[npf.userAgent.Support.Property_.VIDEO].h264);
+    var feature = /** @type {npf.userAgent.Support.VideoFeature?} */ (
+      this.checks_[npf.userAgent.Support.Property_.VIDEO]);
+
+    return feature ? feature.h264 : '';
   }
 
-  return false;
+  return '';
 };
 
 /**
- * @return {boolean}
+ * @return {string} 'probably', 'maybe' or empty string.
  */
 npf.userAgent.support.getVideoH264 = function() {
   return npf.userAgent.Support.getInstance().getVideoH264();
 };
 
 /**
- * @return {boolean}
+ * @return {string} 'probably', 'maybe' or empty string.
  */
 npf.userAgent.Support.prototype.getVideoOgg = function() {
   if (this.getVideo()) {
-    return /** @type {boolean} */ (
-      this.checks_[npf.userAgent.Support.Property_.VIDEO].ogg);
+    var feature = /** @type {npf.userAgent.Support.VideoFeature?} */ (
+      this.checks_[npf.userAgent.Support.Property_.VIDEO]);
+
+    return feature ? feature.ogg : '';
   }
 
-  return false;
+  return '';
 };
 
 /**
- * @return {boolean}
+ * @return {string} 'probably', 'maybe' or empty string.
  */
 npf.userAgent.support.getVideoOgg = function() {
   return npf.userAgent.Support.getInstance().getVideoOgg();
 };
 
 /**
- * @return {boolean}
+ * @return {string} 'probably', 'maybe' or empty string.
  */
 npf.userAgent.Support.prototype.getVideoWebm = function() {
   if (this.getVideo()) {
-    return /** @type {boolean} */ (
-      this.checks_[npf.userAgent.Support.Property_.VIDEO].webm);
+    var feature = /** @type {npf.userAgent.Support.VideoFeature?} */ (
+      this.checks_[npf.userAgent.Support.Property_.VIDEO]);
+
+    return feature ? feature.webm : '';
   }
 
-  return false;
+  return '';
 };
 
 /**
- * @return {boolean}
+ * @return {string} 'probably', 'maybe' or empty string.
  */
 npf.userAgent.support.getVideoWebm = function() {
   return npf.userAgent.Support.getInstance().getVideoWebm();
@@ -2410,9 +2514,9 @@ npf.userAgent.support.getVideoWebm = function() {
  */
 npf.userAgent.Support.prototype.getVideo = function() {
   if (!goog.isDef(this.checks_[npf.userAgent.Support.Property_.VIDEO])) {
-    /** @type {Element} */
-    var elem = goog.dom.createElement('video');
-    /** @type {Object} */
+    var elem = /** @type {!HTMLVideoElement} */ (
+      goog.dom.createElement('video'));
+    /** @type {npf.userAgent.Support.VideoFeature?} */
     var types = null;
 
     // IE9 Running on Windows Server SKU can cause an exception to be thrown,
@@ -2468,7 +2572,7 @@ npf.userAgent.support.getVibrate = function() {
  * @return {boolean}
  */
 npf.userAgent.Support.prototype.getWebAudio = function() {
-  return !!(goog.global['webkitAudioContext'] || goog.global['AudioContext']);
+  return !!goog.global['webkitAudioContext'] || !!goog.global['AudioContext'];
 };
 
 /**
@@ -2520,7 +2624,8 @@ npf.userAgent.support.getWebSocket = function() {
  * @return {boolean}
  */
 npf.userAgent.Support.prototype.getWebSocketBinary = function() {
-  return !!(goog.global['WebSocket'] && (new WebSocket('ws://.'))['binaryType']);
+  return 'WebSocket' in goog.global &&
+    !!(new WebSocket('ws://.'))['binaryType'];
 };
 
 /**
@@ -2631,12 +2736,12 @@ npf.userAgent.Support.prototype.isCssPropertySupported_ = function(
 };
 
 /**
- * Allows you to add custom styles to the document and test an element afterwards
+ * Allows you to add custom styles to the document and test an element
+ * afterwards.
  * @param {string} rule
- * @param {function(!Element, string)} callback
+ * @param {function(!HTMLElement,string)} callback
  * @param {number=} opt_nodes
  * @param {Array.<string>=} opt_testNames
- * @return {boolean}
  * @private
  */
 npf.userAgent.Support.prototype.testStyles_ = function(rule, callback,
@@ -2645,8 +2750,8 @@ npf.userAgent.Support.prototype.testStyles_ = function(rule, callback,
   var nodes = opt_nodes || 0;
   /** @type {string} */
   var docOverflow = '';
-  /** @type {!Element} */
-  var div = goog.dom.createElement(goog.dom.TagName.DIV);
+  var div = /** @type {!HTMLElement} */ (
+    goog.dom.createElement(goog.dom.TagName.DIV));
   /** @type {!Document} */
   var doc = goog.dom.getDomHelper().getDocument();
   var body = doc.body;
@@ -2684,7 +2789,7 @@ npf.userAgent.Support.prototype.testStyles_ = function(rule, callback,
     goog.dom.appendChild(doc.documentElement, fakeBody);
   }
 
-  var ret = callback(div, rule);
+  callback(div, rule);
 
   if (!body) {
     goog.dom.removeNode(fakeBody);
@@ -2692,8 +2797,6 @@ npf.userAgent.Support.prototype.testStyles_ = function(rule, callback,
   } else {
     goog.dom.removeNode(div);
   }
-
-  return !!ret;
 };
 
 /**
@@ -2754,6 +2857,7 @@ npf.userAgent.Support.prototype.testDomProps_ = function(prop, obj, opt_elem) {
     npf.userAgent.Support.cssomPrefixes.join(ucProp + ' ') + ucProp).split(' ');
 
   for (var i in props) {
+    /** @type {*} */
     var item = obj[props[i]];
 
     if (goog.isDef(item)) {

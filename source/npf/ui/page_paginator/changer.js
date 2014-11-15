@@ -1,17 +1,22 @@
 goog.provide('npf.ui.pagePaginator.Changer');
+goog.provide('npf.ui.pagePaginator.Changer.Event');
 goog.provide('npf.ui.pagePaginator.Changer.EventType');
 
 goog.require('goog.Timer');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('goog.events');
+goog.require('goog.events.Event');
 goog.require('goog.events.EventHandler');
 goog.require('goog.events.EventTarget');
+goog.require('goog.events.EventType');
+goog.require('goog.fx.Dragger.EventType');
 goog.require('goog.math');
 goog.require('goog.math.Rect');
-goog.require('goog.object');
 goog.require('goog.style');
 goog.require('goog.userAgent');
+goog.require('npf.fx.CssAnimation');
+goog.require('npf.fx.cssAnimation.EventType');
 goog.require('npf.fx.KeyframeAnimation');
 goog.require('npf.fx.css3.easing');
 goog.require('npf.ui.pagePaginator.Dragger');
@@ -26,19 +31,98 @@ goog.require('npf.ui.pagePaginator.Dragger');
  * @extends {goog.events.EventTarget}
  */
 npf.ui.pagePaginator.Changer = function(element, contentElement, page,
-                                        pageCount) {
+    pageCount) {
   goog.base(this);
 
-  this.element_ = element;
-  this.contentElement_ = contentElement;
-  this.pageIndex_ = page;
-  this.pageCount_ = pageCount;
+  /**
+   * @private {npf.fx.KeyframeAnimation}
+   */
+  this.animation_ = null;
 
+  /**
+   * @private {Element}
+   */
+  this.contentElement_ = contentElement;
+
+  /**
+   * @private {goog.dom.DomHelper}
+   */
+  this.domHelper_ = goog.dom.getDomHelper(element);
+
+  /**
+   * @private {Array.<npf.ui.pagePaginator.Changer.Stamp>}
+   */
+  this.dragStamps_ = null;
+
+  /**
+   * @private {boolean}
+   */
+  this.draggable_ = true;
+
+  /**
+   * @private {npf.ui.pagePaginator.Dragger}
+   */
+  this.dragger_ = null;
+
+  /**
+   * @private {Element}
+   */
+  this.element_ = element;
+
+  /**
+   * @private {Element}
+   */
+  this.emptyElement_ = null;
+
+  /**
+   * @private {goog.events.EventHandler}
+   */
   this.handler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.handler_);
+
+  /**
+   * @private {boolean}
+   */
+  this.loopback_ = false;
+
+  /**
+   * @private {number}
+   */
+  this.pageCount_ = pageCount;
+
+  /**
+   * @private {number}
+   */
+  this.pageIndex_ = page;
+
+  /**
+   * @private {?boolean}
+   */
+  this.queueNext_ = null;
+
+  /**
+   * @private {number}
+   */
+  this.width_ = 0;
 };
 goog.inherits(npf.ui.pagePaginator.Changer, goog.events.EventTarget);
 
+
+/**
+ * @const {number}
+ */
+npf.ui.pagePaginator.Changer.DURATION = 500;
+
+/**
+ * @enum {string}
+ */
+npf.ui.pagePaginator.Changer.EventType = {
+
+  /**
+   * npf.ui.pagePaginator.Changer.Event
+   */
+  PAGE_CHANGE: goog.events.getUniqueId('pageChange')
+};
 
 /**
  * @typedef {{
@@ -48,101 +132,6 @@ goog.inherits(npf.ui.pagePaginator.Changer, goog.events.EventTarget);
  */
 npf.ui.pagePaginator.Changer.Stamp;
 
-/**
- * @enum {string}
- */
-npf.ui.pagePaginator.Changer.EventType = {
-  /**
-   * page (number)
-   * next (boolean)
-   */
-  PAGE_CHANGE: goog.events.getUniqueId('pageChange')
-};
-
-/**
- * @type {number}
- * @const
- */
-npf.ui.pagePaginator.Changer.DURATION = 500;
-
-/**
- * @type {Element}
- * @private
- */
-npf.ui.pagePaginator.Changer.prototype.element_;
-
-/**
- * @type {Element}
- * @private
- */
-npf.ui.pagePaginator.Changer.prototype.contentElement_;
-
-/**
- * @type {number}
- * @private
- */
-npf.ui.pagePaginator.Changer.prototype.pageIndex_;
-
-/**
- * @type {number}
- * @private
- */
-npf.ui.pagePaginator.Changer.prototype.pageCount_;
-
-/**
- * @type {goog.events.EventHandler}
- * @private
- */
-npf.ui.pagePaginator.Changer.prototype.handler_;
-
-/**
- * @type {npf.ui.pagePaginator.Dragger}
- * @private
- */
-npf.ui.pagePaginator.Changer.prototype.dragger_ = null;
-
-/**
- * @type {?boolean}
- * @private
- */
-npf.ui.pagePaginator.Changer.prototype.queueNext_ = null;
-
-/**
- * @type {npf.fx.KeyframeAnimation}
- * @private
- */
-npf.ui.pagePaginator.Changer.prototype.animation_ = null;
-
-/**
- * @type {Array.<npf.ui.pagePaginator.Changer.Stamp>}
- * @private
- */
-npf.ui.pagePaginator.Changer.prototype.dragStamps_ = null;
-
-/**
- * @type {number}
- * @private
- */
-npf.ui.pagePaginator.Changer.prototype.width_;
-
-/**
- * @type {Element}
- * @private
- */
-npf.ui.pagePaginator.Changer.prototype.emptyElement_ = null;
-
-/**
- * @type {boolean}
- * @private
- */
-npf.ui.pagePaginator.Changer.prototype.draggable_ = true;
-
-/**
- * @type {boolean}
- * @private
- */
-npf.ui.pagePaginator.Changer.prototype.ring_ = false;
-
 
 /** @inheritDoc */
 npf.ui.pagePaginator.Changer.prototype.disposeInternal = function() {
@@ -151,36 +140,45 @@ npf.ui.pagePaginator.Changer.prototype.disposeInternal = function() {
 
   goog.base(this, 'disposeInternal');
 
-  this.element_ = null;
-  this.contentElement_ = null;
-  this.handler_ = null;
-  this.dragger_ = null;
   this.animation_ = null;
+  this.contentElement_ = null;
+  this.domHelper_ = null;
   this.dragStamps_ = null;
+  this.dragger_ = null;
+  this.element_ = null;
   this.emptyElement_ = null;
+  this.handler_ = null;
 };
 
 npf.ui.pagePaginator.Changer.prototype.init = function() {
-  /** @type {!goog.dom.DomHelper} */
-  var domHelper = goog.dom.getDomHelper(this.element_);
-  this.handler_
-    .listen(domHelper.getWindow(), goog.events.EventType.RESIZE, this.onResize_);
+  this.handler_.listen(
+    this.domHelper_.getWindow(), goog.events.EventType.RESIZE, this.onResize_);
   this.update_();
 };
 
 /**
- * @param {goog.events.BrowserEvent} evt
- * @private
+ * @return {Element}
  */
-npf.ui.pagePaginator.Changer.prototype.onResize_ = function(evt) {
-  this.update_();
+npf.ui.pagePaginator.Changer.prototype.getContentElement = function() {
+  return this.contentElement_;
 };
 
-npf.ui.pagePaginator.Changer.prototype.update_ = function() {
-  this.width_ = goog.style.getBorderBoxSize(this.element_).width;
+/**
+ * @return {boolean}
+ */
+npf.ui.pagePaginator.Changer.prototype.isDraggable = function() {
+  return this.draggable_;
+};
 
-  if (this.draggable_) {
-    this.reinitDragger_();
+/**
+ * @param {boolean} drag
+ */
+npf.ui.pagePaginator.Changer.prototype.setDraggable = function(drag) {
+  this.draggable_ = drag;
+
+  if (!this.draggable_) {
+    goog.dispose(this.dragger_);
+    this.dragger_ = null;
   }
 };
 
@@ -192,10 +190,24 @@ npf.ui.pagePaginator.Changer.prototype.getElement = function() {
 };
 
 /**
- * @return {Element}
+ * @return {boolean}
  */
-npf.ui.pagePaginator.Changer.prototype.getContentElement = function() {
-  return this.contentElement_;
+npf.ui.pagePaginator.Changer.prototype.isLoopback = function() {
+  return this.loopback_;
+};
+
+/**
+ * @param {boolean} enable
+ */
+npf.ui.pagePaginator.Changer.prototype.setLoopback = function(enable) {
+  this.loopback_ = enable;
+};
+
+/**
+ * @return {number}
+ */
+npf.ui.pagePaginator.Changer.prototype.getPageCount = function() {
+  return this.pageCount_;
 };
 
 /**
@@ -206,10 +218,11 @@ npf.ui.pagePaginator.Changer.prototype.getPageIndex = function() {
 };
 
 /**
- * @return {number}
+ * @param {number} index
+ * @protected
  */
-npf.ui.pagePaginator.Changer.prototype.getPageCount = function() {
-  return this.pageCount_;
+npf.ui.pagePaginator.Changer.prototype.setPageIndexInternal = function(index) {
+  this.pageIndex_ = index;
 };
 
 /**
@@ -221,18 +234,24 @@ npf.ui.pagePaginator.Changer.prototype.reinitDragger_ = function() {
   /** @type {!goog.math.Rect} */
   var draggerLimits = new goog.math.Rect(-this.width_, 0, 2 * this.width_, 0);
 
-  this.dragger_ = new npf.ui.pagePaginator.Dragger(this.contentElement_,
-    this.element_, draggerLimits);
-  this.dragger_.addEventListener(goog.fx.Dragger.EventType.START,
-    this.onDragStart_, false, this);
-  this.dragger_.addEventListener(goog.fx.Dragger.EventType.DRAG,
-    this.onDrag_, false, this);
-  this.dragger_.addEventListener(goog.fx.Dragger.EventType.END,
-    this.onDragEnd_, false, this);
+  this.dragger_ = new npf.ui.pagePaginator.Dragger(
+    this.getContentElement(), this.getElement(), draggerLimits);
+  this.dragger_.listen(
+    goog.fx.Dragger.EventType.START, this.onDragStart_, false, this);
+  this.dragger_.listen(
+    goog.fx.Dragger.EventType.DRAG, this.onDrag_, false, this);
+  this.dragger_.listen(
+    goog.fx.Dragger.EventType.END, this.onDragEnd_, false, this);
 
-  this.dragger_.setLeftLimit(!this.ring_ && !this.pageIndex_);
-  this.dragger_.setRightLimit(
-    !this.ring_ && this.pageCount_ - 1 == this.pageIndex_);
+  /** @type {boolean} */
+  var loopback = this.isLoopback();
+  /** @type {number} */
+  var pageCount = this.getPageCount();
+  /** @type {number} */
+  var pageIndex = this.getPageIndex();
+
+  this.dragger_.setLeftLimit(!loopback && !pageIndex);
+  this.dragger_.setRightLimit(!loopback && pageCount - 1 == pageIndex);
 };
 
 /**
@@ -274,8 +293,7 @@ npf.ui.pagePaginator.Changer.prototype.onDrag_ = function(evt) {
   });
 
   if (!this.emptyElement_ && 10 < Math.abs(this.dragStamps_[0].x - left)) {
-    this.emptyElement_ = goog.dom.getDomHelper(this.element_).createElement(
-      goog.dom.TagName.DIV);
+    this.emptyElement_ = this.domHelper_.createElement(goog.dom.TagName.DIV);
     goog.style.setStyle(this.emptyElement_, {
       'height': '100%',
       'left': '0px',
@@ -283,7 +301,7 @@ npf.ui.pagePaginator.Changer.prototype.onDrag_ = function(evt) {
       'top': '0px',
       'width': '100%'
     });
-    goog.dom.appendChild(this.element_, this.emptyElement_);
+    goog.dom.appendChild(this.getElement(), this.emptyElement_);
   }
 };
 
@@ -292,22 +310,35 @@ npf.ui.pagePaginator.Changer.prototype.onDrag_ = function(evt) {
  * @private
  */
 npf.ui.pagePaginator.Changer.prototype.onDragEnd_ = function(evt) {
+  /** @type {number} */
   var firstLeft = this.dragStamps_[0] ? this.dragStamps_[0].x : 0;
+  /** @type {number} */
   var firstTime = this.dragStamps_[0] ? this.dragStamps_[0].time : goog.now();
+  /** @type {number} */
   var now = goog.now();
+  /** @type {number} */
   var threshold = this.width_ / 2;
-  var offset = parseInt(goog.style.getStyle(this.contentElement_, 'left') || 0, 10);
+  /** @type {number} */
+  var offset = parseInt(
+    goog.style.getStyle(this.getContentElement(), 'left') || 0, 10);
+  /** @type {number} */
   var animationDirection = 0;
+  /** @type {number} */
   var flickDistance = offset - firstLeft;
+  /** @type {number} */
   var flickDuration = now - firstTime;
+  /** @type {number} */
+  var pageCount = this.getPageCount();
+  /** @type {number} */
+  var pageIndex = this.getPageIndex();
 
   if (flickDuration > 0 && Math.abs(flickDistance) >= 10) {
     var velocity = flickDistance / flickDuration;
 
     if (Math.abs(velocity) >= 1) {
-      if (velocity < 0 && (this.pageIndex_ < this.pageCount_ - 1 || this.ring_)) {
+      if (velocity < 0 && (pageIndex < pageCount - 1 || this.isLoopback())) {
         animationDirection = -1;
-      } else if (velocity > 0 && (this.pageIndex_ > 0 || this.ring_)) {
+      } else if (velocity > 0 && (pageIndex > 0 || this.isLoopback())) {
         animationDirection = 1;
       }
     }
@@ -315,12 +346,12 @@ npf.ui.pagePaginator.Changer.prototype.onDragEnd_ = function(evt) {
 
   if (!animationDirection) {
     if (
-      (this.ring_ || this.pageIndex_ < this.pageCount_ - 1) &&
+      (this.isLoopback() || pageIndex < pageCount - 1) &&
       offset < -threshold
     ) {
       animationDirection = -1;
     } else if (
-      (this.ring_ || this.pageIndex_ > 0) &&
+      (this.isLoopback() || pageIndex > 0) &&
       offset > threshold
     ) {
       animationDirection = 1;
@@ -330,14 +361,9 @@ npf.ui.pagePaginator.Changer.prototype.onDragEnd_ = function(evt) {
   this.dragStamps_ = null;
 
   if (animationDirection) {
-    this.pageIndex_ = (
-      this.pageCount_ + this.pageIndex_ - animationDirection) % this.pageCount_;
-
-    this.dispatchEvent({
-      type: npf.ui.pagePaginator.Changer.EventType.PAGE_CHANGE,
-      page: this.pageIndex_,
-      next: 0 > animationDirection
-    });
+    this.setPageIndexInternal(
+      (pageCount + pageIndex - animationDirection) % pageCount);
+    this.onPageChange(0 > animationDirection);
 
     if (this.draggable_) {
       this.reinitDragger_();
@@ -347,11 +373,50 @@ npf.ui.pagePaginator.Changer.prototype.onDragEnd_ = function(evt) {
   goog.dispose(this.animation_);
   this.animation_ = null;
 
-  goog.style.setStyle(this.contentElement_, 'left', '');
+  goog.style.setStyle(this.getContentElement(), 'left', '');
   goog.dom.removeNode(this.emptyElement_);
   this.emptyElement_ = null;
 
   this.animateReturn_(offset - this.width_ * animationDirection);
+};
+
+/**
+ * @param {number} fromX
+ * @private
+ */
+npf.ui.pagePaginator.Changer.prototype.animateReturn_ = function(fromX) {
+  if (npf.fx.CssAnimation.isSupported()) {
+    /** @type {!Object} */
+    var fromProperties;
+    /** @type {!Object} */
+    var toProperties;
+
+    if (goog.userAgent.MOBILE) {
+      fromProperties = {
+        'transform': 'translate(' + fromX + 'px,0px)'
+      };
+      toProperties = {
+        'transform': 'translate(0px,0px)'
+      };
+    } else {
+      fromProperties = {
+        'left': fromX + 'px'
+      };
+      toProperties = {
+        'left': '0px'
+      };
+    }
+
+    this.animation_ = new npf.fx.KeyframeAnimation(this.getContentElement(),
+      npf.ui.pagePaginator.Changer.DURATION, npf.fx.css3.easing.EASE_OUT);
+    this.animation_.listen(npf.fx.cssAnimation.EventType.FINISH,
+      this.onReturnAnimationFinish_, false, this);
+    this.animation_.from(fromProperties);
+    this.animation_.to(toProperties);
+    this.animation_.play();
+  } else {
+    goog.style.setStyle(this.getContentElement(), 'left', 0);
+  }
 };
 
 /**
@@ -364,57 +429,63 @@ npf.ui.pagePaginator.Changer.prototype.animatePage = function(next) {
     return;
   }
 
+  /** @type {number} */
+  var pageCount = this.getPageCount();
+  /** @type {number} */
+  var pageIndex = this.getPageIndex();
+
   if (
-    (next && this.pageCount_ - 1 == this.pageIndex_ && !this.ring_) ||
-    (!next && !this.pageIndex_ && !this.ring_)
+    (next && pageCount - 1 == pageIndex && !this.isLoopback()) ||
+    (!next && !pageIndex && !this.isLoopback())
   ) {
     return;
   }
 
   if (next) {
-    this.pageIndex_++;
+    pageIndex++;
   } else {
-    this.pageIndex_--;
+    pageIndex--;
   }
 
-  this.pageIndex_ = (this.pageCount_ + this.pageIndex_) % this.pageCount_;
+  this.setPageIndexInternal((pageCount + pageIndex) % pageCount);
 
-  /** @type {number} */
-  var from = next ? this.width_ : -this.width_;
-  /** @type {!Object} */
-  var fromProperties;
-  /** @type {!Object} */
-  var toProperties;
+  if (npf.fx.CssAnimation.isSupported()) {
+    /** @type {number} */
+    var from = next ? this.width_ : -this.width_;
+    /** @type {!Object} */
+    var fromProperties;
+    /** @type {!Object} */
+    var toProperties;
 
-  if (goog.userAgent.MOBILE) {
-    fromProperties = {
-      'transform': 'translate(' + from + 'px,0px)'
-    };
-    toProperties = {
-      'transform': 'translate(0px,0px)'
-    };
+    if (goog.userAgent.MOBILE) {
+      fromProperties = {
+        'transform': 'translate(' + from + 'px,0px)'
+      };
+      toProperties = {
+        'transform': 'translate(0px,0px)'
+      };
+    } else {
+      fromProperties = {
+        'left': from + 'px'
+      };
+      toProperties = {
+        'left': '0px'
+      };
+    }
+
+    this.animation_ = new npf.fx.KeyframeAnimation(this.getContentElement(),
+      npf.ui.pagePaginator.Changer.DURATION, [0.25, 0.1, 0.25, 1]);
+    this.animation_.listen(npf.fx.cssAnimation.EventType.FINISH,
+      this.onAnimationFinish_, false, this);
+    this.animation_.from(fromProperties);
+    this.animation_.to(toProperties);
+    this.animation_.play();
   } else {
-    fromProperties = {
-      'left': from + 'px'
-    };
-    toProperties = {
-      'left': '0px'
-    };
+    goog.style.setStyle(this.getContentElement(), 'left', 0);
+    this.release_();
   }
 
-  this.dispatchEvent({
-    type: npf.ui.pagePaginator.Changer.EventType.PAGE_CHANGE,
-    page: this.pageIndex_,
-    next: next
-  });
-
-  this.animation_ = new npf.fx.KeyframeAnimation(this.contentElement_,
-    npf.ui.pagePaginator.Changer.DURATION, [0.25, 0.1, 0.25, 1]);
-  this.animation_.addEventListener(npf.fx.cssAnimation.EventType.FINISH,
-    this.onAnimationFinish_, false, this);
-  this.animation_.from(fromProperties);
-  this.animation_.to(toProperties);
-  this.animation_.play();
+  this.onPageChange(next);
 };
 
 /**
@@ -425,9 +496,7 @@ npf.ui.pagePaginator.Changer.prototype.onAnimationFinish_ = function(evt) {
   goog.dispose(this.animation_);
   this.animation_ = null;
 
-  if (this.draggable_) {
-    this.reinitDragger_();
-  }
+  this.release_();
 
   goog.Timer.callOnce(function() {
     if (!this.isDisposed() && goog.isBoolean(this.queueNext_)) {
@@ -440,45 +509,28 @@ npf.ui.pagePaginator.Changer.prototype.onAnimationFinish_ = function(evt) {
 };
 
 /**
- * @param {number} fromX
  * @private
  */
-npf.ui.pagePaginator.Changer.prototype.animateReturn_ = function(fromX) {
-  /** @type {!Object} */
-  var fromProperties;
-  /** @type {!Object} */
-  var toProperties;
-
-  if (goog.userAgent.MOBILE) {
-    fromProperties = {
-      'transform': 'translate(' + fromX + 'px,0px)'
-    };
-    toProperties = {
-      'transform': 'translate(0px,0px)'
-    };
-  } else {
-    fromProperties = {
-      'left': fromX + 'px'
-    };
-    toProperties = {
-      'left': '0px'
-    };
+npf.ui.pagePaginator.Changer.prototype.release_ = function() {
+  if (this.draggable_) {
+    this.reinitDragger_();
   }
+};
 
-  this.animation_ = new npf.fx.KeyframeAnimation(this.contentElement_,
-    npf.ui.pagePaginator.Changer.DURATION, npf.fx.css3.easing.EASE_OUT);
-  this.animation_.addEventListener(npf.fx.cssAnimation.EventType.FINISH,
-    this.onReturnAnimationFinish_, false, this);
-  this.animation_.from(fromProperties);
-  this.animation_.to(toProperties);
-  this.animation_.play();
+/**
+ * @param {goog.events.BrowserEvent} evt
+ * @private
+ */
+npf.ui.pagePaginator.Changer.prototype.onResize_ = function(evt) {
+  this.update_();
 };
 
 /**
  * @param {npf.fx.cssAnimation.Event} evt
  * @private
  */
-npf.ui.pagePaginator.Changer.prototype.onReturnAnimationFinish_ = function(evt) {
+npf.ui.pagePaginator.Changer.prototype.onReturnAnimationFinish_ = function(
+    evt) {
   goog.dispose(this.animation_);
   this.animation_ = null;
 
@@ -492,35 +544,44 @@ npf.ui.pagePaginator.Changer.prototype.onReturnAnimationFinish_ = function(evt) 
   }, 0, this);
 };
 
-/**
- * @return {boolean}
- */
-npf.ui.pagePaginator.Changer.prototype.isDraggable = function() {
-  return this.draggable_;
-};
+npf.ui.pagePaginator.Changer.prototype.update_ = function() {
+  this.width_ = goog.style.getBorderBoxSize(this.getElement()).width;
 
-/**
- * @param {boolean} drag
- */
-npf.ui.pagePaginator.Changer.prototype.setDraggable = function(drag) {
-  this.draggable_ = drag;
-
-  if (!this.draggable_) {
-    goog.dispose(this.dragger_);
-    this.dragger_ = null;
+  if (this.draggable_) {
+    this.reinitDragger_();
   }
 };
 
 /**
- * @return {boolean}
+ * @param {boolean} next
+ * @protected
  */
-npf.ui.pagePaginator.Changer.prototype.isRing = function() {
-  return this.ring_;
+npf.ui.pagePaginator.Changer.prototype.onPageChange = function(next) {
+  var event = new npf.ui.pagePaginator.Changer.Event(
+    npf.ui.pagePaginator.Changer.EventType.PAGE_CHANGE, this.getPageIndex(),
+    next);
+  this.dispatchEvent(event);
 };
 
+
 /**
- * @param {boolean} enable
+ * @param {npf.ui.pagePaginator.Changer.EventType} type
+ * @param {number} page
+ * @param {boolean} next
+ * @constructor
+ * @extends {goog.events.Event}
  */
-npf.ui.pagePaginator.Changer.prototype.setRing = function(enable) {
-  this.ring_ = enable;
+npf.ui.pagePaginator.Changer.Event = function(type, page, next) {
+  goog.base(this, type);
+
+  /**
+   * @type {number}
+   */
+  this.page = page;
+
+  /**
+   * @type {boolean}
+   */
+  this.next = next;
 };
+goog.inherits(npf.ui.pagePaginator.Changer.Event, goog.events.Event);

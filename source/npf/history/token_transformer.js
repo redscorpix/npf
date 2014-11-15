@@ -14,12 +14,12 @@ npf.history.TokenTransformer = function() {
 
 /** @inheritDoc */
 npf.history.TokenTransformer.prototype.retrieveToken = function(pathPrefix,
-                                                                location) {
+    location) {
   return location.pathname.substr(pathPrefix.length) + location.search;
 };
 
 /** @inheritDoc */
 npf.history.TokenTransformer.prototype.createUrl = function(token, pathPrefix,
-                                                            location) {
+    location) {
   return pathPrefix + token;
 };

@@ -1,7 +1,7 @@
 goog.provide('npf.arch.Gzip');
 goog.provide('npf.arch.gzip');
 
-goog.require('goog.json');
+goog.require('goog.json.hybrid');
 goog.require('npf.crypt.crc32');
 goog.require('npf.arch.deflate');
 
@@ -17,14 +17,12 @@ npf.arch.Gzip = function() {
 
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.Gzip.ID1 = 0x1F;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.Gzip.ID2 = 0x8B;
 
@@ -48,14 +46,12 @@ npf.arch.Gzip.PossibleFlag = {
 
 /**
  * OS identifier (Unix)
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.Gzip.OS = 3;
 
 /**
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.Gzip.DEFAULT_LEVEL = 6;
 
@@ -354,7 +350,7 @@ npf.arch.Gzip.prototype.unzip = function(data) {
  */
 npf.arch.gzip.zip = function(input, opt_level, opt_timestamp, opt_name) {
   /** @type {string} */
-  var data = goog.json.serialize(input);
+  var data = goog.json.hybrid.stringify(input);
   var gzip = new npf.arch.Gzip();
 
   return gzip.zip(data, opt_level, opt_timestamp, opt_name);
@@ -402,7 +398,7 @@ npf.arch.gzip.unzip = function(data) {
     str += String.fromCharCode(result[i]);
   }
 
-  return goog.json.parse(str);
+  return goog.json.hybrid.parse(str);
 };
 
 /**

@@ -5,7 +5,7 @@ goog.require('goog.History');
 goog.require('goog.Uri');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
-goog.require('goog.dom.classes');
+goog.require('goog.dom.classlist');
 goog.require('goog.events');
 goog.require('goog.events.EventTarget');
 goog.require('goog.events.EventType');
@@ -22,9 +22,24 @@ goog.require('npf.history.TokenTransformer');
 npf.History = function() {
   goog.base(this);
 
+  /**
+   * @private {goog.History}
+   */
+  this.history_ = null;
+
+  /**
+   * @private {goog.history.Html5History}
+   */
+  this.html5History_ = null;
+
+  /**
+   * @private {boolean}
+   */
+  this.isLinksHandlerEnabled_ = false;
+
   if (npf.History.isHtml5HistorySupported) {
-    this.html5History_ = new goog.history.Html5History(null,
-      new npf.history.TokenTransformer());
+    this.html5History_ = new goog.history.Html5History(
+      null, new npf.history.TokenTransformer());
     this.html5History_.setPathPrefix('');
     this.html5History_.setParentEventTarget(this);
     this.html5History_.setUseFragment(false);
@@ -41,7 +56,7 @@ goog.inherits(npf.History, goog.events.EventTarget);
 /**
  * @define {boolean}
  */
-npf.History.ASSUME_HTML5 = false;
+goog.define('npf.History.ASSUME_HTML5', false);
 
 /**
  * @enum {string}
@@ -60,24 +75,6 @@ npf.History.EXTERNAL_CSS_CLASS = goog.getCssName('external');
  */
 npf.History.isHtml5HistorySupported =
   npf.History.ASSUME_HTML5 || goog.history.Html5History.isSupported();
-
-/**
- * @type {goog.History}
- * @private
- */
-npf.History.prototype.history_ = null;
-
-/**
- * @type {goog.history.Html5History}
- * @private
- */
-npf.History.prototype.html5History_ = null;
-
-/**
- * @type {boolean}
- * @private
- */
-npf.History.prototype.isLinksHandlerEnabled_ = false;
 
 
 /** @inheritDoc */
@@ -186,9 +183,8 @@ npf.History.prototype.onClick_ = function(evt) {
   var targetElement = evt ? evt.target : null;
 
   if (targetElement && !evt.getBrowserEvent()['defaultPrevented']) {
-    var element =
-      /** @type {Element} */ (goog.dom.getAncestorByTagNameAndClass(targetElement,
-      goog.dom.TagName.A));
+    var element = /** @type {Element} */ (
+      goog.dom.getAncestorByTagNameAndClass(targetElement, goog.dom.TagName.A));
 
     if (element && this.isInnerHandler(element)) {
       var uri = goog.Uri.parse(element.href);
@@ -212,5 +208,5 @@ npf.History.prototype.onClick_ = function(evt) {
  */
 npf.History.prototype.isInnerHandler = function(linkElement) {
   return '_blank' != linkElement.getAttribute('target') &&
-    !goog.dom.classes.has(linkElement, npf.History.EXTERNAL_CSS_CLASS);
+    !goog.dom.classlist.contains(linkElement, npf.History.EXTERNAL_CSS_CLASS);
 };

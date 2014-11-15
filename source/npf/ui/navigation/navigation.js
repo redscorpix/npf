@@ -7,8 +7,10 @@ goog.require('npf.ui.navigation.Renderer');
 
 
 /**
- * @param {npf.ui.navigation.Renderer=} opt_renderer Renderer used to render or decorate the component.
- * @param {goog.dom.DomHelper=} opt_domHelper DOM helper, used for document interaction.
+ * @param {npf.ui.navigation.Renderer=} opt_renderer Renderer used to render
+ *                                      or decorate the component.
+ * @param {goog.dom.DomHelper=} opt_domHelper DOM helper, used for document
+ *                              interaction.
  * @constructor
  * @extends {npf.ui.RenderedComponent}
  */
@@ -16,59 +18,60 @@ npf.ui.Navigation = function(opt_renderer, opt_domHelper) {
   goog.base(this, opt_renderer ||
     npf.ui.navigation.Renderer.getInstance(), opt_domHelper);
 
+  /**
+   * @private {Object.<npf.ui.navigation.Item>}
+   */
   this.itemsMap_ = {};
+
+  /**
+   * @private {npf.ui.navigation.Item}
+   */
+  this.selectedItem_ = null;
+
+  /**
+   * @type {Object.<string>}
+   * @private
+   */
   this.uidToType_ = {};
 };
 goog.inherits(npf.ui.Navigation, npf.ui.RenderedComponent);
 
-
-/**
- * @type {Object.<string,npf.ui.navigation.Item>}
- * @private
- */
-npf.ui.Navigation.prototype.itemsMap_;
-
-/**
- * @type {Object.<string,string>}
- * @private
- */
-npf.ui.Navigation.prototype.uidToType_;
-
-/**
- * @type {npf.ui.navigation.Item}
- * @private
- */
-npf.ui.Navigation.prototype.selectedItem_ = null;
-
-
-/** @inheritDoc */
-npf.ui.Navigation.prototype.createDom = function() {
-  var renderer = this.getRenderer();
-  /** @type {Element} */
-  var element = renderer.createDom(this);
-  this.setElementInternal(element);
-};
 
 /** @inheritDoc */
 npf.ui.Navigation.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
   this.itemsMap_ = null;
-  this.uidToType_ = null;
   this.selectedItem_ = null;
+  this.uidToType_ = null;
 };
 
-/**
- * @param {npf.ui.navigation.Item} item
- * @param {boolean=} opt_render
- */
-npf.ui.Navigation.prototype.addItem = function(item, opt_render) {
-  /** @type {string} */
-  var type = item.getType();
-  goog.object.add(this.itemsMap_, type, item);
-  goog.object.add(this.uidToType_, goog.getUid(item) + '', type);
+/** @inheritDoc */
+npf.ui.Navigation.prototype.addChildAt = function(child, index, opt_render) {
+  if (child instanceof npf.ui.navigation.Item) {
+    var itemContainer = /** @type {npf.ui.navigation.Item} */ (child);
+    /** @type {string} */
+    var type = itemContainer.getType();
+    this.itemsMap_[type] = itemContainer;
+    this.uidToType_[itemContainer.getId()] = type;
+  }
 
-  this.addChild(item, opt_render);
+  goog.base(this, 'addChildAt', child, index, opt_render);
+};
+
+/** @inheritDoc */
+npf.ui.Navigation.prototype.removeChild = function(child, opt_unrender) {
+  child = goog.base(this, 'removeChild', child, opt_unrender);
+
+  if (child && child instanceof npf.ui.navigation.Item) {
+    var itemContainer = /** @type {npf.ui.navigation.Item} */ (child);
+    /** @type {string} */
+    var type = itemContainer.getType();
+    goog.object.remove(this.itemsMap_, type);
+    goog.object.remove(this.uidToType_, itemContainer.getId());
+  }
+
+  return child;
 };
 
 /**
@@ -76,10 +79,7 @@ npf.ui.Navigation.prototype.addItem = function(item, opt_render) {
  */
 npf.ui.Navigation.prototype.getSelectedType = function() {
   if (this.selectedItem_) {
-    /** @type {number} */
-    var uid = goog.getUid(this.selectedItem_);
-
-    return this.uidToType_[/** @type {string} */ (uid)] || null;
+    return this.uidToType_[this.selectedItem_.getId()] || null;
   }
 
   return null;
@@ -101,14 +101,14 @@ npf.ui.Navigation.prototype.getItemByType = function(type) {
 };
 
 /**
- * @param {?string=} opt_type
+ * @param {string=} opt_type
  */
 npf.ui.Navigation.prototype.select = function(opt_type) {
   /** @type {npf.ui.navigation.Item} */
   var item = null;
 
-  if (opt_type) {
-    item = this.itemsMap_[opt_type] || null;
+  if (opt_type && this.itemsMap_[opt_type]) {
+    item = this.itemsMap_[opt_type];
   }
 
   if (this.selectedItem_ !== item) {

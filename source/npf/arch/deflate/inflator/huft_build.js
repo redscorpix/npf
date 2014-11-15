@@ -401,14 +401,12 @@ npf.arch.deflate.inflator.HuftBuild = function(b, n, s, d, e, mm) {
 
 /**
  * Maximum bit length of any code.
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.inflator.HuftBuild.BMAX = 16;
 
 /**
  * Maximum number of codes in any set.
- * @type {number}
- * @const
+ * @const {number}
  */
 npf.arch.deflate.inflator.HuftBuild.N_MAX = 288;

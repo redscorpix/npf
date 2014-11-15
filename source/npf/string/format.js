@@ -8,11 +8,11 @@ goog.provide('npf.string.format');
  * @return {string}
  */
 npf.string.format.number = function(sourceNumber, opt_groupSeparator,
-                                    opt_fractionSeparator) {
+    opt_fractionSeparator) {
   /** @type {string} */
   var source = sourceNumber + '';
   /** @type {string} */
-  var groupSeparator = opt_groupSeparator || ' ';
+  var groupSeparator = opt_groupSeparator || ' ';
   /** @type {string} */
   var fractionSeparator = opt_fractionSeparator || ',';
   /** @type {number} */

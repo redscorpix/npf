@@ -3,8 +3,9 @@ goog.provide('npf.ui.StatedRenderer');
 goog.require('goog.a11y.aria');
 goog.require('goog.a11y.aria.State');
 goog.require('goog.array');
+goog.require('goog.asserts');
 goog.require('goog.dom');
-goog.require('goog.dom.classes');
+goog.require('goog.dom.classlist');
 goog.require('goog.object');
 goog.require('goog.style');
 goog.require('goog.ui.Component.State');
@@ -28,15 +29,14 @@ goog.addSingletonGetter(npf.ui.StatedRenderer);
  * component states to ARIA states is neither component- nor renderer-specific,
  * this is a static property of the renderer class, and is initialized on first
  * use.
- * @type {Object}
- * @private
+ * @private {Object.<goog.a11y.aria.State>}
  */
 npf.ui.StatedRenderer.ARIA_STATE_MAP_;
 
 /**
- * @param {Function} ctor
+ * @param {function(new: npf.ui.StatedRenderer, ...)} ctor
  * @param {string} cssClassName
- * @return {npf.ui.StatedRenderer}
+ * @return {!npf.ui.StatedRenderer}
  */
 npf.ui.StatedRenderer.getCustomRenderer = function(ctor, cssClassName) {
   var renderer = new ctor();
@@ -65,16 +65,15 @@ npf.ui.StatedRenderer.prototype.getAriaRole = function() {
 };
 
 
-/**
- * @param {!npf.ui.RenderedComponent} component Component to render.
- * @return {Element} Root element for the component.
- * @override
- */
+/** @inheritDoc */
 npf.ui.StatedRenderer.prototype.createDom = function(component) {
-  var element = /** @type {!Element} */ (
-    goog.base(this, 'createDom', component));
-  this.setAriaStates(
-    /** @type {!npf.ui.StatedComponent} */ (component), element);
+  /** @type {Element} */
+  var element = goog.base(this, 'createDom', component);
+
+  if (element) {
+    this.setAriaStates(
+      /** @type {!npf.ui.StatedComponent} */ (component), element);
+  }
 
   return element;
 };
@@ -87,11 +86,13 @@ npf.ui.StatedRenderer.prototype.createDom = function(component) {
  * element, its child nodes, and its CSS classes, respectively.  Returns the
  * element.
  * @param {!npf.ui.RenderedComponent} component Component instance to decorate
- *                                            the element.
+ *                                              the element.
  * @param {Element} element Element to decorate.
  * @return {Element} Decorated element.
  */
 npf.ui.StatedRenderer.prototype.decorate = function(component, element) {
+  var statedComponent = /** @type {npf.ui.StatedComponent} */ (component);
+
   // Set the component's ID to the decorated element's DOM ID, if any.
   if (element.id) {
     component.setId(element.id);
@@ -106,7 +107,8 @@ npf.ui.StatedRenderer.prototype.decorate = function(component, element) {
   var hasRendererClassName = false;
   var hasStructuralClassName = false;
   var hasCombinedClassName = false;
-  var classNames = goog.dom.classes.get(element);
+  var classNames = /** @type {!Array.<string>} */ (
+    goog.dom.classlist.get(element));
 
   goog.array.forEach(classNames, function(className) {
     if (!hasRendererClassName && className == rendererClassName) {
@@ -121,7 +123,7 @@ npf.ui.StatedRenderer.prototype.decorate = function(component, element) {
       state |= this.getStateFromClass(className);
     }
   }, this);
-  component.setStateInternal(state);
+  statedComponent.setStateInternal(state);
 
   // Make sure the element has the renderer's CSS classes applied, as well as
   // any extra class names set on the component.
@@ -145,10 +147,10 @@ npf.ui.StatedRenderer.prototype.decorate = function(component, element) {
   // Only write to the DOM if new class names had to be added to the element.
   if (!hasRendererClassName || !hasStructuralClassName ||
       extraClassNames || hasCombinedClassName) {
-    goog.dom.classes.set(element, classNames.join(' '));
+    goog.dom.classlist.addAll(element, classNames);
   }
 
-  this.setAriaStates(/** @type {!npf.ui.StatedComponent} */ (component), element);
+  this.setAriaStates(statedComponent, element);
 
   return element;
 };
@@ -338,7 +340,9 @@ npf.ui.StatedRenderer.prototype.isElementShown = function(element) {
 npf.ui.StatedRenderer.prototype.setVisible = function(element, visible) {
   // The base class implementation is trivial; subclasses should override as
   // needed.  It should be possible to do animated reveals, for example.
-  goog.style.setElementShown(element, visible);
+  if (element) {
+    goog.style.setElementShown(element, visible);
+  }
 };
 
 /**
@@ -348,7 +352,6 @@ npf.ui.StatedRenderer.prototype.setVisible = function(element, visible) {
  * @param {Element} element The ancestor element.
  * @return {boolean} Whether the event has a relatedTarget (the element the
  *     mouse is coming from) and it's a descendent of element.
- * @private
  */
 npf.ui.StatedRenderer.prototype.isMouseEventWithinElement = function(evt,
     element) {
@@ -400,6 +403,7 @@ npf.ui.StatedRenderer.prototype.updateAriaState = function(element, state,
     );
   }
 
+  /** @type {goog.a11y.aria.State|undefined} */
   var ariaState = npf.ui.StatedRenderer.ARIA_STATE_MAP_[state];
 
   if (element && ariaState) {
@@ -420,32 +424,14 @@ npf.ui.StatedRenderer.prototype.getKeyEventTarget = function(component) {
   return component.getElement();
 };
 
-/**
- * Returns all CSS class names applicable to the given component, based on its
- * state.  The return value is an array of strings containing
- * <ol>
- *   <li>the renderer-specific CSS class returned by {@link #getCssClass},
- *       followed by
- *   <li>the structural CSS class returned by {@link getStructuralCssClass} (if
- *       different from the renderer-specific CSS class), followed by
- *   <li>any state-specific classes returned by {@link #getClassNamesForState},
- *       followed by
- *   <li>any extra classes returned by the component's {@code getExtraClassNames}
- *       method and
- * </ol>
- * Since all controls have at least one renderer-specific CSS class name, this
- * method is guaranteed to return an array of at least one element.
- * @param {npf.ui.RenderedComponent} component Component whose CSS classes are
- *                                           to be returned.
- * @return {Array.<string>} Array of CSS class names applicable to the component.
- * @protected
- */
+/** @inheritDoc */
 npf.ui.StatedRenderer.prototype.getClassNames = function(component) {
   /** @type {Array.<string>} */
   var classNames = goog.base(this, 'getClassNames', component);
-
+  var statedComponent = /** @type {npf.ui.StatedComponent} */ (component);
   // Add state-specific class names, if any.
-  var classNamesForState = this.getClassNamesForState(component.getState());
+  var classNamesForState = this.getClassNamesForState(
+    statedComponent.getState());
   classNames.push.apply(classNames, classNamesForState);
 
   return classNames;
@@ -526,8 +512,7 @@ npf.ui.StatedRenderer.prototype.createClassByStateMap_ = function() {
    * used when changing the DOM in response to a state change.  Precomputed
    * and cached on first use to minimize object allocations and string
    * concatenation.
-   * @type {Object}
-   * @private
+   * @private {Object}
    */
   this.classByState_ = goog.object.create(
     goog.ui.Component.State.DISABLED, this.getDisabledCssClass(),
@@ -555,8 +540,7 @@ npf.ui.StatedRenderer.prototype.createStateByClassMap_ = function() {
    * Map of state-specific structural class names to component states,
    * used during element decoration.  Precomputed and cached on first use
    * to minimize object allocations and string concatenation.
-   * @type {Object}
-   * @private
+   * @private {Object}
    */
   this.stateByClass_ = goog.object.transpose(this.classByState_);
 };

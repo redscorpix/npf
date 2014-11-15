@@ -16,20 +16,17 @@ npf.json.Path = function(data, expression, arg) {
   this.data_ = data;
 
   /**
-   * @type {string}
-   * @private
+   * @private {string}
    */
   this.expression_ = expression;
 
   /**
-   * @type {Array}
-   * @private
+   * @private {Array}
    */
   this.result_ = null;
 
   /**
-   * @type {boolean}
-   * @private
+   * @private {boolean}
    */
   this.tracePath_ = false;
 };

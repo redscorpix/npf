@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>Image Crop demo</title>
+<link media="all" rel="stylesheet" type="text/css" href="../source/npf/css/image_crop.css">
+<script src="../closure-library/closure/goog/base.js"></script>
+<script src="../source/npf/deps.js"></script>
+<script>
+goog.require('npf.ui.ImageCrop');
+goog.require('npf.ui.imageCrop.Preview');
+</script>
+</head>
+<body>
+<script>
+function appendImageCrop(image) {
+  var preview = new npf.ui.imageCrop.Preview();
+  preview.setMaxSize(300, 300);
+
+  var imageCrop = new npf.ui.ImageCrop(image);
+  imageCrop.setPreview(preview);
+  imageCrop.setMaxSize(500, 400);
+  imageCrop.setMinCroppedSize(200, 200);
+  imageCrop.render(document.body);
+  preview.render(document.body);
+}
+
+var image = new Image();
+image.onload = function() {
+  appendImageCrop(this);
+};
+image.src = './images/1.jpg';
+</script>
+</body>
+</html>

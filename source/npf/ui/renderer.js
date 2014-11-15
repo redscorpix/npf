@@ -3,7 +3,7 @@ goog.provide('npf.ui.Renderer');
 goog.require('goog.array');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
-goog.require('goog.dom.classes');
+goog.require('goog.dom.classlist');
 
 
 /**
@@ -20,10 +20,10 @@ goog.addSingletonGetter(npf.ui.Renderer);
  * as the base CSS class to apply to all elements rendered by that renderer.
  * An example to use this function using a color palette:
  *
- * @param {Function} ctor The constructor of the renderer you are trying
- *                        to create.
+ * @param {function(new: npf.ui.Renderer, ...)} ctor The constructor of the
+ *    renderer you are trying to create.
  * @param {string} cssClassName The name of the CSS class for this renderer.
- * @return {npf.ui.Renderer} An instance of the desired
+ * @return {!npf.ui.Renderer} An instance of the desired
  *   renderer with its getCssClass() method overridden to return the supplied
  *   custom CSS class name.
  */
@@ -67,8 +67,7 @@ npf.ui.Renderer.prototype.createDom = function(component) {
  * @protected
  */
 npf.ui.Renderer.prototype.applyClassNames = function(component, element) {
-  goog.dom.classes.add.apply(this,
-    [element].concat(this.getClassNames(component)));
+  goog.dom.classlist.addAll(element, this.getClassNames(component));
 };
 
 /**
@@ -95,11 +94,11 @@ npf.ui.Renderer.prototype.getContentElement = function(element) {
  */
 npf.ui.Renderer.prototype.enableClassName = function(component, className,
     enable) {
-  var element = (/** @type {Element} */ component.getElement ?
+  var element = /** @type {Element} */ (component.getElement ?
     component.getElement() : component);
 
   if (element) {
-    goog.dom.classes.enable(element, className, enable);
+    goog.dom.classlist.enable(element, className, enable);
   }
 };
 
@@ -153,7 +152,8 @@ npf.ui.Renderer.prototype.decorate = function(component, element) {
   var hasRendererClassName = false;
   var hasStructuralClassName = false;
   var hasCombinedClassName = false;
-  var classNames = goog.dom.classes.get(element);
+  var classNames = /** @type {!Array.<string>} */ (
+    goog.dom.classlist.get(element));
   var extraClassNames = component.getExtraClassNames();
 
   goog.array.forEach(classNames, function(className) {
@@ -187,9 +187,11 @@ npf.ui.Renderer.prototype.decorate = function(component, element) {
   }
 
   // Only write to the DOM if new class names had to be added to the element.
-  if (!hasRendererClassName || !hasStructuralClassName || extraClassNames ||
-    hasCombinedClassName) {
-    goog.dom.classes.set(element, classNames.join(' '));
+  if (
+    !hasRendererClassName || !hasStructuralClassName ||
+    extraClassNames || hasCombinedClassName
+  ) {
+    goog.dom.classlist.addAll(element, classNames);
   }
 
   return element;

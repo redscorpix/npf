@@ -1,6 +1,8 @@
 goog.provide('npf.net.XhrIo');
 
 goog.require('goog.Uri');
+goog.require('goog.array');
+goog.require('goog.net.EventType');
 goog.require('goog.net.XhrIo');
 goog.require('goog.object');
 goog.require('goog.structs');
@@ -14,15 +16,19 @@ goog.require('goog.structs');
  */
 npf.net.XhrIo = function(opt_xmlHttpFactory) {
   goog.base(this, opt_xmlHttpFactory);
+
+  /**
+   * @private {XMLHttpRequest}
+   */
+  this.nativeXhr_ = null;
 };
 goog.inherits(npf.net.XhrIo, goog.net.XhrIo);
 
 
 /**
- * @type {?function(npf.net.XhrIo, goog.net.EventType)}
- * @deprecated Use {@link npf.net.XhrIo.addGlobalHandler}.
+ * @private {number}
  */
-npf.net.XhrIo.preprocessHandle = null;
+npf.net.XhrIo.globalHandleCounter_ = 0;
 
 /**
  * @type {!Object.<function(npf.net.XhrIo, goog.net.EventType)>}
@@ -31,20 +37,12 @@ npf.net.XhrIo.preprocessHandle = null;
 npf.net.XhrIo.globalHandles_ = {};
 
 /**
- * @type {number}
- * @private
- */
-npf.net.XhrIo.globalHandleCounter_ = 0;
-
-/**
  * All non-disposed instances of npf.net.XhrIo created
  * by {@link npf.net.XhrIo.send} are in this Array.
  * @see npf.net.XhrIo.cleanup
- * @type {!Array.<npf.net.XhrIo>}
- * @private
+ * @private {!Array.<npf.net.XhrIo>}
  */
 npf.net.XhrIo.sendInstances_ = [];
-
 
 /**
  * @param {function(npf.net.XhrIo, goog.net.EventType)} handler
@@ -89,11 +87,13 @@ npf.net.XhrIo.send = function(url, opt_callback, opt_method, opt_content,
   npf.net.XhrIo.sendInstances_.push(x);
 
   if (opt_callback) {
-    goog.events.listen(x, goog.net.EventType.COMPLETE, opt_callback);
+    x.listen(goog.net.EventType.COMPLETE, opt_callback);
   }
 
-  goog.events.listen(x, goog.net.EventType.READY,
-    goog.partial(npf.net.XhrIo.cleanupSend_, x));
+  x.listenOnce(goog.net.EventType.READY, function() {
+    this.dispose();
+    goog.array.remove(npf.net.XhrIo.sendInstances_, this);
+  });
 
   if (opt_timeoutInterval) {
     x.setTimeoutInterval(opt_timeoutInterval);
@@ -131,34 +131,28 @@ npf.net.XhrIo.cleanup = function() {
   }
 };
 
-/**
- * Disposes of the specified npf.net.XhrIo created by
- * {@link npf.net.XhrIo.send} and removes it from
- * {@link npf.net.XhrIo.sendInstances_}.
- * @param {npf.net.XhrIo} XhrIo An XhrIo created by {@npf goog.net.XhrIo.send}.
- * @private
- */
-npf.net.XhrIo.cleanupSend_ = function(XhrIo) {
-  XhrIo.dispose();
-  goog.array.remove(npf.net.XhrIo.sendInstances_, XhrIo);
+
+/** @inheritDoc */
+npf.net.XhrIo.prototype.disposeInternal = function() {
+  goog.base(this, 'disposeInternal');
+
+  this.nativeXhr_ = null;
 };
 
-/**
- * Instance send that actually uses XMLHttpRequest to make a server call.
- * @param {string|goog.Uri} url Uri to make request to.
- * @param {string=} opt_method Send method, default: GET.
- * @param {ArrayBuffer|Blob|Document|FormData|GearsBlob|string=} opt_content
- *     Post data. This can be a Gears blob if the underlying HTTP request object
- *     is a Gears HTTP request.
- * @param {Object|goog.structs.Map=} opt_headers Map of headers to add to the
- *     request.
- */
+/** @inheritDoc */
 npf.net.XhrIo.prototype.send = function(url, opt_method, opt_content,
     opt_headers) {
   /** @type {!Object} */
   var headers = this.parseRequestHeaders(opt_headers);
 
   goog.base(this, 'send', url, opt_method, opt_content, headers);
+};
+
+/**
+ * @return {XMLHttpRequest}
+ */
+npf.net.XhrIo.prototype.getNativeXhr = function() {
+  return this.nativeXhr_;
 };
 
 /**
@@ -215,24 +209,4 @@ npf.net.XhrIo.prototype.getResponseJsonProperty = function(prop) {
   var jsonData = this.getResponseJson();
 
   return goog.isObject(jsonData) ? jsonData[prop] : undefined;
-};
-
-/**
- * @return {*|undefined}
- * @deprecated Use getResponseJsonProperty
- */
-npf.net.XhrIo.prototype.getResponseJsonResult = function() {
-  var jsonData = this.getResponseJson();
-
-  return goog.isObject(jsonData) ? jsonData['result'] : undefined;
-};
-
-/**
- * @return {*|undefined}
- * @deprecated Use getResponseJsonProperty
- */
-npf.net.XhrIo.prototype.getResponseJsonErrors = function() {
-  var jsonData = this.getResponseJson();
-
-  return goog.isObject(jsonData) ? jsonData['errors'] : undefined;
 };

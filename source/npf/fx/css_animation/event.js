@@ -15,12 +15,17 @@ npf.fx.cssAnimation.Event = function(type, animation) {
   /**
    * @type {number}
    */
-  this.duration = animation.getDuration();
+  this.delay = animation.getDelay();
 
   /**
-   * @type {npf.style.animation.PlayState}
+   * @type {npf.style.animation.Direction}
    */
-  this.state = animation.getState();
+  this.direction = animation.getDirection();
+
+  /**
+   * @type {number}
+   */
+  this.duration = animation.getDuration();
 
   /**
    * @type {number}
@@ -28,13 +33,8 @@ npf.fx.cssAnimation.Event = function(type, animation) {
   this.iterationCount = animation.getIterationCount();
 
   /**
-   * @type {number}
+   * @type {npf.style.animation.PlayState}
    */
-  this.delay = animation.getDelay();
-
-  /**
-   * @type {npf.style.animation.Direction}
-   */
-  this.direction = animation.getDirection();
+  this.state = animation.getState();
 };
 goog.inherits(npf.fx.cssAnimation.Event, goog.events.Event);

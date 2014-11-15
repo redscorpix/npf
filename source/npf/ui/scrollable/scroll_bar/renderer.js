@@ -3,17 +3,17 @@ goog.provide('npf.ui.scrollable.scrollBar.Renderer');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('goog.style');
-goog.require('npf.ui.Renderer');
+goog.require('npf.ui.StatedRenderer');
 
 
 /**
  * @constructor
- * @extends {npf.ui.Renderer}
+ * @extends {npf.ui.StatedRenderer}
  */
 npf.ui.scrollable.scrollBar.Renderer = function() {
   goog.base(this);
 };
-goog.inherits(npf.ui.scrollable.scrollBar.Renderer, npf.ui.Renderer);
+goog.inherits(npf.ui.scrollable.scrollBar.Renderer, npf.ui.StatedRenderer);
 goog.addSingletonGetter(npf.ui.scrollable.scrollBar.Renderer);
 
 
@@ -48,6 +48,7 @@ npf.ui.scrollable.scrollBar.Renderer.prototype.createDom = function(scroller) {
 
 /**
  * @param {Element} element
+<<<<<<< HEAD
  * @param {boolean} visible
  */
 npf.ui.scrollable.scrollBar.Renderer.prototype.setVisible = function(element,
@@ -59,6 +60,8 @@ npf.ui.scrollable.scrollBar.Renderer.prototype.setVisible = function(element,
 
 /**
  * @param {Element} element
+=======
+>>>>>>> 5b6e092b0dc9f1e7bfa126dd948a17868bb57405
  * @param {number} position
  */
 npf.ui.scrollable.scrollBar.Renderer.prototype.setPosition =
@@ -85,25 +88,18 @@ npf.ui.scrollable.scrollBar.Renderer.prototype.setUnselectable = function(
  * @param {Element} element
  * @return {Element}
  */
-npf.ui.scrollable.scrollBar.Renderer.prototype.getRunnerElement = function(
-    element) {
-  return this.getElementByClass(this.getRunnerCssClass(), element);
-};
-
-/**
- * @param {Element} element
- * @return {Element}
- */
 npf.ui.scrollable.scrollBar.Renderer.prototype.getBackgroundElement = function(
     element) {
   return this.getElementByClass(this.getBackgroundCssClass(), element);
 };
 
 /**
- * @return {string}
+ * @param {Element} element
+ * @return {Element}
  */
-npf.ui.scrollable.scrollBar.Renderer.prototype.getRunnerCssClass = function() {
-  return goog.getCssName(this.getStructuralCssClass(), 'runner');
+npf.ui.scrollable.scrollBar.Renderer.prototype.getRunnerElement = function(
+    element) {
+  return this.getElementByClass(this.getRunnerCssClass(), element);
 };
 
 /**
@@ -111,4 +107,11 @@ npf.ui.scrollable.scrollBar.Renderer.prototype.getRunnerCssClass = function() {
  */
 npf.ui.scrollable.scrollBar.Renderer.prototype.getBackgroundCssClass = function() {
   return goog.getCssName(this.getStructuralCssClass(), 'background');
+};
+
+/**
+ * @return {string}
+ */
+npf.ui.scrollable.scrollBar.Renderer.prototype.getRunnerCssClass = function() {
+  return goog.getCssName(this.getStructuralCssClass(), 'runner');
 };

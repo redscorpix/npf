@@ -39,6 +39,7 @@ npf.graphics.Blur.create = function(source, opt_attrs, opt_domHelper) {
  * @param {number} radius
  * @param {boolean=} opt_blurAlphaChannel
  * @param {goog.math.Rect=} opt_rect
+ * @return {boolean}
  */
 npf.graphics.Blur.prototype.convert = function(radius, opt_blurAlphaChannel,
     opt_rect) {
@@ -48,9 +49,9 @@ npf.graphics.Blur.prototype.convert = function(radius, opt_blurAlphaChannel,
       new goog.math.Rect(0, 0, this.source.width, this.source.height);
 
     if (opt_blurAlphaChannel) {
-      return this._stackBlurRgba(rect, radius);
+      return this.stackBlurRgba_(rect, radius);
     } else {
-      return this._stackBlurRgb(rect, radius);
+      return this.stackBlurRgb_(rect, radius);
     }
   }
 
@@ -63,7 +64,7 @@ npf.graphics.Blur.prototype.convert = function(radius, opt_blurAlphaChannel,
  * @return {boolean}
  * @private
  */
-npf.graphics.Blur.prototype._stackBlurRgba = function(rect, radius) {
+npf.graphics.Blur.prototype.stackBlurRgba_ = function(rect, radius) {
   /** @type {ImageData} */
   var imageData = this.getImageData(this.destination, rect);
 
@@ -424,7 +425,7 @@ npf.graphics.Blur.prototype._stackBlurRgba = function(rect, radius) {
  * @return {boolean}
  * @private
  */
-npf.graphics.Blur.prototype._stackBlurRgb = function(rect, radius) {
+npf.graphics.Blur.prototype.stackBlurRgb_ = function(rect, radius) {
   /** @type {ImageData} */
   var imageData = this.getImageData(this.destination, rect);
 

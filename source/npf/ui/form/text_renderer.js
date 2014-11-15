@@ -16,39 +16,35 @@ goog.inherits(npf.ui.form.TextRenderer, npf.ui.form.FieldRenderer);
 goog.addSingletonGetter(npf.ui.form.TextRenderer);
 
 
-/** @inheritDoc */
-npf.ui.form.TextRenderer.prototype.createDom = function(component) {
-  /** @type {Element} */
-  var element = goog.base(this, 'createDom', component);
-
-  this.appendValueElement(/** @type {!npf.ui.form.Text} */ (component),
-    element);
-
-  return element;
-};
-
 /**
- * @param {npf.ui.form.Text} component
- * @param {Element} element
- * @protected
+ * @type {string}
  */
-npf.ui.form.TextRenderer.prototype.appendValueElement = function(component,
-                                                                 element) {
+npf.ui.form.TextRenderer.CSS_CLASS = goog.getCssName('npf-form-text');
+
+
+/** @inheritDoc */
+npf.ui.form.TextRenderer.prototype.appendContent = function(component,
+    element) {
+  var textContainer = /** @type {npf.ui.form.Text} */ (component);
   var properties = {
     'class': this.getValueCssClass(),
-    'name': component.getName(),
+    'name': textContainer.getName(),
     'type': 'text',
-    'value': component.getValue()
+    'value': textContainer.getValue()
   };
 
-  if (!component.isAutoComplete()) {
+  if (!textContainer.isAutoComplete()) {
     properties['autocomplete'] = 'off';
   }
 
   /** @type {!Element} */
-  var valueElement = component.getDomHelper().createDom(
+  var valueElement = textContainer.getDomHelper().createDom(
     goog.dom.TagName.INPUT, properties);
   goog.dom.appendChild(this.getContentElement(element), valueElement);
+
+  if (textContainer.isLabelEnabled()) {
+    this.bindLabel(this.getLabelElement(element), valueElement);
+  }
 };
 
 /**
@@ -82,6 +78,6 @@ npf.ui.form.TextRenderer.prototype.setMaxLength = function(element, maxLength) {
 /**
  * @return {string}
  */
-npf.ui.form.TextRenderer.prototype.getTextCssClass = function() {
-  return goog.getCssName(this.getStructuralCssClass(), 'text');
+npf.ui.form.TextRenderer.prototype.getFieldCssClass = function() {
+  return npf.ui.form.TextRenderer.CSS_CLASS;
 };

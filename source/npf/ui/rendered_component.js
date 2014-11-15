@@ -1,6 +1,7 @@
 goog.provide('npf.ui.RenderedComponent');
 
 goog.require('goog.array');
+goog.require('goog.object');
 goog.require('goog.ui.Component.Error');
 goog.require('npf.ui.Component');
 goog.require('npf.ui.Renderer');
@@ -17,23 +18,27 @@ goog.require('npf.ui.Renderer');
 npf.ui.RenderedComponent = function(opt_renderer, opt_domHelper) {
   goog.base(this, opt_domHelper);
 
+  /**
+   * Map of DOM IDs to child components.  Each key is the DOM ID of a child
+   * component's root element; each value is a reference to the child component
+   * itself.  Used for looking up the child component corresponding to a DOM
+   * node in O(1) time.
+   * @private {Object.<goog.ui.Component>}
+   */
+  this.childElementIdMap_ = null;
+
+  /**
+   * Additional class name(s) to apply to the component's root element, if any.
+   * @private {Array.<string>?}
+   */
+  this.extraClassNames_ = null;
+
+  /**
+   * @private {npf.ui.Renderer}
+   */
   this.renderer_ = opt_renderer || npf.ui.Renderer.getInstance();
 };
 goog.inherits(npf.ui.RenderedComponent, npf.ui.Component);
-
-
-/**
- * @type {npf.ui.Renderer}
- * @private
- */
-npf.ui.RenderedComponent.prototype.renderer_;
-
-/**
- * Additional class name(s) to apply to the component's root element, if any.
- * @type {Array.<string>?}
- * @private
- */
-npf.ui.RenderedComponent.prototype.extraClassNames_ = null;
 
 
 /**
@@ -61,11 +66,25 @@ npf.ui.RenderedComponent.prototype.decorateInternal = function(element) {
 };
 
 /** @inheritDoc */
+npf.ui.RenderedComponent.prototype.enterDocument = function() {
+  goog.base(this, 'enterDocument');
+
+  /** @type {function(this:npf.ui.RenderedComponent,goog.ui.Component)} */
+  var registerChilds = function(child) {
+    if (child.isInDocument()) {
+      this.registerChildId_(child);
+    }
+  };
+  this.forEachChild(registerChilds, this);
+};
+
+/** @inheritDoc */
 npf.ui.RenderedComponent.prototype.disposeInternal = function() {
   goog.base(this, 'disposeInternal');
 
-  this.renderer_ = null;
+  this.childElementIdMap_ = null;
   this.extraClassNames_ = null;
+  this.renderer_ = null;
 };
 
 /**
@@ -120,6 +139,107 @@ npf.ui.RenderedComponent.prototype.setRenderer = function(renderer) {
 };
 
 /**
+ * Adds the component as a child of this component at the given 0-based index.
+ * @param {goog.ui.Component} component New child.
+ * @param {number} index Index at which the new child is to be added.
+ * @param {boolean=} opt_render Whether the new child should be rendered
+ *     immediately after being added (defaults to false).
+ * @override
+ */
+npf.ui.RenderedComponent.prototype.addChildAt = function(component, index,
+    opt_render) {
+  goog.base(this, 'addChildAt', component, index, opt_render);
+
+  if (component.isInDocument() && this.isInDocument()) {
+    this.registerChildId_(component);
+  }
+};
+
+/**
+ * Creates a DOM ID for the child component and registers it to an internal
+ * hash table to be able to find it fast by id.
+ * @param {goog.ui.Component} child The child component. Its root element has
+ *     to be created yet.
+ * @private
+ */
+npf.ui.RenderedComponent.prototype.registerChildId_ = function(child) {
+  // Map the DOM ID of the component's root element to the component itself.
+
+  /** @type {Element} */
+  var childElem = child.getElement();
+
+  // If the component's root element doesn't have a DOM ID assign one.
+  var id = childElem.id || (childElem.id = child.getId());
+
+  // Lazily create the child element ID map on first use.
+  if (!this.childElementIdMap_) {
+    this.childElementIdMap_ = {};
+  }
+
+  this.childElementIdMap_[id] = child;
+};
+
+/**
+ * Removes a child component.
+ * @param {string|goog.ui.Component} component The ID of the child to remove, or
+ *     the component itself.
+ * @param {boolean=} opt_unrender Whether to call {@code exitDocument} on the
+ *     removed component, and detach its DOM from the document (defaults to
+ *     false).
+ * @return {goog.ui.Component} The removed component, if any.
+ * @override
+ */
+npf.ui.RenderedComponent.prototype.removeChild = function(component,
+    opt_unrender) {
+  component = goog.isString(component) ? this.getChild(component) : component;
+
+  if (component) {
+    // Remove the mapping from the child element ID map.
+
+    /** @type {Element} */
+    var childElem = component.getElement();
+
+    if (childElem && childElem.id && this.childElementIdMap_) {
+      goog.object.remove(this.childElementIdMap_, childElem.id);
+    }
+  }
+
+  return goog.base(this, 'removeChild', component, opt_unrender);
+};
+
+/**
+ * Returns the child component that owns the given DOM node, or null if no such
+ * component is found.
+ * @param {Node} node DOM node whose owner is to be returned.
+ * @return {goog.ui.Component?} Component hosted in the container to which
+ *     the node belongs (if found).
+ * @protected
+ */
+npf.ui.RenderedComponent.prototype.getOwnerChild = function(node) {
+  // Ensure that this container actually has child components before
+  // looking up the owner.
+  if (this.childElementIdMap_) {
+    /** @type {Element} */
+    var element = this.getElement();
+
+    // See http://b/2964418 . IE9 appears to evaluate '!=' incorrectly, so
+    // using '!==' instead.
+    // TODO(user): Possibly revert this change if/when IE9 fixes the issue.
+    while (node && node !== element) {
+      var id = /** @type {string} */ (node['id']);
+
+      if (id in this.childElementIdMap_) {
+        return this.childElementIdMap_[id];
+      }
+
+      node = node.parentNode;
+    }
+  }
+
+  return null;
+};
+
+/**
  * Returns any additional class name(s) to be applied to the component's
  * root element, or null if no extra class names are needed.
  * @return {Array.<string>?} Additional class names to be applied to
@@ -157,9 +277,11 @@ npf.ui.RenderedComponent.prototype.addClassName = function(className) {
  *                           element.
  */
 npf.ui.RenderedComponent.prototype.removeClassName = function(className) {
-  if (className && this.extraClassNames_) {
-    goog.array.remove(this.extraClassNames_, className);
-
+  if (
+    className &&
+    this.extraClassNames_ &&
+    goog.array.remove(this.extraClassNames_, className)
+  ) {
     if (!this.extraClassNames_.length) {
       this.extraClassNames_ = null;
     }

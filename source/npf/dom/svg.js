@@ -7,6 +7,7 @@ goog.require('goog.object');
 
 /**
  * @enum {string}
+ * @deprecated Use npf.svg.Ns
  */
 npf.dom.svg.Ns = {
   EV: 'http://www.w3.org/2001/xml-events',
@@ -17,29 +18,29 @@ npf.dom.svg.Ns = {
 };
 
 /**
- * @type {!Array.<string>}
- * @private
+ * @private {!Array.<string>}
  */
-npf.dom.svg._xlinkAttrs = ['actuate', 'arcrole', 'href', 'role', 'show', 'title', 'type'];
+npf.dom.svg.xlinkAttrs_ = [
+  'actuate', 'arcrole', 'href', 'role', 'show', 'title', 'type'];
 
 /**
- * @type {!Array.<string>}
- * @private
+ * @private {!Array.<string>}
  */
-npf.dom.svg._xmlAttrs = ['base', 'lang', 'space'];
+npf.dom.svg.xmlAttrs_ = ['base', 'lang', 'space'];
 
 
 /**
  * @param {string} tagName
- * @param {string|Object.<string,string>=} opt_attrs
- * @return {!Element}
+ * @param {string|Object.<string>=} opt_attrs
+ * @return {!SVGElement}
+ * @deprecated Use npf.svg.dom.createElement
  */
 npf.dom.svg.createElement = function(tagName, opt_attrs) {
-  /** @type {!Element} */
-  var element = document.createElementNS(npf.dom.svg.Ns.SVG, tagName);
+  var element = /** @type {!SVGElement} */ (
+    document.createElementNS(npf.dom.svg.Ns.SVG, tagName));
 
   if (opt_attrs) {
-    /** @type {!Object.<string,string>} */
+    /** @type {!Object.<string>} */
     var attrs = {};
 
     if (goog.isString(opt_attrs)) {
@@ -55,9 +56,10 @@ npf.dom.svg.createElement = function(tagName, opt_attrs) {
 };
 
 /**
- * Из строки делает SVG-элемент.
+ * Parse string and returns SVG element.
  * @param {string} data
  * @return {Element}
+ * @deprecated Use npf.svg.dom.parseFromString
  */
 npf.dom.svg.parseFromString = function(data) {
   var index = data.indexOf(' ');
@@ -86,18 +88,20 @@ npf.dom.svg.parseFromString = function(data) {
  * @param {Element} element
  * @param {string} name
  * @return {string?}
+ * @deprecated Use npf.svg.dom.getAttr
  */
 npf.dom.svg.getAttr = function(element, name) {
   /** @type {?string} */
-  var ns = npf.dom.svg._getAttrNamespace(name);
+  var ns = npf.dom.svg.getAttrNamespace_(name);
 
   return ns ? element.getAttributeNS(ns, name) : element.getAttribute(name);
 };
 
 /**
  * @param {Element} element
- * @param {string|Object.<string,string|number>} name
- * @param {number|string=} opt_value
+ * @param {string|Object.<string|number|boolean>} name
+ * @param {number|string|boolean=} opt_value
+ * @deprecated Use npf.svg.dom.setAttr
  */
 npf.dom.svg.setAttr = function(element, name, opt_value) {
   if (goog.isObject(name)) {
@@ -106,12 +110,14 @@ npf.dom.svg.setAttr = function(element, name, opt_value) {
     });
   } else if (goog.isString(name)) {
     /** @type {?string} */
-    var ns = npf.dom.svg._getAttrNamespace(name);
+    var ns = npf.dom.svg.getAttrNamespace_(name);
 
     if (ns) {
-      element.setAttributeNS(ns, name, /** @type {string|number} */ (opt_value));
+      element.setAttributeNS(
+        ns, name, /** @type {string|number|boolean} */ (opt_value));
     } else {
-      element.setAttribute(name, /** @type {string|number} */ (opt_value));
+      element.setAttribute(
+        name, /** @type {string|number|boolean} */ (opt_value));
     }
   }
 };
@@ -119,10 +125,11 @@ npf.dom.svg.setAttr = function(element, name, opt_value) {
 /**
  * @param {Element} element
  * @param {string} name
+ * @deprecated Use npf.svg.dom.removeAttr
  */
 npf.dom.svg.removeAttr = function(element, name) {
   /** @type {?string} */
-  var ns = npf.dom.svg._getAttrNamespace(name);
+  var ns = npf.dom.svg.getAttrNamespace_(name);
 
   if (ns) {
     element.removeAttributeNS(ns, name);
@@ -136,10 +143,10 @@ npf.dom.svg.removeAttr = function(element, name) {
  * @return {string?}
  * @private
  */
-npf.dom.svg._getAttrNamespace = function(name) {
-  if (-1 < goog.array.indexOf(npf.dom.svg._xlinkAttrs, name)) {
+npf.dom.svg.getAttrNamespace_ = function(name) {
+  if (-1 < goog.array.indexOf(npf.dom.svg.xlinkAttrs_, name)) {
     return npf.dom.svg.Ns.XLINK;
-  } else if (-1 < goog.array.indexOf(npf.dom.svg._xmlAttrs, name)) {
+  } else if (-1 < goog.array.indexOf(npf.dom.svg.xmlAttrs_, name)) {
     return npf.dom.svg.Ns.XML;
   }
 
