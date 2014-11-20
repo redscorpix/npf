@@ -48,20 +48,6 @@ npf.ui.scrollable.scrollBar.Renderer.prototype.createDom = function(scroller) {
 
 /**
  * @param {Element} element
-<<<<<<< HEAD
- * @param {boolean} visible
- */
-npf.ui.scrollable.scrollBar.Renderer.prototype.setVisible = function(element,
-    visible) {
-  if (element) {
-    goog.style.setElementShown(element, visible);
-  }
-};
-
-/**
- * @param {Element} element
-=======
->>>>>>> 5b6e092b0dc9f1e7bfa126dd948a17868bb57405
  * @param {number} position
  */
 npf.ui.scrollable.scrollBar.Renderer.prototype.setPosition =

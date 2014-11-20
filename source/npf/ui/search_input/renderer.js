@@ -242,13 +242,6 @@ npf.ui.searchInput.Renderer.prototype.getPlaceholderCssClass = function() {
 /**
  * @return {string}
  */
-<<<<<<< HEAD
-npf.ui.searchInput.Renderer.prototype.setVisible = function(element, visible) {
-  if (element) {
-    goog.style.setElementShown(element, visible);
-  }
-=======
 npf.ui.searchInput.Renderer.prototype.getQueryCssClass = function() {
   return goog.getCssName(this.getStructuralCssClass(), 'query');
->>>>>>> 5b6e092b0dc9f1e7bfa126dd948a17868bb57405
 };
