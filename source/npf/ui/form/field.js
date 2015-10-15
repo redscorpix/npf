@@ -542,14 +542,12 @@ npf.ui.form.Field.prototype.isValid = function() {
  * @protected
  */
 npf.ui.form.Field.prototype.setValid = function(valid) {
-  if (this.valid_ != valid) {
-    this.valid_ = valid;
+  this.valid_ = valid;
 
-    if (this.valid_) {
-      this.onValid();
-    } else {
-      this.onError();
-    }
+  if (this.valid_) {
+    this.onValid();
+  } else {
+    this.onError();
   }
 };
 

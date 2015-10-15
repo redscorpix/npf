@@ -1,0 +1,6 @@
+{
+  "id": "npf",
+  "inherits": "base_config",
+  "inputs": ["../lib/transition/transition.js", "../lib/event_dispatcher/event_dispatcher.js"],
+  "output-file": "../build/npf.js"
+}

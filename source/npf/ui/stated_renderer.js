@@ -107,8 +107,7 @@ npf.ui.StatedRenderer.prototype.decorate = function(component, element) {
   var hasRendererClassName = false;
   var hasStructuralClassName = false;
   var hasCombinedClassName = false;
-  var classNames = /** @type {!Array.<string>} */ (
-    goog.dom.classlist.get(element));
+  var classNames = goog.array.toArray(goog.dom.classlist.get(element));
 
   goog.array.forEach(classNames, function(className) {
     if (!hasRendererClassName && className == rendererClassName) {

@@ -2,6 +2,7 @@ goog.provide('npfTransition.CssAnimation');
 
 goog.require('npf.fx.KeyframeAnimation');
 goog.require('npf.fx.css3.easing');
+goog.require('npfTransition.interfaceMaker');
 goog.require('npf.style.animation.Direction');
 
 
@@ -14,9 +15,9 @@ goog.require('npf.style.animation.Direction');
  */
 npfTransition.CssAnimation = function(element, time, opt_acc) {
 	goog.base(this, element, time, this._getEasing(opt_acc));
+	npfTransition.interfaceMaker.install(this);
 };
 goog.inherits(npfTransition.CssAnimation, npf.fx.KeyframeAnimation);
-
 
 /**
  * @enum {Array.<number>}

@@ -25,6 +25,9 @@ goog.exportSymbol('NpfEventDispatcher.prototype.removeAll', NpfEventDispatcher.p
 goog.exportSymbol('NpfEventDispatcher.prototype.dispatch', NpfEventDispatcher.prototype.dispatchEvent);
 goog.exportSymbol('NpfEventDispatcher.prototype.dispose', NpfEventDispatcher.prototype.dispose);
 goog.exportSymbol('NpfEventDispatcher.prototype.isDisposed', NpfEventDispatcher.prototype.isDisposed);
+goog.exportSymbol('NpfEventDispatcher.prototype.setParent', NpfEventDispatcher.prototype.setParentEventTarget);
+goog.exportSymbol('NpfEventDispatcher.prototype.getParent', NpfEventDispatcher.prototype.getParentEventTarget);
+goog.exportSymbol('NpfEventDispatcher.prototype.disposeInternal', NpfEventDispatcher.prototype.disposeInternal);
 
 goog.exportSymbol('NpfEvent', goog.events.Event);
 goog.exportSymbol('NpfEvent.prototype.type', goog.events.Event.prototype.type);

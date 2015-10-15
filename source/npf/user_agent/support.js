@@ -139,7 +139,9 @@ npf.userAgent.Support.SMILE = ':)';
 npf.userAgent.Support.vendorPrefix =
   goog.userAgent.WEBKIT ? 'webkit' :
   goog.userAgent.GECKO ? 'moz' :
-  goog.userAgent.OPERA ? 'o' :
+  // TODO(max@): Dirty hack. From 12.10 prefix was removed for  Transitions,
+  // Animations and Transforms
+  goog.userAgent.OPERA ? (goog.userAgent.isVersionOrHigher('12.10') ? '' : 'o') :
   goog.userAgent.IE ? 'ms' : '';
 
 /**

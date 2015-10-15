@@ -4,6 +4,7 @@ goog.require('goog.object');
 goog.require('npf.fx.Animation');
 goog.require('npf.fx.DomAnimation');
 goog.require('npf.fx.easing');
+goog.require('npfTransition.interfaceMaker');
 
 
 /**
@@ -15,6 +16,7 @@ goog.require('npf.fx.easing');
  */
 npfTransition.JsAnimation = function(element, time, opt_acc) {
 	goog.base(this, element, time, this._getEasing(opt_acc));
+	npfTransition.interfaceMaker.install(this);
 
 	this._helper = new npf.fx.Animation([0], [1], 0);
 	this.registerDisposable(this._helper);
@@ -45,7 +47,6 @@ npfTransition.JsAnimation = function(element, time, opt_acc) {
 	this.add(this._helper);
 };
 goog.inherits(npfTransition.JsAnimation, npf.fx.DomAnimation);
-
 
 /**
  * @enum {Function}
@@ -195,7 +196,7 @@ npfTransition.JsAnimation.prototype.stopEx = function(opt_gotoEnd) {
  */
 npfTransition.JsAnimation.prototype.addBgColorTransformEx = function(start, end, opt_time, opt_acc) {
 	this.addBgColorTransform(start, end, opt_time, this._getEasing(opt_acc));
-
+	this._helper.duration = Math.max(this._helper.duration, opt_time || 0, this.time);
 	return this;
 };
 
@@ -208,7 +209,7 @@ npfTransition.JsAnimation.prototype.addBgColorTransformEx = function(start, end,
  */
 npfTransition.JsAnimation.prototype.addColorTransformEx = function(start, end, opt_time, opt_acc) {
 	this.addColorTransform(start, end, opt_time, this._getEasing(opt_acc));
-
+	this._helper.duration = Math.max(this._helper.duration, opt_time || 0, this.time);
 	return this;
 };
 
@@ -221,7 +222,7 @@ npfTransition.JsAnimation.prototype.addColorTransformEx = function(start, end, o
  */
 npfTransition.JsAnimation.prototype.addFadeEx = function(start, end, opt_time, opt_acc) {
 	this.addFade(start, end, opt_time, this._getEasing(opt_acc));
-
+	this._helper.duration = Math.max(this._helper.duration, opt_time || 0, this.time);
 	return this;
 };
 
@@ -232,7 +233,7 @@ npfTransition.JsAnimation.prototype.addFadeEx = function(start, end, opt_time, o
  */
 npfTransition.JsAnimation.prototype.addFadeInEx = function(opt_time, opt_acc) {
 	this.addFadeIn(opt_time, this._getEasing(opt_acc));
-
+	this._helper.duration = Math.max(this._helper.duration, opt_time || 0, this.time);
 	return this;
 };
 
@@ -243,7 +244,7 @@ npfTransition.JsAnimation.prototype.addFadeInEx = function(opt_time, opt_acc) {
  */
 npfTransition.JsAnimation.prototype.addFadeInAndShowEx = function(opt_time, opt_acc) {
 	this.addFadeInAndShow(opt_time, this._getEasing(opt_acc));
-
+	this._helper.duration = Math.max(this._helper.duration, opt_time || 0, this.time);
 	return this;
 };
 
@@ -254,7 +255,7 @@ npfTransition.JsAnimation.prototype.addFadeInAndShowEx = function(opt_time, opt_
  */
 npfTransition.JsAnimation.prototype.addFadeOutEx = function(opt_time, opt_acc) {
 	this.addFadeOut(opt_time, this._getEasing(opt_acc));
-
+	this._helper.duration = Math.max(this._helper.duration, opt_time || 0, this.time);
 	return this;
 };
 
@@ -265,7 +266,7 @@ npfTransition.JsAnimation.prototype.addFadeOutEx = function(opt_time, opt_acc) {
  */
 npfTransition.JsAnimation.prototype.addFadeOutAndHideEx = function(opt_time, opt_acc) {
 	this.addFadeOutAndHide(opt_time, this._getEasing(opt_acc));
-
+	this._helper.duration = Math.max(this._helper.duration, opt_time || 0, this.time);
 	return this;
 };
 
@@ -291,7 +292,7 @@ npfTransition.JsAnimation.prototype.addResizeEx = function(start, end, opt_time,
  */
 npfTransition.JsAnimation.prototype.addResizeWidthEx = function(start, end, opt_time, opt_acc) {
 	this.addResizeWidth(start, end, opt_time, this._getEasing(opt_acc));
-
+	this._helper.duration = Math.max(this._helper.duration, opt_time || 0, this.time);
 	return this;
 };
 
@@ -304,7 +305,7 @@ npfTransition.JsAnimation.prototype.addResizeWidthEx = function(start, end, opt_
  */
 npfTransition.JsAnimation.prototype.addResizeHeightEx = function(start, end, opt_time, opt_acc) {
 	this.addResizeHeight(start, end, opt_time, this._getEasing(opt_acc));
-
+	this._helper.duration = Math.max(this._helper.duration, opt_time || 0, this.time);
 	return this;
 };
 
@@ -317,7 +318,7 @@ npfTransition.JsAnimation.prototype.addResizeHeightEx = function(start, end, opt
  */
 npfTransition.JsAnimation.prototype.addScrollEx = function(start, end, opt_time, opt_acc) {
 	this.addScroll(start, end, opt_time, this._getEasing(opt_acc));
-
+	this._helper.duration = Math.max(this._helper.duration, opt_time || 0, this.time);
 	return this;
 };
 
@@ -330,7 +331,7 @@ npfTransition.JsAnimation.prototype.addScrollEx = function(start, end, opt_time,
  */
 npfTransition.JsAnimation.prototype.addSlideEx = function(start, end, opt_time, opt_acc) {
 	this.addSlide(start, end, opt_time, this._getEasing(opt_acc));
-
+	this._helper.duration = Math.max(this._helper.duration, opt_time || 0, this.time);
 	return this;
 };
 
@@ -343,7 +344,7 @@ npfTransition.JsAnimation.prototype.addSlideEx = function(start, end, opt_time, 
  */
 npfTransition.JsAnimation.prototype.addSlideLeftEx = function(start, end, opt_time, opt_acc) {
 	this.addSlideLeft(start, end, opt_time, this._getEasing(opt_acc));
-
+	this._helper.duration = Math.max(this._helper.duration, opt_time || 0, this.time);
 	return this;
 };
 
@@ -356,7 +357,7 @@ npfTransition.JsAnimation.prototype.addSlideLeftEx = function(start, end, opt_ti
  */
 npfTransition.JsAnimation.prototype.addSlideRightEx = function(start, end, opt_time, opt_acc) {
 	this.addSlideRight(start, end, opt_time, this._getEasing(opt_acc));
-
+	this._helper.duration = Math.max(this._helper.duration, opt_time || 0, this.time);
 	return this;
 };
 
@@ -369,7 +370,7 @@ npfTransition.JsAnimation.prototype.addSlideRightEx = function(start, end, opt_t
  */
 npfTransition.JsAnimation.prototype.addSlideTopEx = function(start, end, opt_time, opt_acc) {
 	this.addSlideTop(start, end, opt_time, this._getEasing(opt_acc));
-
+	this._helper.duration = Math.max(this._helper.duration, opt_time || 0, this.time);
 	return this;
 };
 
@@ -381,7 +382,7 @@ npfTransition.JsAnimation.prototype.addSlideTopEx = function(start, end, opt_tim
  */
 npfTransition.JsAnimation.prototype.addSlideFromEx = function(end, opt_time, opt_acc) {
 	this.addSlideFrom(end, opt_time, this._getEasing(opt_acc));
-
+	this._helper.duration = Math.max(this._helper.duration, opt_time || 0, this.time);
 	return this;
 };
 
@@ -393,7 +394,7 @@ npfTransition.JsAnimation.prototype.addSlideFromEx = function(end, opt_time, opt
  */
 npfTransition.JsAnimation.prototype.addSlideLeftFromEx = function(end, opt_time, opt_acc) {
 	this.addSlideLeftFrom(end, opt_time, this._getEasing(opt_acc));
-
+	this._helper.duration = Math.max(this._helper.duration, opt_time || 0, this.time);
 	return this;
 };
 
@@ -405,7 +406,7 @@ npfTransition.JsAnimation.prototype.addSlideLeftFromEx = function(end, opt_time,
  */
 npfTransition.JsAnimation.prototype.addSlideTopFromEx = function(end, opt_time, opt_acc) {
 	this.addSlideTopFrom(end, opt_time, this._getEasing(opt_acc));
-
+	this._helper.duration = Math.max(this._helper.duration, opt_time || 0, this.time);
 	return this;
 };
 
@@ -418,7 +419,7 @@ npfTransition.JsAnimation.prototype.addSlideTopFromEx = function(end, opt_time, 
  */
 npfTransition.JsAnimation.prototype.addSwipeEx = function(start, end, opt_time, opt_acc) {
 	this.addSwipe(start, end, opt_time, this._getEasing(opt_acc));
-
+	this._helper.duration = Math.max(this._helper.duration, opt_time || 0, this.time);
 	return this;
 };
 

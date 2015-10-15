@@ -1,5 +1,6 @@
 .DS_Store
 *~
-
-/bin
+npf.sublime-project
+npf.sublime-workspace
+bin
 node_modules

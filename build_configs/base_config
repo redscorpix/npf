@@ -1,0 +1,35 @@
+{
+	"paths": ["../source", "../lib"],
+	"mode": "ADVANCED",
+	// "mode": "SIMPLE",
+	"level": "VERBOSE",
+
+	"checks": {
+	  // Unfortunately, the Closure Library violates these in many places.
+	  // "accessControls": "ERROR",
+	  // "visibility": "ERROR"
+
+	  "checkRegExp": "ERROR",
+	  "checkTypes": "ERROR",
+	  "checkVars": "ERROR",
+	  "deprecated": "ERROR",
+	  "fileoverviewTags": "ERROR",
+	  "invalidCasts": "ERROR",
+	  "missingProperties": "ERROR",
+	  "nonStandardJsDocs": "ERROR",
+	  "undefinedVars": "ERROR"
+	},
+
+	"externs": [
+	  "//jquery-1.5.js",
+	  "//google_maps_api_v3.js",
+	  "//chrome_extensions.js"
+	],
+	
+	"define": {
+	  "goog.DEBUG": false
+	},
+
+	"output-wrapper": "(function(){%output%})();",
+	"output-charset": "utf-8"
+}

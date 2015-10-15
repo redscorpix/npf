@@ -1,13 +1,16 @@
 goog.provide('npfTransition');
 
+goog.require('npfTransition.AnimationParallelQueue');
+goog.require('npfTransition.AnimationQueue');
 goog.require('goog.debug.ErrorHandler');
 goog.require('goog.events.EventWrapper');
 goog.require('npf.fx.KeyframeAnimation');
 goog.require('npf.userAgent.support');
-goog.require('npfTransition.AnimationQueue');
-goog.require('npfTransition.AnimationParallelQueue');
 goog.require('npfTransition.CssAnimation');
 goog.require('npfTransition.JsAnimation');
+goog.require('npfTransition.Queue');
+goog.require('npfTransition.ParallelQueue');
+goog.require('npfTransition.SerialQueue');
 
 
 /**
@@ -44,7 +47,6 @@ npfTransition.createJsAnimation = function(element, time, opt_acc) {
 	return animation;
 };
 
-
 goog.exportSymbol('npfAnimation.css', npfTransition.createCssAnimation);
 goog.exportSymbol('npfAnimation.js', npfTransition.createJsAnimation);
 goog.exportSymbol('npfAnimation.isCssAnimationSupported', npf.fx.CssAnimation.isSupported);
@@ -75,6 +77,7 @@ goog.exportSymbol('NpfJsAnimation.prototype.pause', npfTransition.JsAnimation.pr
 goog.exportSymbol('NpfJsAnimation.prototype.stop', npfTransition.JsAnimation.prototype.stop);
 goog.exportSymbol('NpfJsAnimation.prototype.dispose', npfTransition.JsAnimation.prototype.dispose);
 goog.exportSymbol('NpfJsAnimation.prototype.isDisposed', npfTransition.JsAnimation.prototype.isDisposed);
+
 goog.exportSymbol('NpfJsAnimation.prototype.addBgColorTransform', npfTransition.JsAnimation.prototype.addBgColorTransformEx);
 goog.exportSymbol('NpfJsAnimation.prototype.addColorTransform', npfTransition.JsAnimation.prototype.addColorTransformEx);
 goog.exportSymbol('NpfJsAnimation.prototype.addFade', npfTransition.JsAnimation.prototype.addFadeEx);
@@ -128,11 +131,23 @@ goog.exportSymbol('NpfCssAnimation.prototype.fromTransform', npfTransition.CssAn
 goog.exportSymbol('NpfCssAnimation.prototype.toTransform', npfTransition.CssAnimation.prototype.toTransform);
 goog.exportSymbol('NpfCssAnimation.prototype.setTransform', npfTransition.CssAnimation.prototype.setTransform);
 goog.exportSymbol('NpfCssAnimation.prototype.setTransformOrigin', npfTransition.CssAnimation.prototype.setTransformOrigin);
-goog.exportSymbol('NpfCssAnimation.prototype.onBegin', npfTransition.CssAnimation.prototype.onBeginHandler);
-goog.exportSymbol('NpfCssAnimation.prototype.onEnd', npfTransition.CssAnimation.prototype.onEndHandler);
-goog.exportSymbol('NpfCssAnimation.prototype.onFinish', npfTransition.CssAnimation.prototype.onFinishHandler);
-goog.exportSymbol('NpfCssAnimation.prototype.onPause', npfTransition.CssAnimation.prototype.onPauseHandler);
-goog.exportSymbol('NpfCssAnimation.prototype.onPlay', npfTransition.CssAnimation.prototype.onPlayHandler);
-goog.exportSymbol('NpfCssAnimation.prototype.onResume', npfTransition.CssAnimation.prototype.onResumeHandler);
-goog.exportSymbol('NpfCssAnimation.prototype.onStop', npfTransition.CssAnimation.prototype.onStopHandler);
-goog.exportSymbol('NpfCssAnimation.prototype.onIteration', npfTransition.CssAnimation.prototype.onIterationHandler);
+
+goog.exportSymbol('NpfAnimationParallelQueue', npfTransition.ParallelQueue);
+goog.exportSymbol('NpfAnimationParallelQueue.prototype.add', npfTransition.ParallelQueue.prototype.add);
+goog.exportSymbol('NpfAnimationParallelQueue.prototype.remove', npfTransition.ParallelQueue.prototype.remove);
+goog.exportSymbol('NpfAnimationParallelQueue.prototype.play', npfTransition.ParallelQueue.prototype.play);
+goog.exportSymbol('NpfAnimationParallelQueue.prototype.pause', npfTransition.ParallelQueue.prototype.pause);
+goog.exportSymbol('NpfAnimationParallelQueue.prototype.stop', npfTransition.ParallelQueue.prototype.stop);
+goog.exportSymbol('NpfAnimationParallelQueue.prototype.dispose', npfTransition.ParallelQueue.prototype.dispose);
+goog.exportSymbol('NpfAnimationParallelQueue.prototype.disposeInternal', npfTransition.ParallelQueue.prototype.disposeInternal);
+goog.exportSymbol('NpfAnimationParallelQueue.prototype.isDisposed', npfTransition.ParallelQueue.prototype.isDisposed);
+
+goog.exportSymbol('NpfAnimationQueue', npfTransition.SerialQueue);
+goog.exportSymbol('NpfAnimationQueue.prototype.add', npfTransition.SerialQueue.prototype.add);
+goog.exportSymbol('NpfAnimationQueue.prototype.remove', npfTransition.SerialQueue.prototype.remove);
+goog.exportSymbol('NpfAnimationQueue.prototype.play', npfTransition.SerialQueue.prototype.play);
+goog.exportSymbol('NpfAnimationQueue.prototype.pause', npfTransition.SerialQueue.prototype.pause);
+goog.exportSymbol('NpfAnimationQueue.prototype.stop', npfTransition.SerialQueue.prototype.stop);
+goog.exportSymbol('NpfAnimationQueue.prototype.dispose', npfTransition.SerialQueue.prototype.dispose);
+goog.exportSymbol('NpfAnimationQueue.prototype.disposeInternal', npfTransition.SerialQueue.prototype.disposeInternal);
+goog.exportSymbol('NpfAnimationQueue.prototype.isDisposed', npfTransition.SerialQueue.prototype.isDisposed);
