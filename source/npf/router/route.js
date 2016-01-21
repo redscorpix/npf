@@ -10,17 +10,18 @@ goog.require('npf.string');
 /**
  * @param {string} fragment
  * @param {Object.<function(string):boolean|Array.<function(string):boolean>>=}
- *                                                             opt_validatorsMap
+ *    opt_validatorsMap
  *
  * @example
- * new npf.router.Route('/user/{id:int}', {
+ * new npf.router.Route('/user/{id:int}/', {
  *   'id': function(value) { return 1000 < parseInt(value, 10); }
  * });
- * new npf.router.Route('/user/{id:range(10,)}');
- * new npf.router.Route('/user/{id:string}');
- * new npf.router.Route('/user/{id}');
+ * new npf.router.Route('/user/{id:range(10,)}/');
+ * new npf.router.Route('/user/{id:string}/'); ==
+ *    new npf.router.Route('/user/{id}/');
  *
  * @constructor
+ * @struct
  */
 npf.router.Route = function(fragment, opt_validatorsMap) {
 
@@ -31,7 +32,8 @@ npf.router.Route = function(fragment, opt_validatorsMap) {
   this.validatorsMap_ = {};
 
   if (opt_validatorsMap) {
-    /** @type {function(this:npf.router.Route,(function(string):boolean|Array.<function(string):boolean>),string)} */
+    /** @type {function(this:npf.router.Route,(function(string):boolean|
+      Array.<function(string):boolean>),string)} */
     var addValidators = function(validator, name) {
       /** @type {Array.<function(string):boolean>} */
       var validators = goog.isArray(validator) ? validator : [validator];
@@ -70,7 +72,7 @@ npf.router.Route = function(fragment, opt_validatorsMap) {
       }
     } else {
       replacedFragment = replacedFragment.replace(
-        npf.router.Route.FRAGMENT_REPLACE_REGEX, '(\\w+)');
+        npf.router.Route.FRAGMENT_REPLACE_REGEX, '([^/]+)');
     }
 
     this.optionNames_.push(name);
@@ -205,15 +207,6 @@ npf.router.Route.prototype.getOptionsInternal = function(path) {
  * @param {string|goog.Uri.QueryData|Object.<string>=} opt_query
  * @return {string}
  */
-npf.router.Route.prototype.getUrl = function(opt_optionsMap, opt_query) {
-  return this.getToken(opt_optionsMap, opt_query);
-};
-
-/**
- * @param {Object.<number|string>=} opt_optionsMap
- * @param {string|goog.Uri.QueryData|Object.<string>=} opt_query
- * @return {string}
- */
 npf.router.Route.prototype.getToken = function(opt_optionsMap, opt_query) {
   return this.getUri(opt_optionsMap, opt_query).toString();
 };
@@ -221,7 +214,7 @@ npf.router.Route.prototype.getToken = function(opt_optionsMap, opt_query) {
 /**
  * @param {Object.<number|string>=} opt_optionsMap
  * @param {string|goog.Uri.QueryData|Object.<string>=} opt_query
- * @return {goog.Uri}
+ * @return {!goog.Uri}
  */
 npf.router.Route.prototype.getUri = function(opt_optionsMap, opt_query) {
   var fragment = npf.string.supplant(this.generateFragment_, opt_optionsMap);

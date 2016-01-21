@@ -1,6 +1,8 @@
 goog.provide('npf.net.FileInput');
+goog.provide('npf.net.FileInput.EventType');
 
 goog.require('goog.dom');
+goog.require('goog.dom.InputType');
 goog.require('goog.dom.TagName');
 goog.require('goog.dom.forms');
 goog.require('goog.events');
@@ -8,17 +10,20 @@ goog.require('goog.events.BrowserEvent');
 goog.require('goog.events.EventHandler');
 goog.require('goog.events.EventTarget');
 goog.require('goog.events.EventType');
+goog.require('goog.object');
 goog.require('goog.style');
 
 
 /**
  * @param {Element} buttonElement
  * @param {Element=} opt_parentElement
+ * @param {Object=} opt_inputAttrs
  * @constructor
+ * @struct
  * @extends {goog.events.EventTarget}
  */
-npf.net.FileInput = function(buttonElement, opt_parentElement) {
-  goog.base(this);
+npf.net.FileInput = function(buttonElement, opt_parentElement, opt_inputAttrs) {
+  npf.net.FileInput.base(this, 'constructor');
 
   /**
    * @private {Element}
@@ -42,6 +47,11 @@ npf.net.FileInput = function(buttonElement, opt_parentElement) {
   this.enabled_ = false;
 
   /**
+   * @private {boolean}
+   */
+  this.hover_ = false;
+
+  /**
    * @private {string}
    */
   this.ext_ = '';
@@ -59,25 +69,57 @@ npf.net.FileInput = function(buttonElement, opt_parentElement) {
   /**
    * @private {HTMLInputElement}
    */
-  this.inputElement_ = this.createInputElement_();
-  goog.dom.appendChild(this.element_, this.inputElement_);
-  goog.dom.appendChild(this.parentElement_, this.element_);
+  this.inputElement_ = this.createInputElement_(opt_inputAttrs);
+  this.domHelper_.appendChild(this.element_, this.inputElement_);
+  this.domHelper_.appendChild(this.parentElement_, this.element_);
 
   /**
-   * @private {goog.events.EventHandler}
+   * @private {goog.events.EventHandler.<!npf.net.FileInput>}
    */
   this.handler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.handler_);
+
+  /**
+   * @private {number}
+   */
+  this.left_ = NaN;
+
+  /**
+   * @private {Array.<string>}
+   */
+  this.mimeTypes_ = null;
+
+  /**
+   * @private {number}
+   */
+  this.top_ = NaN;
+
+  /**
+   * @private {number}
+   */
+  this.width_ = NaN;
+
+  /**
+   * @private {number}
+   */
+  this.height_ = NaN;
 };
 goog.inherits(npf.net.FileInput, goog.events.EventTarget);
 
+
+/**
+ * @type {string}
+ */
+npf.net.FileInput.CSS_CLASS = goog.getCssName('npf-fileInput');
 
 /**
  * @enum {string}
  */
 npf.net.FileInput.EventType = {
   CLICK: goog.events.getUniqueId('click'),
-  CHANGE: goog.events.getUniqueId('change')
+  CHANGE: goog.events.getUniqueId('change'),
+  ENTER: goog.events.getUniqueId('enter'),
+  LEAVE: goog.events.getUniqueId('leave')
 };
 
 /**
@@ -102,9 +144,9 @@ npf.net.FileInput.getExt = function(file) {
 /** @inheritDoc */
 npf.net.FileInput.prototype.disposeInternal = function() {
   this.setEnabled(false);
-  goog.dom.removeNode(this.element_);
+  this.domHelper_.removeNode(this.element_);
 
-  goog.base(this, 'disposeInternal');
+  npf.net.FileInput.base(this, 'disposeInternal');
 
   this.buttonElement_ = null;
   this.domHelper_ = null;
@@ -112,13 +154,6 @@ npf.net.FileInput.prototype.disposeInternal = function() {
   this.handler_ = null;
   this.inputElement_ = null;
   this.parentElement_ = null;
-};
-
-/**
- * @return {Element}
- */
-npf.net.FileInput.prototype.getElement = function() {
-  return this.element_;
 };
 
 /**
@@ -177,19 +212,22 @@ npf.net.FileInput.prototype.getInputElement = function() {
 };
 
 /**
+ * @param {Object=} opt_attrs
  * @return {!HTMLInputElement}
  * @private
  */
-npf.net.FileInput.prototype.createInputElement_ = function() {
-  var inputElement = /** @type {!HTMLInputElement} */ (
-    this.domHelper_.createDom(goog.dom.TagName.INPUT, {
-      'type': 'file'
-    })
-  );
-  inputElement.style.cssText = 'cursor:pointer;font-size:480px;margin:0;'+
-    'padding:0;position:absolute;right:0';
+npf.net.FileInput.prototype.createInputElement_ = function(opt_attrs) {
+  var attrs = {
+    'class': goog.getCssName(npf.net.FileInput.CSS_CLASS, 'input'),
+    'type': goog.dom.InputType.FILE
+  };
 
-  return inputElement;
+  if (opt_attrs) {
+    goog.object.extend(attrs, opt_attrs);
+  }
+
+  return /** @type {!HTMLInputElement} */ (
+    this.domHelper_.createDom(goog.dom.TagName.INPUT, attrs));
 };
 
 /**
@@ -197,12 +235,53 @@ npf.net.FileInput.prototype.createInputElement_ = function() {
  * @private
  */
 npf.net.FileInput.prototype.createElement_ = function() {
-  /** @type {!Element} */
-  var element = this.domHelper_.createDom(goog.dom.TagName.DIV);
-  element.style.cssText = 'direction:ltr;display:block;margin:0;opacity:0;' +
-    'overflow:hidden;padding:0;position:absolute;z-index:2147483583';
+  return this.domHelper_.createDom(
+    goog.dom.TagName.DIV, npf.net.FileInput.CSS_CLASS);
+};
 
-  return element;
+/**
+ * @return {Element}
+ */
+npf.net.FileInput.prototype.getElement = function() {
+  return this.element_;
+};
+
+/**
+ * @return {Array.<string>}
+ */
+npf.net.FileInput.prototype.getMimeTypes = function() {
+  return this.mimeTypes_;
+};
+
+/**
+ * @param {Array.<string>} mimeTypes Ex. ['audio/*', 'image/jpeg']
+ */
+npf.net.FileInput.prototype.setMimeTypes = function(mimeTypes) {
+  this.mimeTypes_ = mimeTypes;
+
+  if (this.mimeTypes_ && this.mimeTypes_.length) {
+    this.inputElement_['accept'] = this.mimeTypes_.join(',');
+  } else {
+    this.inputElement_.removeAttribute('accept');
+  }
+};
+
+/**
+ * Checks if a mouse event (mouseover or mouseout) occured below an element.
+ * @param {goog.events.BrowserEvent} evt Mouse event (should be mouseover or
+ *     mouseout).
+ * @param {Element} element The ancestor element.
+ * @return {boolean} Whether the event has a relatedTarget (the element the
+ *     mouse is coming from) and it's a descendent of element.
+ * @private
+ */
+npf.net.FileInput.prototype.isMouseEventWithinElement_ = function(evt,
+    element) {
+  // If relatedTarget is null, it means there was no previous element (e.g.
+  // the mouse moved out of the window).  Assume this means that the mouse
+  // event was not within the element.
+  return !!evt.relatedTarget &&
+    this.domHelper_.contains(element, evt.relatedTarget);
 };
 
 /**
@@ -241,10 +320,15 @@ npf.net.FileInput.prototype.onClick_ = function(evt) {
  * @private
  */
 npf.net.FileInput.prototype.onMouseOut_ = function(evt) {
-  // We use visibility instead of display to fix problem with Safari 4
-  // The problem is that the value of input doesn't change if it
-  // has display none when user selects a file
-  this.element_.style.visibility = 'hidden';
+  if (this.hover_) {
+    this.hover_ = false;
+
+    // We use visibility instead of display to fix problem with Safari 4
+    // The problem is that the value of input doesn't change if it
+    // has display none when user selects a file
+    this.element_.style.visibility = 'hidden';
+    this.dispatchEvent(npf.net.FileInput.EventType.LEAVE);
+  }
 };
 
 /**
@@ -252,15 +336,31 @@ npf.net.FileInput.prototype.onMouseOut_ = function(evt) {
  * @private
  */
 npf.net.FileInput.prototype.onMouseOver_ = function(evt) {
+  if (!this.hover_) {
+    this.hover_ = true;
+    this.element_.style.visibility = 'visible';
+    this.dispatchEvent(npf.net.FileInput.EventType.ENTER);
+  }
+
   /** @type {!goog.math.Coordinate} */
   var offset = goog.style.getRelativePosition(
     this.buttonElement_, this.parentElement_);
-  goog.style.setStyle(this.element_, {
-    'height': this.buttonElement_.offsetHeight + 'px',
-    'left': offset.x + 'px',
-    'position': 'absolute',
-    'top': offset.y + 'px',
-    'visibility': 'visible',
-    'width': this.buttonElement_.offsetWidth + 'px'
-  });
+  /** @type {number} */
+  var width = this.buttonElement_.offsetWidth;
+  /** @type {number} */
+  var height = this.buttonElement_.offsetHeight;
+
+  if (offset.x != this.left_ || offset.y != this.top_) {
+    this.left_ = offset.x;
+    this.top_ = offset.y;
+    this.element_.style.left = offset.x + 'px';
+    this.element_.style.top = offset.y + 'px';
+  }
+
+  if (width != this.width_ || height != this.height_) {
+    this.width_ = width;
+    this.height_ = height;
+    this.element_.width = width + 'px';
+    this.element_.height = height + 'px';
+  }
 };

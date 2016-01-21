@@ -1,6 +1,5 @@
 goog.provide('npf.ui.form.DatePickerRenderer');
 
-goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('goog.dom.forms');
 goog.require('npf.ui.form.FieldRenderer');
@@ -8,10 +7,11 @@ goog.require('npf.ui.form.FieldRenderer');
 
 /**
  * @constructor
+ * @struct
  * @extends {npf.ui.form.FieldRenderer}
  */
 npf.ui.form.DatePickerRenderer = function() {
-  goog.base(this);
+  npf.ui.form.DatePickerRenderer.base(this, 'constructor');
 };
 goog.inherits(npf.ui.form.DatePickerRenderer, npf.ui.form.FieldRenderer);
 goog.addSingletonGetter(npf.ui.form.DatePickerRenderer);
@@ -62,12 +62,14 @@ npf.ui.form.DatePickerRenderer.prototype.appendDayElement = function(component,
     this.getValueCssClass(),
     this.getDayCssClass()
   ].join(' ');
+  /** @type {goog.dom.DomHelper} */
+  var domHelper = component.getDomHelper();
   /** @type {!Element} */
-  var dayElement = component.getDomHelper().createDom(goog.dom.TagName.SELECT, {
+  var dayElement = domHelper.createDom(goog.dom.TagName.SELECT, {
     'class': className,
     'name': component.getName() + npf.ui.form.DatePickerRenderer.NameSuffix.DAY
   });
-  goog.dom.appendChild(element, dayElement);
+  domHelper.appendChild(element, dayElement);
 
   return dayElement;
 };
@@ -85,12 +87,14 @@ npf.ui.form.DatePickerRenderer.prototype.appendMonthElement = function(
     this.getValueCssClass(),
     this.getMonthCssClass()
   ].join(' ');
+  /** @type {goog.dom.DomHelper} */
+  var domHelper = component.getDomHelper();
   /** @type {!Element} */
-  var monthElement = component.getDomHelper().createDom(goog.dom.TagName.SELECT, {
+  var monthElement = domHelper.createDom(goog.dom.TagName.SELECT, {
     'class': className,
     'name': component.getName() + npf.ui.form.DatePickerRenderer.NameSuffix.MONTH
   });
-  goog.dom.appendChild(element, monthElement);
+  domHelper.appendChild(element, monthElement);
 
   return monthElement;
 };
@@ -108,12 +112,14 @@ npf.ui.form.DatePickerRenderer.prototype.appendYearElement = function(component,
     this.getValueCssClass(),
     this.getYearCssClass()
   ].join(' ');
+  /** @type {goog.dom.DomHelper} */
+  var domHelper = component.getDomHelper();
   /** @type {!Element} */
-  var yearElement = component.getDomHelper().createDom(goog.dom.TagName.SELECT, {
+  var yearElement = domHelper.createDom(goog.dom.TagName.SELECT, {
     'class': className,
     'name': component.getName() + npf.ui.form.DatePickerRenderer.NameSuffix.YEAR
   });
-  goog.dom.appendChild(element, yearElement);
+  domHelper.appendChild(element, yearElement);
 
   return yearElement;
 };
@@ -200,17 +206,17 @@ npf.ui.form.DatePickerRenderer.prototype.setValue = function(component, value) {
   /** @type {Element} */
   var yearElement = datePicker.getYearElement();
   /** @type {number} */
-  var dayStart = 1;
+  var minDay = 1;
   /** @type {number} */
-  var dayFinish = 31;
+  var maxDay = 31;
   /** @type {number} */
-  var monthStart = 1;
+  var minMonth = 1;
   /** @type {number} */
-  var monthFinish = 12;
+  var maxMonth = 12;
   /** @type {number} */
-  var yearStart = datePicker.getMinDate().getFullYear();
+  var minYear = datePicker.getMinDate().getFullYear();
   /** @type {number} */
-  var yearFinish = datePicker.getMaxDate().getFullYear();
+  var maxYear = datePicker.getMaxDate().getFullYear();
   /** @type {string} */
   var dayHtml = '';
   /** @type {string} */
@@ -220,53 +226,69 @@ npf.ui.form.DatePickerRenderer.prototype.setValue = function(component, value) {
   /** @type {number} */
   var i;
 
-  if (day && month && year) {
-    if (year == yearStart) {
-      monthStart = datePicker.getMinDate().getMonth() + 1;
+  if (year) {
+    if (year == minYear) {
+      minMonth = datePicker.getMinDate().getMonth() + 1;
+    }
 
-      if (month == monthStart) {
-        dayStart = datePicker.getMinDate().getDate();
+    if (year == maxYear) {
+      maxMonth = datePicker.getMaxDate().getMonth() + 1;
+    }
+
+    if (month) {
+      if (year == minYear && month == minMonth) {
+        minDay = datePicker.getMinDate().getDate();
       }
-    } else if (year == yearFinish) {
-      monthFinish = datePicker.getMaxDate().getMonth() + 1;
+
+      if (year == maxYear && month == maxMonth) {
+        maxDay = datePicker.getMaxDate().getDate();
+      }
     }
   }
 
   if (month) {
     // Если год не знаем, то выводим для високосного года.
-    dayFinish = (new Date(year || 2000, month + 1, 0)).getDate();
+    maxDay = Math.min(maxDay, (new Date(year || 2000, month, 0)).getDate());
   }
 
   if (datePicker.isEmptyValue()) {
-    dayHtml += this.getSelectHtml_(goog.isNull(day));
-    monthHtml += this.getSelectHtml_(goog.isNull(month));
-    yearHtml += this.getSelectHtml_(goog.isNull(year));
+    dayHtml += this.getOptionHtml_();
+    monthHtml += this.getOptionHtml_();
+    yearHtml += this.getOptionHtml_();
   }
 
-  for (i = dayStart; i <= dayFinish; i++) {
-    dayHtml += this.getSelectHtml_(day === i, i);
+  for (i = minDay; i <= maxDay; i++) {
+    dayHtml += this.getOptionHtml_(i, datePicker.getDayLabel(i));
   }
 
-  for (i = monthStart; i <= monthFinish; i++) {
-    monthHtml += this.getSelectHtml_(month === i, i);
+  for (i = minMonth; i <= maxMonth; i++) {
+    monthHtml += this.getOptionHtml_(i, datePicker.getMonthLabel(i));
   }
 
-  for (i = yearStart; i <= yearFinish; i++) {
-    yearHtml += this.getSelectHtml_(year === i, i);
+  if (datePicker.isYearReversed()) {
+    for (i = maxYear; i >= minYear; i--) {
+      yearHtml += this.getOptionHtml_(i, datePicker.getYearLabel(i));
+    }
+  } else {
+    for (i = minYear; i <= maxYear; i++) {
+      yearHtml += this.getOptionHtml_(i, datePicker.getYearLabel(i));
+    }
   }
 
-  goog.dom.removeChildren(dayElement);
-  dayElement.innerHTML = dayHtml;
+  if (dayElement) {
+    dayElement.innerHTML = dayHtml;
+    goog.dom.forms.setValue(dayElement, day || 0);
+  }
 
-  goog.dom.removeChildren(monthElement);
-  monthElement.innerHTML = monthHtml;
+  if (monthElement) {
+    monthElement.innerHTML = monthHtml;
+    goog.dom.forms.setValue(monthElement, month || 0);
+  }
 
-  goog.dom.removeChildren(yearElement);
-  yearElement.innerHTML = yearHtml;
-
-  goog.dom.forms.setValue(datePicker.getDayElement(), day);
-  goog.dom.forms.setValue(datePicker.getMonthElement(), month);
-  goog.dom.forms.setValue(datePicker.getYearElement(), year);
+  if (yearElement) {
+    yearElement.innerHTML = yearHtml;
+    goog.dom.forms.setValue(yearElement, year || 0);
+  }
 };
 
 /**
@@ -294,16 +316,19 @@ npf.ui.form.DatePickerRenderer.prototype.getYearElement = function(element) {
 };
 
 /**
- * @param {boolean} selected
  * @param {number=} opt_value
+ * @param {string=} opt_label
  * @return {string}
  * @private
  */
-npf.ui.form.DatePickerRenderer.prototype.getSelectHtml_ = function(selected,
-    opt_value) {
-  return ['<option value="', opt_value || 0, '"',
-    selected ? ' selected="selected"' : '', '>',
-    opt_value || '&nbsp;', '</option>'].join('');
+npf.ui.form.DatePickerRenderer.prototype.getOptionHtml_ = function(opt_value,
+    opt_label) {
+  /** @type {number} */
+  var value = opt_value || 0;
+  /** @type {number|string} */
+  var label = opt_label || value || ' ';
+
+  return '<option value="' + value + '">' + label + '</option>';
 };
 
 /**

@@ -8,7 +8,7 @@ goog.require('npf.ui.Renderer');
  * @extends {npf.ui.Renderer}
  */
 npf.ui.navigation.Renderer = function() {
-  goog.base(this);
+  npf.ui.navigation.Renderer.base(this, 'constructor');
 };
 goog.inherits(npf.ui.navigation.Renderer, npf.ui.Renderer);
 goog.addSingletonGetter(npf.ui.navigation.Renderer);

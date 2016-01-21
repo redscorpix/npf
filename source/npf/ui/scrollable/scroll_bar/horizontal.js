@@ -12,8 +12,12 @@ goog.require('npf.ui.scrollable.scrollBar.HorizontalRenderer');
  * @extends {npf.ui.scrollable.ScrollBar}
  */
 npf.ui.scrollable.scrollBar.Horizontal = function(opt_renderer, opt_domHelper) {
-  goog.base(this, opt_renderer ||
-    npf.ui.scrollable.scrollBar.HorizontalRenderer.getInstance(), opt_domHelper);
+  npf.ui.scrollable.scrollBar.Horizontal.base(
+    this,
+    'constructor',
+    opt_renderer ||
+      npf.ui.scrollable.scrollBar.HorizontalRenderer.getInstance(),
+    opt_domHelper);
 
   this.addClassName(npf.ui.scrollable.scrollBar.Horizontal.CSS_CLASS);
 };
@@ -35,9 +39,8 @@ npf.ui.scrollable.scrollBar.Horizontal.prototype.setContainer = function(
   var oldContainer = this.getContainer();
 
   if (oldContainer !== container) {
-    this.setContainerInternal(null);
-
     if (oldContainer) {
+      this.setContainerInternal(null);
       this.setListenedContainer(oldContainer, false);
       oldContainer.setHorizontalScrollBar(null);
     }

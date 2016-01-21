@@ -1,10 +1,8 @@
 goog.provide('npf.ui.progressBar.Renderer');
 
 goog.require('goog.a11y.aria');
-goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('goog.dom.classlist');
-goog.require('goog.style');
 goog.require('npf.ui.Renderer');
 
 
@@ -13,7 +11,7 @@ goog.require('npf.ui.Renderer');
  * @extends {npf.ui.Renderer}
  */
 npf.ui.progressBar.Renderer = function() {
-  goog.base(this);
+  npf.ui.progressBar.Renderer.base(this, 'constructor');
 };
 goog.inherits(npf.ui.progressBar.Renderer, npf.ui.Renderer);
 goog.addSingletonGetter(npf.ui.progressBar.Renderer);
@@ -35,13 +33,13 @@ npf.ui.progressBar.Renderer.prototype.createDom = function(component) {
   var progressBar = /** @type {npf.ui.ProgressBar} */ (component);
   /** @type {npf.ui.ProgressBar.Orientation} */
   var orientation = progressBar.getOrientation();
-  var element = /** @type {!Element} */ (
-    goog.base(this, 'createDom', component));
+  /** @type {!Element} */
+  var element = npf.ui.progressBar.Renderer.base(this, 'createDom', component);
   goog.dom.classlist.add(element, this.getOrientationCssClass(orientation));
 
   /** @type {Element} */
   var thumbElement = this.createThumbElement(progressBar);
-  goog.dom.appendChild(element, thumbElement);
+  component.getDomHelper().appendChild(element, thumbElement);
 
   // state live = polite will notify the user of updates,
   // but will not interrupt ongoing feedback
@@ -53,7 +51,8 @@ npf.ui.progressBar.Renderer.prototype.createDom = function(component) {
 
 /** @inheritDoc */
 npf.ui.progressBar.Renderer.prototype.decorate = function(component, element) {
-  element = goog.base(this, 'decorate', component, element);
+  element = npf.ui.progressBar.Renderer.base(
+    this, 'decorate', component, element);
 
   var progressBar = /** @type {npf.ui.ProgressBar} */ (component);
   /** @type {npf.ui.ProgressBar.Orientation} */
@@ -65,7 +64,7 @@ npf.ui.progressBar.Renderer.prototype.decorate = function(component, element) {
 
   if (!thumbElement) {
     thumbElement = this.createThumbElement(progressBar);
-    goog.dom.appendChild(element, thumbElement);
+    component.getDomHelper().appendChild(element, thumbElement);
   }
 
   return element;
@@ -80,16 +79,12 @@ npf.ui.progressBar.Renderer.prototype.initializeUi = function(component) {
 
   if (thumbElement) {
     if (npf.ui.ProgressBar.Orientation.VERTICAL == component.getOrientation()) {
-      goog.style.setStyle(thumbElement, {
-        'left': 0,
-        'width': '100%'
-      });
+      thumbElement.style.left = 0;
+      thumbElement.style.width = '100%';
     } else {
-      goog.style.setStyle(thumbElement, {
-        'height': '100%',
-        'left': 0,
-        'top': 0
-      });
+      thumbElement.style.height = '100%';
+      thumbElement.style.left = 0;
+      thumbElement.style.top = 0;
     }
   }
 };
@@ -112,12 +107,10 @@ npf.ui.progressBar.Renderer.prototype.updateUi = function(component) {
     var size = Math.round((value - min) / (max - min) * 100);
 
     if (npf.ui.ProgressBar.Orientation.VERTICAL == component.getOrientation()) {
-      goog.style.setStyle(thumbElement, {
-        'height': size + '%',
-        'top': (100 - size) + '%'
-      });
+      thumbElement.style.height = size + '%';
+      thumbElement.style.top = (100 - size) + '%';
     } else {
-      goog.style.setStyle(thumbElement, 'width', size + '%');
+      thumbElement.style.width = size + '%';
     }
   }
 };

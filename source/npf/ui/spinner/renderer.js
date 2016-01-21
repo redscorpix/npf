@@ -2,9 +2,7 @@ goog.provide('npf.ui.spinner.Renderer');
 
 goog.require('goog.a11y.aria');
 goog.require('goog.a11y.aria.Role');
-goog.require('goog.dom');
 goog.require('goog.dom.TagName');
-goog.require('goog.style');
 goog.require('npf.ui.Renderer');
 
 
@@ -13,7 +11,7 @@ goog.require('npf.ui.Renderer');
  * @extends {npf.ui.Renderer}
  */
 npf.ui.spinner.Renderer = function() {
-  goog.base(this);
+  npf.ui.spinner.Renderer.base(this, 'constructor');
 };
 goog.inherits(npf.ui.spinner.Renderer, npf.ui.Renderer);
 goog.addSingletonGetter(npf.ui.spinner.Renderer);
@@ -33,8 +31,7 @@ npf.ui.spinner.Renderer.prototype.getCssClass = function() {
 /** @inheritDoc */
 npf.ui.spinner.Renderer.prototype.createDom = function(component) {
   /** @type {!Element} */
-  var element = component.getDomHelper().createDom(goog.dom.TagName.INS,
-    this.getClassNames(component).join(' '));
+  var element = npf.ui.spinner.Renderer.base(this, 'createDom', component);
   goog.a11y.aria.setRole(element, goog.a11y.aria.Role.PROGRESSBAR);
 
   /** @type {number} */
@@ -45,23 +42,26 @@ npf.ui.spinner.Renderer.prototype.createDom = function(component) {
   var radius = component.getRadius();
   /** @type {number} */
   var opacity = component.getOpacity();
+  /** @type {goog.dom.DomHelper} */
+  var domHelper = component.getDomHelper();
 
   for (var i = 0; i < segmentCount; i++) {
-    /** @type {!Element} */
-    var segmentElement = component.getDomHelper().createDom(
-      goog.dom.TagName.INS, this.getSegmentCssClass());
-    /** @type {!Element} */
-    var lineElement = component.getDomHelper().createDom(
-      goog.dom.TagName.INS, this.getLineCssClass());
     /** @type {number} */
     var rotate = Math.round(360 / segmentCount * i + rotation);
-
-    goog.style.setStyle(lineElement, {
-      'opacity': opacity,
-      'transform': 'rotate(' + rotate + 'deg) translate(' + radius + 'px,0)'
+    /** @type {string} */
+    var transformValue =
+      'rotate(' + rotate + 'deg) translate(' + radius + 'px,0)';
+    /** @type {string} */
+    var styleValue = 'opacity:' + opacity + ';transform:' + transformValue;
+    /** @type {string} */
+    var lineElementHtml = '<div class="' + this.getLineCssClass() +
+      '" style="' + styleValue + '"></div>';
+    /** @type {!Element} */
+    var segmentElement = domHelper.createDom(goog.dom.TagName.DIV, {
+      'class': this.getSegmentCssClass(),
+      'innerHTML': lineElementHtml
     });
-    goog.dom.appendChild(segmentElement, lineElement);
-    goog.dom.appendChild(element, segmentElement);
+    domHelper.appendChild(element, segmentElement);
   }
 
   return element;
@@ -73,7 +73,7 @@ npf.ui.spinner.Renderer.prototype.createDom = function(component) {
  */
 npf.ui.spinner.Renderer.prototype.setOpacity = function(element, opacity) {
   if (element) {
-    goog.style.setStyle(element, 'opacity', opacity);
+    element.style.opacity = opacity;
   }
 };
 

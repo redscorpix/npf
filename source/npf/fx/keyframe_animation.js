@@ -9,12 +9,14 @@ goog.require('npf.fx.cssAnimation.Keyframes');
  * @param {number} duration in ms
  * @param {Array.<number>=} opt_acc defaults to npf.fx.css3.easing.LINEAR
  * @constructor
+ * @struct
  * @extends {npf.fx.CssAnimation}
  */
 npf.fx.KeyframeAnimation = function(element, duration, opt_acc) {
   var keyframes = new npf.fx.cssAnimation.Keyframes();
 
-  goog.base(this, keyframes, element, duration, opt_acc);
+  npf.fx.KeyframeAnimation.base(
+    this, 'constructor', keyframes, element, duration, opt_acc);
 };
 goog.inherits(npf.fx.KeyframeAnimation, npf.fx.CssAnimation);
 
@@ -23,7 +25,7 @@ goog.inherits(npf.fx.KeyframeAnimation, npf.fx.CssAnimation);
 npf.fx.KeyframeAnimation.prototype.disposeInternal = function() {
   goog.dispose(this.getKeyframes());
 
-  goog.base(this, 'disposeInternal');
+  npf.fx.KeyframeAnimation.base(this, 'disposeInternal');
 };
 
 /**

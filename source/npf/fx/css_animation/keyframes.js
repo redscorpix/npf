@@ -8,8 +8,7 @@ goog.require('goog.math.Rect');
 goog.require('goog.math.Size');
 goog.require('goog.object');
 goog.require('goog.style');
-goog.require('npf.userAgent.Support');
-goog.require('npf.userAgent.support');
+goog.require('npf.userAgent.utils');
 
 
 /**
@@ -19,11 +18,12 @@ goog.require('npf.userAgent.support');
  * @param {Array.<number>=} opt_toAcc
  * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
+ * @struct
  * @extends {goog.Disposable}
  */
 npf.fx.cssAnimation.Keyframes = function(opt_from, opt_to, opt_fromAcc,
     opt_toAcc, opt_domHelper) {
-  goog.base(this);
+  npf.fx.cssAnimation.Keyframes.base(this, 'constructor');
 
   /**
    * @private {goog.dom.DomHelper}
@@ -36,8 +36,7 @@ npf.fx.cssAnimation.Keyframes = function(opt_from, opt_to, opt_fromAcc,
   this.name_ = npf.fx.cssAnimation.Keyframes.getNextKeyframeName();
 
   /**
-   * @type {Object.<string>}
-   * @private
+   * @private {Object.<string>}
    */
   this.endStyles_ = null;
 
@@ -47,14 +46,12 @@ npf.fx.cssAnimation.Keyframes = function(opt_from, opt_to, opt_fromAcc,
   this.inited_ = false;
 
   /**
-   * @type {Object.<Object>}
-   * @private
+   * @private {Object.<Object>}
    */
   this.keyframesMap_ = {};
 
   /**
-   * @type {Element|StyleSheet}
-   * @private
+   * @private {Element|StyleSheet}
    */
   this.styleElement_ = null;
 
@@ -104,7 +101,7 @@ npf.fx.cssAnimation.Keyframes.getVendorPrefix = function() {
 
     if (!goog.isDef(element.style['animationName'])) {
       /** @type {!Array.<string>} */
-      var vendorPrefixes = npf.userAgent.Support.cssomPrefixes;
+      var vendorPrefixes = npf.userAgent.utils.CSSOM_PREFIXES;
 
       for (var i = 0; i < vendorPrefixes.length; i++) {
         if (goog.isDef(element.style[vendorPrefixes[i] + 'AnimationName'])) {
@@ -127,7 +124,7 @@ npf.fx.cssAnimation.Keyframes.prototype.disposeInternal = function() {
     goog.style.uninstallStyles(this.styleElement_);
   }
 
-  goog.base(this, 'disposeInternal');
+  npf.fx.cssAnimation.Keyframes.base(this, 'disposeInternal');
 
   this.domHelper_ = null;
   this.endStyles_ = null;
@@ -187,8 +184,8 @@ npf.fx.cssAnimation.Keyframes.prototype.init = function() {
       var keyframeText = position + '% {';
 
       for (var key in properties) {
-        /** @type {string} */
-        var name = npf.userAgent.support.getCssPropertyName(key);
+        /** @type {string?} */
+        var name = npf.userAgent.utils.prefixedCss(key);
 
         if (name) {
           keyframeText += name + ':' + properties[key] + ';';
@@ -811,7 +808,7 @@ npf.fx.cssAnimation.Keyframes.prototype.toTransform = function(transform,
 npf.fx.cssAnimation.Keyframes.prototype.setTransform = function(transform,
     position, opt_acc) {
   return this.insertKeyframe(goog.object.create(
-    npf.userAgent.support.getCssPropertyName('transform'), transform
+    npf.userAgent.utils.prefixedCss('transform'), transform
   ), position, opt_acc);
 };
 
@@ -862,10 +859,13 @@ npf.fx.cssAnimation.Keyframes.prototype.insertKeyframe = function(rules,
     var properties = goog.object.clone(rules);
 
     if (opt_acc) {
-      /** @type {string} */
+      /** @type {string?} */
       var timingFunc =
-        npf.userAgent.support.getCssPropertyName('animation-timing-function');
-      properties[timingFunc] = 'cubic-bezier(' + opt_acc.join(',') + ')';
+        npf.userAgent.utils.prefixedCss('animationTimingFunction');
+
+      if (timingFunc) {
+        properties[timingFunc] = 'cubic-bezier(' + opt_acc.join(',') + ')';
+      }
     }
 
     if (100 == position) {

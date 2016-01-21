@@ -15,10 +15,11 @@ goog.require('npf.graphics.blend.functions');
  *                                                           image.
  * @param {HTMLCanvasElement} destination
  * @constructor
+ * @struct
  * @extends {npf.graphics.Effect}
  */
 npf.graphics.Blend = function(source1, source2, destination) {
-  goog.base(this, source1, destination);
+  npf.graphics.Blend.base(this, 'constructor', source1, destination);
 
   /**
    * @type {HTMLCanvasElement|Image|HTMLImageElement}

@@ -5,17 +5,20 @@ goog.require('goog.dom.TagName');
 goog.require('goog.events.BrowserEvent');
 goog.require('goog.events.EventType');
 goog.require('goog.ui.Component.EventType');
+goog.require('npf.events.ClickHandler');
 goog.require('npf.ui.Component');
 
 
 /**
  * @param {Object|string|Array|NodeList} caption
- * @param {string|goog.Uri=} opt_url
+ * @param {goog.Uri=} opt_uri
+ * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
+ * @struct
  * @extends {npf.ui.Component}
  */
-npf.ui.Link = function(caption, opt_url) {
-  goog.base(this);
+npf.ui.Link = function(caption, opt_uri, opt_domHelper) {
+  npf.ui.Link.base(this, 'constructor', opt_domHelper);
 
   /**
    * @type {Object|string|Array|NodeList}
@@ -31,7 +34,7 @@ npf.ui.Link = function(caption, opt_url) {
   /**
    * @private {goog.Uri}
    */
-  this.uri_ = opt_url ? new goog.Uri(opt_url) : null;
+  this.uri_ = opt_uri || null;
 };
 goog.inherits(npf.ui.Link, npf.ui.Component);
 
@@ -49,7 +52,7 @@ npf.ui.Link.prototype.createDom = function() {
 
   if (this.uri_) {
     tagName = goog.dom.TagName.A;
-    attrs['href'] = this.getUrl();
+    attrs['href'] = this.getUri().toString();
   }
 
   /** @type {!Element} */
@@ -59,15 +62,19 @@ npf.ui.Link.prototype.createDom = function() {
 
 /** @inheritDoc */
 npf.ui.Link.prototype.enterDocument = function() {
-  goog.base(this, 'enterDocument');
+  npf.ui.Link.base(this, 'enterDocument');
 
-  this.getHandler()
-    .listen(this.getElement(), goog.events.EventType.CLICK, this.onClick_);
+  var clickHandler = new npf.events.ClickHandler(
+    /** @type {!Element} */ (this.getElement()));
+  this.disposeOnExitDocument(clickHandler);
+
+  this.getHandler().
+    listen(clickHandler, goog.events.EventType.CLICK, this.onClick_);
 };
 
 /** @inheritDoc */
 npf.ui.Link.prototype.disposeInternal = function() {
-  goog.base(this, 'disposeInternal');
+  npf.ui.Link.base(this, 'disposeInternal');
 
   this.cssClass_ = null;
   this.uri_ = null;
@@ -110,11 +117,7 @@ npf.ui.Link.prototype.getCssClass = function() {
  * @param {string|Array.<string>|null} cssClass
  */
 npf.ui.Link.prototype.setCssClass = function(cssClass) {
-  if (goog.isString(cssClass)) {
-    this.cssClass_ = [cssClass];
-  } else {
-    this.cssClass_ = cssClass;
-  }
+  this.cssClass_ = goog.isString(cssClass) ? [cssClass] : cssClass;
 };
 
 /**
@@ -125,22 +128,8 @@ npf.ui.Link.prototype.getUri = function() {
 };
 
 /**
- * @param {string|goog.Uri} url
+ * @param {goog.Uri} uri
  */
-npf.ui.Link.prototype.setUri = function(url) {
-  this.uri_ = new goog.Uri(url);
-};
-
-/**
- * @return {string}
- */
-npf.ui.Link.prototype.getUrl = function() {
-  return this.uri_ ? this.uri_.toString() : '';
-};
-
-/**
- * @param {string|goog.Uri} url
- */
-npf.ui.Link.prototype.setUrl = function(url) {
-  this.setUri(url);
+npf.ui.Link.prototype.setUri = function(uri) {
+  this.uri_ = uri;
 };

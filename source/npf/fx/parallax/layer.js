@@ -12,10 +12,11 @@ goog.require('npf.fx.Parallax.EventType');
 /**
  * @param {npf.fx.Parallax} viewport
  * @constructor
+ * @struct
  * @extends {goog.events.EventTarget}
  */
 npf.fx.parallax.Layer = function(viewport) {
-  goog.base(this);
+  npf.fx.parallax.Layer.base(this, 'constructor');
 
   /**
    * @private {npf.fx.Parallax}
@@ -70,11 +71,26 @@ npf.fx.parallax.Layer.prototype.disposeInternal = function() {
   this.viewport_.unlisten(
     npf.fx.Parallax.EventType.UPDATE, this.onUpdate_, false, this);
 
-  goog.base(this, 'disposeInternal');
+  npf.fx.parallax.Layer.base(this, 'disposeInternal');
 
   this.end_ = null;
   this.start_ = null;
   this.viewport_ = null;
+};
+
+/**
+ * @param {!Array.<number>} start
+ * @param {!Array.<number>} end
+ */
+npf.fx.parallax.Layer.prototype.setCoordinateRange = function(start, end) {
+  if (start.length != end.length) {
+    throw Error('Start and end points must be the same length');
+  }
+
+  this.start_ = start;
+  this.end_ = end;
+
+  this.dispatchUpdateEvent();
 };
 
 /**
@@ -96,34 +112,8 @@ npf.fx.parallax.Layer.prototype.getCoords = function() {
 /**
  * @return {Array.<number>}
  */
-npf.fx.parallax.Layer.prototype.getStartCoordinates = function() {
-  return this.start_;
-};
-
-/**
- * @return {Array.<number>}
- */
 npf.fx.parallax.Layer.prototype.getEndCoordinates = function() {
   return this.end_;
-};
-
-/**
- * @param {Array.<number>} start
- * @param {Array.<number>} end
- */
-npf.fx.parallax.Layer.prototype.setCoordinateRange = function(start, end) {
-  if (!goog.isArray(start) || !goog.isArray(end)) {
-    throw Error('Start and end parameters must be arrays');
-  }
-
-  if (start.length != end.length) {
-    throw Error('Start and end points must be the same length');
-  }
-
-  this.start_ = start;
-  this.end_ = end;
-
-  this.dispatchUpdateEvent();
 };
 
 /**
@@ -208,7 +198,25 @@ npf.fx.parallax.Layer.prototype.setPosition = function(position) {
  * @param {number} max
  */
 npf.fx.parallax.Layer.prototype.setRange = function(min, max) {
-  this.setOptions(min, max, this.getPosition());
+  this.setOptions(min, max, this.viewport_.getPosition());
+};
+
+/**
+ * @return {Array.<number>}
+ */
+npf.fx.parallax.Layer.prototype.getStartCoordinates = function() {
+  return this.start_;
+};
+
+/**
+ * @protected
+ */
+npf.fx.parallax.Layer.prototype.dispatchUpdateEvent = function() {
+  var event = new npf.fx.parallax.Layer.Event(
+    npf.fx.parallax.Layer.EventType.UPDATE,
+    this.getCoords(), this.getPosition(), this.getValue()
+  );
+  this.dispatchEvent(event);
 };
 
 /**
@@ -251,18 +259,7 @@ npf.fx.parallax.Layer.prototype.getViewport = function() {
  */
 npf.fx.parallax.Layer.prototype.onUpdate_ = function(evt) {
   var position = /** @type {number} */ (evt.position);
-  this.setOptions(this.getMinPosition(), this.getMaxPosition(), position);
-};
-
-/**
- * @protected
- */
-npf.fx.parallax.Layer.prototype.dispatchUpdateEvent = function() {
-  var event = new npf.fx.parallax.Layer.Event(
-    npf.fx.parallax.Layer.EventType.UPDATE,
-    this.getCoords(), this.getPosition(), this.getValue()
-  );
-  this.dispatchEvent(event);
+  this.setOptions(this.minPosition_, this.maxPosition_, position);
 };
 
 
@@ -272,10 +269,11 @@ npf.fx.parallax.Layer.prototype.dispatchUpdateEvent = function() {
  * @param {number} position
  * @param {number} value
  * @constructor
+ * @struct
  * @extends {goog.events.Event}
  */
 npf.fx.parallax.Layer.Event = function(type, coords, position, value) {
-  goog.base(this, type);
+  npf.fx.parallax.Layer.Event.base(this, 'constructor', type);
 
   /**
    * @type {Array.<number>}

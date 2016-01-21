@@ -12,10 +12,11 @@ goog.require('goog.structs');
  * @param {goog.net.XmlHttpFactory=} opt_xmlHttpFactory Factory to use when
  *     creating XMLHttpRequest objects.
  * @constructor
+ * @struct
  * @extends {goog.net.XhrIo}
  */
 npf.net.XhrIo = function(opt_xmlHttpFactory) {
-  goog.base(this, opt_xmlHttpFactory);
+  npf.net.XhrIo.base(this, 'constructor', opt_xmlHttpFactory);
 
   /**
    * @private {XMLHttpRequest}
@@ -71,9 +72,8 @@ npf.net.XhrIo.removeGlobalHandler = function(id) {
  * @param {Function=} opt_callback Callback function for when request is
  *     complete.
  * @param {string=} opt_method Send method, default: GET.
- * @param {ArrayBuffer|Blob|Document|FormData|GearsBlob|string=} opt_content
- *     Post data. This can be a Gears blob if the underlying HTTP request object
- *     is a Gears HTTP request.
+ * @param {ArrayBuffer|ArrayBufferView|Blob|Document|FormData|string=}
+ *     opt_content Body data.
  * @param {Object|goog.structs.Map=} opt_headers Map of headers to add to the
  *     request.
  * @param {number=} opt_timeoutInterval Number of milliseconds after which an
@@ -134,7 +134,7 @@ npf.net.XhrIo.cleanup = function() {
 
 /** @inheritDoc */
 npf.net.XhrIo.prototype.disposeInternal = function() {
-  goog.base(this, 'disposeInternal');
+  npf.net.XhrIo.base(this, 'disposeInternal');
 
   this.nativeXhr_ = null;
 };
@@ -145,7 +145,7 @@ npf.net.XhrIo.prototype.send = function(url, opt_method, opt_content,
   /** @type {!Object} */
   var headers = this.parseRequestHeaders(opt_headers);
 
-  goog.base(this, 'send', url, opt_method, opt_content, headers);
+  npf.net.XhrIo.base(this, 'send', url, opt_method, opt_content, headers);
 };
 
 /**
@@ -198,7 +198,7 @@ npf.net.XhrIo.prototype.dispatchEvent = function(e) {
     }, this);
   }
 
-  return goog.base(this, 'dispatchEvent', e);
+  return npf.net.XhrIo.base(this, 'dispatchEvent', e);
 };
 
 /**

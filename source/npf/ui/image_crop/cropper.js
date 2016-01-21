@@ -16,7 +16,7 @@ goog.require('npf.ui.imageCrop.Direction');
 
 
 /**
- * @param {!Image} image
+ * @param {!(Image|HTMLImageElement|HTMLCanvasElement)} image
  * @param {number} scale
  * @param {!goog.math.Rect} rect
  * @param {npf.ui.imageCrop.CropperRenderer=} opt_renderer
@@ -26,7 +26,7 @@ goog.require('npf.ui.imageCrop.Direction');
  */
 npf.ui.imageCrop.Cropper = function(image, scale, rect, opt_renderer,
     opt_domHelper) {
-  goog.base(this, opt_renderer ||
+  npf.ui.imageCrop.Cropper.base(this, 'constructor', opt_renderer ||
     npf.ui.imageCrop.CropperRenderer.getInstance(), opt_domHelper);
 
   /**
@@ -45,7 +45,7 @@ npf.ui.imageCrop.Cropper = function(image, scale, rect, opt_renderer,
   this.dragger_ = null;
 
   /**
-   * @private {Image}
+   * @private {Image|HTMLImageElement|HTMLCanvasElement}
    */
   this.image_ = image;
 
@@ -71,14 +71,14 @@ npf.ui.imageCrop.Cropper.EventType = {
 
 /** @inheritDoc */
 npf.ui.imageCrop.Cropper.prototype.createDom = function() {
-  goog.base(this, 'createDom');
+  npf.ui.imageCrop.Cropper.base(this, 'createDom');
 
   this.initializeInternal();
 };
 
 /** @inheritDoc */
 npf.ui.imageCrop.Cropper.prototype.decorateInternal = function(element) {
-  goog.base(this, 'decorateInternal', element);
+  npf.ui.imageCrop.Cropper.base(this, 'decorateInternal', element);
 
   this.initializeInternal();
 };
@@ -92,7 +92,7 @@ npf.ui.imageCrop.Cropper.prototype.initializeInternal = function() {
 
 /** @inheritDoc */
 npf.ui.imageCrop.Cropper.prototype.enterDocument = function() {
-  goog.base(this, 'enterDocument');
+  npf.ui.imageCrop.Cropper.base(this, 'enterDocument');
 
   this.getHandler().listen(this.getElement(), [
     goog.events.EventType.MOUSEDOWN,
@@ -105,12 +105,12 @@ npf.ui.imageCrop.Cropper.prototype.exitDocument = function() {
   goog.dispose(this.dragger_);
   this.dragger_ = null;
 
-  goog.base(this, 'exitDocument');
+  npf.ui.imageCrop.Cropper.base(this, 'exitDocument');
 };
 
 /** @inheritDoc */
 npf.ui.imageCrop.Cropper.prototype.disposeInternal = function() {
-  goog.base(this, 'disposeInternal');
+  npf.ui.imageCrop.Cropper.base(this, 'disposeInternal');
 
   this.croppedRect_ = null;
   this.image_ = null;
@@ -129,7 +129,7 @@ npf.ui.imageCrop.Cropper.prototype.getCroppedRect = function() {
 npf.ui.imageCrop.Cropper.prototype.setCroppedRect = function(rect) {
   if (!goog.math.Rect.equals(this.croppedRect_, rect)) {
     this.setCroppedRectInternal(rect);
-    this.applyCroppedRect(this.croppedRect_);
+    this.applyCroppedRect(/** @type {!goog.math.Rect} */ (this.croppedRect_));
   }
 };
 
@@ -143,11 +143,13 @@ npf.ui.imageCrop.Cropper.prototype.setCroppedRectInternal = function(
 };
 
 /**
- * @param {goog.math.Rect} rect
+ * @param {!goog.math.Rect} rect
  * @protected
  */
 npf.ui.imageCrop.Cropper.prototype.applyCroppedRect = function(rect) {
-  this.getRenderer().setCroppedRect(this, rect, this.scale_);
+  var renderer = /** @type {npf.ui.imageCrop.CropperRenderer} */ (
+    this.getRenderer());
+  renderer.setCroppedRect(this, rect, this.scale_);
 };
 
 /**
@@ -171,11 +173,13 @@ npf.ui.imageCrop.Cropper.prototype.hasDirection = function(direction) {
  * @param {boolean} enable
  */
 npf.ui.imageCrop.Cropper.prototype.setDirection = function(direction, enable) {
-  if (enable != this.hasDirection(direction)) {
+  if (this.hasDirection(direction) != enable) {
     var newDirection = /** @type {npf.ui.imageCrop.Direction} */ (
       enable ? this.direction_ | direction : this.direction_ & ~direction);
+    var renderer = /** @type {npf.ui.imageCrop.CropperRenderer} */ (
+      this.getRenderer());
     this.setDirectionInternal(newDirection);
-    this.getRenderer().setDirection(this, direction, enable);
+    renderer.setDirection(this, direction, enable);
   }
 };
 
@@ -192,35 +196,50 @@ npf.ui.imageCrop.Cropper.prototype.setDirectionInternal = function(direction) {
  * @return {Element}
  */
 npf.ui.imageCrop.Cropper.prototype.getDirectionElement = function(direction) {
-  return this.getRenderer().getDirectionElement(this.getElement(), direction);
+  var renderer = /** @type {npf.ui.imageCrop.CropperRenderer} */ (
+    this.getRenderer());
+
+  return renderer.getDirectionElement(this.getElement(), direction);
 };
 
 /**
- * @return {Image}
+ * @return {Image|HTMLImageElement|HTMLCanvasElement}
  */
 npf.ui.imageCrop.Cropper.prototype.getImage = function() {
   return this.image_;
 };
 
 /**
- * @return {Element}
+ * @return {HTMLImageElement}
  */
 npf.ui.imageCrop.Cropper.prototype.getImageElement = function() {
-  return this.getRenderer().getImageElement(this.getElement());
+  var renderer = /** @type {npf.ui.imageCrop.CropperRenderer} */ (
+    this.getRenderer());
+
+  return renderer.getImageElement(this.getElement());
 };
 
 /**
  * @return {!goog.math.Size}
  */
 npf.ui.imageCrop.Cropper.prototype.getImageNaturalSize = function() {
-  return this.getRenderer().getImageSize(this.image_);
+  var renderer = /** @type {npf.ui.imageCrop.CropperRenderer} */ (
+    this.getRenderer());
+
+  return renderer.getImageSize(
+    /** @type {!(Image|HTMLImageElement|HTMLCanvasElement)} */ (this.image_));
 };
 
 /**
  * @return {!goog.math.Size}
  */
 npf.ui.imageCrop.Cropper.prototype.getImageSize = function() {
-  return this.getRenderer().getImageSize(this.image_, this.scale_);
+  var renderer = /** @type {npf.ui.imageCrop.CropperRenderer} */ (
+    this.getRenderer());
+
+  return renderer.getImageSize(
+    /** @type {!(Image|HTMLImageElement|HTMLCanvasElement)} */ (this.image_),
+    this.scale_);
 };
 
 /**
@@ -253,8 +272,11 @@ npf.ui.imageCrop.Cropper.prototype.setScaleInternal = function(scale) {
  * @protected
  */
 npf.ui.imageCrop.Cropper.prototype.applyScale = function(scale) {
-  this.getRenderer().setScale(this, scale);
-  this.getRenderer().setCroppedRect(this, this.croppedRect_, scale);
+  var renderer = /** @type {npf.ui.imageCrop.CropperRenderer} */ (
+    this.getRenderer());
+  renderer.setScale(this, scale);
+  renderer.setCroppedRect(
+    this, /** @type {!goog.math.Rect} */ (this.croppedRect_), scale);
 };
 
 /**
@@ -266,7 +288,7 @@ npf.ui.imageCrop.Cropper.prototype.onMouseDown_ = function(evt) {
     evt.isMouseActionButton() ||
     (
       goog.events.EventType.TOUCHSTART == evt.type &&
-      1 == npf.events.TouchHandler.countFingers(evt.getBrowserEvent())
+      1 == npf.events.TouchHandler.getFingerCount(evt.getBrowserEvent())
     )
   ) {
     this.startDrag(evt);
@@ -292,7 +314,9 @@ npf.ui.imageCrop.Cropper.prototype.startDrag = function(evt, opt_direction) {
     } else {
       /** @type {Element} */
       var draggerElement = /** @type {Element} */ (evt.target);
-      direction = this.getRenderer().getDirection(draggerElement);
+      var renderer = /** @type {npf.ui.imageCrop.CropperRenderer} */ (
+        this.getRenderer());
+      direction = renderer.getDirection(draggerElement);
     }
 
     if (!direction || !this.hasDirection(direction)) {
@@ -533,10 +557,11 @@ npf.ui.imageCrop.Cropper.prototype.onDragEnd = function(evt) {
  * @param {!goog.math.Rect} croppedRect
  * @param {npf.ui.imageCrop.Direction} direction
  * @constructor
+ * @struct
  * @extends {goog.events.Event}
  */
 npf.ui.imageCrop.CropperEvent = function(type, croppedRect, direction) {
-  goog.base(this, type);
+  npf.ui.imageCrop.CropperEvent.base(this, 'constructor', type);
 
   /**
    * @type {!goog.math.Rect}

@@ -7,6 +7,7 @@ goog.require('goog.math.Size');
  * @param {number|null=} opt_limitWidth
  * @param {number|null=} opt_limitHeight
  * @constructor
+ * @struct
  */
 npf.graphics.Scale = function(opt_limitWidth, opt_limitHeight) {
   /** @type {number} */

@@ -19,6 +19,7 @@ goog.require('npf.events.ResizeHandler.EventType');
 goog.require('npf.ui.StatedComponent');
 goog.require('npf.ui.scrollable.Animation');
 goog.require('npf.ui.scrollable.ContainerRenderer');
+goog.require('npf.ui.scrollable.ScrollBar.EventType');
 goog.require('npf.ui.scrollable.scrollBar.Horizontal');
 goog.require('npf.ui.scrollable.scrollBar.Vertical');
 
@@ -28,9 +29,10 @@ goog.require('npf.ui.scrollable.scrollBar.Vertical');
  * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
  * @extends {npf.ui.StatedComponent}
+ * @deprecated Use npf.ui.ScrollContainer
  */
 npf.ui.scrollable.Container = function(opt_renderer, opt_domHelper) {
-  goog.base(this, opt_renderer ||
+  npf.ui.scrollable.Container.base(this, 'constructor', opt_renderer ||
     npf.ui.scrollable.ContainerRenderer.getInstance(), opt_domHelper);
 
   /**
@@ -39,14 +41,19 @@ npf.ui.scrollable.Container = function(opt_renderer, opt_domHelper) {
   this.animation_ = null;
 
   /**
-   * @private {number}
+   * @private {boolean}
    */
-  this.contentHeight_ = 0;
+  this.autoContentSize_ = true;
 
   /**
    * @private {boolean}
    */
-  this.contentSizeFromElement_ = true;
+  this.autoSize_ = true;
+
+  /**
+   * @private {number}
+   */
+  this.contentHeight_ = 0;
 
   /**
    * @private {number}
@@ -72,11 +79,6 @@ npf.ui.scrollable.Container = function(opt_renderer, opt_domHelper) {
    * @private {number}
    */
   this.scrollTop_ = 0;
-
-  /**
-   * @private {boolean}
-   */
-  this.sizeFromElement_ = true;
 
   /**
    * @private {goog.async.Delay}
@@ -117,14 +119,14 @@ npf.ui.scrollable.Container.EventType = {
 
 /** @inheritDoc */
 npf.ui.scrollable.Container.prototype.createDom = function() {
-  goog.base(this, 'createDom');
+  npf.ui.scrollable.Container.base(this, 'createDom');
 
   this.initializeDom();
 };
 
 /** @inheritDoc */
 npf.ui.scrollable.Container.prototype.decorateInternal = function(element) {
-  goog.base(this, 'decorateInternal', element);
+  npf.ui.scrollable.Container.base(this, 'decorateInternal', element);
 
   this.initializeDom();
 };
@@ -133,13 +135,18 @@ npf.ui.scrollable.Container.prototype.decorateInternal = function(element) {
  * @protected
  */
 npf.ui.scrollable.Container.prototype.initializeDom = function() {
-  this.applySizeFromElement(this.isSizeFromElement());
-  this.applyContentSizeFromElement(this.isContentSizeFromElement());
+  if (!this.autoSize_) {
+    this.applySize(this.width_, this.height_);
+  }
+
+  if (!this.autoContentSize_) {
+    this.applyContentSize(this.contentWidth_, this.contentHeight_);
+  }
 };
 
 /** @inheritDoc */
 npf.ui.scrollable.Container.prototype.enterDocument = function() {
-  goog.base(this, 'enterDocument');
+  npf.ui.scrollable.Container.base(this, 'enterDocument');
 
   this.update();
 
@@ -152,9 +159,7 @@ npf.ui.scrollable.Container.prototype.enterDocument = function() {
   var mouseWheelHandler = new goog.events.MouseWheelHandler(scrollElement);
   this.disposeOnExitDocument(mouseWheelHandler);
 
-  /** @type {goog.events.EventHandler} */
-  var handler = this.getHandler();
-  handler.
+  this.getHandler().
     listen(scrollElement, goog.events.EventType.SCROLL, this.onScroll_).
     listen(mouseWheelHandler,
       goog.events.MouseWheelHandler.EventType.MOUSEWHEEL, this.onMouseWheel_).
@@ -177,7 +182,7 @@ npf.ui.scrollable.Container.prototype.exitDocument = function() {
 
   this.updateDelay_.stop();
 
-  goog.base(this, 'exitDocument');
+  npf.ui.scrollable.Container.base(this, 'exitDocument');
 };
 
 /** @inheritDoc */
@@ -185,7 +190,7 @@ npf.ui.scrollable.Container.prototype.disposeInternal = function() {
   this.setHorizontalScrollBar(null);
   this.setVerticalScrollBar(null);
 
-  goog.base(this, 'disposeInternal');
+  npf.ui.scrollable.Container.base(this, 'disposeInternal');
 
   this.horizScrollBar_ = null;
   this.updateDelay_ = null;
@@ -197,77 +202,6 @@ npf.ui.scrollable.Container.prototype.disposeInternal = function() {
  */
 npf.ui.scrollable.Container.prototype.isAnimating = function() {
   return !!this.animation_;
-};
-
-/**
- * @param {number} x
- */
-npf.ui.scrollable.Container.prototype.animateToLeft = function(x) {
-  this.animate(x, this.getScrollTop());
-};
-
-/**
- * @param {number} y
- */
-npf.ui.scrollable.Container.prototype.animateToTop = function(y) {
-  this.animate(this.getScrollLeft(), y);
-};
-
-/**
- * @param {number|goog.math.Coordinate} x
- * @param {number=} opt_y
- */
-npf.ui.scrollable.Container.prototype.animate = function(x, opt_y) {
-  if (this.isEnabled()) {
-    /** @type {number} */
-    var left = goog.isNumber(x) ? x : /** @type {number} */ (x.x);
-    var top = /** @type {number} */ (goog.isNumber(x) ? opt_y : x.y);
-    /** @type {goog.math.Coordinate} */
-    var scrollPosition = this.getScrollPosition();
-    /** @type {goog.math.Coordinate} */
-    var maxScroll = this.getMaxScrollPosition();
-    left = goog.math.clamp(left, 0, maxScroll.x);
-    top = goog.math.clamp(top, 0, maxScroll.y);
-
-    goog.dispose(this.animation_);
-    this.animation_ = null;
-
-    this.animation_ = this.createAnimation(
-      scrollPosition.x, scrollPosition.y, left, top);
-
-    if (this.animation_) {
-      this.animation_.listen(
-        goog.fx.Animation.EventType.ANIMATE, this.onAnimate_, false, this);
-      this.animation_.listen(
-        goog.fx.Transition.EventType.FINISH, this.onAnimate_, false, this);
-      this.animation_.listen(
-        goog.fx.Transition.EventType.END, this.onAnimationEnd_, false, this);
-      this.animation_.play();
-    } else {
-      this.applyScrollPosition(left, top);
-    }
-  }
-};
-
-/**
- * @param {goog.fx.AnimationEvent} evt
- * @private
- */
-npf.ui.scrollable.Container.prototype.onAnimate_ = function(evt) {
-  /** @type {number} */
-  var x = Math.round(evt.x);
-  /** @type {number} */
-  var y = Math.round(evt.y);
-  this.applyScrollPosition(x, y);
-};
-
-/**
- * @param {goog.events.Event} evt
- * @private
- */
-npf.ui.scrollable.Container.prototype.onAnimationEnd_ = function(evt) {
-  goog.dispose(this.animation_);
-  this.animation_ = null;
 };
 
 /**
@@ -284,6 +218,67 @@ npf.ui.scrollable.Container.prototype.createAnimation = function(fromX, fromY,
 };
 
 /**
+ * @return {boolean}
+ */
+npf.ui.scrollable.Container.prototype.isAutoContentSize = function() {
+  return this.autoContentSize_;
+};
+
+/**
+ * @param {boolean} autoSize
+ */
+npf.ui.scrollable.Container.prototype.setAutoContentSize = function(autoSize) {
+  if (this.autoContentSize_ != autoSize) {
+    this.setAutoContentSizeInternal(autoSize);
+
+    if (!this.autoContentSize_) {
+      this.applyContentSize(this.contentWidth_, this.contentHeight_);
+    }
+
+    this.update();
+  }
+};
+
+/**
+ * @param {boolean} autoSize
+ * @protected
+ */
+npf.ui.scrollable.Container.prototype.setAutoContentSizeInternal = function(
+    autoSize) {
+  this.autoContentSize_ = autoSize;
+};
+
+/**
+ * @return {boolean}
+ */
+npf.ui.scrollable.Container.prototype.isAutoSize = function() {
+  return this.autoSize_;
+};
+
+/**
+ * @param {boolean} autoSize
+ */
+npf.ui.scrollable.Container.prototype.setAutoSize = function(autoSize) {
+  if (this.autoSize_ != autoSize) {
+    this.setAutoSizeInternal(autoSize);
+
+    if (!this.autoSize_) {
+      this.applySize(this.width_, this.height_);
+    }
+
+    this.update();
+  }
+};
+
+/**
+ * @param {boolean} autoSize
+ * @protected
+ */
+npf.ui.scrollable.Container.prototype.setAutoSizeInternal = function(autoSize) {
+  this.autoSize_ = autoSize;
+};
+
+/**
  * @return {!goog.math.Size}
  */
 npf.ui.scrollable.Container.prototype.getContentSize = function() {
@@ -296,20 +291,15 @@ npf.ui.scrollable.Container.prototype.getContentSize = function() {
  */
 npf.ui.scrollable.Container.prototype.setContentSize = function(width,
     opt_height) {
-  if (!this.isContentSizeFromElement()) {
+  if (!this.autoContentSize_) {
     var w = /** @type {number} */ (
       goog.isNumber(width) ? width : width.width);
     var h = /** @type {number} */ (
       goog.isNumber(width) ? opt_height : width.height);
-    /** @type {goog.math.Size} */
-    var contentSize = this.getContentSize();
 
-    if (contentSize.width != w || contentSize.height != h) {
+    if (this.contentWidth_ != w || this.contentHeight_ != h) {
       this.setContentSizeInternal(w, h);
-
-      contentSize = this.getContentSize();
-      this.applyContentSize(contentSize.width, contentSize.height);
-
+      this.applyContentSize(this.contentWidth_, this.contentHeight_);
       this.onResize();
     }
   }
@@ -336,51 +326,6 @@ npf.ui.scrollable.Container.prototype.applyContentSize = function(width,
   var renderer = /** @type {npf.ui.scrollable.ContainerRenderer} */ (
     this.getRenderer());
   renderer.setSize(this.getContentElement(), width, height);
-};
-
-/**
- * @return {boolean}
- */
-npf.ui.scrollable.Container.prototype.isContentSizeFromElement = function() {
-  return this.contentSizeFromElement_;
-};
-
-/**
- * @param {boolean} autoSize
- */
-npf.ui.scrollable.Container.prototype.setContentSizeFromElement = function(
-    autoSize) {
-  if (this.isContentSizeFromElement() != autoSize) {
-    this.setContentSizeFromElementInternal(autoSize);
-    this.applyContentSizeFromElement(this.isContentSizeFromElement());
-    this.update();
-  }
-};
-
-/**
- * @param {boolean} autoSize
- * @protected
- */
-npf.ui.scrollable.Container.prototype.setContentSizeFromElementInternal =
-    function(autoSize) {
-  this.contentSizeFromElement_ = autoSize;
-};
-
-/**
- * @param {boolean} autoSize
- * @protected
- */
-npf.ui.scrollable.Container.prototype.applyContentSizeFromElement = function(
-    autoSize) {
-  if (autoSize) {
-    var renderer = /** @type {npf.ui.scrollable.ContainerRenderer} */ (
-      this.getRenderer());
-    renderer.resetSize(this.getContentElement());
-  } else {
-    /** @type {goog.math.Size} */
-    var size = this.getContentSize();
-    this.applyContentSize(size.width, size.height);
-  }
 };
 
 /**
@@ -421,14 +366,12 @@ npf.ui.scrollable.Container.prototype.setHorizontalScrollBar = function(
 npf.ui.scrollable.Container.prototype.setListenedHorizontalScrollBar = function(
     scrollBar, listen) {
   if (this.isInDocument()) {
-    /** @type {goog.events.EventHandler} */
-    var handler = this.getHandler();
-    var eventType = npf.ui.scrollable.ScrollBar.EventType.SCROLL;
-
     if (listen) {
-      handler.listen(scrollBar, eventType, this.onHorizScroll_);
+      this.getHandler().listen(scrollBar,
+        npf.ui.scrollable.ScrollBar.EventType.SCROLL, this.onHorizScroll_);
     } else {
-      handler.unlisten(scrollBar, eventType, this.onHorizScroll_);
+      this.getHandler().unlisten(scrollBar,
+        npf.ui.scrollable.ScrollBar.EventType.SCROLL, this.onHorizScroll_);
     }
   }
 };
@@ -445,18 +388,9 @@ npf.ui.scrollable.Container.prototype.getMaxScrollLeft = function() {
  */
 npf.ui.scrollable.Container.prototype.getMaxScrollPosition = function() {
   /** @type {number} */
-  var left = 0;
+  var left = Math.max(0, this.contentWidth_ - this.width_);
   /** @type {number} */
-  var top = 0;
-  /** @type {goog.math.Size} */
-  var size = this.getSize();
-  /** @type {goog.math.Size} */
-  var contentSize = this.getContentSize();
-
-  if (contentSize && size) {
-    left = Math.max(0, contentSize.width - size.width);
-    top = Math.max(0, contentSize.height - size.height);
-  }
+  var top = Math.max(0, this.contentHeight_ - this.height_);
 
   return new goog.math.Coordinate(left, top);
 };
@@ -493,14 +427,17 @@ npf.ui.scrollable.Container.prototype.getScrollElement = function() {
  * @return {number}
  */
 npf.ui.scrollable.Container.prototype.getScrollLeft = function() {
-  return this.getScrollPosition().x;
+  return this.scrollLeft_;
 };
 
 /**
  * @param {number} left
+ * @param {boolean=} opt_force
+ * @param {boolean=} opt_animate
  */
-npf.ui.scrollable.Container.prototype.setScrollLeft = function(left) {
-  this.setScrollPosition(left, this.getScrollTop());
+npf.ui.scrollable.Container.prototype.setScrollLeft = function(left, opt_force,
+    opt_animate) {
+  this.setScrollPosition(left, this.scrollTop_, opt_force, opt_animate);
 };
 
 /**
@@ -514,26 +451,87 @@ npf.ui.scrollable.Container.prototype.getScrollPosition = function() {
  * @param {number|goog.math.Coordinate} left
  * @param {number=} opt_top
  * @param {boolean=} opt_force
+ * @param {boolean=} opt_animate
  */
 npf.ui.scrollable.Container.prototype.setScrollPosition = function(left,
-    opt_top, opt_force) {
+    opt_top, opt_force, opt_animate) {
+  if (!this.isEnabled()) {
+    return;
+  }
+
+  goog.dispose(this.animation_);
+  this.animation_ = null;
+
   var x = /** @type {number} */ (goog.isNumber(left) ? left : left.x);
   var y = /** @type {number} */ (goog.isNumber(left) ? opt_top : left.y);
+
+  if (opt_animate && this.isInDocument()) {
+    /** @type {goog.math.Coordinate} */
+    var maxScroll = this.getMaxScrollPosition();
+    x = goog.math.clamp(x, 0, maxScroll.x);
+    y = goog.math.clamp(y, 0, maxScroll.y);
+
+    if (this.scrollLeft_ != x || this.scrollTop_ != y) {
+      this.animation_ = this.createAnimation(
+        this.scrollLeft_, this.scrollTop_, x, y);
+
+      if (this.animation_) {
+        this.animation_.listen(
+          goog.fx.Animation.EventType.ANIMATE, this.onAnimate_, false, this);
+        this.animation_.listen(
+          goog.fx.Transition.EventType.END, this.onAnimationEnd_, false, this);
+        this.animation_.play();
+
+        return;
+      }
+    }
+  }
+
+  this.setScrollCoords(x, y, opt_force);
+};
+
+/**
+ * @param {goog.fx.AnimationEvent} evt
+ * @private
+ */
+npf.ui.scrollable.Container.prototype.onAnimate_ = function(evt) {
+  /** @type {number} */
+  var x = Math.round(evt.x);
+  /** @type {number} */
+  var y = Math.round(evt.y);
+  this.setScrollCoords(x, y);
+};
+
+/**
+ * @param {goog.events.Event} evt
+ * @private
+ */
+npf.ui.scrollable.Container.prototype.onAnimationEnd_ = function(evt) {
+  /** @type {number} */
+  var x = Math.round(evt.x);
+  /** @type {number} */
+  var y = Math.round(evt.y);
+  this.setScrollCoords(x, y);
+
+  goog.dispose(this.animation_);
+  this.animation_ = null;
+};
+
+/**
+ * @param {number} x
+ * @param {number} y
+ * @param {boolean=} opt_force
+ */
+npf.ui.scrollable.Container.prototype.setScrollCoords = function(x, y,
+    opt_force) {
   /** @type {goog.math.Coordinate} */
-  var scrollPosition = this.getScrollPosition();
+  var maxScroll = this.getMaxScrollPosition();
+  x = goog.math.clamp(x, 0, maxScroll.x);
+  y = goog.math.clamp(y, 0, maxScroll.y);
 
-  if (
-    this.isEnabled() &&
-    (opt_force || scrollPosition.x != x || scrollPosition.y != y)
-  ) {
-    goog.dispose(this.animation_);
-    this.animation_ = null;
-
+  if (opt_force || this.scrollLeft_ != x || this.scrollTop_ != y) {
     this.setScrollPositionInternal(x, y);
-
-    scrollPosition = this.getScrollPosition();
-    this.applyScrollPosition(scrollPosition.x, scrollPosition.y);
-
+    this.applyScrollPosition(this.scrollLeft_, this.scrollTop_);
     this.onScroll();
   }
 };
@@ -564,14 +562,17 @@ npf.ui.scrollable.Container.prototype.applyScrollPosition = function(x, y) {
  * @return {number}
  */
 npf.ui.scrollable.Container.prototype.getScrollTop = function() {
-  return this.getScrollPosition().y;
+  return this.scrollTop_;
 };
 
 /**
  * @param {number} top
+ * @param {boolean=} opt_force
+ * @param {boolean=} opt_animate
  */
-npf.ui.scrollable.Container.prototype.setScrollTop = function(top) {
-  this.setScrollPosition(this.getScrollLeft(), top);
+npf.ui.scrollable.Container.prototype.setScrollTop = function(top, opt_force,
+    opt_animate) {
+  this.setScrollPosition(this.scrollLeft_, top, opt_force, opt_animate);
 };
 
 /**
@@ -586,21 +587,18 @@ npf.ui.scrollable.Container.prototype.getSize = function() {
  * @param {number=} opt_height
  */
 npf.ui.scrollable.Container.prototype.setSize = function(width, opt_height) {
-  if (!this.isSizeFromElement()) {
+  if (!this.autoSize_) {
     var w = /** @type {number} */ (
       goog.isNumber(width) ? width : width.width);
     var h = /** @type {number} */ (
       goog.isNumber(width) ? opt_height : width.height);
-    /** @type {goog.math.Size} */
-    var size = this.getSize();
 
-    if (size.width != w || size.height != h) {
+    if (this.width_ != w || this.height_ != h) {
       this.setSizeInternal(w, h);
 
-      size = this.getSize();
-      this.applySize(size.width, size.height);
+      this.applySize(this.width_, this.height_);
 
-      if (!this.isContentSizeFromElement()) {
+      if (!this.autoContentSize_) {
         var renderer = /** @type {npf.ui.scrollable.ContainerRenderer} */ (
           this.getRenderer());
         /** @type {!goog.math.Size} */
@@ -633,50 +631,6 @@ npf.ui.scrollable.Container.prototype.applySize = function(width, height) {
   var renderer = /** @type {npf.ui.scrollable.ContainerRenderer} */ (
     this.getRenderer());
   renderer.setSize(this.getElement(), width, height);
-};
-
-/**
- * @return {boolean}
- */
-npf.ui.scrollable.Container.prototype.isSizeFromElement = function() {
-  return this.sizeFromElement_;
-};
-
-/**
- * @param {boolean} autoSize
- */
-npf.ui.scrollable.Container.prototype.setSizeFromElement = function(autoSize) {
-  if (this.isSizeFromElement() != autoSize) {
-    this.setSizeFromElementInternal(autoSize);
-    this.applySizeFromElement(this.isSizeFromElement());
-    this.update();
-  }
-};
-
-/**
- * @param {boolean} autoSize
- * @protected
- */
-npf.ui.scrollable.Container.prototype.setSizeFromElementInternal = function(
-    autoSize) {
-  this.sizeFromElement_ = autoSize;
-};
-
-/**
- * @param {boolean} autoSize
- * @protected
- */
-npf.ui.scrollable.Container.prototype.applySizeFromElement = function(
-    autoSize) {
-  if (autoSize) {
-    var renderer = /** @type {npf.ui.scrollable.ContainerRenderer} */ (
-      this.getRenderer());
-    renderer.resetSize(this.getElement());
-  } else {
-    /** @type {goog.math.Size} */
-    var size = this.getSize();
-    this.applySize(size.width, size.height);
-  }
 };
 
 /**
@@ -717,14 +671,12 @@ npf.ui.scrollable.Container.prototype.setVerticalScrollBar = function(
 npf.ui.scrollable.Container.prototype.setListenedVerticalScrollBar = function(
     scrollBar, listen) {
   if (this.isInDocument()) {
-    /** @type {goog.events.EventHandler} */
-    var handler = this.getHandler();
-    var eventType = npf.ui.scrollable.ScrollBar.EventType.SCROLL;
-
     if (listen) {
-      handler.listen(scrollBar, eventType, this.onVertScroll_);
+      this.getHandler().listen(scrollBar,
+        npf.ui.scrollable.ScrollBar.EventType.SCROLL, this.onVertScroll_);
     } else {
-      handler.unlisten(scrollBar, eventType, this.onVertScroll_);
+      this.getHandler().unlisten(scrollBar,
+        npf.ui.scrollable.ScrollBar.EventType.SCROLL, this.onVertScroll_);
     }
   }
 };
@@ -732,7 +684,7 @@ npf.ui.scrollable.Container.prototype.setListenedVerticalScrollBar = function(
 npf.ui.scrollable.Container.prototype.update = function() {
   if (this.isInDocument()) {
     this.checkSize_();
-    this.checkScroll_();
+    this.setScrollCoords(this.scrollLeft_, this.scrollTop_, true);
   }
 };
 
@@ -747,25 +699,24 @@ npf.ui.scrollable.Container.prototype.checkSize_ = function() {
   var renderer = /** @type {npf.ui.scrollable.ContainerRenderer} */ (
     this.getRenderer());
 
-  if (this.isSizeFromElement()) {
+  if (this.autoSize_) {
     /** @type {!goog.math.Size} */
     var domSize = renderer.getSize(this.getElement());
-    /** @type {goog.math.Size} */
-    var size = this.getSize();
 
-    if (!goog.math.Size.equals(size, domSize)) {
+    if (this.width_ != domSize.width || this.height_ != domSize.height) {
       this.setSizeInternal(domSize.width, domSize.height);
       sizeChanged = true;
     }
   }
 
-  if (this.isContentSizeFromElement()) {
-    /** @type {goog.math.Size} */
-    var contentSize = this.getContentSize();
+  if (this.autoContentSize_) {
     /** @type {!goog.math.Size} */
     var domContentSize = renderer.getSize(this.getContentElement());
 
-    if (!goog.math.Size.equals(contentSize, domContentSize)) {
+    if (
+      this.contentWidth_ != domContentSize.width ||
+      this.contentHeight_ != domContentSize.height
+    ) {
       this.setContentSizeInternal(domContentSize.width, domContentSize.height);
       contentSizeChanged = true;
     }
@@ -773,23 +724,6 @@ npf.ui.scrollable.Container.prototype.checkSize_ = function() {
 
   if (sizeChanged || contentSizeChanged) {
     this.onResize();
-  }
-};
-
-/**
- * @private
- */
-npf.ui.scrollable.Container.prototype.checkScroll_ = function() {
-  var renderer = /** @type {npf.ui.scrollable.ContainerRenderer} */ (
-    this.getRenderer());
-  /** @type {!goog.math.Coordinate} */
-  var domScroll = renderer.getScrollPosition(this.getScrollElement());
-  /** @type {goog.math.Coordinate} */
-  var scroll = this.getScrollPosition();
-
-  if (!goog.math.Coordinate.equals(domScroll, scroll) && this.isEnabled()) {
-    this.setScrollPositionInternal(domScroll.x, domScroll.y);
-    this.onScroll();
   }
 };
 
@@ -814,7 +748,12 @@ npf.ui.scrollable.Container.prototype.onScroll = function() {
 npf.ui.scrollable.Container.prototype.onScroll_ = function(evt) {
   evt.preventDefault();
   evt.stopPropagation();
-  this.checkScroll_();
+
+  var renderer = /** @type {npf.ui.scrollable.ContainerRenderer} */ (
+    this.getRenderer());
+  /** @type {!goog.math.Coordinate} */
+  var domScroll = renderer.getScrollPosition(this.getScrollElement());
+  this.setScrollCoords(domScroll.x, domScroll.y);
 };
 
 /**
@@ -872,20 +811,16 @@ npf.ui.scrollable.Container.prototype.dispatchEvent_ = function(type) {
  * @param {goog.math.Size} contentSize
  * @param {goog.math.Coordinate} scroll
  * @constructor
+ * @struct
  * @extends {goog.events.Event}
  */
 npf.ui.scrollable.ContainerEvent = function(type, size, contentSize, scroll) {
-  goog.base(this, type);
+  npf.ui.scrollable.ContainerEvent.base(this, 'constructor', type);
 
   /**
    * @type {number}
    */
-  this.width = size.width;
-
-  /**
-   * @type {number}
-   */
-  this.height = size.height;
+  this.contentHeight = contentSize.height;
 
   /**
    * @type {number}
@@ -895,7 +830,7 @@ npf.ui.scrollable.ContainerEvent = function(type, size, contentSize, scroll) {
   /**
    * @type {number}
    */
-  this.contentHeight = contentSize.height;
+  this.height = size.height;
 
   /**
    * @type {number}
@@ -906,6 +841,11 @@ npf.ui.scrollable.ContainerEvent = function(type, size, contentSize, scroll) {
    * @type {number}
    */
   this.scrollTop = scroll.y;
+
+  /**
+   * @type {number}
+   */
+  this.width = size.width;
 };
 goog.inherits(npf.ui.scrollable.ContainerEvent, goog.events.Event);
 

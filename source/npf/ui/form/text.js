@@ -6,6 +6,8 @@ goog.require('goog.string');
 goog.require('npf.ui.form.Field');
 goog.require('npf.ui.form.TextRenderer');
 goog.require('npf.ui.form.validation.Email');
+goog.require('npf.ui.form.validation.MaxLength');
+goog.require('npf.ui.form.validation.MinLength');
 
 
 /**
@@ -13,12 +15,13 @@ goog.require('npf.ui.form.validation.Email');
  * @param {npf.ui.form.TextRenderer=} opt_renderer
  * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
+ * @struct
  * @extends {npf.ui.form.Field}
  */
 npf.ui.form.Text = function(name, opt_renderer, opt_domHelper) {
   var renderer = opt_renderer || npf.ui.form.TextRenderer.getInstance();
 
-  goog.base(this, name, renderer, opt_domHelper);
+  npf.ui.form.Text.base(this, 'constructor', name, renderer, opt_domHelper);
 
   /**
    * @private {boolean}
@@ -28,7 +31,7 @@ npf.ui.form.Text = function(name, opt_renderer, opt_domHelper) {
   /**
    * @private {number}
    */
-  this.maxLength_ = 0;
+  this.maxLength_ = -1;
 
   /**
    * @private {boolean}
@@ -43,18 +46,18 @@ goog.inherits(npf.ui.form.Text, npf.ui.form.Field);
 
 /** @inheritDoc */
 npf.ui.form.Text.prototype.enterDocument = function() {
-  goog.base(this, 'enterDocument');
+  npf.ui.form.Text.base(this, 'enterDocument');
 
   var inputHandler = new goog.events.InputHandler(this.getValueElement());
   this.disposeOnExitDocument(inputHandler);
 
   this.getHandler().listen(inputHandler,
-    goog.events.InputHandler.EventType.INPUT, this.onInput_);
+    goog.events.InputHandler.EventType.INPUT, this.onInput);
 };
 
 /** @inheritDoc */
 npf.ui.form.Text.prototype.initializeInternal = function() {
-  goog.base(this, 'initializeInternal');
+  npf.ui.form.Text.base(this, 'initializeInternal');
 
   this.applyMaxLength(this.getMaxLength());
   this.applyAutoComplete(this.isAutoComplete());
@@ -64,8 +67,25 @@ npf.ui.form.Text.prototype.initializeInternal = function() {
  * @return {string}
  * @override
  */
+npf.ui.form.Text.prototype.getRequestValue = function() {
+  return /** @type {string} */ (npf.ui.form.Text.base(this, 'getRequestValue'));
+};
+
+/**
+ * @return {string}
+ * @override
+ */
 npf.ui.form.Text.prototype.getValue = function() {
-  return /** @type {string} */ (goog.base(this, 'getValue'));
+  return /** @type {string} */ (npf.ui.form.Text.base(this, 'getValue'));
+};
+
+/** @inheritDoc */
+npf.ui.form.Text.prototype.setValue = function(value, opt_noRender, opt_force) {
+  if (!goog.isString(value)) {
+    throw Error(npf.ui.form.Field.Error.TYPE_INVALID);
+  }
+
+  npf.ui.form.Text.base(this, 'setValue', value, opt_noRender, opt_force);
 };
 
 /** @inheritDoc */
@@ -159,6 +179,26 @@ npf.ui.form.Text.prototype.applyMaxLength = function(maxLength) {
 };
 
 /**
+ * @param {string} errorMessage
+ * @param {number} maxLength
+ */
+npf.ui.form.Text.prototype.addMaxLengthValidator = function(errorMessage,
+    maxLength) {
+  var validator = new npf.ui.form.validation.MaxLength(errorMessage, maxLength);
+  this.addValidator(validator);
+};
+
+/**
+ * @param {string} errorMessage
+ * @param {number} minLength
+ */
+npf.ui.form.Text.prototype.addMinLengthValidator = function(errorMessage,
+    minLength) {
+  var validator = new npf.ui.form.validation.MinLength(errorMessage, minLength);
+  this.addValidator(validator);
+};
+
+/**
  * @return {boolean}
  */
 npf.ui.form.Text.prototype.isTrimedValue = function() {
@@ -174,16 +214,9 @@ npf.ui.form.Text.prototype.setTrimedValue = function(trim) {
 
 /**
  * @param {goog.events.BrowserEvent} evt
- * @private
- */
-npf.ui.form.Text.prototype.onInput_ = function(evt) {
-  this.onInput();
-};
-
-/**
  * @protected
  */
-npf.ui.form.Text.prototype.onInput = function() {
+npf.ui.form.Text.prototype.onInput = function(evt) {
   var value = this.getValueFromElement();
   this.setValue(value, true);
 };

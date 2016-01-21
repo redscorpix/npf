@@ -1,7 +1,5 @@
 goog.provide('npf.ui.scrollable.scrollBar.Renderer');
 
-goog.require('goog.dom');
-goog.require('goog.dom.TagName');
 goog.require('goog.style');
 goog.require('npf.ui.StatedRenderer');
 
@@ -11,7 +9,7 @@ goog.require('npf.ui.StatedRenderer');
  * @extends {npf.ui.StatedRenderer}
  */
 npf.ui.scrollable.scrollBar.Renderer = function() {
-  goog.base(this);
+  npf.ui.scrollable.scrollBar.Renderer.base(this, 'constructor');
 };
 goog.inherits(npf.ui.scrollable.scrollBar.Renderer, npf.ui.StatedRenderer);
 goog.addSingletonGetter(npf.ui.scrollable.scrollBar.Renderer);
@@ -31,17 +29,12 @@ npf.ui.scrollable.scrollBar.Renderer.prototype.getCssClass = function() {
 
 /** @inheritDoc */
 npf.ui.scrollable.scrollBar.Renderer.prototype.createDom = function(scroller) {
-  /** @type {Element} */
-  var element = goog.base(this, 'createDom', scroller);
   /** @type {!Element} */
-  var backgroundElement = scroller.getDomHelper().createDom(
-    goog.dom.TagName.DIV, this.getBackgroundCssClass());
-  /** @type {!Element} */
-  var runnerElement = scroller.getDomHelper().createDom(goog.dom.TagName.DIV,
-    this.getRunnerCssClass());
-
-  goog.dom.appendChild(element, backgroundElement);
-  goog.dom.appendChild(element, runnerElement);
+  var element = npf.ui.scrollable.scrollBar.Renderer.base(
+    this, 'createDom', scroller);
+  element.innerHTML =
+    '<div class="' + this.getBackgroundCssClass() + '"></div>' +
+    '<div class="' + this.getRunnerCssClass() + '"></div>';
 
   return element;
 };

@@ -12,30 +12,29 @@ goog.require('npf.string');
  * @param {Object.<string>|Array.<string>=} opt_urlKeys
  * @param {Object.<string>|Array.<string>=} opt_optionKeys
  * @constructor
+ * @struct
  * @extends {goog.events.EventTarget}
  */
 npf.application.Settings = function(opt_urlKeys, opt_optionKeys) {
+  npf.application.Settings.base(this, 'constructor');
+
   var optionKeys;
   var urlKeys;
 
-  if (opt_urlKeys) {
-    if (goog.isArray(opt_urlKeys)) {
-      urlKeys = opt_urlKeys;
-    } else {
-      urlKeys = goog.object.getValues(opt_urlKeys);
-    }
-  } else {
+  if (!opt_urlKeys) {
     urlKeys = [];
+  } else if (goog.isArray(opt_urlKeys)) {
+    urlKeys = opt_urlKeys;
+  } else {
+    urlKeys = goog.object.getValues(opt_urlKeys);
   }
 
-  if (opt_optionKeys) {
-    if (goog.isArray(opt_optionKeys)) {
-      optionKeys = opt_optionKeys;
-    } else {
-      optionKeys = goog.object.getValues(opt_optionKeys);
-    }
-  } else {
+  if (!opt_optionKeys) {
     optionKeys = [];
+  } else if (goog.isArray(opt_optionKeys)) {
+    optionKeys = opt_optionKeys;
+  } else {
+    optionKeys = goog.object.getValues(opt_optionKeys);
   }
 
   /**
@@ -94,7 +93,7 @@ npf.application.Settings.URLS = 'urls';
 
 /** @inheritDoc */
 npf.application.Settings.prototype.disposeInternal = function() {
-  goog.base(this, 'disposeInternal');
+  npf.application.Settings.base(this, 'disposeInternal');
 
   this.defaultsMap_ = null;
   this.optionKeys_ = null;
@@ -127,7 +126,7 @@ npf.application.Settings.prototype.parse = function(jsonSettings) {
     var value = this.getValue_(jsonSettings, parts);
 
     if (goog.isString(value)) {
-      this.setUrl(key, value);
+      this.setUri(key, value);
     } else {
       this.undefinedSettings_.push(parts.join('.'));
     }
@@ -221,15 +220,6 @@ npf.application.Settings.prototype.checkOption = function(key, value) {
  * @return {!goog.Uri}
  */
 npf.application.Settings.prototype.getUri = function(key, opt_params) {
-  return new goog.Uri(this.getUrl(key, opt_params));
-};
-
-/**
- * @param {string} key
- * @param {Object=} opt_params
- * @return {string}
- */
-npf.application.Settings.prototype.getUrl = function(key, opt_params) {
   /** @type {string} */
   var url = this.urlsMap_[key];
 
@@ -237,7 +227,7 @@ npf.application.Settings.prototype.getUrl = function(key, opt_params) {
     throw Error('Url key "' + key + '" not found in settings.');
   }
 
-  return npf.string.supplant(url, opt_params);
+  return new goog.Uri(npf.string.supplant(url, opt_params));
 };
 
 /**
@@ -245,7 +235,7 @@ npf.application.Settings.prototype.getUrl = function(key, opt_params) {
  * @param {string|goog.Uri} uri
  * @return {!npf.application.Settings}
  */
-npf.application.Settings.prototype.setUrl = function(key, uri) {
+npf.application.Settings.prototype.setUri = function(key, uri) {
   this.urlsMap_[key] = goog.isString(uri) ? uri : uri.toString();
 
   return this;

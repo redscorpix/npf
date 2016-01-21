@@ -21,7 +21,13 @@ npf.ui.scrollable.Animation = function(fromX, fromY, toX, toY, opt_duration,
   /** @type {npf.fx.Animation.Timing} */
   var timing = opt_timing || npf.fx.Animation.Timing.EASE_IN_OUT;
 
-  goog.base(this, [fromX, fromY], [toX, toY], duration, timing);
+  npf.ui.scrollable.Animation.base(
+    this,
+    'constructor',
+    [fromX, fromY],
+    [toX, toY],
+    duration,
+    timing);
 };
 goog.inherits(npf.ui.scrollable.Animation, npf.fx.Animation);
 

@@ -10,10 +10,11 @@ goog.require('npf.ui.form.validation.Compare');
  * @param {npf.ui.form.PasswordRenderer=} opt_renderer
  * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
+ * @struct
  * @extends {npf.ui.form.Text}
  */
 npf.ui.form.Password = function(name, opt_renderer, opt_domHelper) {
-  goog.base(this, name, opt_renderer ||
+  npf.ui.form.Password.base(this, 'constructor', name, opt_renderer ||
     npf.ui.form.PasswordRenderer.getInstance(), opt_domHelper);
 };
 goog.inherits(npf.ui.form.Password, npf.ui.form.Text);

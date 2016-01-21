@@ -10,10 +10,11 @@ goog.require('npf.application.Settings');
  * @param {npf.application.Settings=} opt_settings
  * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
+ * @struct
  * @extends {goog.events.EventTarget}
  */
 npf.Application = function(opt_settings, opt_domHelper) {
-  goog.base(this);
+  npf.Application.base(this, 'constructor');
 
   /**
    * @private {goog.dom.DomHelper}
@@ -28,16 +29,20 @@ npf.Application = function(opt_settings, opt_domHelper) {
   /**
    * @private {npf.application.Settings}
    */
-  this.settings_ = opt_settings || new npf.application.Settings();
-  this.registerDisposable(this.settings_);
-  this.settings_.setParentEventTarget(this);
+  this.settings_ = opt_settings || null;
+
+  if (this.settings_) {
+    this.settings_.setParentEventTarget(this);
+  }
 };
 goog.inherits(npf.Application, goog.events.EventTarget);
 
 
 /** @inheritDoc */
 npf.Application.prototype.disposeInternal = function() {
-	goog.base(this, 'disposeInternal');
+	npf.Application.base(this, 'disposeInternal');
+
+  goog.dispose(this.settings_);
 
 	this.domHelper_ = null;
   this.settings_ = null;
@@ -82,7 +87,7 @@ npf.Application.prototype.setDomHelper = function(domHelper) {
  * @return {*}
  */
 npf.Application.prototype.getOption = function(key) {
-  return this.settings_.getOption(key);
+  return this.settings_ ? this.settings_.getOption(key) : undefined;
 };
 
 /**
@@ -95,17 +100,8 @@ npf.Application.prototype.getSettings = function() {
 /**
  * @param {string} key
  * @param {Object=} opt_params
- * @return {!goog.Uri}
+ * @return {goog.Uri}
  */
 npf.Application.prototype.getUri = function(key, opt_params) {
-  return this.settings_.getUri(key, opt_params);
-};
-
-/**
- * @param {string} key
- * @param {Object=} opt_params
- * @return {string}
- */
-npf.Application.prototype.getUrl = function(key, opt_params) {
-  return this.settings_.getUrl(key, opt_params);
+  return this.settings_ ? this.settings_.getUri(key, opt_params) : null;
 };

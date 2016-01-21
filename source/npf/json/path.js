@@ -7,6 +7,7 @@ goog.provide('npf.json.path');
  * @param {string} expression
  * @source JSONPath 0.8.0 - XPath for JSON, Stefan Goessner (goessner.net)
  * @constructor
+ * @struct
  */
 npf.json.Path = function(data, expression, arg) {
   /**

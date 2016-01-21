@@ -1,9 +1,7 @@
 goog.provide('npf.ui.pagePaginator.Renderer');
 
-goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('goog.dom.classlist');
-goog.require('goog.style');
 goog.require('npf.ui.Renderer');
 
 
@@ -12,7 +10,7 @@ goog.require('npf.ui.Renderer');
  * @extends {npf.ui.Renderer}
  */
 npf.ui.pagePaginator.Renderer = function() {
-  goog.base(this);
+  npf.ui.pagePaginator.Renderer.base(this, 'constructor');
 };
 goog.inherits(npf.ui.pagePaginator.Renderer, npf.ui.Renderer);
 goog.addSingletonGetter(npf.ui.pagePaginator.Renderer);
@@ -26,8 +24,9 @@ npf.ui.pagePaginator.Renderer.CSS_CLASS = goog.getCssName('npf-pagePaginator');
 
 /** @override */
 npf.ui.pagePaginator.Renderer.prototype.createDom = function(component) {
-  /** @type {Element} */
-  var element = goog.base(this, 'createDom', component);
+  /** @type {!Element} */
+  var element = npf.ui.pagePaginator.Renderer.base(
+    this, 'createDom', component);
   /** @type {Element} */
   var prevElement = this.createPrevElement(
     /** @type {npf.ui.PagePaginator} */ (component));
@@ -43,25 +42,27 @@ npf.ui.pagePaginator.Renderer.prototype.createDom = function(component) {
   /** @type {Element} */
   var indicatorsElement = this.createPageIndicatorsElement(
     /** @type {npf.ui.PagePaginator} */ (component));
+  /** @type {goog.dom.DomHelper} */
+  var domHelper = component.getDomHelper();
 
   if (prevElement) {
-    goog.dom.appendChild(element, prevElement);
+    domHelper.appendChild(element, prevElement);
   }
 
   if (nextElement) {
-    goog.dom.appendChild(element, nextElement);
+    domHelper.appendChild(element, nextElement);
   }
 
   if (indicatorsElement) {
-    goog.dom.appendChild(element, indicatorsElement);
+    domHelper.appendChild(element, indicatorsElement);
   }
 
   if (contentElement) {
-    goog.dom.appendChild(containerElement, contentElement);
+    domHelper.appendChild(containerElement, contentElement);
   }
 
   if (containerElement) {
-    goog.dom.appendChild(element, containerElement);
+    domHelper.appendChild(element, containerElement);
   }
 
   return element;
@@ -73,7 +74,7 @@ npf.ui.pagePaginator.Renderer.prototype.createDom = function(component) {
  */
 npf.ui.pagePaginator.Renderer.prototype.createPrevElement = function(
     component) {
-  return component.getDomHelper().createDom(goog.dom.TagName.INS,
+  return component.getDomHelper().createDom(goog.dom.TagName.DIV,
     this.getPrevCssClass());
 };
 
@@ -83,7 +84,7 @@ npf.ui.pagePaginator.Renderer.prototype.createPrevElement = function(
  */
 npf.ui.pagePaginator.Renderer.prototype.createNextElement = function(
     component) {
-  return component.getDomHelper().createDom(goog.dom.TagName.INS,
+  return component.getDomHelper().createDom(goog.dom.TagName.DIV,
     this.getNextCssClass());
 };
 
@@ -114,16 +115,18 @@ npf.ui.pagePaginator.Renderer.prototype.createContentElement = function(
 npf.ui.pagePaginator.Renderer.prototype.createPageIndicatorsElement = function(
     component) {
   /** @type {!Element} */
-  var element = component.getDomHelper().createDom(goog.dom.TagName.INS,
+  var element = component.getDomHelper().createDom(goog.dom.TagName.DIV,
     this.getPageIndicatorsCssClass());
   /** @type {number} */
   var pageCount = component.getPageCount();
+  /** @type {goog.dom.DomHelper} */
+  var domHelper = component.getDomHelper();
 
   for (var i = 0; i < pageCount; i++) {
     /** @type {!Element} */
-    var subElement = component.getDomHelper().createDom(goog.dom.TagName.INS,
-      this.getPageIndicatorCssClass());
-    goog.dom.appendChild(element, subElement);
+    var subElement = domHelper.createDom(
+      goog.dom.TagName.DIV, this.getPageIndicatorCssClass());
+    domHelper.appendChild(element, subElement);
   }
 
   return element;
@@ -319,7 +322,6 @@ npf.ui.pagePaginator.Renderer.prototype.setSelected = function(component, index,
  */
 npf.ui.pagePaginator.Renderer.prototype.setLeft = function(element, left) {
   if (element) {
-    left = goog.isNumber(left) ? left + 'px' : left;
-    goog.style.setStyle(element, 'left', left);
+    element.style.left = goog.isNumber(left) ? left + 'px' : left;
   }
 };

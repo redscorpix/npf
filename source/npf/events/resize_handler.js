@@ -15,10 +15,12 @@ goog.require('goog.events.EventType');
  * goog.dom.FontSizeMonitor.EventType.CHANGE.
  * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
+ * @struct
  * @extends {goog.events.EventTarget}
+ * @deprecated Use npf.labs.events.ResizeHandler
  */
 npf.events.ResizeHandler = function(opt_domHelper) {
-  goog.base(this);
+  npf.events.ResizeHandler.base(this, 'constructor');
 
   /**
    * @private {goog.dom.DomHelper}
@@ -26,7 +28,7 @@ npf.events.ResizeHandler = function(opt_domHelper) {
   this.domHelper_ = opt_domHelper || goog.dom.getDomHelper();
 
   /**
-   * @private {goog.events.EventHandler}
+   * @private {goog.events.EventHandler.<!npf.events.ResizeHandler>}
    */
   this.eventHandler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.eventHandler_);
@@ -55,7 +57,7 @@ npf.events.ResizeHandler.EventType = {
 
 /** @inheritDoc */
 npf.events.ResizeHandler.prototype.disposeInternal = function() {
-  goog.base(this, 'disposeInternal');
+  npf.events.ResizeHandler.base(this, 'disposeInternal');
 
   this.domHelper_ = null;
   this.eventHandler_ = null;

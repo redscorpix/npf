@@ -1,19 +1,19 @@
 goog.provide('npf.ui.contextPopup.Renderer');
 
-goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('goog.style');
-goog.require('npf.ui.Renderer');
+goog.require('npf.ui.StatedRenderer');
 
 
 /**
  * @constructor
- * @extends {npf.ui.Renderer}
+ * @struct
+ * @extends {npf.ui.StatedRenderer}
  */
 npf.ui.contextPopup.Renderer = function() {
-  goog.base(this);
+  npf.ui.contextPopup.Renderer.base(this, 'constructor');
 };
-goog.inherits(npf.ui.contextPopup.Renderer, npf.ui.Renderer);
+goog.inherits(npf.ui.contextPopup.Renderer, npf.ui.StatedRenderer);
 goog.addSingletonGetter(npf.ui.contextPopup.Renderer);
 
 
@@ -30,14 +30,10 @@ npf.ui.contextPopup.Renderer.prototype.getCssClass = function() {
 
 /** @inheritDoc */
 npf.ui.contextPopup.Renderer.prototype.createDom = function(component) {
-  /** @type {Element} */
-  var element = goog.base(this, 'createDom', component);
-  goog.style.setElementShown(element, false);
   /** @type {!Element} */
-  var contentElement = component.getDomHelper().createDom(goog.dom.TagName.DIV,
-    this.getContentCssClass());
-
-  goog.dom.appendChild(element, contentElement);
+  var element = npf.ui.contextPopup.Renderer.base(this, 'createDom', component);
+  element.innerHTML = '<div class="' + this.getContentCssClass() + '"></div>';
+  goog.style.setElementShown(element, false);
 
   return element;
 };
@@ -48,7 +44,7 @@ npf.ui.contextPopup.Renderer.prototype.createDom = function(component) {
  */
 npf.ui.contextPopup.Renderer.prototype.createFaderElement = function(
     component) {
-  return component.getDomHelper().createDom(goog.dom.TagName.INS,
+  return component.getDomHelper().createDom(goog.dom.TagName.DIV,
     this.getFaderCssClass());
 };
 

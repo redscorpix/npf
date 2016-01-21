@@ -15,10 +15,11 @@ goog.require('goog.math');
  * @param {number=} opt_position
  * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
+ * @struct
  * @extends {goog.events.EventTarget}
  */
 npf.fx.Parallax = function(opt_maxPosition, opt_position, opt_domHelper) {
-  goog.base(this);
+  npf.fx.Parallax.base(this, 'constructor');
 
   /**
    * @private {boolean}
@@ -59,9 +60,18 @@ npf.fx.Parallax.EventType = {
 npf.fx.Parallax.prototype.disposeInternal = function() {
   this.setDocumentMonitoring(false);
 
-  goog.base(this, 'disposeInternal');
+  npf.fx.Parallax.base(this, 'disposeInternal');
 
-  this.domHelper_;
+  this.domHelper_ = null;
+};
+
+npf.fx.Parallax.prototype.update = function() {
+  /** @type {number} */
+  var maxScroll = this.getMaxScrollInternal();
+  /** @type {number} */
+  var scroll = this.getScrollInternal();
+  this.setMaxPosition(maxScroll);
+  this.setPosition(scroll);
 };
 
 /**
@@ -81,14 +91,16 @@ npf.fx.Parallax.prototype.setDocumentMonitoring = function(enable) {
     var EventType = goog.events.EventType;
 
     if (this.documentMonitoring_) {
-      this.updateToDocument();
+      this.update();
 
       /** @type {!Window} */
       var win = this.domHelper_.getWindow();
 
+      goog.events.listen(win, EventType.LOAD, this.onResize_, false, this);
       goog.events.listen(win, EventType.SCROLL, this.onScroll_, false, this);
       goog.events.listen(win, EventType.RESIZE, this.onResize_, false, this);
     } else {
+      goog.events.unlisten(win, EventType.LOAD, this.onResize_, false, this);
       goog.events.unlisten(win, EventType.SCROLL, this.onScroll_, false, this);
       goog.events.unlisten(win, EventType.RESIZE, this.onResize_, false, this);
     }
@@ -125,16 +137,11 @@ npf.fx.Parallax.prototype.setMaxPosition = function(maxPosition) {
 
 /**
  * @return {number}
+ * @protected
  */
-npf.fx.Parallax.prototype.getPosition = function() {
-  return this.position_;
-};
-
-/**
- * @param {number} position
- */
-npf.fx.Parallax.prototype.setPosition = function(position) {
-  this.setOptions(this.getMaxPosition(), position);
+npf.fx.Parallax.prototype.getMaxScrollInternal = function() {
+  return this.domHelper_.getDocumentHeight() -
+    this.domHelper_.getViewportSize().height;
 };
 
 /**
@@ -164,6 +171,28 @@ npf.fx.Parallax.prototype.setOptionsInternal = function(maxPosition, position) {
 /**
  * @return {number}
  */
+npf.fx.Parallax.prototype.getPosition = function() {
+  return this.position_;
+};
+
+/**
+ * @param {number} position
+ */
+npf.fx.Parallax.prototype.setPosition = function(position) {
+  this.setOptions(this.getMaxPosition(), position);
+};
+
+/**
+ * @return {number}
+ * @protected
+ */
+npf.fx.Parallax.prototype.getScrollInternal = function() {
+  return this.domHelper_.getDocumentScroll().y;
+};
+
+/**
+ * @return {number}
+ */
 npf.fx.Parallax.prototype.getValue = function() {
   /** @type {number} */
   var maxPosition = this.getMaxPosition();
@@ -171,12 +200,23 @@ npf.fx.Parallax.prototype.getValue = function() {
   return maxPosition ? this.getPosition() / maxPosition : 0;
 };
 
-npf.fx.Parallax.prototype.updateToDocument = function() {
+/**
+ * @param {goog.events.BrowserEvent} evt
+ * @private
+ */
+npf.fx.Parallax.prototype.onResize_ = function(evt) {
   /** @type {number} */
   var maxScroll = this.getMaxScrollInternal();
+  this.setMaxPosition(maxScroll);
+};
+
+/**
+ * @param {goog.events.BrowserEvent} evt
+ * @private
+ */
+npf.fx.Parallax.prototype.onScroll_ = function(evt) {
   /** @type {number} */
   var scroll = this.getScrollInternal();
-  this.setMaxPosition(maxScroll);
   this.setPosition(scroll);
 };
 
@@ -191,52 +231,18 @@ npf.fx.Parallax.prototype.onUpdate = function() {
   this.dispatchEvent(event);
 };
 
-/**
- * @param {goog.events.BrowserEvent} evt
- * @private
- */
-npf.fx.Parallax.prototype.onScroll_ = function(evt) {
-  /** @type {number} */
-  var scroll = this.getScrollInternal();
-  this.setPosition(scroll);
-};
-
-/**
- * @param {goog.events.BrowserEvent} evt
- * @private
- */
-npf.fx.Parallax.prototype.onResize_ = function(evt) {
-  /** @type {number} */
-  var maxScroll = this.getMaxScrollInternal();
-  this.setMaxPosition(maxScroll);
-};
-
-/**
- * @return {number}
- * @protected
- */
-npf.fx.Parallax.prototype.getScrollInternal = function() {
-  return this.domHelper_.getDocumentScroll().y;
-};
-
-/**
- * @return {number}
- * @protected
- */
-npf.fx.Parallax.prototype.getMaxScrollInternal = function() {
-  return this.domHelper_.getDocumentHeight() -
-    this.domHelper_.getViewportSize().height;
-};
-
 
 /**
  * @param {npf.fx.Parallax.EventType} type
  * @param {number} maxPosition
  * @param {number} position
  * @param {number} value
+ * @constructor
+ * @struct
+ * @extends {goog.events.Event}
  */
 npf.fx.Parallax.Event = function(type, maxPosition, position, value) {
-  goog.base(this, type);
+  npf.fx.Parallax.Event.base(this, 'constructor', type);
 
   /**
    * @type {number}

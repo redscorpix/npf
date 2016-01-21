@@ -1,14 +1,13 @@
 goog.provide('npf.net.XhrIo2');
 goog.provide('npf.net.XhrIo2.ResponseType');
 
-goog.require('goog.Timer');
 goog.require('goog.Uri');
 goog.require('goog.array');
-goog.require('goog.debug.Logger');
 goog.require('goog.debug.entryPointRegistry');
 goog.require('goog.events.BrowserEvent');
 goog.require('goog.events.EventTarget');
-goog.require('goog.json.hybrid');
+goog.require('goog.json');
+goog.require('goog.log');
 goog.require('goog.net.ErrorCode');
 goog.require('goog.net.EventType');
 goog.require('goog.net.HttpStatus');
@@ -26,13 +25,14 @@ goog.require('npf.net.EventType');
 
 /**
  * Basic class for handling XMLHttpRequests.
- * @param {goog.net.XmlHttpFactory=} opt_xmlHttpFactory Factory to use
- *    when creating XMLHttpRequest objects.
+ * @param {goog.net.XmlHttpFactory=} opt_xmlHttpFactory Factory to use when
+ *     creating XMLHttpRequest objects.
  * @constructor
+ * @struct
  * @extends {goog.events.EventTarget}
  */
 npf.net.XhrIo2 = function(opt_xmlHttpFactory) {
-  goog.base(this);
+  npf.net.XhrIo2.base(this, 'constructor');
 
   /**
    * Map of default headers to add to every request, use:
@@ -57,7 +57,7 @@ npf.net.XhrIo2 = function(opt_xmlHttpFactory) {
 
   /**
    * The XMLHttpRequest object that is being used for the transfer.
-   * @private {goog.net.XhrLike.OrNative|GearsHttpRequest}
+   * @private {goog.net.XhrLike.OrNative?}
    */
   this.xhr_ = null;
 
@@ -183,9 +183,9 @@ npf.net.XhrIo2.ResponseType = {
 /**
  * A reference to the XhrIo logger
  * @private {goog.debug.Logger}
+ * @const
  */
-npf.net.XhrIo2.prototype.logger_ =
-  goog.debug.Logger.getLogger('npf.net.XhrIo2');
+npf.net.XhrIo2.prototype.logger_ = goog.log.getLogger('npf.net.XhrIo2');
 
 
 /**
@@ -283,7 +283,8 @@ npf.net.XhrIo2.removeGlobalHandler = function(id) {
  * @param {Function=} opt_callback Callback function for when request is
  *     complete.
  * @param {string=} opt_method Send method, default: GET.
- * @param {ArrayBuffer|Blob|Document|FormData|string=} opt_content Body data.
+ * @param {ArrayBuffer|ArrayBufferView|Blob|Document|FormData|string=}
+ *     opt_content Body data.
  * @param {Object|goog.structs.Map=} opt_headers Map of headers to add to the
  *     request.
  * @param {number=} opt_timeoutInterval Number of milliseconds after which an
@@ -431,7 +432,8 @@ npf.net.XhrIo2.prototype.getWithCredentials = function() {
  * Instance send that actually uses XMLHttpRequest to make a server call.
  * @param {string|goog.Uri} url Uri to make request to.
  * @param {string=} opt_method Send method, default: GET.
- * @param {ArrayBuffer|Blob|Document|FormData|string=} opt_content Body data.
+ * @param {ArrayBuffer|ArrayBufferView|Blob|Document|FormData|string=}
+ *     opt_content Body data.
  * @param {Object|goog.structs.Map=} opt_headers Map of headers to add to the
  *     request.
  */
@@ -470,7 +472,7 @@ npf.net.XhrIo2.prototype.send = function(url, opt_method, opt_content,
   try {
     goog.log.fine(this.logger_, this.formatMsg_('Opening Xhr'));
     this.inOpen_ = true;
-    this.xhr_.open(method, url, true);  // Always async!
+    this.xhr_.open(method, String(url), true);  // Always async!
     this.inOpen_ = false;
   } catch (err) {
     goog.log.fine(this.logger_,
@@ -540,8 +542,10 @@ npf.net.XhrIo2.prototype.send = function(url, opt_method, opt_content,
         this.xhr_[npf.net.XhrIo2.XHR2_ON_TIMEOUT_] =
             goog.bind(this.timeout_, this);
       } else {
-        this.timeoutId_ = goog.Timer.callOnce(this.timeout_,
-            this.timeoutInterval_, this);
+        var self = this;
+        this.timeoutId_ = setTimeout(function() {
+          self.timeout_();
+        }, this.timeoutInterval_);
       }
     }
     goog.log.fine(this.logger_, this.formatMsg_('Sending request'));
@@ -589,12 +593,12 @@ npf.net.XhrIo2.prototype.parseRequestHeaders = function(opt_headers) {
  * @see http://www.w3.org/TR/XMLHttpRequest/#the-timeout-attribute
  * @see https://bugzilla.mozilla.org/show_bug.cgi?id=525816
  *
- * @param {!goog.net.XhrLike.OrNative|!GearsHttpRequest} xhr The request.
+ * @param {!goog.net.XhrLike.OrNative} xhr The request.
  * @return {boolean} True if the request supports level 2 timeout.
  * @private
  */
 npf.net.XhrIo2.shouldUseXhr2Timeout_ = function(xhr) {
-  return goog.userAgent.IE &&
+  return goog.userAgent.EDGE_OR_IE &&
       goog.userAgent.isVersionOrHigher(9) &&
       goog.isNumber(xhr[npf.net.XhrIo2.XHR2_TIMEOUT_]) &&
       goog.isDef(xhr[npf.net.XhrIo2.XHR2_ON_TIMEOUT_]);
@@ -615,8 +619,7 @@ npf.net.XhrIo2.isContentTypeHeader_ = function(header) {
 
 /**
  * Creates a new XHR object.
- * @return {goog.net.XhrLike.OrNative|GearsHttpRequest} The newly created XHR
- *     object.
+ * @return {!goog.net.XhrLike.OrNative} The newly created XHR object.
  * @protected
  */
 npf.net.XhrIo2.prototype.createXhr = function() {
@@ -721,7 +724,7 @@ npf.net.XhrIo2.prototype.disposeInternal = function() {
     this.cleanUpXhr_(true);
   }
 
-  goog.base(this, 'disposeInternal');
+  npf.net.XhrIo2.base(this, 'disposeInternal');
 };
 
 
@@ -734,7 +737,7 @@ npf.net.XhrIo2.prototype.disposeInternal = function() {
  */
 npf.net.XhrIo2.prototype.onReadyStateChange_ = function() {
   if (this.isDisposed()) {
-    // This method is the target of an untracked goog.Timer.callOnce().
+    // This method is the target of an untracked setTimeout().
     return;
   }
   if (!this.inOpen_ && !this.inSend_ && !this.inAbort_) {
@@ -822,9 +825,15 @@ npf.net.XhrIo2.prototype.onReadyStateChangeHelper_ = function() {
     // from inside the send call and this usually breaks code that assumes that
     // XhrIo is asynchronous.  If that is the case we delay the callback
     // using a timer.
-    if (this.inSend_ &&
-        this.getReadyState() == goog.net.XmlHttp.ReadyState.COMPLETE) {
-      goog.Timer.callOnce(this.onReadyStateChange_, 0, this);
+    if (
+      this.inSend_ &&
+      this.getReadyState() == goog.net.XmlHttp.ReadyState.COMPLETE
+    ) {
+      var self = this;
+      setTimeout(function() {
+        self.onReadyStateChange_();
+      }, 0);
+
       return;
     }
 
@@ -907,7 +916,7 @@ npf.net.XhrIo2.prototype.cleanUpTimeoutTimer_ = function() {
     this.xhr_[npf.net.XhrIo2.XHR2_ON_TIMEOUT_] = null;
   }
   if (goog.isNumber(this.timeoutId_)) {
-    goog.Timer.clear(this.timeoutId_);
+    clearTimeout(this.timeoutId_);
     this.timeoutId_ = null;
   }
 };
@@ -979,7 +988,6 @@ npf.net.XhrIo2.prototype.getStatus = function() {
     return this.getReadyState() > goog.net.XmlHttp.ReadyState.LOADED ?
         this.xhr_.status : -1;
   } catch (e) {
-    goog.log.warning(this.logger_, 'Can not get status: ' + e.message);
     return -1;
   }
 };
@@ -1081,7 +1089,7 @@ npf.net.XhrIo2.prototype.getResponseJson = function(opt_xssiPrefix) {
     responseText = responseText.substring(opt_xssiPrefix.length);
   }
 
-  return goog.json.hybrid.parse(responseText);
+  return goog.json.parse(responseText);
 };
 
 
@@ -1153,7 +1161,7 @@ npf.net.XhrIo2.prototype.getResponseHeaders = function() {
   var headersArray = this.getAllResponseHeaders().split('\r\n');
 
   for (var i = 0; i < headersArray.length; i++) {
-    if (goog.string.isEmpty(headersArray[i])) {
+    if (goog.string.isEmptyOrWhitespace(headersArray[i])) {
       continue;
     }
 
@@ -1222,7 +1230,7 @@ npf.net.XhrIo2.prototype.dispatchEvent = function(e) {
     }, this);
   }
 
-  return goog.base(this, 'dispatchEvent', e);
+  return npf.net.XhrIo2.base(this, 'dispatchEvent', e);
 };
 
 /**

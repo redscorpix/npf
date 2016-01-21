@@ -7,10 +7,11 @@ goog.require('goog.object');
 
 
 /**
- * @param {HTMLCanvasElement|Image|HTMLImageElement} source Canvas or loaded
- *                                                          image.
+ * @param {HTMLCanvasElement|Image|HTMLImageElement} source
+ *                                                      Canvas or loaded image.
  * @param {HTMLCanvasElement} destination
  * @constructor
+ * @struct
  */
 npf.graphics.Effect = function(source, destination) {
 
@@ -129,7 +130,7 @@ npf.graphics.Effect.prototype.getImageData = function(source, opt_rect) {
   try {
     imageData = ctx.getImageData(rect.left, rect.top, rect.width, rect.height);
   } catch(e) {
-    //throw new Error("unable to access image data: " + e);
+    throw new Error("unable to access image data: " + e);
   }
 
   return imageData;

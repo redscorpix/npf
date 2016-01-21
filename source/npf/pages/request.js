@@ -5,16 +5,17 @@ goog.require('npf.router.Route');
 
 
 /**
- * @param {goog.Uri} uri
+ * @param {!goog.Uri} uri
  * @param {npf.router.Route=} opt_route
  * @param {string=} opt_name
  * @param {Object.<string>=} opt_options
  * @constructor
+ * @struct
  */
 npf.pages.Request = function(uri, opt_route, opt_name, opt_options) {
 
   /**
-   * @type {goog.Uri}
+   * @type {!goog.Uri}
    */
   this.uri = uri;
 
@@ -58,14 +59,7 @@ npf.pages.Request.prototype.getOption = function(key) {
  */
 npf.pages.Request.prototype.setOption = function(key, value) {
   this.options[key] = value;
-  this.uri.setPath(this.route.getUrl(this.options));
-};
-
-/**
- * @return {string}
- */
-npf.pages.Request.prototype.getUrl = function() {
-  return this.getToken();
+  this.uri.setPath(this.route.getUri(this.options).toString());
 };
 
 /**

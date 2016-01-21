@@ -13,10 +13,11 @@ goog.require('npf.ui.Renderer');
  * @param {goog.dom.DomHelper=} opt_domHelper DOM helper, used for document
  *                                            interaction.
  * @constructor
+ * @struct
  * @extends {npf.ui.Component}
  */
 npf.ui.RenderedComponent = function(opt_renderer, opt_domHelper) {
-  goog.base(this, opt_domHelper);
+  npf.ui.RenderedComponent.base(this, 'constructor', opt_domHelper);
 
   /**
    * Map of DOM IDs to child components.  Each key is the DOM ID of a child
@@ -67,7 +68,7 @@ npf.ui.RenderedComponent.prototype.decorateInternal = function(element) {
 
 /** @inheritDoc */
 npf.ui.RenderedComponent.prototype.enterDocument = function() {
-  goog.base(this, 'enterDocument');
+  npf.ui.RenderedComponent.base(this, 'enterDocument');
 
   /** @type {function(this:npf.ui.RenderedComponent,goog.ui.Component)} */
   var registerChilds = function(child) {
@@ -80,7 +81,7 @@ npf.ui.RenderedComponent.prototype.enterDocument = function() {
 
 /** @inheritDoc */
 npf.ui.RenderedComponent.prototype.disposeInternal = function() {
-  goog.base(this, 'disposeInternal');
+  npf.ui.RenderedComponent.base(this, 'disposeInternal');
 
   this.childElementIdMap_ = null;
   this.extraClassNames_ = null;
@@ -148,7 +149,8 @@ npf.ui.RenderedComponent.prototype.setRenderer = function(renderer) {
  */
 npf.ui.RenderedComponent.prototype.addChildAt = function(component, index,
     opt_render) {
-  goog.base(this, 'addChildAt', component, index, opt_render);
+  npf.ui.RenderedComponent.base(
+    this, 'addChildAt', component, index, opt_render);
 
   if (component.isInDocument() && this.isInDocument()) {
     this.registerChildId_(component);
@@ -204,7 +206,8 @@ npf.ui.RenderedComponent.prototype.removeChild = function(component,
     }
   }
 
-  return goog.base(this, 'removeChild', component, opt_unrender);
+  return npf.ui.RenderedComponent.base(
+    this, 'removeChild', component, opt_unrender);
 };
 
 /**

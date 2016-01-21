@@ -1,16 +1,17 @@
 goog.provide('npf.ui.form.TextRenderer');
 
-goog.require('goog.dom');
+goog.require('goog.dom.InputType');
 goog.require('goog.dom.TagName');
 goog.require('npf.ui.form.FieldRenderer');
 
 
 /**
  * @constructor
+ * @struct
  * @extends {npf.ui.form.FieldRenderer}
  */
 npf.ui.form.TextRenderer = function() {
-  goog.base(this);
+  npf.ui.form.TextRenderer.base(this, 'constructor');
 };
 goog.inherits(npf.ui.form.TextRenderer, npf.ui.form.FieldRenderer);
 goog.addSingletonGetter(npf.ui.form.TextRenderer);
@@ -25,24 +26,25 @@ npf.ui.form.TextRenderer.CSS_CLASS = goog.getCssName('npf-form-text');
 /** @inheritDoc */
 npf.ui.form.TextRenderer.prototype.appendContent = function(component,
     element) {
-  var textContainer = /** @type {npf.ui.form.Text} */ (component);
+  var field = /** @type {npf.ui.form.Text} */ (component);
   var properties = {
     'class': this.getValueCssClass(),
-    'name': textContainer.getName(),
-    'type': 'text',
-    'value': textContainer.getValue()
+    'name': field.getName(),
+    'type': this.getInputType(),
+    'value': field.getValue()
   };
 
-  if (!textContainer.isAutoComplete()) {
+  if (!field.isAutoComplete()) {
     properties['autocomplete'] = 'off';
   }
 
+  /** @type {goog.dom.DomHelper} */
+  var domHelper = field.getDomHelper();
   /** @type {!Element} */
-  var valueElement = textContainer.getDomHelper().createDom(
-    goog.dom.TagName.INPUT, properties);
-  goog.dom.appendChild(this.getContentElement(element), valueElement);
+  var valueElement = domHelper.createDom(goog.dom.TagName.INPUT, properties);
+  domHelper.appendChild(this.getContentElement(element), valueElement);
 
-  if (textContainer.isLabelEnabled()) {
+  if (field.isLabelEnabled()) {
     this.bindLabel(this.getLabelElement(element), valueElement);
   }
 };
@@ -62,12 +64,19 @@ npf.ui.form.TextRenderer.prototype.setAutoComplete = function(element, enable) {
 };
 
 /**
+ * @return {string}
+ */
+npf.ui.form.TextRenderer.prototype.getInputType = function() {
+  return goog.dom.InputType.TEXT;
+};
+
+/**
  * @param {Element} element
  * @param {number} maxLength
  */
 npf.ui.form.TextRenderer.prototype.setMaxLength = function(element, maxLength) {
   if (element) {
-    if (maxLength) {
+    if (-1 < maxLength) {
       element.setAttribute('maxlength', maxLength);
     } else {
       element.removeAttribute('maxlength');

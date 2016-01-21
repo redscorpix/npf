@@ -1,0 +1,7 @@
+.npf-fullScreen video::-webkit-media-controls {
+  display: none !important;
+}
+
+.npf-fullScreen .controls {
+  z-index: 2147483647;
+}

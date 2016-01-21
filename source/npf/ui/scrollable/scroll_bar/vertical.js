@@ -12,8 +12,11 @@ goog.require('npf.ui.scrollable.scrollBar.VerticalRenderer');
  * @extends {npf.ui.scrollable.ScrollBar}
  */
 npf.ui.scrollable.scrollBar.Vertical = function(opt_renderer, opt_domHelper) {
-  goog.base(this, opt_renderer ||
-    npf.ui.scrollable.scrollBar.VerticalRenderer.getInstance(), opt_domHelper);
+  npf.ui.scrollable.scrollBar.Vertical.base(
+    this,
+    'constructor',
+    opt_renderer || npf.ui.scrollable.scrollBar.VerticalRenderer.getInstance(),
+    opt_domHelper);
 
   this.addClassName(npf.ui.scrollable.scrollBar.Vertical.CSS_CLASS);
 };
@@ -35,9 +38,8 @@ npf.ui.scrollable.scrollBar.Vertical.prototype.setContainer = function(
   var oldContainer = this.getContainer();
 
   if (oldContainer !== container) {
-    this.setContainerInternal(null);
-
     if (oldContainer) {
+      this.setContainerInternal(null);
       this.setListenedContainer(oldContainer, false);
       oldContainer.setVerticalScrollBar(null);
     }

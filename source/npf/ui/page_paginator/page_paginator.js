@@ -4,6 +4,7 @@ goog.provide('npf.ui.PagePaginator.EventType');
 goog.require('goog.events');
 goog.require('goog.events.EventType');
 goog.require('goog.ui.Component.Error');
+goog.require('npf.events.ClickHandler');
 goog.require('npf.ui.RenderedComponent');
 goog.require('npf.ui.pagePaginator.Changer');
 goog.require('npf.ui.pagePaginator.Changer.EventType');
@@ -20,7 +21,7 @@ goog.require('npf.ui.pagePaginator.Renderer');
  */
 npf.ui.PagePaginator = function(pageCount, opt_page, opt_renderer,
     opt_domHelper) {
-  goog.base(this, opt_renderer ||
+  npf.ui.PagePaginator.base(this, 'constructor', opt_renderer ||
     npf.ui.pagePaginator.Renderer.getInstance(), opt_domHelper);
 
   /**
@@ -76,14 +77,14 @@ npf.ui.PagePaginator.EventType = {
 
 /** @inheritDoc */
 npf.ui.PagePaginator.prototype.createDom = function() {
-  goog.base(this, 'createDom');
+  npf.ui.PagePaginator.base(this, 'createDom');
 
   this.initializeDom();
 };
 
 /** @inheritDoc */
 npf.ui.PagePaginator.prototype.decorateInternal = function(element) {
-  goog.base(this, 'decorateInternal', element);
+  npf.ui.PagePaginator.base(this, 'decorateInternal', element);
 
   this.initializeDom();
 };
@@ -114,17 +115,14 @@ npf.ui.PagePaginator.prototype.initializeDom = function() {
 
 /** @inheritDoc */
 npf.ui.PagePaginator.prototype.enterDocument = function() {
-  goog.base(this, 'enterDocument');
-
-  /** @type {goog.events.EventHandler} */
-  var handler = this.getHandler();
+  npf.ui.PagePaginator.base(this, 'enterDocument');
 
   this.changer_ = new npf.ui.pagePaginator.Changer(this.getContainerElement(),
     this.getContentElement(), this.getPageIndex(), this.getPageCount());
   this.changer_.setDraggable(this.isDraggable());
   this.changer_.setLoopback(this.isLoopback());
 
-  handler.listen(this.changer_,
+  this.getHandler().listen(this.changer_,
     npf.ui.pagePaginator.Changer.EventType.PAGE_CHANGE, this.onPageChange_);
   this.changer_.init();
 
@@ -134,11 +132,19 @@ npf.ui.PagePaginator.prototype.enterDocument = function() {
   var nextElement = this.getNextElement();
 
   if (prevElement) {
-    handler.listen(prevElement, goog.events.EventType.CLICK, this.onPrevClick_);
+    var prevClickHandler = new npf.events.ClickHandler(prevElement);
+    this.disposeOnExitDocument(prevClickHandler);
+
+    this.getHandler().
+      listen(prevClickHandler, goog.events.EventType.CLICK, this.onPrevClick_);
   }
 
   if (nextElement) {
-    handler.listen(nextElement, goog.events.EventType.CLICK, this.onNextClick_);
+    var nextClickHandler = new npf.events.ClickHandler(nextElement);
+    this.disposeOnExitDocument(nextClickHandler);
+
+    this.getHandler().
+      listen(nextClickHandler, goog.events.EventType.CLICK, this.onNextClick_);
   }
 
   this.updateContent_();
@@ -149,12 +155,12 @@ npf.ui.PagePaginator.prototype.exitDocument = function() {
   this.changer_.dispose();
   this.changer_ = null;
 
-  goog.base(this, 'exitDocument');
+  npf.ui.PagePaginator.base(this, 'exitDocument');
 };
 
 /** @inheritDoc */
 npf.ui.PagePaginator.prototype.disposeInternal = function() {
-  goog.base(this, 'disposeInternal');
+  npf.ui.PagePaginator.base(this, 'disposeInternal');
 
   this.changer_ = null;
   this.nextPage_ = null;
@@ -259,17 +265,18 @@ npf.ui.PagePaginator.prototype.prev = function() {
  * @private
  */
 npf.ui.PagePaginator.prototype.updateContent_ = function() {
-  this.getRenderer().setLeft(this.page_.getElement(), 0);
+  var renderer = /** @type {npf.ui.pagePaginator.Renderer} */ (
+    this.getRenderer());
+  renderer.setLeft(this.page_.getElement(), 0);
 
   if (this.prevPage_) {
-    this.getRenderer().setLeft(this.prevPage_.getElement(), '-100%');
+    renderer.setLeft(this.prevPage_.getElement(), '-100%');
   }
 
   if (this.nextPage_) {
-    this.getRenderer().setLeft(this.nextPage_.getElement(), '100%');
+    renderer.setLeft(this.nextPage_.getElement(), '100%');
   }
 
-  var renderer = this.getRenderer();
   /** @type {number} */
   var pageIndex = this.getPageIndex();
   renderer.setPrevEnabled(this, this.isLoopback() || !!pageIndex);
@@ -303,21 +310,30 @@ npf.ui.PagePaginator.prototype.createPage = goog.abstractMethod;
  * @return {Element}
  */
 npf.ui.PagePaginator.prototype.getContainerElement = function() {
-  return this.getRenderer().getContainerElement(this.getElement());
+  var renderer = /** @type {npf.ui.pagePaginator.Renderer} */ (
+    this.getRenderer());
+
+  return renderer.getContainerElement(this.getElement());
 };
 
 /**
  * @return {Element}
  */
 npf.ui.PagePaginator.prototype.getNextElement = function() {
-  return this.getRenderer().getNextElement(this.getElement());
+  var renderer = /** @type {npf.ui.pagePaginator.Renderer} */ (
+    this.getRenderer());
+
+  return renderer.getNextElement(this.getElement());
 };
 
 /**
  * @return {Element}
  */
 npf.ui.PagePaginator.prototype.getPrevElement = function() {
-  return this.getRenderer().getPrevElement(this.getElement());
+  var renderer = /** @type {npf.ui.pagePaginator.Renderer} */ (
+    this.getRenderer());
+
+  return renderer.getPrevElement(this.getElement());
 };
 
 /**
@@ -389,7 +405,9 @@ npf.ui.PagePaginator.prototype.onPageChange_ = function(evt) {
     }
   }
 
-  this.getRenderer().setSelected(this, this.getPageIndex(), false);
+  var renderer = /** @type {npf.ui.pagePaginator.Renderer} */ (
+    this.getRenderer());
+  renderer.setSelected(this, this.getPageIndex(), false);
   this.setPageIndexInternal(pageIndex);
   this.updateContent_();
   this.onChange();

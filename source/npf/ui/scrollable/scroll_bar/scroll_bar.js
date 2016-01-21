@@ -21,10 +21,14 @@ goog.require('npf.ui.scrollable.scrollBar.Renderer');
  * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
  * @extends {npf.ui.StatedComponent}
+ * @deprecated Use npf.ui.ScrollBar
  */
 npf.ui.scrollable.ScrollBar = function(opt_renderer, opt_domHelper) {
-  goog.base(this, opt_renderer ||
-    npf.ui.scrollable.scrollBar.Renderer.getInstance(), opt_domHelper);
+  npf.ui.scrollable.ScrollBar.base(
+    this,
+    'constructor',
+    opt_renderer || npf.ui.scrollable.scrollBar.Renderer.getInstance(),
+    opt_domHelper);
 
   /**
    * @private {npf.ui.scrollable.Container}
@@ -85,7 +89,7 @@ npf.ui.scrollable.ScrollBar.EventType = {
 
 /** @inheritDoc */
 npf.ui.scrollable.ScrollBar.prototype.createDom = function() {
-  goog.base(this, 'createDom');
+  npf.ui.scrollable.ScrollBar.base(this, 'createDom');
 
   this.applySize(this.getSize());
   this.applyRunnerSize(this.getRunnerSize());
@@ -94,20 +98,17 @@ npf.ui.scrollable.ScrollBar.prototype.createDom = function() {
 
 /** @inheritDoc */
 npf.ui.scrollable.ScrollBar.prototype.enterDocument = function() {
-  goog.base(this, 'enterDocument');
+  npf.ui.scrollable.ScrollBar.base(this, 'enterDocument');
 
   this.update();
 
-  /** @type {goog.events.EventHandler} */
-  var handler = this.getHandler();
-
-  handler.listen(this.getElement(), [
+  this.getHandler().listen(this.getElement(), [
     goog.events.EventType.TOUCHSTART,
     goog.events.EventType.MOUSEDOWN
   ], this.onBeforeDrag_, true);
 
   if (this.dragger_) {
-    handler
+    this.getHandler()
       .listen(this.dragger_, goog.fx.Dragger.EventType.START, this.onDragStart_)
       .listen(this.dragger_, goog.fx.Dragger.EventType.DRAG, this.onDrag_)
       .listen(this.dragger_, goog.fx.Dragger.EventType.END, this.onDragEnd_);
@@ -123,7 +124,7 @@ npf.ui.scrollable.ScrollBar.prototype.disposeInternal = function() {
   goog.dispose(this.dragger_);
   this.setContainer(null);
 
-  goog.base(this, 'disposeInternal');
+  npf.ui.scrollable.ScrollBar.base(this, 'disposeInternal');
 
   this.container_ = null;
   this.containerContentSize_ = null;
@@ -533,17 +534,17 @@ npf.ui.scrollable.ScrollBar.prototype.update = function() {
 npf.ui.scrollable.ScrollBar.prototype.setListenedContainer = function(
     container, listen) {
   if (this.isInDocument()) {
-    /** @type {goog.events.EventHandler} */
-    var handler = this.getHandler();
     var eventTypes = [
       npf.ui.scrollable.Container.EventType.RESIZE,
       npf.ui.scrollable.Container.EventType.SCROLL
     ];
 
     if (listen) {
-      handler.listen(container, eventTypes, this.onContainerUpdate_);
+      this.getHandler().
+        listen(container, eventTypes, this.onContainerUpdate_);
     } else {
-      handler.unlisten(container, eventTypes, this.onContainerUpdate_);
+      this.getHandler().
+        unlisten(container, eventTypes, this.onContainerUpdate_);
     }
   }
 };
@@ -587,10 +588,11 @@ npf.ui.scrollable.ScrollBar.prototype.onDrag = function(left, top) {
  * @param {npf.ui.scrollable.ScrollBar.EventType} type
  * @param {number} position
  * @constructor
+ * @struct
  * @extends {goog.events.Event}
  */
 npf.ui.scrollable.ScrollBarEvent = function(type, position) {
-  goog.base(this, type);
+  npf.ui.scrollable.ScrollBarEvent.base(this, 'constructor', type);
 
   /**
    * @type {number}

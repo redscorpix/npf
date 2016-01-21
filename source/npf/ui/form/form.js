@@ -2,6 +2,7 @@ goog.provide('npf.ui.Form');
 
 goog.require('goog.events.EventType');
 goog.require('goog.object');
+goog.require('goog.ui.Component.State');
 goog.require('goog.ui.Control');
 goog.require('npf.ui.StatedComponent');
 goog.require('npf.ui.form.EventType');
@@ -11,16 +12,15 @@ goog.require('npf.ui.form.SubmitButton');
 
 
 /**
- * @param {npf.ui.form.Renderer=} opt_renderer Renderer used to render or
- *                                            decorate the component.
- * @param {goog.dom.DomHelper=} opt_domHelper DOM helper, used for document
- *                                            interaction.
+ * @param {npf.ui.form.Renderer=} opt_renderer
+ * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
+ * @struct
  * @extends {npf.ui.StatedComponent}
  */
 npf.ui.Form = function(opt_renderer, opt_domHelper) {
-  goog.base(
-    this, opt_renderer || npf.ui.form.Renderer.getInstance(), opt_domHelper);
+  npf.ui.Form.base(this, 'constructor', opt_renderer ||
+    npf.ui.form.Renderer.getInstance(), opt_domHelper);
 
   /**
    * @private {Object.<npf.ui.form.Field>}
@@ -39,48 +39,47 @@ npf.ui.Form = function(opt_renderer, opt_domHelper) {
   this.submitButton_ = null;
 
   this.setAllowTextSelection(true);
+  this.setSupportedState(goog.ui.Component.State.DISABLED, true);
 };
 goog.inherits(npf.ui.Form, npf.ui.StatedComponent);
 
 
 /** @inheritDoc */
 npf.ui.Form.prototype.enterDocument = function() {
-  goog.base(this, 'enterDocument');
+  npf.ui.Form.base(this, 'enterDocument');
 
-  this.getHandler()
-    .listen(this.getElement(), goog.events.EventType.SUBMIT, this.onSubmit_);
+  this.getHandler().
+    listen(this.getElement(), goog.events.EventType.SUBMIT, this.onSubmit_);
 };
 
 /** @inheritDoc */
 npf.ui.Form.prototype.disposeInternal = function() {
   this.setSubmitButton(null);
 
-  goog.base(this, 'disposeInternal');
+  npf.ui.Form.base(this, 'disposeInternal');
 
   this.fieldsMap_ = null;
 };
 
-/** @inheritDoc */
-npf.ui.Form.prototype.addChildAt = function(child, index, opt_render) {
-  goog.base(this, 'addChildAt', child, index, opt_render);
-
-  if (child instanceof npf.ui.form.Field) {
-    this.fieldsMap_[child.getName()] = child;
+npf.ui.Form.prototype.submit = function() {
+  if (this.getElement()) {
+    this.onSubmit();
   }
 };
 
 /** @inheritDoc */
-npf.ui.Form.prototype.removeChild = function(child, opt_unrender) {
-  if (child) {
-    var id = goog.isString(child) ? child : child.getId();
-    child = this.getChild(id);
+npf.ui.Form.prototype.setState = function(state, enable, opt_calledFrom) {
+  npf.ui.Form.base(this, 'setState', state, enable, opt_calledFrom);
 
-    if (child && child instanceof npf.ui.form.Field) {
-      goog.object.remove(this.fieldsMap_, child.getName());
+  if (goog.ui.Component.State.DISABLED == state) {
+    this.forEachField(function(field) {
+      field.setEnabled(!enable);
+    });
+
+    if (this.submitButton_ && this.submitButton_.setEnabled) {
+      this.submitButton_.setEnabled(!enable);
     }
   }
-
-  return goog.base(this, 'removeChild', child, opt_unrender);
 };
 
 /**
@@ -93,11 +92,26 @@ npf.ui.Form.prototype.hasErrors = function() {
 };
 
 /**
+ * @param {npf.ui.form.Field} field
+ */
+npf.ui.Form.prototype.addField = function(field) {
+  goog.object.set(this.fieldsMap_, field.getName(), field);
+  field.setEnabled(this.isEnabled());
+};
+
+/**
  * @param {string} name
  * @return {npf.ui.form.Field}
  */
 npf.ui.Form.prototype.getField = function(name) {
   return this.fieldsMap_[name] || null;
+};
+
+/**
+ * @param {npf.ui.form.Field} field
+ */
+npf.ui.Form.prototype.removeField = function(field) {
+  goog.object.remove(this.fieldsMap_, field.getName());
 };
 
 /**
@@ -155,7 +169,7 @@ npf.ui.Form.prototype.getSubmitButton = function() {
 
 /**
  * @param {goog.ui.Control|npf.ui.StatedComponent|npf.ui.form.SubmitButton}
- *                                                                  submitButton
+ *    submitButton
  */
 npf.ui.Form.prototype.setSubmitButton = function(submitButton) {
   this.submitButton_ = submitButton;
@@ -198,13 +212,10 @@ npf.ui.Form.prototype.getValue = function(name) {
 npf.ui.Form.prototype.forEachField = function(f, opt_obj) {
   /** @type {number} */
   var index = 0;
-  /** @type {function(this:npf.ui.Form,goog.ui.Component)} */
-  var iterateFields = function(child) {
-    if (child instanceof npf.ui.form.Field) {
-      f.call(opt_obj, child, index++);
-    }
-  };
-  this.forEachChild(iterateFields, this);
+
+  goog.object.forEach(this.fieldsMap_, function(field) {
+    f.call(opt_obj, field, index++);
+  });
 };
 
 /**

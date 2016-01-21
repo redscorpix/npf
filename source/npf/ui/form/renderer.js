@@ -6,10 +6,11 @@ goog.require('npf.ui.StatedRenderer');
 
 /**
  * @constructor
+ * @struct
  * @extends {npf.ui.StatedRenderer}
  */
 npf.ui.form.Renderer = function() {
-  goog.base(this);
+  npf.ui.form.Renderer.base(this, 'constructor');
 };
 goog.inherits(npf.ui.form.Renderer, npf.ui.StatedRenderer);
 goog.addSingletonGetter(npf.ui.form.Renderer);
@@ -30,10 +31,6 @@ npf.ui.form.Renderer.prototype.getCssClass = function() {
 
 /** @inheritDoc */
 npf.ui.form.Renderer.prototype.createDom = function(component) {
-  /** @type {!Element} */
-  var element = component.getDomHelper().createDom(goog.dom.TagName.FORM,
+  return component.getDomHelper().createDom(goog.dom.TagName.FORM,
     this.getClassNames(component).join(' '));
-  this.setAriaStates(/** @type {!npf.ui.Form} */ (component), element);
-
-  return element;
 };

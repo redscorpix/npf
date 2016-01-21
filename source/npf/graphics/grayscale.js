@@ -4,19 +4,22 @@ goog.require('npf.graphics.Effect');
 
 
 /**
- * @param {HTMLCanvasElement|Image|HTMLImageElement} source Canvas or loaded image.
+ * @param {HTMLCanvasElement|Image|HTMLImageElement} source Canvas or loaded
+ *    image.
  * @param {HTMLCanvasElement} destination
  * @constructor
+ * @struct
  * @extends {npf.graphics.Effect}
  */
 npf.graphics.Grayscale = function(source, destination) {
-  goog.base(this, source, destination);
+  npf.graphics.Grayscale.base(this, 'constructor', source, destination);
 };
 goog.inherits(npf.graphics.Grayscale, npf.graphics.Effect);
 
 
 /**
- * @param {HTMLCanvasElement|Image|HTMLImageElement} source Canvas or loaded image.
+ * @param {HTMLCanvasElement|Image|HTMLImageElement} source Canvas or loaded
+ *    image.
  * @param {Object.<number|string>=} opt_attrs
  * @param {goog.dom.DomHelper=} opt_domHelper
  * @return {!npf.graphics.Grayscale}

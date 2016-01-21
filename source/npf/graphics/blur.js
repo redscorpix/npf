@@ -12,17 +12,22 @@ goog.require('npf.graphics.Effect');
  * Contact: mario@quasimondo.com
  * Website: http://www.quasimondo.com/StackBlurForCanvas/StackBlurDemo.html
  * Twitter: @quasimondo
+ * @param {HTMLCanvasElement|Image|HTMLImageElement} source
+ *                                                      Canvas or loaded image.
+ * @param {HTMLCanvasElement} destination
  * @constructor
+ * @struct
  * @extends {npf.graphics.Effect}
  */
 npf.graphics.Blur = function(source, destination) {
-  goog.base(this, source, destination);
+  npf.graphics.Blur.base(this, 'constructor', source, destination);
 };
 goog.inherits(npf.graphics.Blur, npf.graphics.Effect);
 
 
 /**
- * @param {HTMLCanvasElement|Image|HTMLImageElement} source Canvas or loaded image.
+ * @param {HTMLCanvasElement|Image|HTMLImageElement} source Canvas or loaded
+ *    image.
  * @param {Object.<number|string>=} opt_attrs
  * @param {goog.dom.DomHelper=} opt_domHelper
  * @return {!npf.graphics.Blur}

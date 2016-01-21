@@ -3,6 +3,7 @@ goog.provide('npf.ui.ProgressBar.Orientation');
 
 goog.require('goog.ui.Component.EventType');
 goog.require('goog.ui.RangeModel');
+goog.require('npf.generator');
 goog.require('npf.ui.RenderedComponent');
 goog.require('npf.ui.progressBar.Renderer');
 
@@ -16,7 +17,7 @@ goog.require('npf.ui.progressBar.Renderer');
  * @extends {npf.ui.RenderedComponent}
  */
 npf.ui.ProgressBar = function(opt_renderer, opt_domHelper) {
-  goog.base(this, opt_renderer ||
+  npf.ui.ProgressBar.base(this, 'constructor', opt_renderer ||
     npf.ui.progressBar.Renderer.getInstance(), opt_domHelper);
 
   /**
@@ -41,14 +42,14 @@ goog.inherits(npf.ui.ProgressBar, npf.ui.RenderedComponent);
  * @enum {string}
  */
 npf.ui.ProgressBar.Orientation = {
-  HORIZONTAL: 'horizontal',
-  VERTICAL: 'vertical'
+  HORIZONTAL: npf.generator.getUniqueId('horizontal'),
+  VERTICAL: npf.generator.getUniqueId('vertical')
 };
 
 
 /** @inheritDoc */
 npf.ui.ProgressBar.prototype.createDom = function() {
-  goog.base(this, 'createDom');
+  npf.ui.ProgressBar.base(this, 'createDom');
 
   this.applyMaximum(this.getMaximum());
   this.applyMinimum(this.getMinimum());
@@ -57,14 +58,14 @@ npf.ui.ProgressBar.prototype.createDom = function() {
 
 /** @inheritDoc */
 npf.ui.ProgressBar.prototype.enterDocument = function() {
-  goog.base(this, 'enterDocument');
+  npf.ui.ProgressBar.base(this, 'enterDocument');
 
   this.updateUi();
 };
 
 /** @inheritDoc */
 npf.ui.ProgressBar.prototype.disposeInternal = function() {
-  goog.base(this, 'disposeInternal');
+  npf.ui.ProgressBar.base(this, 'disposeInternal');
 
   this.rangeModel_ = null;
 };

@@ -5,6 +5,7 @@ goog.require('goog.events');
 goog.require('goog.events.EventType');
 goog.require('goog.events.InputHandler');
 goog.require('goog.events.InputHandler.EventType');
+goog.require('npf.events.ClickHandler');
 goog.require('npf.ui.RenderedComponent');
 goog.require('npf.ui.searchInput.Renderer');
 
@@ -19,7 +20,7 @@ goog.require('npf.ui.searchInput.Renderer');
  */
 npf.ui.SearchInput = function(opt_value, opt_placeholder, opt_renderer,
     opt_domHelper) {
-  goog.base(this, opt_renderer ||
+  npf.ui.SearchInput.base(this, 'constructor', opt_renderer ||
     npf.ui.searchInput.Renderer.getInstance(), opt_domHelper);
 
   /**
@@ -63,35 +64,44 @@ npf.ui.SearchInput.EventType = {
 
 /** @inheritDoc */
 npf.ui.SearchInput.prototype.createDom = function() {
-  goog.base(this, 'createDom');
+  npf.ui.SearchInput.base(this, 'createDom');
 
-  this.applyValue(this.getValue(), '');
+  this.applyValue(this.getValue());
 };
 
 /** @inheritDoc */
 npf.ui.SearchInput.prototype.enterDocument = function() {
-  goog.base(this, 'enterDocument');
+  npf.ui.SearchInput.base(this, 'enterDocument');
 
-  /** @type {goog.events.EventHandler} */
-  var handler = this.getHandler();
   /** @type {Element} */
   var clearElement = this.getClearElement();
   /** @type {Element} */
   var iconElement = this.getIconElement();
+  /** @type {goog.events.EventHandler} */
+  var handler = this.getHandler();
 
   if (clearElement) {
-    handler.listen(
-      clearElement, goog.events.EventType.CLICK, this.onClearClick_);
+    var clearClickHandler = new npf.events.ClickHandler(clearElement);
+    this.disposeOnExitDocument(clearClickHandler);
+
+    handler.
+      listen(clearClickHandler, goog.events.EventType.CLICK,
+        this.onClearClick_);
   }
 
   if (iconElement) {
-    handler.listen(iconElement, goog.events.EventType.CLICK, this.onIconClick_);
+    var iconClickHandler = new npf.events.ClickHandler(iconElement);
+    this.disposeOnExitDocument(iconClickHandler);
+
+    handler.
+      listen(iconClickHandler, goog.events.EventType.CLICK, this.onIconClick_);
   }
 
   var inputHandler = new goog.events.InputHandler(this.getQueryElement());
   this.disposeOnExitDocument(inputHandler);
-  handler.listen(
-    inputHandler, goog.events.InputHandler.EventType.INPUT, this.onChange_);
+  handler.
+    listen(inputHandler, goog.events.InputHandler.EventType.INPUT,
+      this.onChange_);
 };
 
 /**
@@ -173,21 +183,18 @@ npf.ui.SearchInput.prototype.setValueInternal = function(value) {
 
 /**
  * @param {string} value
- * @param {string} oldValue
+ * @param {string=} opt_oldValue
  * @param {boolean=} opt_noDom
  * @protected
  */
-npf.ui.SearchInput.prototype.applyValue = function(value, oldValue, opt_noDom) {
-  /** @type {boolean} */
-  var oldEmpty = '' == oldValue;
-  /** @type {boolean} */
-  var newEmpty = '' == value;
+npf.ui.SearchInput.prototype.applyValue = function(value, opt_oldValue,
+    opt_noDom) {
   var renderer = /** @type {npf.ui.searchInput.Renderer} */ (
     this.getRenderer());
 
-  if (oldEmpty != newEmpty) {
-    renderer.setVisible(this.getClearElement(), !newEmpty);
-    renderer.setVisible(this.getPlaceholderElement(), newEmpty);
+  if (!opt_oldValue != !value || !goog.isDef(opt_oldValue)) {
+    renderer.setVisible(this.getClearElement(), !!value);
+    renderer.setVisible(this.getPlaceholderElement(), !value);
   }
 
   if (!opt_noDom) {

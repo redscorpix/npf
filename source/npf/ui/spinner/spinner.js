@@ -1,6 +1,5 @@
 goog.provide('npf.ui.Spinner');
 
-goog.require('goog.Timer');
 goog.require('goog.array');
 goog.require('npf.fx.CssAnimation');
 goog.require('npf.fx.KeyframeAnimation');
@@ -16,7 +15,7 @@ goog.require('npf.ui.spinner.Renderer');
  * @extends {npf.ui.RenderedComponent}
  */
 npf.ui.Spinner = function(opt_renderer, opt_domHelper) {
-  goog.base(this, opt_renderer ||
+  npf.ui.Spinner.base(this, 'constructor', opt_renderer ||
     npf.ui.spinner.Renderer.getInstance(), opt_domHelper);
 
   /**
@@ -81,7 +80,7 @@ goog.inherits(npf.ui.Spinner, npf.ui.RenderedComponent);
 
 /** @inheritDoc */
 npf.ui.Spinner.prototype.enterDocument = function() {
-  goog.base(this, 'enterDocument');
+  npf.ui.Spinner.base(this, 'enterDocument');
 
   if (this.isPlaying()) {
     this.applyPlaying(true);
@@ -94,7 +93,7 @@ npf.ui.Spinner.prototype.exitDocument = function() {
     this.applyPlaying(false);
   }
 
-  goog.base(this, 'exitDocument');
+  npf.ui.Spinner.base(this, 'exitDocument');
 };
 
 /**
@@ -170,8 +169,8 @@ npf.ui.Spinner.prototype.applyPlaying = function(play) {
  */
 npf.ui.Spinner.prototype.setCssPlaying_ = function(play) {
   if (play) {
-    var segmentElements = this.getRenderer().getSegmentElements(
-      this.getElement());
+    var renderer = /** @type {npf.ui.spinner.Renderer} */ (this.getRenderer());
+    var segmentElements = renderer.getSegmentElements(this.getElement());
     /** @type {number} */
     var opacity = this.getOpacity();
 
@@ -221,10 +220,11 @@ npf.ui.Spinner.prototype.setJsPlaying_ = function(play) {
     var segmentCount = this.getSegmentCount();
     /** @type {number} */
     var astep = f / segmentCount;
-    var segmentElements = this.getRenderer().getSegmentElements(
-      this.getElement());
+    var renderer = /** @type {npf.ui.spinner.Renderer} */ (this.getRenderer());
+    var segmentElements = renderer.getSegmentElements(this.getElement());
+    var self = this;
 
-    var animate = goog.bind(function() {
+    var animate = function() {
       i++;
 
       for (var s= segmentCount; s; s--) {
@@ -232,16 +232,16 @@ npf.ui.Spinner.prototype.setJsPlaying_ = function(play) {
         var alpha = Math.max(1 - (i + s * astep) % f * ostep, opacity);
 
         if (segmentCount - s < segmentElements.length) {
-          this.getRenderer().setOpacity(
+          renderer.setOpacity(
             segmentElements[segmentCount - s], alpha);
         }
       }
 
-      this.timeoutId_ = goog.Timer.callOnce(animate, 1000 / fps);
-    }, this);
+      self.timeoutId_ = setTimeout(animate, 1000 / fps);
+    };
     animate();
   } else {
-    goog.Timer.clear(this.timeoutId_);
+    clearTimeout(this.timeoutId_);
   }
 };
 

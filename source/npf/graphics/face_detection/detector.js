@@ -10,6 +10,7 @@ goog.require('npf.graphics.faceDetection.cascade');
  * @param {number=} opt_interval
  * @param {number=} opt_minNeighbors
  * @constructor
+ * @struct
  */
 npf.graphics.faceDetection.Detector = function(canvas, opt_interval,
     opt_minNeighbors) {
@@ -115,15 +116,17 @@ npf.graphics.faceDetection.Detector.prototype.pre = function() {
   var draw = function(dest, source, sx, sy, sw, sh, dx, dy, dw, dh) {
     dest.getContext("2d").drawImage(source, sx, sy, sw, sh, dx, dy, dw, dh);
   };
+  /** @type {!goog.dom.DomHelper} */
+  var domHelper = this.domHelper;
   /** @type {function(number,number):!HTMLCanvasElement} */
-  var createCanvasElement = goog.bind(function(width, height) {
+  var createCanvasElement = function(width, height) {
     return /** @type {!HTMLCanvasElement} */ (
-      this.domHelper.createDom(goog.dom.TagName.CANVAS, {
+      domHelper.createDom(goog.dom.TagName.CANVAS, {
         'width': width,
         'height': height
       })
     );
-  }, this);
+  };
 
   canvases[0] = this.canvas;
   result[0] = {

@@ -1,6 +1,7 @@
 goog.provide('npf.svg.dom');
 
 goog.require('goog.array');
+goog.require('goog.dom');
 goog.require('goog.dom.NodeType');
 goog.require('goog.object');
 goog.require('npf.svg.Ns');
@@ -30,11 +31,14 @@ npf.svg.dom.isSvgElement = function(node) {
 /**
  * @param {string} tagName
  * @param {string|Object.<string>=} opt_attrs
+ * @param {goog.dom.DomHelper=} opt_domHelper
  * @return {!SVGElement}
  */
-npf.svg.dom.createElement = function(tagName, opt_attrs) {
+npf.svg.dom.createElement = function(tagName, opt_attrs, opt_domHelper) {
+  /** @type {!goog.dom.DomHelper} */
+  var domHelper = opt_domHelper || goog.dom.getDomHelper();
   var element = /** @type {!SVGElement} */ (
-    document.createElementNS(npf.svg.Ns.SVG, tagName));
+    domHelper.getDocument().createElementNS(npf.svg.Ns.SVG, tagName));
 
   if (opt_attrs) {
     /** @type {!Object.<string>} */
@@ -55,23 +59,20 @@ npf.svg.dom.createElement = function(tagName, opt_attrs) {
 /**
  * Parse string and returns SVG element.
  * @param {string} data
- * @return {Element}
+ * @param {goog.dom.DomHelper=} opt_domHelper
+ * @return {!SVGSVGElement}
  */
-npf.svg.dom.parseFromString = function(data) {
-  var index = data.indexOf(' ');
-
+npf.svg.dom.parseFromString = function(data, opt_domHelper) {
   var xmlData = new DOMParser().parseFromString(data, 'text/xml');
-  var svgElement = document.createElementNS(npf.svg.Ns.SVG, 'svg');
-  var attrs = {
-    version: '1.1'
-  };
+  var attrs = {};
 
   for (var i = 0; i < xmlData.documentElement.attributes.length; i++) {
     var xmlAttr = xmlData.documentElement.attributes.item(i);
     attrs[xmlAttr.nodeName] = xmlAttr.nodeValue;
   }
 
-  npf.svg.dom.setAttr(svgElement, attrs);
+  var svgElement = /** @type {!SVGSVGElement} */ (
+    npf.svg.dom.createElement('svg', attrs, opt_domHelper));
 
   goog.array.forEach(xmlData.documentElement.childNodes, function(node) {
     svgElement.appendChild(node.cloneNode(true));

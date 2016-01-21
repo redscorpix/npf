@@ -5,6 +5,7 @@ goog.require('goog.history.Html5History.TokenTransformer');
 
 /**
  * @constructor
+ * @struct
  * @implements {goog.history.Html5History.TokenTransformer}
  */
 npf.history.TokenTransformer = function() {

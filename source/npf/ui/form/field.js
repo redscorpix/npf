@@ -16,11 +16,12 @@ goog.require('npf.ui.form.validation.Required');
  * @param {npf.ui.form.FieldRenderer=} opt_renderer
  * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
+ * @struct
  * @extends {npf.ui.StatedComponent}
  */
 npf.ui.form.Field = function(name, opt_renderer, opt_domHelper) {
-  goog.base(this, opt_renderer || npf.ui.form.FieldRenderer.getInstance(),
-    opt_domHelper);
+  npf.ui.form.Field.base(this, 'constructor', opt_renderer ||
+    npf.ui.form.FieldRenderer.getInstance(), opt_domHelper);
 
   /**
    * @private {boolean}
@@ -33,10 +34,14 @@ npf.ui.form.Field = function(name, opt_renderer, opt_domHelper) {
   this.errorEnabled_ = true;
 
   /**
-   * @type {string|Node|Array.<Node>|NodeList}
-   * @private
+   * @private {string|Node|Array.<Node>|NodeList}
    */
   this.errorMessage_ = '';
+
+  /**
+   * @private {npf.ui.Form}
+   */
+  this.form_ = null;
 
   /**
    * @private {boolean}
@@ -44,8 +49,7 @@ npf.ui.form.Field = function(name, opt_renderer, opt_domHelper) {
   this.hideErrorOnChange_ = true;
 
   /**
-   * @type {string|Node|Array.<Node>|NodeList}
-   * @private
+   * @private {string|Node|Array.<Node>|NodeList}
    */
   this.label_ = '';
 
@@ -70,8 +74,7 @@ npf.ui.form.Field = function(name, opt_renderer, opt_domHelper) {
   this.name_ = name;
 
   /**
-   * @type {string|Node|Array.<Node>|NodeList}
-   * @private
+   * @private {string|Node|Array.<Node>|NodeList}
    */
   this.notice_ = '';
 
@@ -79,6 +82,21 @@ npf.ui.form.Field = function(name, opt_renderer, opt_domHelper) {
    * @private {boolean}
    */
   this.noticeEnabled_ = true;
+
+  /**
+   * @private {string|Node|Array.<Node>|NodeList}
+   */
+  this.placeholder_ = '';
+
+  /**
+   * @private {boolean}
+   */
+  this.placeholderEnabled_ = false;
+
+  /**
+   * @private {boolean}
+   */
+  this.placeholderVisible_ = true;
 
   /**
    * @private {boolean}
@@ -91,43 +109,72 @@ npf.ui.form.Field = function(name, opt_renderer, opt_domHelper) {
   this.validators_ = [];
 
   /**
-   * @type {*}
-   * @private
+   * @private {*}
    */
   this.value_ = undefined;
 
   this.setAllowTextSelection(true);
   this.setSupportedState(goog.ui.Component.State.DISABLED, true);
   this.setSupportedState(goog.ui.Component.State.FOCUSED, true);
+  this.setDispatchTransitionEvents(goog.ui.Component.State.FOCUSED, true);
 };
 goog.inherits(npf.ui.form.Field, npf.ui.StatedComponent);
 
 
+/**
+ * @enum {string}
+ */
+npf.ui.form.Field.Error = {
+  TYPE_INVALID: 'Invalid form field value type.'
+};
+
 /** @inheritDoc */
 npf.ui.form.Field.prototype.createDom = function() {
-  goog.base(this, 'createDom');
+  npf.ui.form.Field.base(this, 'createDom');
 
   this.initializeInternal();
 };
 
 /** @inheritDoc */
 npf.ui.form.Field.prototype.decorateInternal = function(element) {
-  goog.base(this, 'decorateInternal', element);
+  npf.ui.form.Field.base(this, 'decorateInternal', element);
 
   this.initializeInternal();
 };
 
 /** @inheritDoc */
 npf.ui.form.Field.prototype.disposeInternal = function() {
-  goog.base(this, 'disposeInternal');
+  npf.ui.form.Field.base(this, 'disposeInternal');
 
   this.validators_ = null;
   this.value_ = null;
 };
 
 /** @inheritDoc */
+npf.ui.form.Field.prototype.setParent = function(parent) {
+  if (this.form_) {
+    this.form_.removeField(this);
+  }
+
+  npf.ui.form.Field.base(this, 'setParent', parent);
+
+  /** @type {goog.ui.Component} */
+  var p = parent;
+
+  while (p) {
+    if (p instanceof npf.ui.Form) {
+      this.form_ = p;
+      this.form_.addField(this);
+      p = null;
+    } else {
+      p = p.getParent();
+    }
+  }
+};
+
+/** @inheritDoc */
 npf.ui.form.Field.prototype.handleKeyEventInternal = function(e) {
-  goog.base(this, 'handleKeyEventInternal', e);
+  npf.ui.form.Field.base(this, 'handleKeyEventInternal', e);
 
   return false;
 };
@@ -143,6 +190,10 @@ npf.ui.form.Field.prototype.initializeInternal = function() {
 
   if (this.isLabelEnabled() && this.isLabelAsPlaceholder()) {
     this.applyLabelAsPlaceholder(this.isLabelVisible());
+  }
+
+  if (this.isPlaceholderEnabled()) {
+    this.applyPlaceholderVisible(this.isPlaceholderVisible());
   }
 
   this.applyValue(this.getValue());
@@ -428,6 +479,96 @@ npf.ui.form.Field.prototype.setNoticeEnabled = function(enable) {
 };
 
 /**
+ * @return {string|Node|Array.<Node>|NodeList}
+ */
+npf.ui.form.Field.prototype.getPlaceholder = function() {
+  return this.placeholder_;
+};
+
+/**
+ * @param {string|Node|Array.<Node>|NodeList} placeholder
+ */
+npf.ui.form.Field.prototype.setPlaceholder = function(placeholder) {
+  if (this.isPlaceholderEnabled()) {
+    this.setPlaceholderInternal(placeholder);
+    this.applyPlaceholder(this.getPlaceholder());
+  }
+};
+
+/**
+ * @param {string|Node|Array.<Node>|NodeList} placeholder
+ * @protected
+ */
+npf.ui.form.Field.prototype.setPlaceholderInternal = function(placeholder) {
+  this.placeholder_ = placeholder;
+};
+
+/**
+ * @param {string|Node|Array.<Node>|NodeList} placeholder
+ * @protected
+ */
+npf.ui.form.Field.prototype.applyPlaceholder = function(placeholder) {
+  var renderer = /** @type {npf.ui.form.FieldRenderer} */ (this.getRenderer());
+  renderer.setContent(this.getPlaceholderElement(), placeholder);
+};
+
+/**
+ * @return {boolean}
+ */
+npf.ui.form.Field.prototype.isPlaceholderEnabled = function() {
+  return this.placeholderEnabled_;
+};
+
+/**
+ * @param {boolean} enable
+ */
+npf.ui.form.Field.prototype.setPlaceholderEnabled = function(enable) {
+  this.placeholderEnabled_ = enable;
+};
+
+/**
+ * @return {boolean}
+ * @protected
+ */
+npf.ui.form.Field.prototype.checkPlaceholderVisible = function() {
+  return this.isEmpty();
+};
+
+/**
+ * @return {boolean}
+ */
+npf.ui.form.Field.prototype.isPlaceholderVisible = function() {
+  return this.placeholderVisible_;
+};
+
+/**
+ * @param {boolean} visible
+ */
+npf.ui.form.Field.prototype.setPlaceholderVisible = function(visible) {
+  if (this.isPlaceholderEnabled() && this.isPlaceholderVisible() != visible) {
+    this.setPlaceholderVisibleInternal(visible);
+    this.applyPlaceholderVisible(this.isPlaceholderVisible());
+  }
+};
+
+/**
+ * @param {boolean} visible
+ * @protected
+ */
+npf.ui.form.Field.prototype.setPlaceholderVisibleInternal = function(visible) {
+  this.placeholderVisible_ = visible;
+};
+
+/**
+ * @param {boolean} visible
+ * @protected
+ */
+npf.ui.form.Field.prototype.applyPlaceholderVisible = function(visible) {
+  var renderer = /** @type {npf.ui.form.FieldRenderer} */ (this.getRenderer());
+  renderer.setPlaceholderVisible(this, visible);
+};
+
+/**
  * @return {*}
  */
 npf.ui.form.Field.prototype.getRequestValue = function() {
@@ -492,6 +633,10 @@ npf.ui.form.Field.prototype.applyValue = function(value, opt_noRender) {
 
   if (this.isLabelAsPlaceholder()) {
     this.setLabelVisible(this.isEmpty());
+  }
+
+  if (this.isPlaceholderEnabled()) {
+    this.setPlaceholderVisible(this.checkPlaceholderVisible());
   }
 
   this.validate();
@@ -641,6 +786,15 @@ npf.ui.form.Field.prototype.getNoticeElement = function() {
 /**
  * @return {Element}
  */
+npf.ui.form.Field.prototype.getPlaceholderElement = function() {
+  var renderer = /** @type {npf.ui.form.FieldRenderer} */ (this.getRenderer());
+
+  return renderer.getPlaceholderElement(this.getElement());
+};
+
+/**
+ * @return {Element}
+ */
 npf.ui.form.Field.prototype.getValueElement = function() {
   var renderer = /** @type {npf.ui.form.FieldRenderer} */ (this.getRenderer());
 
@@ -653,10 +807,11 @@ npf.ui.form.Field.prototype.getValueElement = function() {
  * @param {string} name
  * @param {*} value
  * @constructor
+ * @struct
  * @extends {goog.events.Event}
  */
 npf.ui.form.FieldEvent = function(type, name, value) {
-  goog.base(this, type);
+  npf.ui.form.FieldEvent.base(this, 'constructor', type);
 
   /**
    * @type {string}

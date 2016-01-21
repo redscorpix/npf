@@ -13,7 +13,7 @@ goog.require('npf.ui.imageCrop.PreviewRenderer');
  * @extends {npf.ui.StatedComponent}
  */
 npf.ui.imageCrop.Preview = function(opt_renderer, opt_domHelper) {
-  goog.base(this, opt_renderer ||
+  npf.ui.imageCrop.Preview.base(this, 'constructor', opt_renderer ||
     npf.ui.imageCrop.PreviewRenderer.getInstance(), opt_domHelper);
 
   /**
@@ -23,7 +23,7 @@ npf.ui.imageCrop.Preview = function(opt_renderer, opt_domHelper) {
   this.croppedRect_ = null;
 
   /**
-   * @private {Image}
+   * @private {Image|HTMLImageElement|HTMLCanvasElement}
    */
   this.image_ = null;
 
@@ -42,14 +42,14 @@ goog.inherits(npf.ui.imageCrop.Preview, npf.ui.StatedComponent);
 
 /** @inheritDoc */
 npf.ui.imageCrop.Preview.prototype.createDom = function() {
-  goog.base(this, 'createDom');
+  npf.ui.imageCrop.Preview.base(this, 'createDom');
 
   this.initializeInternal();
 };
 
 /** @inheritDoc */
 npf.ui.imageCrop.Preview.prototype.decorateInternal = function(element) {
-  goog.base(this, 'decorateInternal', element);
+  npf.ui.imageCrop.Preview.base(this, 'decorateInternal', element);
 
   this.initializeInternal();
 };
@@ -64,7 +64,7 @@ npf.ui.imageCrop.Preview.prototype.initializeInternal = function() {
 
 /** @inheritDoc */
 npf.ui.imageCrop.Preview.prototype.disposeInternal = function() {
-  goog.base(this, 'disposeInternal');
+  npf.ui.imageCrop.Preview.base(this, 'disposeInternal');
 
   this.croppedRect_ = null;
   this.image_ = null;
@@ -126,17 +126,17 @@ npf.ui.imageCrop.Preview.prototype.setCroppedRectInternal = function(rect) {
  * @param {goog.math.Size} maxSize
  * @protected
  */
-npf.ui.imageCrop.Preview.prototype.applyCroppedRect = function(rect,
-    maxSize) {
+npf.ui.imageCrop.Preview.prototype.applyCroppedRect = function(rect, maxSize) {
   /** @type {number} */
   var scale = this.getScaleInternal(this.image_, rect, maxSize);
-  this.getRenderer().setCroppedRect(this, rect, scale);
-  this.enableClassName(
-    this.getRenderer().getEmptyCssClass(), !(rect && this.image_));
+  var renderer = /** @type {npf.ui.imageCrop.PreviewRenderer} */ (
+    this.getRenderer());
+  renderer.setCroppedRect(this, rect, scale);
+  this.enableClassName(renderer.getEmptyCssClass(), !(rect && this.image_));
 };
 
 /**
- * @return {Image}
+ * @return {Image|HTMLImageElement|HTMLCanvasElement}
  */
 npf.ui.imageCrop.Preview.prototype.getImage = function() {
   return this.image_;
@@ -144,22 +144,19 @@ npf.ui.imageCrop.Preview.prototype.getImage = function() {
 
 /**
  * Set loaded image.
- * @param {Image} image
+ * @param {Image|HTMLImageElement|HTMLCanvasElement} image
  * @param {goog.math.Rect=} opt_croppedRect
  */
 npf.ui.imageCrop.Preview.prototype.setImage = function(image, opt_croppedRect) {
-  /** @type {Image} */
-  var oldImage = this.image_;
-
-  if (oldImage !== image) {
+  if (this.image_ !== image) {
     this.setImageInternal(image);
-    this.applyImage(this.image_, oldImage);
+    this.applyImage(this.image_);
     this.setCroppedRect(opt_croppedRect || this.croppedRect_);
   }
 };
 
 /**
- * @param {Image} image
+ * @param {Image|HTMLImageElement|HTMLCanvasElement} image
  * @protected
  */
 npf.ui.imageCrop.Preview.prototype.setImageInternal = function(image) {
@@ -167,33 +164,43 @@ npf.ui.imageCrop.Preview.prototype.setImageInternal = function(image) {
 };
 
 /**
- * @param {Image} image
- * @param {Image=} opt_oldImage
+ * @param {Image|HTMLImageElement|HTMLCanvasElement} image
  * @protected
  */
-npf.ui.imageCrop.Preview.prototype.applyImage = function(image, opt_oldImage) {
-  this.getRenderer().setImage(this, image, opt_oldImage);
+npf.ui.imageCrop.Preview.prototype.applyImage = function(image) {
+  var renderer = /** @type {npf.ui.imageCrop.PreviewRenderer} */ (
+    this.getRenderer());
+  renderer.setImage(this, image);
 };
 
 /**
- * @return {Element}
+ * @return {HTMLImageElement}
  */
 npf.ui.imageCrop.Preview.prototype.getImageElement = function() {
-  return this.getRenderer().getImageElement(this.getElement());
+  var renderer = /** @type {npf.ui.imageCrop.PreviewRenderer} */ (
+    this.getRenderer());
+
+  return renderer.getImageElement(this.getElement());
 };
 
 /**
  * @return {goog.math.Size?}
  */
 npf.ui.imageCrop.Preview.prototype.getImageNaturalSize = function() {
-  return this.getRenderer().getImageSize(this.image_);
+  var renderer = /** @type {npf.ui.imageCrop.PreviewRenderer} */ (
+    this.getRenderer());
+
+  return renderer.getImageSize(this.image_);
 };
 
 /**
  * @return {goog.math.Size?}
  */
 npf.ui.imageCrop.Preview.prototype.getImageSize = function() {
-  return this.getRenderer().getImageSize(this.image_, this.getScale());
+  var renderer = /** @type {npf.ui.imageCrop.PreviewRenderer} */ (
+    this.getRenderer());
+
+  return renderer.getImageSize(this.image_, this.getScale());
 };
 
 /**
@@ -238,7 +245,7 @@ npf.ui.imageCrop.Preview.prototype.getScale = function() {
 };
 
 /**
- * @param {Image} image
+ * @param {Image|HTMLImageElement|HTMLCanvasElement} image
  * @param {goog.math.Rect} rect
  * @param {goog.math.Size} maxSize
  * @return {number}
@@ -246,12 +253,6 @@ npf.ui.imageCrop.Preview.prototype.getScale = function() {
  */
 npf.ui.imageCrop.Preview.prototype.getScaleInternal = function(image, rect,
     maxSize) {
-  /** @type {number} */
-  var scale = 1;
-
-  if (maxSize && rect) {
-    scale = Math.min(maxSize.width / rect.width, maxSize.height / rect.height);
-  }
-
-  return scale;
+  return maxSize && rect ?
+    Math.min(maxSize.width / rect.width, maxSize.height / rect.height) : 1;
 };

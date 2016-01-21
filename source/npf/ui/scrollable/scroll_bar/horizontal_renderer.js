@@ -1,6 +1,5 @@
 goog.provide('npf.ui.scrollable.scrollBar.HorizontalRenderer');
 
-goog.require('goog.style');
 goog.require('npf.ui.scrollable.scrollBar.Renderer');
 
 
@@ -9,7 +8,7 @@ goog.require('npf.ui.scrollable.scrollBar.Renderer');
  * @extends {npf.ui.scrollable.scrollBar.Renderer}
  */
 npf.ui.scrollable.scrollBar.HorizontalRenderer = function() {
-  goog.base(this);
+  npf.ui.scrollable.scrollBar.HorizontalRenderer.base(this, 'constructor');
 };
 goog.inherits(npf.ui.scrollable.scrollBar.HorizontalRenderer,
   npf.ui.scrollable.scrollBar.Renderer);
@@ -20,7 +19,7 @@ goog.addSingletonGetter(npf.ui.scrollable.scrollBar.HorizontalRenderer);
 npf.ui.scrollable.scrollBar.HorizontalRenderer.prototype.setPosition = function(
     element, position) {
   if (element) {
-    goog.style.setStyle(element, 'left', position + 'px');
+    element.style.left = position + 'px';
   }
 };
 
@@ -28,6 +27,6 @@ npf.ui.scrollable.scrollBar.HorizontalRenderer.prototype.setPosition = function(
 npf.ui.scrollable.scrollBar.HorizontalRenderer.prototype.setSize = function(
     element, size) {
   if (element) {
-    goog.style.setStyle(element, 'width', size + 'px');
+    element.style.width = size + 'px';
   }
 };

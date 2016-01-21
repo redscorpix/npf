@@ -1,4 +1,5 @@
 goog.provide('npf.Router');
+goog.provide('npf.Router.EventType');
 goog.provide('npf.RouterEvent');
 
 goog.require('goog.Uri');
@@ -6,17 +7,21 @@ goog.require('goog.array');
 goog.require('goog.events');
 goog.require('goog.events.Event');
 goog.require('goog.events.EventTarget');
+goog.require('goog.History');
 goog.require('goog.history.EventType');
-goog.require('npf.History');
+goog.require('goog.history.Html5History');
+goog.require('npf.history.Html5History');
 
 
 /**
- * @param {goog.History|npf.History=} opt_history
+ * @param {goog.History|goog.history.Html5History|npf.history.Html5History=}
+ *    opt_history
  * @constructor
+ * @struct
  * @extends {goog.events.EventTarget}
  */
 npf.Router = function(opt_history) {
-  goog.base(this);
+  npf.Router.base(this, 'constructor');
 
   /**
    * @private {string}
@@ -29,10 +34,10 @@ npf.Router = function(opt_history) {
   this.enabled_ = false;
 
   /**
-   * @type {goog.History|npf.History}
+   * @type {goog.History|goog.history.Html5History|npf.history.Html5History}
    * @private
    */
-  this.history_ = opt_history || new npf.History();
+  this.history_ = opt_history || new npf.history.Html5History();
   this.registerDisposable(this.history_);
 
   /**
@@ -75,52 +80,12 @@ npf.Router.EventType = {
  */
 npf.Router.NamedRoute;
 
-/**
- * Проверяет, на корневую ли страницу зашел пользователь.
- * Осуществляет редирект, если требуется.
- * @return {boolean} false, если произошла перезагрузка страницы.
- */
-npf.Router.normalizeRootPath = function() {
-  /** @type {string} */
-  var hash = goog.global.location.hash;
-  /** @type {string} */
-  var path = '';
-
-  if (npf.History.isHtml5HistorySupported) {
-    if (hash && 1 < hash.length && '/' == hash.charAt(1)) {
-      path = goog.global.location.hash.substr(1);
-    }
-  } else {
-    if (!(
-      '/' == goog.global.location.pathname &&
-      !goog.global.location.search
-    )) {
-      // Если был хэш, то идем на корневую и подставляем якорь.
-      if (hash) {
-        path = '/' + hash;
-      } else {
-        // Делаем редирект на корневую плюс якорь с этим путем.
-        path =
-          '/#' + goog.global.location.pathname + goog.global.location.search;
-      }
-    }
-  }
-
-  if ('' != path) {
-    goog.global.location.href = path;
-
-    return false;
-  }
-
-  return true;
-};
-
 
 /** @inheritDoc */
 npf.Router.prototype.disposeInternal = function() {
   this.setEnabled(false);
 
-  goog.base(this, 'disposeInternal');
+  npf.Router.base(this, 'disposeInternal');
 
   this.history_ = null;
   this.namedRoutes_ = null;
@@ -170,8 +135,9 @@ npf.Router.prototype.getRouteNameAt = function(index) {
 };
 
 /**
- * @param {function(npf.router.Route,string,number)} func
- * @param {Object=} opt_scope
+ * @param {function(this: SCOPE, npf.router.Route, string, number)} func
+ * @param {SCOPE=} opt_scope
+ * @template SCOPE
  */
 npf.Router.prototype.forEach = function(func, opt_scope) {
   goog.array.forEach(this.namedRoutes_, function(namedRoute, index) {
@@ -366,7 +332,14 @@ npf.Router.prototype.onNavigate = function(token) {
     }
   }
 
-  /** @type {{route:?npf.router.Route,name:string,uri:!goog.Uri,options:?Object.<string>}} */
+  /**
+   * @type {{
+   *   route:?npf.router.Route,
+   *   name:string,
+   *   uri:!goog.Uri,
+   *   options:?Object.<string>
+   * }}
+   */
   var info = this.parseToken(token);
   var event = new npf.RouterEvent(npf.Router.EventType.NAVIGATE, info.uri,
     info.route, info.name, info.options);
@@ -375,7 +348,10 @@ npf.Router.prototype.onNavigate = function(token) {
 
 /**
  * @param {string|goog.Uri} token
- * @return {{route:?npf.router.Route,name:string,uri:!goog.Uri,options:?Object.<string>}}
+ * @return {{route:?npf.router.Route,
+ *           name:string,
+ *           uri:!goog.Uri,
+ *           options:?Object.<string>}}
  */
 npf.Router.prototype.parseToken = function(token) {
   /** @type {!goog.Uri} */
@@ -412,7 +388,7 @@ npf.Router.prototype.parseToken = function(token) {
 };
 
 /**
- * @return {goog.Uri}
+ * @return {!goog.Uri}
  */
 npf.Router.prototype.getUri = function() {
   return new goog.Uri(this.getToken());
@@ -442,18 +418,19 @@ npf.Router.prototype.setSlashSuffixEnabled = function(enable) {
 
 /**
  * @param {npf.Router.EventType} type
- * @param {goog.Uri} uri
+ * @param {!goog.Uri} uri
  * @param {npf.router.Route?} route
  * @param {string} name
  * @param {Object.<string>} options
  * @constructor
+ * @struct
  * @extends {goog.events.Event}
  */
 npf.RouterEvent = function(type, uri, route, name, options) {
-  goog.base(this, type);
+  npf.RouterEvent.base(this, 'constructor', type);
 
   /**
-   * @type {goog.Uri}
+   * @type {!goog.Uri}
    */
   this.uri = uri;
 

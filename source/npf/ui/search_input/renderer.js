@@ -1,6 +1,6 @@
 goog.provide('npf.ui.searchInput.Renderer');
 
-goog.require('goog.dom');
+goog.require('goog.dom.InputType');
 goog.require('goog.dom.TagName');
 goog.require('goog.dom.forms');
 goog.require('goog.style');
@@ -12,7 +12,7 @@ goog.require('npf.ui.Renderer');
  * @extends {npf.ui.Renderer}
  */
 npf.ui.searchInput.Renderer = function() {
-  goog.base(this);
+  npf.ui.searchInput.Renderer.base(this, 'constructor');
 };
 goog.inherits(npf.ui.searchInput.Renderer, npf.ui.Renderer);
 goog.addSingletonGetter(npf.ui.searchInput.Renderer);
@@ -29,11 +29,11 @@ npf.ui.searchInput.Renderer.prototype.getCssClass = function() {
   return npf.ui.searchInput.Renderer.CSS_CLASS;
 };
 
-/** @override */
+/** @inheritDoc */
 npf.ui.searchInput.Renderer.prototype.createDom = function(component) {
   var inputContainer = /** @type {npf.ui.SearchInput} */ (component);
-  /** @type {Element} */
-  var element = goog.base(this, 'createDom', component);
+  /** @type {!Element} */
+  var element = npf.ui.searchInput.Renderer.base(this, 'createDom', component);
   /** @type {Element} */
   var placeholderElement = this.createPlaceholderElement(inputContainer);
   /** @type {!Element} */
@@ -42,20 +42,24 @@ npf.ui.searchInput.Renderer.prototype.createDom = function(component) {
   var clearElement = this.createClearElement(inputContainer);
   /** @type {Element} */
   var iconElement = this.createIconElement(inputContainer);
+  /** @type {!Array<Element>} */
+  var childElements = [];
 
   if (placeholderElement) {
-    goog.dom.appendChild(element, placeholderElement);
+    childElements.push(placeholderElement);
   }
 
-  goog.dom.appendChild(element, queryElement);
+  childElements.push(queryElement);
 
   if (clearElement) {
-    goog.dom.appendChild(element, clearElement);
+    childElements.push(clearElement);
   }
 
   if (iconElement) {
-    goog.dom.appendChild(element, iconElement);
+    childElements.push(iconElement);
   }
+
+  component.getDomHelper().append(element, childElements);
 
   return element;
 };
@@ -69,16 +73,15 @@ npf.ui.searchInput.Renderer.prototype.createPlaceholderElement = function(
     component) {
   /** @type {string} */
   var placeholderValue = component.getPlaceholderValue();
-  /** @type {Element} */
-  var placeholderElement = null;
 
-  if ('' != placeholderValue) {
-    placeholderElement = component.getDomHelper().createDom(
-      goog.dom.TagName.SPAN, this.getPlaceholderCssClass());
-    placeholderElement.innerHTML = placeholderValue;
+  if (placeholderValue) {
+    return component.getDomHelper().createDom(goog.dom.TagName.SPAN, {
+      'class': this.getPlaceholderCssClass(),
+      'innerHTML': placeholderValue
+    });
   }
 
-  return placeholderElement;
+  return null;
 };
 
 /**
@@ -88,9 +91,9 @@ npf.ui.searchInput.Renderer.prototype.createPlaceholderElement = function(
  */
 npf.ui.searchInput.Renderer.prototype.createQueryElement = function(component) {
   return component.getDomHelper().createDom(goog.dom.TagName.INPUT, {
+    'autocomplete': 'off',
     'class': this.getQueryCssClass(),
-    'type': 'text',
-    'autocomplete': 'off'
+    'type': goog.dom.InputType.TEXT
   });
 };
 
@@ -100,15 +103,12 @@ npf.ui.searchInput.Renderer.prototype.createQueryElement = function(component) {
  * @protected
  */
 npf.ui.searchInput.Renderer.prototype.createClearElement = function(component) {
-  /** @type {Element} */
-  var clearElement = null;
-
   if (component.isClearable()) {
-    clearElement = component.getDomHelper().createDom(goog.dom.TagName.INS,
-      this.getClearCssClass());
+    return component.getDomHelper().createDom(
+      goog.dom.TagName.DIV, this.getClearCssClass());
   }
 
-  return clearElement;
+  return null;
 };
 
 /**
@@ -117,15 +117,12 @@ npf.ui.searchInput.Renderer.prototype.createClearElement = function(component) {
  * @protected
  */
 npf.ui.searchInput.Renderer.prototype.createIconElement = function(component) {
-  /** @type {Element} */
-  var iconElement = null;
-
   if (component.hasIcon()) {
-    iconElement = component.getDomHelper().createDom(goog.dom.TagName.INS,
-      this.getIconCssClass());
+    return component.getDomHelper().createDom(
+      goog.dom.TagName.DIV, this.getIconCssClass());
   }
 
-  return iconElement;
+  return null;
 };
 
 /**

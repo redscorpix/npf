@@ -1,7 +1,5 @@
 goog.provide('npf.ui.scrollable.ContainerRenderer');
 
-goog.require('goog.dom');
-goog.require('goog.dom.TagName');
 goog.require('goog.math.Coordinate');
 goog.require('goog.math.Size');
 goog.require('goog.style');
@@ -13,7 +11,7 @@ goog.require('npf.ui.StatedRenderer');
  * @extends {npf.ui.StatedRenderer}
  */
 npf.ui.scrollable.ContainerRenderer = function() {
-  goog.base(this);
+  npf.ui.scrollable.ContainerRenderer.base(this, 'constructor');
 };
 goog.inherits(
   npf.ui.scrollable.ContainerRenderer, npf.ui.StatedRenderer);
@@ -34,32 +32,19 @@ npf.ui.scrollable.ContainerRenderer.prototype.getCssClass = function() {
 
 /** @override */
 npf.ui.scrollable.ContainerRenderer.prototype.createDom = function(component) {
-  /** @type {Element} */
-  var element = goog.base(this, 'createDom', component);
-  /** @type {!Element} */
-  var scrollElement = component.getDomHelper().createDom(
-    goog.dom.TagName.DIV, this.getScrollCssClass());
-  /** @type {!Element} */
-  var contentElement = component.getDomHelper().createDom(
-    goog.dom.TagName.DIV, this.getContentCssClass());
   /** @type {number} */
   var scrollBarWidth = this.getScrollBarWidth();
-
-  if (scrollBarWidth) {
-    goog.style.setStyle(scrollElement, {
-      'right': -scrollBarWidth + 'px',
-      'bottom': -scrollBarWidth + 'px'
-    });
-  }
-
-  // Webkit bug fixing.
-  // if (goog.userAgent.WEBKIT) {
-  //   goog.style.setStyle(element, 'direction', 'rtl');
-  //   goog.style.setStyle(scrollElement, 'direction', 'ltr');
-  // }
-
-  goog.dom.appendChild(element, scrollElement);
-  goog.dom.appendChild(scrollElement, contentElement);
+  /** @type {string} */
+  var scrollStyle = scrollBarWidth ?
+    'bottom:-' + scrollBarWidth + 'px;right:-' + scrollBarWidth + 'px' : '';
+  /** @type {!Element} */
+  var element = npf.ui.scrollable.ContainerRenderer.base(
+    this, 'createDom', component);
+  element.innerHTML =
+    '<div class="' + this.getScrollCssClass() + '" style="' +
+        scrollStyle + '">' +
+      '<div class="' + this.getContentCssClass() + '"></div>' +
+    '</div>';
 
   return element;
 };
@@ -67,7 +52,8 @@ npf.ui.scrollable.ContainerRenderer.prototype.createDom = function(component) {
 /** @inheritDoc */
 npf.ui.scrollable.ContainerRenderer.prototype.decorate = function(component,
     element) {
-  goog.base(this, 'decorate', component, element);
+  npf.ui.scrollable.ContainerRenderer.base(
+    this, 'decorate', component, element);
 
   /** @type {number} */
   var scrollBarWidth = this.getScrollBarWidth();
@@ -77,10 +63,8 @@ npf.ui.scrollable.ContainerRenderer.prototype.decorate = function(component,
     var scrollElement = this.getScrollElement(element);
 
     if (scrollElement) {
-      goog.style.setStyle(scrollElement, {
-        'right': -scrollBarWidth + 'px',
-        'bottom': -scrollBarWidth + 'px'
-      });
+      scrollElement.style.bottom = -scrollBarWidth + 'px';
+      scrollElement.style.right = -scrollBarWidth + 'px';
     }
   }
 
@@ -115,19 +99,8 @@ npf.ui.scrollable.ContainerRenderer.prototype.getSize = function(element) {
 npf.ui.scrollable.ContainerRenderer.prototype.setSize = function(element, width,
     height) {
   if (element) {
-    goog.style.setSize(element, width, height);
-  }
-};
-
-/**
- * @param {Element} element
- */
-npf.ui.scrollable.ContainerRenderer.prototype.resetSize = function(element) {
-  if (element) {
-    goog.style.setStyle(element, {
-      'height': '',
-      'width': ''
-    });
+    element.style.width = width + 'px';
+    element.style.height = height + 'px';
   }
 };
 
@@ -158,8 +131,13 @@ npf.ui.scrollable.ContainerRenderer.prototype.getScrollPosition = function(
 npf.ui.scrollable.ContainerRenderer.prototype.setScrollPosition = function(
     element, x, y) {
   if (element) {
-    element.scrollLeft = x;
-    element.scrollTop = y;
+    if (element.scrollLeft != x) {
+      element.scrollLeft = x;
+    }
+
+    if (element.scrollTop != y) {
+      element.scrollTop = y;
+    }
   }
 };
 

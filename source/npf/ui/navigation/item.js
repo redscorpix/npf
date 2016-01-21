@@ -3,24 +3,23 @@ goog.provide('npf.ui.navigation.Item');
 goog.require('goog.events.BrowserEvent');
 goog.require('goog.events.EventType');
 goog.require('goog.ui.Component.EventType');
+goog.require('npf.events.ClickHandler');
 goog.require('npf.ui.RenderedComponent');
 goog.require('npf.ui.navigation.ItemRenderer');
 
 
 /**
  * @param {string} type
- * @param {string} url
+ * @param {goog.Uri} uri
  * @param {string} caption
- * @param {npf.ui.navigation.ItemRenderer=} opt_renderer Renderer used to render
- *        or decorate the component.
- * @param {goog.dom.DomHelper=} opt_domHelper DOM helper, used for document
- *        interaction.
+ * @param {npf.ui.navigation.ItemRenderer=} opt_renderer
+ * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
  * @extends {npf.ui.RenderedComponent}
  */
-npf.ui.navigation.Item = function(type, url, caption, opt_renderer,
+npf.ui.navigation.Item = function(type, uri, caption, opt_renderer,
     opt_domHelper) {
-  goog.base(this, opt_renderer ||
+  npf.ui.navigation.Item.base(this, 'constructor', opt_renderer ||
     npf.ui.navigation.ItemRenderer.getInstance(), opt_domHelper);
 
   /**
@@ -44,23 +43,23 @@ npf.ui.navigation.Item = function(type, url, caption, opt_renderer,
   this.type_ = type;
 
   /**
-   * @private {string}
+   * @private {goog.Uri}
    */
-  this.url_ = url;
+  this.uri_ = uri;
 };
 goog.inherits(npf.ui.navigation.Item, npf.ui.RenderedComponent);
 
 
 /** @inheritDoc */
 npf.ui.navigation.Item.prototype.createDom = function() {
-  goog.base(this, 'createDom');
+  npf.ui.navigation.Item.base(this, 'createDom');
 
   this.initializeDom();
 };
 
 /** @inheritDoc */
 npf.ui.navigation.Item.prototype.decorateInternal = function(element) {
-  goog.base(this, 'decorateInternal', element);
+  npf.ui.navigation.Item.base(this, 'decorateInternal', element);
 
   this.initializeDom();
 };
@@ -76,10 +75,21 @@ npf.ui.navigation.Item.prototype.initializeDom = function() {
 
 /** @inheritDoc */
 npf.ui.navigation.Item.prototype.enterDocument = function() {
-  goog.base(this, 'enterDocument');
+  npf.ui.navigation.Item.base(this, 'enterDocument');
 
-  this.getHandler()
-    .listen(this.getElement(), goog.events.EventType.CLICK, this.onClick_);
+  var clickHandler = new npf.events.ClickHandler(
+    /** @type {!Element} */ (this.getElement()));
+  this.disposeOnExitDocument(clickHandler);
+
+  this.getHandler().
+    listen(clickHandler, goog.events.EventType.CLICK, this.onClick_);
+};
+
+/** @inheritDoc */
+npf.ui.navigation.Item.prototype.disposeInternal = function() {
+  npf.ui.navigation.Item.base(this, 'disposeInternal');
+
+  this.uri_ = null;
 };
 
 /**
@@ -112,7 +122,9 @@ npf.ui.navigation.Item.prototype.setCaptionInternal = function(caption) {
  * @protected
  */
 npf.ui.navigation.Item.prototype.applyCaption = function(caption) {
-  this.getRenderer().setCaption(this.getCaptionElement(), caption);
+  var renderer = /** @type {npf.ui.navigation.ItemRenderer} */ (
+    this.getRenderer());
+  renderer.setCaption(this.getCaptionElement(), caption);
 };
 
 /**
@@ -145,7 +157,9 @@ npf.ui.navigation.Item.prototype.setEnabledInternal = function(enable) {
  * @protected
  */
 npf.ui.navigation.Item.prototype.applyEnabled = function(enable) {
-  this.getRenderer().setEnabled(this.getElement(), enable);
+  var renderer = /** @type {npf.ui.navigation.ItemRenderer} */ (
+    this.getRenderer());
+  renderer.setEnabled(this.getElement(), enable);
 };
 
 /**
@@ -178,7 +192,9 @@ npf.ui.navigation.Item.prototype.setSelectedInternal = function(select) {
  * @protected
  */
 npf.ui.navigation.Item.prototype.applySelected = function(select) {
-  this.getRenderer().setSelected(this.getElement(), select);
+  var renderer = /** @type {npf.ui.navigation.ItemRenderer} */ (
+    this.getRenderer());
+  renderer.setSelected(this.getElement(), select);
 };
 
 /**
@@ -189,36 +205,38 @@ npf.ui.navigation.Item.prototype.getType = function() {
 };
 
 /**
- * @return {string}
+ * @return {goog.Uri}
  */
-npf.ui.navigation.Item.prototype.getUrl = function() {
-  return this.url_;
+npf.ui.navigation.Item.prototype.getUri = function() {
+  return this.uri_;
 };
 
 /**
- * @param {string} url
+ * @param {goog.Uri} uri
  */
-npf.ui.navigation.Item.prototype.setUrl = function(url) {
-  if (this.getUrl() != url) {
-    this.setUrlInternal(url);
-    this.applyUrl(this.getUrl());
+npf.ui.navigation.Item.prototype.setUri = function(uri) {
+  if (this.getUri().toString() != uri.toString()) {
+    this.setUriInternal(uri);
+    this.applyUri(this.getUri());
   }
 };
 
 /**
- * @param {string} url
+ * @param {goog.Uri} uri
  * @protected
  */
-npf.ui.navigation.Item.prototype.setUrlInternal = function(url) {
-  this.url_ = url;
+npf.ui.navigation.Item.prototype.setUriInternal = function(uri) {
+  this.uri_ = uri;
 };
 
 /**
- * @param {string} url
+ * @param {goog.Uri} uri
  * @protected
  */
-npf.ui.navigation.Item.prototype.applyUrl = function(url) {
-  this.getRenderer().setUrl(this.getLinkElement(), url);
+npf.ui.navigation.Item.prototype.applyUri = function(uri) {
+  var renderer = /** @type {npf.ui.navigation.ItemRenderer} */ (
+    this.getRenderer());
+  renderer.setUri(this.getLinkElement(), uri);
 };
 
 /**
@@ -245,12 +263,18 @@ npf.ui.navigation.Item.prototype.onAction = function(evt) {
  * @return {Element}
  */
 npf.ui.navigation.Item.prototype.getCaptionElement = function() {
-  return this.getRenderer().getCaptionElement(this.getElement());
+  var renderer = /** @type {npf.ui.navigation.ItemRenderer} */ (
+    this.getRenderer());
+
+  return renderer.getCaptionElement(this.getElement());
 };
 
 /**
  * @return {Element}
  */
 npf.ui.navigation.Item.prototype.getLinkElement = function() {
-  return this.getRenderer().getLinkElement(this.getElement());
+  var renderer = /** @type {npf.ui.navigation.ItemRenderer} */ (
+    this.getRenderer());
+
+  return renderer.getLinkElement(this.getElement());
 };

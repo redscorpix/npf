@@ -13,8 +13,8 @@ goog.require('npf.fx.cssAnimation.EventType');
 goog.require('npf.style.animation');
 goog.require('npf.style.animation.Direction');
 goog.require('npf.style.animation.PlayState');
-goog.require('npf.userAgent.Support');
-goog.require('npf.userAgent.support');
+goog.require('npf.userAgent.css');
+goog.require('npf.userAgent.utils');
 
 
 /**
@@ -23,11 +23,12 @@ goog.require('npf.userAgent.support');
  * @param {number} duration in ms
  * @param {Array.<number>=} opt_acc defaults to npf.fx.css3.easing.LINEAR
  * @constructor
+ * @struct
  * @implements {goog.fx.Transition}
  * @extends {goog.fx.TransitionBase}
  */
 npf.fx.CssAnimation = function(keyframes, element, duration, opt_acc) {
-  goog.base(this);
+  npf.fx.CssAnimation.base(this, 'constructor');
 
   /**
    * @private {npf.fx.cssAnimation.Keyframes}
@@ -80,7 +81,7 @@ npf.fx.CssAnimation = function(keyframes, element, duration, opt_acc) {
   this.finished_ = false;
 
   /**
-   * @private {goog.events.EventHandler}
+   * @private {goog.events.EventHandler.<!npf.fx.CssAnimation>}
    */
   this.handler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.handler_);
@@ -115,7 +116,7 @@ npf.fx.CssAnimation.PreferredTimingFunction = {
  */
 npf.fx.CssAnimation.isSupported = function() {
   /** @type {boolean} */
-  var supported = npf.userAgent.support.getCssAnimations();
+  var supported = npf.userAgent.css.isAnimationSupported();
 
   return supported && npf.fx.Animation.enabled;
 };
@@ -131,7 +132,7 @@ npf.fx.CssAnimation.prototype.disposeInternal = function() {
     this.clearDom();
   }
 
-  goog.base(this, 'disposeInternal');
+  npf.fx.CssAnimation.base(this, 'disposeInternal');
 
   this.accel_ = null;
   this.element = null;
@@ -291,8 +292,8 @@ npf.fx.CssAnimation.prototype.setDom = function() {
   this.domSet_ = true;
   this.getKeyframes().init();
 
-  /** @type {string?} */
-  var vendorPrefix = npf.userAgent.Support.vendorPrefix;
+  /** @type {string} */
+  var vendorPrefix = npf.userAgent.utils.VENDOR_PREFIX;
   /** @type {!Array.<string>} */
   var startEventTypes = ['animationstart'];
   /** @type {!Array.<string>} */

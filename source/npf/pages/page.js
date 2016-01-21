@@ -14,11 +14,18 @@ goog.require('npf.pages.Request');
 /**
  * @param {npf.pages.Manager} manager
  * @param {string} type
+ * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
+ * @struct
  * @extends {goog.events.EventTarget}
  */
-npf.pages.Page = function(manager, type) {
-  goog.base(this);
+npf.pages.Page = function(manager, type, opt_domHelper) {
+  npf.pages.Page.base(this, 'constructor');
+
+  /**
+   * @private {goog.dom.DomHelper}
+   */
+  this.domHelper_ = opt_domHelper || goog.dom.getDomHelper();
 
   /**
    * @private {npf.pages.Manager}
@@ -26,12 +33,17 @@ npf.pages.Page = function(manager, type) {
   this.manager_ = manager;
 
   /**
+   * @private {npf.pages.Request}
+   */
+  this.request_ = null;
+
+  /**
    * @private {string}
    */
   this.type_ = type;
 
   /**
-   * @private {goog.events.EventHandler}
+   * @private {goog.events.EventHandler.<!npf.pages.Page>}
    */
   this.handler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.handler_);
@@ -66,10 +78,12 @@ npf.pages.Page.EventType = {
 npf.pages.Page.prototype.disposeInternal = function() {
   this.unload();
 
-  goog.base(this, 'disposeInternal');
+  npf.pages.Page.base(this, 'disposeInternal');
 
+  this.domHelper_ = null;
   this.handler_ = null;
   this.manager_ = null;
+  this.request_ = null;
 };
 
 /**
@@ -97,6 +111,7 @@ npf.pages.Page.prototype.load = function(request) {
  * @protected
  */
 npf.pages.Page.prototype.loadInternal = function(request) {
+  this.request_ = request;
   this.initHelpers(request);
 };
 
@@ -143,7 +158,21 @@ npf.pages.Page.prototype.isLoaded = function() {
 };
 
 /**
- * @return {goog.events.EventHandler}
+ * @return {goog.dom.DomHelper}
+ */
+npf.pages.Page.prototype.getDomHelper = function() {
+  return this.domHelper_;
+};
+
+/**
+ * @param {goog.dom.DomHelper} domHelper
+ */
+npf.pages.Page.prototype.setDomHelper = function(domHelper) {
+  this.domHelper_ = domHelper;
+};
+
+/**
+ * @return {goog.events.EventHandler.<!npf.pages.Page>}
  */
 npf.pages.Page.prototype.getHandler = function() {
   return this.handler_;
@@ -230,7 +259,7 @@ npf.pages.Page.prototype.getHelper = function(type) {
  * @param {npf.pages.Request} request
  * @protected
  */
-npf.pages.Page.prototype.initHelpers = function(request) {};
+npf.pages.Page.prototype.initHelpers = goog.nullFunction;
 
 /**
  * @return {npf.pages.Manager}
@@ -339,7 +368,7 @@ npf.pages.Page.prototype.getRouter = function() {
  * @return {npf.pages.Request}
  */
 npf.pages.Page.prototype.getRequest = function() {
-  return this.manager_ ? this.manager_.getRequest() : null;
+  return this.request_;
 };
 
 /**
@@ -377,10 +406,12 @@ npf.pages.Page.prototype.dispatchTitleChangeEvent = function() {
 /**
  * @param {goog.net.HttpStatus} status
  * @constructor
+ * @struct
  * @extends {goog.events.Event}
  */
 npf.pages.PageErrorEvent = function(status) {
-  goog.base(this, npf.pages.Page.EventType.ERROR);
+  npf.pages.PageErrorEvent.base(
+    this, 'constructor', npf.pages.Page.EventType.ERROR);
 
   /**
    * @type {goog.net.HttpStatus}

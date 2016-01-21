@@ -11,7 +11,7 @@ goog.require('npf.ui.Renderer');
  * @extends {npf.ui.Renderer}
  */
 npf.ui.navigation.ItemRenderer = function() {
-  goog.base(this);
+  npf.ui.navigation.ItemRenderer.base(this, 'constructor');
 };
 goog.inherits(npf.ui.navigation.ItemRenderer, npf.ui.Renderer);
 goog.addSingletonGetter(npf.ui.navigation.ItemRenderer);
@@ -34,7 +34,7 @@ npf.ui.navigation.ItemRenderer.prototype.createDom = function(component) {
   /** @type {!Element} */
   var element = component.getDomHelper().createDom(goog.dom.TagName.A, {
     'class': this.getClassNames(component).join(' '),
-    'href': component.getUrl()
+    'href': component.getUri().toString()
   });
   this.applyClassNames(component, element);
 
@@ -76,12 +76,12 @@ npf.ui.navigation.ItemRenderer.prototype.setSelected = function(element,
 
 /**
  * @param {Element} element
- * @param {string} url
+ * @param {goog.Uri} uri
  */
-npf.ui.navigation.ItemRenderer.prototype.setUrl = function(element, url) {
+npf.ui.navigation.ItemRenderer.prototype.setUri = function(element, uri) {
   if (element) {
     goog.dom.setProperties(element, {
-      'href': url
+      'href': uri.toString()
     });
   }
 };

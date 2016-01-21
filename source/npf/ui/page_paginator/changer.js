@@ -2,7 +2,6 @@ goog.provide('npf.ui.pagePaginator.Changer');
 goog.provide('npf.ui.pagePaginator.Changer.Event');
 goog.provide('npf.ui.pagePaginator.Changer.EventType');
 
-goog.require('goog.Timer');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('goog.events');
@@ -32,7 +31,7 @@ goog.require('npf.ui.pagePaginator.Dragger');
  */
 npf.ui.pagePaginator.Changer = function(element, contentElement, page,
     pageCount) {
-  goog.base(this);
+  npf.ui.pagePaginator.Changer.base(this, 'constructor');
 
   /**
    * @private {npf.fx.KeyframeAnimation}
@@ -75,7 +74,7 @@ npf.ui.pagePaginator.Changer = function(element, contentElement, page,
   this.emptyElement_ = null;
 
   /**
-   * @private {goog.events.EventHandler}
+   * @private {goog.events.EventHandler.<!npf.ui.pagePaginator.Changer>}
    */
   this.handler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.handler_);
@@ -138,7 +137,7 @@ npf.ui.pagePaginator.Changer.prototype.disposeInternal = function() {
   goog.dispose(this.dragger_);
   goog.dispose(this.animation_);
 
-  goog.base(this, 'disposeInternal');
+  npf.ui.pagePaginator.Changer.base(this, 'disposeInternal');
 
   this.animation_ = null;
   this.contentElement_ = null;
@@ -293,15 +292,10 @@ npf.ui.pagePaginator.Changer.prototype.onDrag_ = function(evt) {
   });
 
   if (!this.emptyElement_ && 10 < Math.abs(this.dragStamps_[0].x - left)) {
-    this.emptyElement_ = this.domHelper_.createElement(goog.dom.TagName.DIV);
-    goog.style.setStyle(this.emptyElement_, {
-      'height': '100%',
-      'left': '0px',
-      'position': 'absolute',
-      'top': '0px',
-      'width': '100%'
+    this.emptyElement_ = this.domHelper_.createElement(goog.dom.TagName.DIV, {
+      'style': 'height:100%;left:0;position:absolute;top:0;width:100%'
     });
-    goog.dom.appendChild(this.getElement(), this.emptyElement_);
+    this.domHelper_.appendChild(this.getElement(), this.emptyElement_);
   }
 };
 
@@ -373,8 +367,8 @@ npf.ui.pagePaginator.Changer.prototype.onDragEnd_ = function(evt) {
   goog.dispose(this.animation_);
   this.animation_ = null;
 
-  goog.style.setStyle(this.getContentElement(), 'left', '');
-  goog.dom.removeNode(this.emptyElement_);
+  this.getContentElement().style.left = '';
+  this.domHelper_.removeNode(this.emptyElement_);
   this.emptyElement_ = null;
 
   this.animateReturn_(offset - this.width_ * animationDirection);
@@ -415,7 +409,7 @@ npf.ui.pagePaginator.Changer.prototype.animateReturn_ = function(fromX) {
     this.animation_.to(toProperties);
     this.animation_.play();
   } else {
-    goog.style.setStyle(this.getContentElement(), 'left', 0);
+    this.getContentElement().style.left = 0;
   }
 };
 
@@ -481,7 +475,7 @@ npf.ui.pagePaginator.Changer.prototype.animatePage = function(next) {
     this.animation_.to(toProperties);
     this.animation_.play();
   } else {
-    goog.style.setStyle(this.getContentElement(), 'left', 0);
+    this.getContentElement().style.left = 0;
     this.release_();
   }
 
@@ -498,14 +492,16 @@ npf.ui.pagePaginator.Changer.prototype.onAnimationFinish_ = function(evt) {
 
   this.release_();
 
-  goog.Timer.callOnce(function() {
-    if (!this.isDisposed() && goog.isBoolean(this.queueNext_)) {
+  var self = this;
+
+  setTimeout(function() {
+    if (!self.isDisposed() && goog.isBoolean(self.queueNext_)) {
       /** @type {boolean} */
-      var direction = this.queueNext_;
-      this.queueNext_ = null;
-      this.animatePage(direction);
+      var direction = self.queueNext_;
+      self.queueNext_ = null;
+      self.animatePage(direction);
     }
-  }, 0, this);
+  }, 0);
 };
 
 /**
@@ -534,18 +530,20 @@ npf.ui.pagePaginator.Changer.prototype.onReturnAnimationFinish_ = function(
   goog.dispose(this.animation_);
   this.animation_ = null;
 
-  goog.Timer.callOnce(function() {
-    if (!this.isDisposed() && goog.isBoolean(this.queueNext_)) {
+  var self = this;
+
+  setTimeout(function() {
+    if (!self.isDisposed() && goog.isBoolean(self.queueNext_)) {
       /** @type {boolean} */
-      var direction = this.queueNext_;
-      this.queueNext_ = null;
-      this.animatePage(direction);
+      var direction = self.queueNext_;
+      self.queueNext_ = null;
+      self.animatePage(direction);
     }
-  }, 0, this);
+  }, 0);
 };
 
 npf.ui.pagePaginator.Changer.prototype.update_ = function() {
-  this.width_ = goog.style.getBorderBoxSize(this.getElement()).width;
+  this.width_ = this.getElement().offsetWidth;
 
   if (this.draggable_) {
     this.reinitDragger_();
@@ -569,10 +567,11 @@ npf.ui.pagePaginator.Changer.prototype.onPageChange = function(next) {
  * @param {number} page
  * @param {boolean} next
  * @constructor
+ * @struct
  * @extends {goog.events.Event}
  */
 npf.ui.pagePaginator.Changer.Event = function(type, page, next) {
-  goog.base(this, type);
+  npf.ui.pagePaginator.Changer.Event.base(this, 'constructor', type);
 
   /**
    * @type {number}

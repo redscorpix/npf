@@ -15,8 +15,11 @@ goog.require('npf.ui.navigation.Renderer');
  * @extends {npf.ui.RenderedComponent}
  */
 npf.ui.Navigation = function(opt_renderer, opt_domHelper) {
-  goog.base(this, opt_renderer ||
-    npf.ui.navigation.Renderer.getInstance(), opt_domHelper);
+  npf.ui.Navigation.base(
+    this,
+    'constructor',
+    opt_renderer || npf.ui.navigation.Renderer.getInstance(),
+    opt_domHelper);
 
   /**
    * @private {Object.<npf.ui.navigation.Item>}
@@ -39,7 +42,7 @@ goog.inherits(npf.ui.Navigation, npf.ui.RenderedComponent);
 
 /** @inheritDoc */
 npf.ui.Navigation.prototype.disposeInternal = function() {
-  goog.base(this, 'disposeInternal');
+  npf.ui.Navigation.base(this, 'disposeInternal');
 
   this.itemsMap_ = null;
   this.selectedItem_ = null;
@@ -56,12 +59,12 @@ npf.ui.Navigation.prototype.addChildAt = function(child, index, opt_render) {
     this.uidToType_[itemContainer.getId()] = type;
   }
 
-  goog.base(this, 'addChildAt', child, index, opt_render);
+  npf.ui.Navigation.base(this, 'addChildAt', child, index, opt_render);
 };
 
 /** @inheritDoc */
 npf.ui.Navigation.prototype.removeChild = function(child, opt_unrender) {
-  child = goog.base(this, 'removeChild', child, opt_unrender);
+  child = npf.ui.Navigation.base(this, 'removeChild', child, opt_unrender);
 
   if (child && child instanceof npf.ui.navigation.Item) {
     var itemContainer = /** @type {npf.ui.navigation.Item} */ (child);

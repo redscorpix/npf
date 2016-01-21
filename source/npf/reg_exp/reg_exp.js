@@ -445,13 +445,15 @@ npf.regExp = (function() {
    * Executes a provided function once per regex match.
    * @param {string} str String to search.
    * @param {RegExp} regex Regex to search with.
-   * @param {Function} callback Function to execute for each match. Invoked with four arguments:
+   * @param {function(this: SCOPE, Array.<string>, number, string, RegExp)}
+   *    callback Function to execute for each match. Invoked with four arguments:
    *          <li>The match array, with named backreference properties.
    *          <li>The zero-based match index.
    *          <li>The string being traversed.
    *          <li>The regex object being used to traverse the string.
-   * @param {Object=} context Object to use as `this` when executing `callback`.
-   * @return {*} Provided `context` object.
+   * @param {SCOPE=} opt_scope
+   * @return {SCOPE} Provided `context` object.
+   * @template {SCOPE}
    * @example
    *  // Extracts every other digit from a string
    * npf.regExp.forEach('1a2345', /\d/, function (match, i) {
@@ -459,16 +461,17 @@ npf.regExp = (function() {
    * }, []);
    * // -> [2, 4]
    */
-  self.forEach = function(str, regex, callback, context) {
+  self.forEach = function(str, regex, callback, opt_scope) {
     var pos = 0;
     var i = -1;
     var match;
 
     while ((match = self.exec(str, regex, pos))) {
-      callback.call(context, match, ++i, str, regex);
+      callback.call(opt_scope, match, ++i, str, regex);
       pos = match.index + (match[0].length || 1);
     }
-    return context;
+
+    return opt_scope;
   };
 
   /**

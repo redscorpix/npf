@@ -1,7 +1,7 @@
 goog.provide('npf.ui.Image');
 
-goog.require('goog.dom.classlist');
 goog.require('goog.dom.TagName');
+goog.require('goog.dom.classlist');
 goog.require('goog.math.Size');
 goog.require('npf.ui.Component');
 
@@ -10,11 +10,13 @@ goog.require('npf.ui.Component');
  * @param {string} src
  * @param {number} width
  * @param {number} height
+ * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
+ * @struct
  * @extends {npf.ui.Component}
  */
-npf.ui.Image = function(src, width, height) {
-  goog.base(this);
+npf.ui.Image = function(src, width, height, opt_domHelper) {
+  npf.ui.Image.base(this, 'constructor', opt_domHelper);
 
   /**
    * @private {string}
@@ -63,7 +65,7 @@ npf.ui.Image.prototype.createDom = function() {
 
 /** @inheritDoc */
 npf.ui.Image.prototype.disposeInternal = function() {
-  goog.base(this, 'disposeInternal');
+  npf.ui.Image.base(this, 'disposeInternal');
 
   this.cssClass_ = null;
 };

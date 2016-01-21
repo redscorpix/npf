@@ -1,9 +1,10 @@
-goog.provide('npf.userAgent.Support');
 goog.provide('npf.userAgent.support');
 
 goog.require('goog.dom');
+goog.require('goog.dom.InputType');
 goog.require('goog.dom.TagName');
 goog.require('goog.events.EventType');
+goog.require('goog.functions');
 goog.require('goog.math');
 goog.require('goog.object');
 goog.require('goog.userAgent');
@@ -11,107 +12,15 @@ goog.require('npf.svg.Ns');
 
 
 /**
- * Source: Modernizr 2.6.2 Custom Build (http://modernizr.com)
- * @constructor
+ * Source: Modernizr 2.8.2 Custom Build (http://modernizr.com)
  */
-npf.userAgent.Support = function() {
-  /**
-   * @type {!Object.<npf.userAgent.Support.Property_,*>}
-   * @private
-   */
-  this.checks_ = {};
 
-  /**
-   * @private {CSSStyleDeclaration}
-   */
-  this.mStyle_ = goog.dom.createElement(npf.userAgent.Support.MOD).style;
-
-  /**
-   * @private {!Object.<string>}
-   */
-  this.cssPropertyNames_ = {};
-};
-goog.addSingletonGetter(npf.userAgent.Support);
-
-
-/**
- * @enum {number}
- * @private
- */
-npf.userAgent.Support.Property_ = {
-  ANIMATED_PNG: 1,
-  AUDIO: 2,
-  BACKGROUND_POSITION: 3,
-  BACKGROUND_REPEAT_ROUND: 4,
-  BACKGROUND_REPEAT_SPACE: 5,
-  BACKGROUND_SIZE: 6,
-  BACKGROUND_SIZE_COVER: 7,
-  BATTERY: 8,
-  BLOB_CONSTRUCTOR: 9,
-  BORDER_IMAGE: 10,
-  BORDER_RADIUS: 11,
-  BOX_SHADOW: 12,
-  BOX_SIZING: 13,
-  CANVAS: 14,
-  CANVAS_TEXT: 15,
-  CANVAS_TO_JPEG: 16,
-  CANVAS_TO_WEBP: 17,
-  CSS_ANIMATIONS: 18,
-  CSS_COLUMNS: 19,
-  CSS_GRADIENTS: 20,
-  CSS_REFLECTIONS: 21,
-  CSS_REM_UNIT: 22,
-  CSS_SCROLL_BAR: 23,
-  CSS_TRANSFORMS: 24,
-  CSS_TRANSFORMS_3D: 25,
-  CSS_TRANSITIONS: 26,
-  DATA_URI: 27,
-  DRAG_AND_DROP: 28,
-  EXIF_ORIENTATION: 29,
-  FILE_INPUT: 30,
-  FILE_SYSTEM: 31,
-  FLEX_BOX: 32,
-  FONT_FACE: 33,
-  GENERATED_CONTENT: 34,
-  HASH_CHANGE: 35,
-  HSLA: 36,
-  INDEXED_DB: 37,
-  INLINE_SVG: 38,
-  INPUT: 39,
-  INPUT_TYPES: 40,
-  LOCAL_STORAGE: 41,
-  LOW_BATTERY: 42,
-  MATH: 43,
-  MULTIPLE_BACKGROUNDS: 44,
-  NOTIFICATION: 45,
-  OPACITY: 46,
-  PERFORMANCE: 47,
-  RGBA: 48,
-  SESSION_STORAGE: 49,
-  SMIL: 50,
-  SVG: 51,
-  SVG_CLIP_PATHS: 52,
-  SVG_FILTERS: 53,
-  TEXT_SHADOW: 54,
-  TOUCH: 55,
-  VIDEO: 56,
-  WEBP: 57
-};
-
-/**
- * @typedef {{m4a:string,mp3:string,ogg:string,wav:string}}
- */
-npf.userAgent.Support.AudioFeature;
-
-/**
- * @typedef {{ogg:string,h264:string,webm:string}}
- */
-npf.userAgent.Support.VideoFeature;
 
 /**
  * @type {!Object.<string>}
+ * @deprecated
  */
-npf.userAgent.Support.eventTagNames = goog.object.create(
+npf.userAgent.support.eventTagNames = goog.object.create(
   goog.events.EventType.SELECT, goog.dom.TagName.INPUT,
   goog.events.EventType.CHANGE, goog.dom.TagName.INPUT,
   goog.events.EventType.SUBMIT, goog.dom.TagName.FORM,
@@ -124,35 +33,50 @@ npf.userAgent.Support.eventTagNames = goog.object.create(
 /**
  * Create our element that we do most feature tests on.
  * @const {string}
+ * @deprecated Use npf.userAgent.support.utils.ID.
  */
-npf.userAgent.Support.MOD = 'useragentsupport_' + goog.math.randomInt(1000000);
+npf.userAgent.support.MOD = 'useragentsupport_' + goog.math.randomInt(1000000);
 
 /**
  * @const {string}
+ * @deprecated
  */
-npf.userAgent.Support.SMILE = ':)';
+npf.userAgent.support.SMILE = ':)';
+
+/**
+ * @private {!Object.<string>}
+ */
+npf.userAgent.support.cssPropertyNames_ = {};
+
+/**
+ * @private {CSSStyleDeclaration}
+ */
+npf.userAgent.support.mStyle_ =
+  goog.dom.createElement(npf.userAgent.support.MOD).style;
 
 /**
  * Browser special CSS prefix.
  * @type {string}
+ * @deprecated Use npf.userAgent.support.utils.VENDOR_PREFIX.
  */
-npf.userAgent.Support.vendorPrefix =
+npf.userAgent.support.vendorPrefix =
   goog.userAgent.WEBKIT ? 'webkit' :
   goog.userAgent.GECKO ? 'moz' :
   goog.userAgent.OPERA ? 'o' :
-  goog.userAgent.IE ? 'ms' : '';
+  goog.userAgent.EDGE_OR_IE ? 'ms' : '';
 
 /**
  * List of property values to set for css tests.
  * @type {!Array.<string>}
+ * @deprecated
  */
-npf.userAgent.Support.prefixes = (npf.userAgent.Support.vendorPrefix ? ' -' +
-  npf.userAgent.Support.vendorPrefix + '- ' : ' ').split(' ');
+npf.userAgent.support.prefixes = (npf.userAgent.support.vendorPrefix ? ' -' +
+  npf.userAgent.support.vendorPrefix + '- ' : ' ').split(' ');
 
 /**
  * @private {string}
  */
-npf.userAgent.Support.omPrefixes_ = 'Webkit Moz O ms';
+npf.userAgent.support.omPrefixes_ = 'Webkit Moz O ms';
 
 /**
  * Following spec is to expose vendor-specific style properties as:
@@ -166,15 +90,17 @@ npf.userAgent.Support.omPrefixes_ = 'Webkit Moz O ms';
  *
  * More here: http://github.com/Modernizr/Modernizr/issues/issue/21
  * @type {!Array.<string>}
+ * @deprecated Use npf.userAgent.support.utils.DOM_PREFIXES
  */
-npf.userAgent.Support.domPrefixes =
-  npf.userAgent.Support.omPrefixes_.toLowerCase().split(' ');
+npf.userAgent.support.domPrefixes =
+  npf.userAgent.support.omPrefixes_.toLowerCase().split(' ');
 
 /**
  * @type {!Array.<string>}
+ * @deprecated Use npf.userAgent.support.utils.CSSOM_PREFIXES.
  */
-npf.userAgent.Support.cssomPrefixes =
-  npf.userAgent.Support.omPrefixes_.split(' ');
+npf.userAgent.support.cssomPrefixes =
+  npf.userAgent.support.omPrefixes_.split(' ');
 
 
 /**
@@ -182,9 +108,10 @@ npf.userAgent.Support.cssomPrefixes =
  *
  * @param {string} str Property name
  * @return {string} Property name with browser prefix.
+ * @deprecated Use npf.userAgent.support.utils.prefixedCss.
  */
-npf.userAgent.Support.prototype.getCssPropertyName = function(str) {
-  if (!goog.isDef(this.cssPropertyNames_[str])) {
+npf.userAgent.support.getCssPropertyName = function(str) {
+  if (!goog.isDef(npf.userAgent.support.cssPropertyNames_[str])) {
     /** @type {!Element} */
     var element = goog.dom.createElement(goog.dom.TagName.DIV);
     /** @type {function(string):string} */
@@ -196,18 +123,18 @@ npf.userAgent.Support.prototype.getCssPropertyName = function(str) {
     /** @type {string} */
     var str2 = str1.charAt(0).toUpperCase() + str1.substr(1);
 
-    this.cssPropertyNames_[str] = '';
+    npf.userAgent.support.cssPropertyNames_[str] = '';
 
     if (goog.isDef(element.style[str1])) {
-      this.cssPropertyNames_[str] = str;
+      npf.userAgent.support.cssPropertyNames_[str] = str;
     } else {
       /** @type {!Array.<string>} */
-      var vendorPrefixes = npf.userAgent.Support.cssomPrefixes;
+      var vendorPrefixes = npf.userAgent.support.cssomPrefixes;
 
       for (var i = 0; i < vendorPrefixes.length; i++) {
         if (goog.isDef(element.style[vendorPrefixes[i] + str2])) {
-          this.cssPropertyNames_[str] = '-' + vendorPrefixes[i].toLowerCase() +
-            '-' + str;
+          npf.userAgent.support.cssPropertyNames_[str] =
+            '-' + vendorPrefixes[i].toLowerCase() + '-' + str;
 
           break;
         }
@@ -215,17 +142,7 @@ npf.userAgent.Support.prototype.getCssPropertyName = function(str) {
     }
   }
 
-  return this.cssPropertyNames_[str];
-};
-
-/**
- * Returns property name with proper browser prefix.
- *
- * @param {string} str Property name
- * @return {string} Property name with browser prefix.
- */
-npf.userAgent.support.getCssPropertyName = function(str) {
-  return npf.userAgent.Support.getInstance().getCssPropertyName(str);
+  return npf.userAgent.support.cssPropertyNames_[str];
 };
 
 /**
@@ -237,31 +154,32 @@ npf.userAgent.support.getCssPropertyName = function(str) {
  *     state, which may change later.
  *   - You must specify values. Eg. If you are testing support for the min-width
  *     media query use:
- *     npf.userAgent.Support.getInstance().mq('(min-width:0)')
+ *     npf.userAgent.support.mq('(min-width:0)')
  *
  * @example
- * npf.userAgent.Support.getInstance().mq('only screen and (max-width:768)')
+ * npf.userAgent.support.mq('only screen and (max-width:768)')
  *
  * @param {string} mq
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.utils.mq
  */
-npf.userAgent.Support.prototype.mq = function(mq) {
+npf.userAgent.support.mq = function(mq) {
   /** @type {function(string):MediaQueryList} */
   var matchMedia = goog.global.matchMedia ||
     /** @type {function(string):MediaQueryList} */ (
       goog.global['msMatchMedia']);
 
   if (matchMedia) {
-    return matchMedia(mq).matches;
+    return !!matchMedia(mq) || matchMedia(mq).matches || false;
   }
 
   /** @type {boolean} */
   var bool;
   /** @type {string} */
-  var cssText = '@media ' + mq + ' { #' + npf.userAgent.Support.MOD +
-    ' { position: absolute; } }';
+  var cssText = '@media ' + mq + ' {#' + npf.userAgent.support.MOD +
+    ' {position:absolute;}}';
 
-  this.testStyles_(cssText, function(element) {
+  npf.userAgent.support.testStyles_(cssText, function(element) {
     /** @type {!Window} */
     var win = goog.dom.getWindow();
     /** @type {Object} */
@@ -275,23 +193,20 @@ npf.userAgent.Support.prototype.mq = function(mq) {
 };
 
 /**
- * @param {string} mq
- * @return {boolean}
- */
-npf.userAgent.support.mq = function(mq) {
-  return npf.userAgent.Support.getInstance().mq(mq);
-};
-
-/**
  * Returns the prefixed or nonprefixed property name variant of your input
- * npf.userAgent.Support.getInstance().prefixed('boxSizing') // 'MozBoxSizing'
+ * npf.userAgent.support.prefixed('boxSizing') // 'MozBoxSizing'
  *
- * Properties must be passed as dom-style camelcase, rather than `box-sizing` hypentated style.
- * Return values will also be the camelCase variant, if you need to translate that to hypenated style use:
+ * Properties must be passed as dom-style camelcase, rather than `box-sizing`
+ * hypentated style.
+ * Return values will also be the camelCase variant, if you need to translate
+ * that to hypenated style use:
  *
- *   str.replace(/([A-Z])/g, function(str,m1){ return '-' + m1.toLowerCase(); }).replace(/^ms-/,'-ms-');
+ *   str.replace(/([A-Z])/g, function(str,m1){
+ *     return '-' + m1.toLowerCase();
+ *   }).replace(/^ms-/,'-ms-');
  *
- * If you're trying to ascertain which transition end event to bind to, you might do something like...
+ * If you're trying to ascertain which transition end event to bind to, you
+ * might do something like...
  *
  *   var transEndEventNames = {
  *     'WebkitTransition' : 'webkitTransitionEnd',
@@ -300,25 +215,19 @@ npf.userAgent.support.mq = function(mq) {
  *     'msTransition'     : 'msTransitionEnd', // maybe?
  *     'transition'       : 'transitionEnd'
  *   },
- *   transEndEventName = transEndEventNames[ npf.userAgent.Support.getInstance().prefixed('transition') ];
+ *   transEndEventName =
+ *     transEndEventNames[npf.userAgent.support.prefixed('transition')];
  *
  * @param {string} prop
  * @return {string}
- */
-npf.userAgent.Support.prototype.prefixed = function(prop) {
-  var ucProp = prop.charAt(0).toUpperCase() + prop.substr(1);
-  var props = (prop + ' ' + npf.userAgent.Support.domPrefixes.join(ucProp + ' ')
-    + ucProp).split(' ');
-
-  return this.testPropsPrefixed_(props);
-};
-
-/**
- * @param {string} prop
- * @return {string}
+ * @deprecated Use npf.userAgent.support.utils.prefixedCss.
  */
 npf.userAgent.support.prefixed = function(prop) {
-  return npf.userAgent.Support.getInstance().prefixed(prop);
+  var ucProp = prop.charAt(0).toUpperCase() + prop.substr(1);
+  var props = (prop + ' ' + npf.userAgent.support.domPrefixes.join(ucProp + ' ')
+    + ucProp).split(' ');
+
+  return npf.userAgent.support.testPropsPrefixed_(props);
 };
 
 /**
@@ -326,21 +235,14 @@ npf.userAgent.support.prefixed = function(prop) {
  * Note that the property names must be provided in the camelCase variant.
  *
  * @example
- *   npf.userAgent.Support.getInstance().testProp('pointerEvents')
+ *   npf.userAgent.support.testProp('pointerEvents')
  *
  * @param {string} prop
  * @return {boolean}
- */
-npf.userAgent.Support.prototype.testProp = function(prop) {
-  return this.testProps_([prop]);
-};
-
-/**
- * @param {string} prop
- * @return {boolean}
+ * @deprecated Use npf.userAgent.support.utils.testProp.
  */
 npf.userAgent.support.testProp = function(prop) {
-  return npf.userAgent.Support.getInstance().testProp(prop);
+  return npf.userAgent.support.testProps_([prop]);
 };
 
 /**
@@ -349,273 +251,239 @@ npf.userAgent.support.testProp = function(prop) {
  * Note that the property names must be provided in the camelCase variant.
  *
  * @example
- *   npf.userAgent.Support.getInstance().testAllProps('boxSizing')
+ *   npf.userAgent.support.testAllProps('boxSizing')
  *
  * @param {string} prop
  * @return {string}
+ * @deprecated Use npf.userAgent.support.utils.testAllProps.
  */
-npf.userAgent.Support.prototype.testAllProps = function(prop) {
+npf.userAgent.support.testAllProps = function(prop) {
   /** @type {string} */
   var ucProp = prop.charAt(0).toUpperCase() + prop.substr(1);
   /** @type {!Array.<string>} */
-  var props = (prop + ' ' + npf.userAgent.Support.domPrefixes.join(ucProp + ' ')
+  var props = (prop + ' ' + npf.userAgent.support.domPrefixes.join(ucProp + ' ')
     + ucProp).split(' ');
 
-  return this.testPropsPrefixed_(props);
+  return npf.userAgent.support.testPropsPrefixed_(props);
 };
 
 /**
- * @param {string} prop
- * @return {string}
+ * @private {boolean?}
  */
-npf.userAgent.support.testAllProps = function(prop) {
-  return npf.userAgent.Support.getInstance().testAllProps(prop);
-};
+npf.userAgent.support.animatedPng_ = null;
 
 /**
- * http://en.wikipedia.org/wiki/APNG
- * @param {function(boolean)} callback
- * @param {Object=} opt_scope
+ * @define {boolean}
  */
-npf.userAgent.Support.prototype.getAnimatedPng = function(callback, opt_scope) {
-  var propName = npf.userAgent.Support.Property_.ANIMATED_PNG;
+goog.define('npf.userAgent.support.ASSUME_ANIMATED_PNG', false);
 
-  if (!this.getCanvas()) {
+/**
+ * @const {string}
+ */
+npf.userAgent.support.ANIMATED_PNG_SRC =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACGFj' +
+  'VEwAAAABAAAAAcMq2TYAAAANSURBVAiZY2BgYPgPAAEEAQB9ssjfAAAAGmZjVEwAAAAAAAAAAQ' +
+  'AAAAEAAAAAAAAAAAD6A+gBAbNU+2sAAAARZmRBVAAAAAEImWNgYGBgAAAABQAB6MzFdgAAAABJ' +
+  'RU5ErkJggg==';
+
+/**
+ * @param {function(this: SCOPE, boolean)} callback
+ * @param {SCOPE=} opt_scope
+ * @template SCOPE
+ * @deprecated Use npf.userAgent.support.image.isAnimatedPngSupported.
+ */
+npf.userAgent.support.getAnimatedPng = function(callback, opt_scope) {
+  if (npf.userAgent.support.ASSUME_ANIMATED_PNG) {
+    callback.call(opt_scope, true);
+  } else if (!npf.userAgent.support.getCanvas()) {
     callback.call(opt_scope, false);
-  }
-
-  if (goog.isDef(this.checks_[propName])) {
-    callback.call(opt_scope, /** @type {boolean} */ (this.checks_[propName]));
-  } else {
+  } else if (goog.isNull(npf.userAgent.support.animatedPng_)) {
     var image = new Image();
-    image.onload = goog.bind(function () {
+    image.onload = function () {
       var canvasElement = /** @type {!HTMLCanvasElement} */ (
         goog.dom.createElement(goog.dom.TagName.CANVAS));
       var ctx = /** @type {CanvasRenderingContext2D} */ (
         canvasElement.getContext('2d'));
       ctx.drawImage(image, 0, 0);
 
-      this.checks_[propName] = 0 === ctx.getImageData(0, 0, 1, 1).data[3];
+      npf.userAgent.support.animatedPng_ =
+        0 === ctx.getImageData(0, 0, 1, 1).data[3];
 
-      callback.call(opt_scope, /** @type {boolean} */ (this.checks_[propName]));
-    }, this);
-    image.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAA' +
-      'AfFcSJAAAACGFjVEwAAAABAAAAAcMq2TYAAAANSURBVAiZY2BgYPgPAAEEAQB9ssjfAAAA' +
-      'GmZjVEwAAAAAAAAAAQAAAAEAAAAAAAAAAAD6A+gBAbNU+2sAAAARZmRBVAAAAAEImWNgYG' +
-      'BgAAAABQAB6MzFdgAAAABJRU5ErkJggg==';
+      callback.call(
+        opt_scope, /** @type {boolean} */ (npf.userAgent.support.animatedPng_));
+    };
+    image.src = npf.userAgent.support.ANIMATED_PNG_SRC;
+  } else {
+    callback.call(
+      opt_scope, /** @type {boolean} */ (npf.userAgent.support.animatedPng_));
   }
 };
 
 /**
- * @param {function(boolean)} callback
- * @param {Object=} opt_scope
+ * @define {boolean}
  */
-npf.userAgent.support.getAnimatedPng = function(callback, opt_scope) {
-  return npf.userAgent.Support.getInstance().getAnimatedPng(
-    callback, opt_scope);
-};
+goog.define('npf.userAgent.support.ASSUME_APPLICATION_CACHE', false);
 
 /**
  * @return {boolean}
- */
-npf.userAgent.Support.prototype.getApplicationCache = function() {
-  return !!goog.global['applicationCache'];
-};
-
-/**
- * @return {boolean}
+ * @deprecated Use npf.userAgent.support.applicationCache.isSupported.
  */
 npf.userAgent.support.getApplicationCache = function() {
-  return npf.userAgent.Support.getInstance().getApplicationCache();
+  return npf.userAgent.support.ASSUME_APPLICATION_CACHE ||
+    !!goog.global['applicationCache'];
 };
+
+/**
+ * @define {boolean}
+ */
+goog.define('npf.userAgent.support.ASSUME_AUDIO_DATA', false);
 
 /**
  * Mozilla Audio Data API
  * https://wiki.mozilla.org/Audio_Data_API
  * @return {boolean}
- */
-npf.userAgent.Support.prototype.getAudioData = function() {
-  return !!goog.global['Audio'];
-};
-
-/**
- * @return {boolean}
+ * @deprecated Use npf.userAgent.support.audio.isSupported.
  */
 npf.userAgent.support.getAudioData = function() {
-  return npf.userAgent.Support.getInstance().getAudioData();
+  return npf.userAgent.support.ASSUME_AUDIO_DATA || !!goog.global['Audio'];
 };
 
 /**
- * @return {string} 'probably', 'maybe' or empty string.
+ * @define {boolean}
  */
-npf.userAgent.Support.prototype.getAudioOgg = function() {
-  if (this.getAudio()) {
-    var features = /** @type {npf.userAgent.Support.AudioFeature?} */ (
-      this.checks_[npf.userAgent.Support.Property_.AUDIO]);
-
-    if (features) {
-      return features.ogg;
-    }
-  }
-
-  return '';
-};
+goog.define('npf.userAgent.support.ASSUME_AUDIO_OGG', false);
 
 /**
  * @return {string} 'probably', 'maybe' or empty string.
+ * @deprecated Use npf.userAgent.support.audio.isOggSupported.
  */
 npf.userAgent.support.getAudioOgg = function() {
-  return npf.userAgent.Support.getInstance().getAudioOgg();
+  return npf.userAgent.support.ASSUME_AUDIO_OGG ?
+    'probably' : npf.userAgent.support.getAudio_().ogg;
 };
 
 /**
- * @return {string} 'probably', 'maybe' or empty string.
+ * @define {boolean}
  */
-npf.userAgent.Support.prototype.getAudioMp3 = function() {
-  if (this.getAudio()) {
-    var features = /** @type {npf.userAgent.Support.AudioFeature?} */ (
-      this.checks_[npf.userAgent.Support.Property_.AUDIO]);
-
-    if (features) {
-      return features.mp3;
-    }
-  }
-
-  return '';
-};
+goog.define('npf.userAgent.support.ASSUME_AUDIO_MP3', false);
 
 /**
  * @return {string} 'probably', 'maybe' or empty string.
+ * @deprecated Use npf.userAgent.support.audio.isMp3Supported.
  */
 npf.userAgent.support.getAudioMp3 = function() {
-  return npf.userAgent.Support.getInstance().getAudioMp3();
+  return npf.userAgent.support.ASSUME_AUDIO_MP3 ?
+    'probably' : npf.userAgent.support.getAudio_().mp3;
 };
 
 /**
- * @return {string} 'probably', 'maybe' or empty string.
+ * @define {boolean}
  */
-npf.userAgent.Support.prototype.getAudioWav = function() {
-  if (this.getAudio()) {
-    var features = /** @type {npf.userAgent.Support.AudioFeature?} */ (
-      this.checks_[npf.userAgent.Support.Property_.AUDIO]);
-
-    if (features) {
-      return features.wav;
-    }
-  }
-
-  return '';
-};
+goog.define('npf.userAgent.support.ASSUME_AUDIO_WAV', false);
 
 /**
  * @return {string} 'probably', 'maybe' or empty string.
+ * @deprecated Use npf.userAgent.support.audio.isWavSupported.
  */
 npf.userAgent.support.getAudioWav = function() {
-  return npf.userAgent.Support.getInstance().getAudioWav();
+  return npf.userAgent.support.ASSUME_AUDIO_WAV ?
+    'probably' : npf.userAgent.support.getAudio_().wav;
 };
 
 /**
- * @return {string} 'probably', 'maybe' or empty string.
+ * @define {boolean}
  */
-npf.userAgent.Support.prototype.getAudioM4a = function() {
-  if (this.getAudio()) {
-    var features = /** @type {npf.userAgent.Support.AudioFeature?} */ (
-      this.checks_[npf.userAgent.Support.Property_.AUDIO]);
-
-    if (features) {
-      return features.m4a;
-    }
-  }
-
-  return '';
-};
+goog.define('npf.userAgent.support.ASSUME_AUDIO_M4A', false);
 
 /**
  * @return {string} 'probably', 'maybe' or empty string.
+ * @deprecated Use npf.userAgent.support.audio.isM4aSupported.
  */
 npf.userAgent.support.getAudioM4a = function() {
-  return npf.userAgent.Support.getInstance().getAudioM4a();
+  return npf.userAgent.support.ASSUME_AUDIO_M4A ?
+    'probably' : npf.userAgent.support.getAudio_().m4a;
 };
 
 /**
- * @return {boolean}
+ * @return {{m4a:string,mp3:string,ogg:string,wav:string}}
+ * @private
  */
-npf.userAgent.Support.prototype.getAudio = function() {
-  if (!goog.isDef(this.checks_[npf.userAgent.Support.Property_.AUDIO])) {
-    var elem = /** @type {!HTMLAudioElement} */ (
-      goog.dom.createElement('audio'));
-    /** @type {npf.userAgent.Support.AudioFeature?} */
-    var types = null;
+npf.userAgent.support.getAudio_ = goog.functions.cacheReturnValue(function() {
+  var elem = /** @type {!HTMLAudioElement} */ (goog.dom.createElement('audio'));
+  var result;
 
-    try {
-      if (elem.canPlayType) {
-        // Mimetypes accepted:
-        //   https://developer.mozilla.org/En/Media_formats_supported_by_the_audio_and_video_elements
-        //   http://bit.ly/iphoneoscodecs
-        types = {
-          m4a: elem.canPlayType('audio/x-m4a;') ||
-            elem.canPlayType('audio/aac;').replace(/^no$/, ''),
-          mp3: elem.canPlayType('audio/mpeg;').replace(/^no$/, ''),
-          ogg: elem.canPlayType('audio/ogg; codecs="vorbis"').
-            replace(/^no$/, ''),
-          wav: elem.canPlayType('audio/wav; codecs="1"').replace(/^no$/, '')
-        };
-      }
-    } catch(e) { }
+  try {
+    if (elem.canPlayType) {
+      // Mimetypes accepted:
+      //   https://developer.mozilla.org/En/Media_formats_supported_by_the_audio_and_video_elements
+      //   http://bit.ly/iphoneoscodecs
+      result = {
+        m4a: elem.canPlayType('audio/x-m4a;') ||
+          elem.canPlayType('audio/aac;').replace(/^no$/, ''),
+        mp3: elem.canPlayType('audio/mpeg;').replace(/^no$/, ''),
+        ogg: elem.canPlayType('audio/ogg; codecs="vorbis"').
+          replace(/^no$/, ''),
+        wav: elem.canPlayType('audio/wav; codecs="1"').replace(/^no$/, '')
+      };
+    }
+  } catch(e) { }
 
-    this.checks_[npf.userAgent.Support.Property_.AUDIO] = types;
-  }
-
-  return !!this.checks_[npf.userAgent.Support.Property_.AUDIO];
-};
+  return result || {
+    m4a: '',
+    mp3: '',
+    ogg: '',
+    wav: ''
+  };
+});
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getAudio = function() {
-  return npf.userAgent.Support.getInstance().getAudio();
-};
+goog.define('npf.userAgent.support.ASSUME_BACKGROUND_POSITION', false);
 
 /**
  * https://developer.mozilla.org/en/CSS/background-position
  * http://www.w3.org/TR/css3-background/#background-position
  * @return {boolean}
+ * @deprecated Use
+ *             npf.userAgent.support.css.isBackgroundPositionShorthandSupported.
  */
-npf.userAgent.Support.prototype.getBackgroundPosition = function() {
-  var propName = npf.userAgent.Support.Property_.BACKGROUND_POSITION;
+npf.userAgent.support.getBackgroundPosition = goog.functions.cacheReturnValue(
+  function() {
+    if (npf.userAgent.support.ASSUME_BACKGROUND_POSITION) {
+      return true;
+    }
 
-  if (!goog.isDef(this.checks_[propName])) {
     var style = goog.dom.createElement(goog.dom.TagName.A).style;
     var val = "right 10px bottom 10px";
     style.cssText = "background-position:" + val + ";";
 
-    this.checks_[propName] = style['backgroundPosition'] === val;
+    return style['backgroundPosition'] === val;
   }
-
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+);
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getBackgroundPosition = function() {
-  return npf.userAgent.Support.getInstance().getBackgroundPosition();
-};
+goog.define('npf.userAgent.support.ASSUME_BACKGROUND_REPEAT_ROUND', false);
 
 /**
  * developer.mozilla.org/en/CSS/background-repeat
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.isBackgroundRepeatRoundSupported.
  */
-npf.userAgent.Support.prototype.getBackgroundRepeatRound = function() {
-  var propName = npf.userAgent.Support.Property_.BACKGROUND_REPEAT_ROUND;
+npf.userAgent.support.getBackgroundRepeatRound = goog.functions.cacheReturnValue(
+  function() {
+    if (npf.userAgent.support.ASSUME_BACKGROUND_REPEAT_ROUND) {
+      return true;
+    }
 
-  if (!goog.isDef(this.checks_[propName])) {
     /** @type {boolean} */
     var supported;
-    var style = '#' + npf.userAgent.Support.MOD +
-      ' { background-repeat: round; }';
+    var style = '#' + npf.userAgent.support.MOD +
+      ' {background-repeat:round;}';
 
-    this.testStyles_(style, function(elem, rule) {
+    npf.userAgent.support.testStyles_(style, function(elem, rule) {
       /** @type {!Window} */
       var win = goog.dom.getWindow();
       /** @type {string|undefined} */
@@ -624,33 +492,32 @@ npf.userAgent.Support.prototype.getBackgroundRepeatRound = function() {
         /** @type {string|undefined} */ (elem['currentStyle']['background']);
       supported = 'round' == value;
     });
-    this.checks_[propName] = supported;
-  }
 
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+    return supported;
+  }
+);
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getBackgroundRepeatRound = function() {
-  return npf.userAgent.Support.getInstance().getBackgroundRepeatRound();
-};
+goog.define('npf.userAgent.support.ASSUME_BACKGROUND_REPEAT_SPACE', false);
 
 /**
  * developer.mozilla.org/en/CSS/background-repeat
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.isBackgroundRepeatSpaceSupported.
  */
-npf.userAgent.Support.prototype.getBackgroundRepeatSpace = function() {
-  var propName = npf.userAgent.Support.Property_.BACKGROUND_REPEAT_SPACE;
+npf.userAgent.support.getBackgroundRepeatSpace = goog.functions.cacheReturnValue(
+  function() {
+    if (npf.userAgent.support.ASSUME_BACKGROUND_REPEAT_SPACE) {
+      return true;
+    }
 
-  if (!goog.isDef(this.checks_[propName])) {
     /** @type {boolean} */
     var supported;
-    var style = '#' + npf.userAgent.Support.MOD +
-      ' { background-repeat: space; }';
+    var style = '#' + npf.userAgent.support.MOD + ' {background-repeat:space;}';
 
-    this.testStyles_(style, function(elem, rule) {
+    npf.userAgent.support.testStyles_(style, function(elem, rule) {
       /** @type {!Window} */
       var win = goog.dom.getWindow();
       /** @type {string|undefined} */
@@ -660,18 +527,15 @@ npf.userAgent.Support.prototype.getBackgroundRepeatSpace = function() {
 
       supported = 'space' == value;
     });
-    this.checks_[propName] = supported;
-  }
 
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+    return supported;
+  }
+);
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getBackgroundRepeatSpace = function() {
-  return npf.userAgent.Support.getInstance().getBackgroundRepeatSpace();
-};
+goog.define('npf.userAgent.support.ASSUME_BACKGROUND_SIZE', false);
 
 /**
  * In testing support for a given CSS property, it's legit to test:
@@ -684,32 +548,36 @@ npf.userAgent.support.getBackgroundRepeatSpace = function() {
  * empty string.
  *
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.isBackgroundSizeSupported.
  */
-npf.userAgent.Support.prototype.getBackgroundSize = function() {
-  return this.isCssPropertySupported_(
-    npf.userAgent.Support.Property_.BACKGROUND_SIZE, 'backgroundSize');
-};
+npf.userAgent.support.getBackgroundSize = goog.functions.cacheReturnValue(
+  function() {
+    return npf.userAgent.support.ASSUME_BACKGROUND_SIZE ||
+      npf.userAgent.support.testPropsAll_('backgroundSize');
+  }
+);
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getBackgroundSize = function() {
-  return npf.userAgent.Support.getInstance().getBackgroundSize();
-};
+goog.define('npf.userAgent.support.ASSUME_BACKGROUND_COVER', false);
 
 /**
  * developer.mozilla.org/en/CSS/background-size
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.isBackgroundSizeCoverSupported.
  */
-npf.userAgent.Support.prototype.getBackgroundSizeCover = function() {
-  var propName = npf.userAgent.Support.Property_.BACKGROUND_SIZE_COVER;
+npf.userAgent.support.getBackgroundSizeCover = goog.functions.cacheReturnValue(
+  function() {
+    if (npf.userAgent.support.ASSUME_BACKGROUND_COVER) {
+      return true;
+    }
 
-  if (!goog.isDef(this.checks_[propName])) {
     /** @type {boolean} */
     var supported;
-    var style = '#' + npf.userAgent.Support.MOD + '{background-size:cover}';
+    var style = '#' + npf.userAgent.support.MOD + '{background-size:cover}';
 
-    this.testStyles_(style, function(elem) {
+    npf.userAgent.support.testStyles_(style, function(elem) {
       /** @type {!Window} */
       var win = goog.dom.getWindow();
       /** @type {Object} */
@@ -719,253 +587,266 @@ npf.userAgent.Support.prototype.getBackgroundSizeCover = function() {
       supported = 'cover' == style['backgroundSize'];
     });
 
-    this.checks_[propName] = supported;
+    return supported;
   }
-
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+);
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getBackgroundSizeCover = function() {
-  return npf.userAgent.Support.getInstance().getBackgroundSizeCover();
-};
+goog.define('npf.userAgent.support.ASSUME_BATTERY', false);
 
 /**
  * Battery API
  * https://developer.mozilla.org/en/DOM/window.navigator.mozBattery
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.battery.isSupported.
  */
-npf.userAgent.Support.prototype.getBattery = function() {
-  var propName = npf.userAgent.Support.Property_.BATTERY;
-
-  if (!goog.isDef(this.checks_[propName])) {
-    this.checks_[propName] = !!this.testDomProps_(
-      'battery', goog.global.navigator);
-  }
-
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+npf.userAgent.support.getBattery = goog.functions.cacheReturnValue(function() {
+  return npf.userAgent.support.ASSUME_BATTERY ||
+    !!npf.userAgent.support.testDomProps_('battery', goog.global.navigator);
+});
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getBattery = function() {
-  return npf.userAgent.Support.getInstance().getBattery();
-};
+goog.define('npf.userAgent.support.ASSUME_BLOB_CONSTRUCTOR', false);
 
 /**
  * Blob constructor
  * http://dev.w3.org/2006/webapi/FileAPI/#constructorBlob
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.blob.isSupported.
  */
-npf.userAgent.Support.prototype.getBlobConstructor = function() {
-  var propName = npf.userAgent.Support.Property_.BLOB_CONSTRUCTOR;
+npf.userAgent.support.getBlobConstructor = goog.functions.cacheReturnValue(
+  function() {
+    if (npf.userAgent.support.ASSUME_BLOB_CONSTRUCTOR) {
+      return true;
+    }
 
-  if (!goog.isDef(this.checks_[propName])) {
+    /** @type {boolean} */
     var supported = false;
 
     try {
-      supported = !!(new goog.global.Blob());
+      supported = !!(new Blob());
     } catch (e) { }
 
-    this.checks_[propName] = supported;
+    return supported;
   }
+);
 
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+/**
+ * @define {boolean}
+ */
+goog.define('npf.userAgent.support.ASSUME_BORDER_IMAGE', false);
 
 /**
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.isBorderImageSupported.
  */
-npf.userAgent.support.getBlobConstructor = function() {
-  return npf.userAgent.Support.getInstance().getBlobConstructor();
-};
+npf.userAgent.support.getBorderImage = goog.functions.cacheReturnValue(
+  function() {
+    return npf.userAgent.support.ASSUME_BORDER_IMAGE ||
+      npf.userAgent.support.testPropsAll_('borderImage');
+  }
+);
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.Support.prototype.getBorderImage = function() {
-  return this.isCssPropertySupported_(
-    npf.userAgent.Support.Property_.BORDER_IMAGE, 'borderImage');
-};
-
-/**
- * @return {boolean}
- */
-npf.userAgent.support.getBorderImage = function() {
-  return npf.userAgent.Support.getInstance().getBorderImage();
-};
+goog.define('npf.userAgent.support.ASSUME_BORDER_RADIUS', false);
 
 /**
  * Super comprehensive table about all the unique implementations of
  * border-radius:
  *   http://muddledramblings.com/table-of-css3-border-radius-compliance
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.isBorderRadiusSupported.
  */
-npf.userAgent.Support.prototype.getBorderRadius = function() {
-  return this.isCssPropertySupported_(
-    npf.userAgent.Support.Property_.BORDER_RADIUS, 'borderRadius');
-};
+npf.userAgent.support.getBorderRadius = goog.functions.cacheReturnValue(
+  function() {
+    return npf.userAgent.support.ASSUME_BORDER_RADIUS ||
+      npf.userAgent.support.testPropsAll_('borderRadius');
+  }
+);
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getBorderRadius = function() {
-  return npf.userAgent.Support.getInstance().getBorderRadius();
-};
+goog.define('npf.userAgent.support.ASSUME_BOX_SHADOW', false);
 
 /**
  * WebOS unfortunately false positives on this test.
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.isBoxShadowSupported.
  */
-npf.userAgent.Support.prototype.getBoxShadow = function() {
-  return this.isCssPropertySupported_(
-    npf.userAgent.Support.Property_.BOX_SHADOW, 'boxShadow');
-};
+npf.userAgent.support.getBoxShadow = goog.functions.cacheReturnValue(
+  function() {
+    return npf.userAgent.support.ASSUME_BOX_SHADOW ||
+      npf.userAgent.support.testPropsAll_('boxShadow');
+  }
+);
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getBoxShadow = function() {
-  return npf.userAgent.Support.getInstance().getBoxShadow();
-};
+goog.define('npf.userAgent.support.ASSUME_BOX_SIZING', false);
 
 /**
  * developer.mozilla.org/en/CSS/box-sizing
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.isBoxSizingSupported.
  */
-npf.userAgent.Support.prototype.getBoxSizing = function() {
-  var propName = npf.userAgent.Support.Property_.CANVAS;
+npf.userAgent.support.getBoxSizing = goog.functions.cacheReturnValue(
+  function() {
+    if (npf.userAgent.support.ASSUME_BOX_SIZING) {
+      return true;
+    }
 
-  if (!goog.isDef(this.checks_[propName])) {
     /** @type {!Document} */
-    var doc = goog.dom.getDomHelper().getDocument();
-    this.checks_[propName] = this.testPropsAll_('boxSizing') && (
-      !goog.isDef(doc['documentMode']) || 7 < doc['documentMode']
-    );
+    var doc = goog.dom.getDocument();
+    return npf.userAgent.support.testPropsAll_('boxSizing') &&
+      (!goog.isDef(doc['documentMode']) || 7 < doc['documentMode']);
+  }
+);
+
+/**
+ * @define {boolean}
+ */
+goog.define('npf.userAgent.support.ASSUME_CANVAS', false);
+
+/**
+ * @return {boolean}
+ * @deprecated Use npf.userAgent.support.canvas.isSupported.
+ */
+npf.userAgent.support.getCanvas = goog.functions.cacheReturnValue(function() {
+  if (npf.userAgent.support.ASSUME_CANVAS) {
+    return true;
   }
 
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+  var elem = /** @type {!HTMLCanvasElement} */ (
+    goog.dom.createElement(goog.dom.TagName.CANVAS));
+  return !!(elem.getContext && elem.getContext('2d'));
+});
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getBoxSizing = function() {
-  return npf.userAgent.Support.getInstance().getBoxSizing();
-};
+goog.define('npf.userAgent.support.ASSUME_CANVAS_TO_JPEG', false);
 
 /**
- * @return {boolean}
+ * @private {boolean?}
  */
-npf.userAgent.Support.prototype.getCanvas = function() {
-  var propName = npf.userAgent.Support.Property_.CANVAS;
-
-  if (!goog.isDef(this.checks_[propName])) {
-    var elem = /** @type {!HTMLCanvasElement} */ (
-      goog.dom.createElement(goog.dom.TagName.CANVAS));
-    this.checks_[propName] = !!(elem.getContext && elem.getContext('2d'));
-  }
-
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+npf.userAgent.support.canvasToJpeg_ = null;
 
 /**
- * @return {boolean}
- */
-npf.userAgent.support.getCanvas = function() {
-  return npf.userAgent.Support.getInstance().getCanvas();
-};
-
-/**
- * @param {function(boolean)} callback
- * @param {Object=} opt_scope
- */
-npf.userAgent.Support.prototype.getCanvasToJpeg = function(callback,
-    opt_scope) {
-  this.canvasToDataUrl_(
-    npf.userAgent.Support.Property_.CANVAS_TO_JPEG, callback, opt_scope);
-};
-
-/**
- * @param {function(boolean)} callback
- * @param {Object=} opt_scope
+ * @param {function(this: SCOPE, boolean)} callback
+ * @param {SCOPE=} opt_scope
+ * @template SCOPE
+ * @deprecated Use npf.userAgent.support.canvas.isJpegDataUrlSupported.
  */
 npf.userAgent.support.getCanvasToJpeg = function(callback, opt_scope) {
-  return npf.userAgent.Support.getInstance().getCanvasToJpeg(
-    callback, opt_scope);
+  if (npf.userAgent.support.ASSUME_CANVAS_TO_JPEG) {
+    return true;
+  }
+
+  if (goog.isNull(npf.userAgent.support.canvasToJpeg_)) {
+    npf.userAgent.support.canvasToDataUrl_('jpeg', function(support) {
+      npf.userAgent.support.canvasToJpeg_ = support;
+      callback.call(opt_scope, support);
+    });
+  } else {
+    callback.call(
+      opt_scope, /** @type {boolean} */ (npf.userAgent.support.canvasToJpeg_));
+  }
 };
 
 /**
- * @param {function(boolean)} callback
- * @param {Object=} opt_scope
+ * @define {boolean}
  */
-npf.userAgent.Support.prototype.getCanvasToWebp = function(callback,
-    opt_scope) {
-  this.canvasToDataUrl_(
-    npf.userAgent.Support.Property_.CANVAS_TO_WEBP, callback, opt_scope);
-};
+goog.define('npf.userAgent.support.ASSUME_CANVAS_TO_WEBP', false);
 
 /**
- * @param {function(boolean)} callback
- * @param {Object=} opt_scope
+ * @private {boolean?}
+ */
+npf.userAgent.support.canvasToWebp_ = null;
+
+/**
+ * @param {function(this: SCOPE, boolean)} callback
+ * @param {SCOPE=} opt_scope
+ * @template SCOPE
+ * @deprecated Use npf.userAgent.support.canvas.isWebpDataUrlSupported.
  */
 npf.userAgent.support.getCanvasToWebp = function(callback, opt_scope) {
-  return npf.userAgent.Support.getInstance().getCanvasToWebp(
-    callback, opt_scope);
+  if (npf.userAgent.support.ASSUME_CANVAS_TO_WEBP) {
+    return true;
+  }
+
+  if (goog.isNull(npf.userAgent.support.canvasToWebp_)) {
+    npf.userAgent.support.canvasToDataUrl_('webp', function(support) {
+      npf.userAgent.support.canvasToWebp_ = support;
+      callback.call(opt_scope, support);
+    });
+  } else {
+    callback.call(
+      opt_scope, /** @type {boolean} */ (npf.userAgent.support.canvasToWebp_));
+  }
 };
+
+/**
+ * @const {string}
+ */
+npf.userAgent.support.CANVAS_SRC =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklE' +
+  'QVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==';
 
 /**
  * canvas.toDataURL type support
  * http://www.w3.org/TR/html5/the-canvas-element.html#dom-canvas-todataurl
- * @param {npf.userAgent.Support.Property_} propName
+ * @param {string} format
  * @param {function(boolean)} callback
- * @param {Object=} opt_scope
  * @private
  */
-npf.userAgent.Support.prototype.canvasToDataUrl_ = function(propName, callback,
-    opt_scope) {
-  var Property = npf.userAgent.Support.Property_;
-
-  if (goog.isDef(this.checks_[propName])) {
-    callback.call(opt_scope, /** @type {boolean} */ (this.checks_[propName]));
-  } else if (!this.getCanvas()) {
-    this.checks_[Property.CANVAS_TO_JPEG] = false;
-    this.checks_[Property.CANVAS_TO_WEBP] = false;
-    callback.call(opt_scope, /** @type {boolean} */ (this.checks_[propName]));
+npf.userAgent.support.canvasToDataUrl_ = function(format, callback) {
+  if (!npf.userAgent.support.getCanvas()) {
+    callback(false);
   } else {
     var image = new Image();
-    image.onload = goog.bind(function() {
+    image.onload = function() {
       var canvas = /** @type {!HTMLCanvasElement} */ (
         goog.dom.createElement(goog.dom.TagName.CANVAS));
       var ctx = /** @type {CanvasRenderingContext2D} */ (
         canvas.getContext('2d'));
       ctx.drawImage(image, 0, 0);
 
-      this.checks_[Property.CANVAS_TO_JPEG] =
-        canvas.toDataURL('image/jpeg').indexOf('data:image/jpeg') === 0;
-      this.checks_[Property.CANVAS_TO_WEBP] =
-        canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0;
+      /** @type {boolean} */
+      var support = canvas.toDataURL('image/' + format).
+        indexOf('data:image/' + format) === 0;
 
-      callback.call(opt_scope, /** @type {boolean} */ (this.checks_[propName]));
-    }, this);
-    image.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAA' +
-      'AfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==';
+      callback(support);
+    };
+    image.src = npf.userAgent.support.CANVAS_SRC;
   }
 };
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.Support.prototype.getCanvasText = function() {
-  var propName = npf.userAgent.Support.Property_.CANVAS_TEXT;
+goog.define('npf.userAgent.support.ASSUME_CANVAS_TEXT', false);
 
-  if (!goog.isDef(this.checks_[propName])) {
+/**
+ * @return {boolean}
+ * @deprecated Use npf.userAgent.support.canvas.isTextSupported.
+ */
+npf.userAgent.support.getCanvasText = goog.functions.cacheReturnValue(
+  function() {
+    if (npf.userAgent.support.ASSUME_CANVAS_TEXT) {
+      return true;
+    }
+
     var support = false;
 
-    if (this.getCanvas()) {
+    if (npf.userAgent.support.getCanvas()) {
       var element = /** @type {!HTMLCanvasElement} */ (
         goog.dom.createElement(goog.dom.TagName.CANVAS));
       var ctx = /** @type {CanvasRenderingContext2D} */ (
@@ -973,56 +854,57 @@ npf.userAgent.Support.prototype.getCanvasText = function() {
       support = goog.isFunction(ctx.fillText);
     }
 
-    this.checks_[propName] = support;
+    return support;
   }
+);
 
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+/**
+ * @define {boolean}
+ */
+goog.define('npf.userAgent.support.ASSUME_CSS_ANIMATIONS', false);
 
 /**
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.isAnimationSupported.
  */
-npf.userAgent.support.getCanvasText = function() {
-  return npf.userAgent.Support.getInstance().getCanvasText();
-};
+npf.userAgent.support.getCssAnimations = goog.functions.cacheReturnValue(
+  function() {
+    return npf.userAgent.support.ASSUME_CSS_ANIMATIONS ||
+      npf.userAgent.support.testPropsAll_('animationName');
+  }
+);
+
+/**
+ * @define {boolean}
+ */
+goog.define('npf.userAgent.support.ASSUME_CSS_COLUMNS', false);
 
 /**
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.getColumnStylesSupported.
  */
-npf.userAgent.Support.prototype.getCssAnimations = function() {
-  return this.isCssPropertySupported_(
-    npf.userAgent.Support.Property_.CSS_ANIMATIONS, 'animationName');
-};
+npf.userAgent.support.getCssColumns = goog.functions.cacheReturnValue(
+  function() {
+    return npf.userAgent.support.ASSUME_CSS_COLUMNS ||
+      npf.userAgent.support.testPropsAll_('columnCount');
+  }
+);
+
+/**
+ * @define {boolean}
+ */
+goog.define('npf.userAgent.support.ASSUME_CSS_GRADIENTS', false);
 
 /**
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.isGradientSupported.
  */
-npf.userAgent.support.getCssAnimations = function() {
-  return npf.userAgent.Support.getInstance().getCssAnimations();
-};
+npf.userAgent.support.getCssGradients = goog.functions.cacheReturnValue(
+  function() {
+    if (npf.userAgent.support.ASSUME_CSS_GRADIENTS) {
+      return true;
+    }
 
-/**
- * @return {boolean}
- */
-npf.userAgent.Support.prototype.getCssColumns = function() {
-  return this.isCssPropertySupported_(
-    npf.userAgent.Support.Property_.CSS_COLUMNS, 'columnCount');
-};
-
-/**
- * @return {boolean}
- */
-npf.userAgent.support.getCssColumns = function() {
-  return npf.userAgent.Support.getInstance().getCssColumns();
-};
-
-/**
- * @return {boolean}
- */
-npf.userAgent.Support.prototype.getCssGradients = function() {
-  var propName = npf.userAgent.Support.Property_.CSS_GRADIENTS;
-
-  if (!goog.isDef(this.checks_[propName])) {
     /*
      * For CSS Gradients syntax, please see:
      * http://webkit.org/blog/175/introducing-css-gradients/
@@ -1038,46 +920,47 @@ npf.userAgent.Support.prototype.getCssGradients = function() {
     /** @type {string} */
     var str3 = 'linear-gradient(left top,#9f9, white);';
 
-    this.setCss_((str1 + '-webkit- '.split(' ').join(str2 + str1) +
-      npf.userAgent.Support.prefixes.join(str3 + str1)).slice(0, -str1.length));
+    npf.userAgent.support.setCss_(
+      (str1 + '-webkit- '.split(' ').join(str2 + str1) +
+      npf.userAgent.support.prefixes.join(str3 + str1)
+    ).slice(0, -str1.length));
 
-    this.checks_[propName] = this.contains_(
-      this.mStyle_.backgroundImage, 'gradient');
+    return npf.userAgent.support.contains_(
+      npf.userAgent.support.mStyle_.backgroundImage, 'gradient');
   }
+);
 
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+/**
+ * @define {boolean}
+ */
+goog.define('npf.userAgent.support.ASSUME_CSS_REFLECTIONS', false);
 
 /**
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.isReflectionSupported.
  */
-npf.userAgent.support.getCssGradients = function() {
-  return npf.userAgent.Support.getInstance().getCssGradients();
-};
+npf.userAgent.support.getCssReflections = goog.functions.cacheReturnValue(
+  function() {
+    return npf.userAgent.support.ASSUME_CSS_REFLECTIONS ||
+      npf.userAgent.support.testPropsAll_('boxReflect');
+  }
+);
+
+/**
+ * @define {boolean}
+ */
+goog.define('npf.userAgent.support.ASSUME_CSS_REM_UNIT', false);
 
 /**
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.isRemUnitSupported.
  */
-npf.userAgent.Support.prototype.getCssReflections = function() {
-  return this.isCssPropertySupported_(
-    npf.userAgent.Support.Property_.CSS_REFLECTIONS, 'boxReflect');
-};
+npf.userAgent.support.getCssRemUnit = goog.functions.cacheReturnValue(
+  function() {
+    if (npf.userAgent.support.ASSUME_CSS_REM_UNIT) {
+      return true;
+    }
 
-/**
- * @return {boolean}
- */
-npf.userAgent.support.getCssReflections = function() {
-  return npf.userAgent.Support.getInstance().getCssReflections();
-};
-
-/**
- * Stylable scrollbars detection.
- * @return {boolean}
- */
-npf.userAgent.Support.prototype.getCssRemUnit = function() {
-  var propName = npf.userAgent.Support.Property_.CSS_REM_UNIT;
-
-  if (!goog.isDef(this.checks_[propName])) {
     /** @type {!Element} */
     var div = goog.dom.createElement(goog.dom.TagName.DIV);
 
@@ -1085,80 +968,80 @@ npf.userAgent.Support.prototype.getCssRemUnit = function() {
       div.style['fontSize'] = '3rem';
     } catch(er){}
 
-    this.checks_[propName] = /rem/.test(div.style['fontSize']);
+    return /rem/.test(div.style['fontSize']);
   }
-
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+);
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getCssRemUnit = function() {
-  return npf.userAgent.Support.getInstance().getCssRemUnit();
-};
+goog.define('npf.userAgent.support.ASSUME_CSS_SCROLL_BAR', false);
 
 /**
  * Stylable scrollbars detection.
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.isScrollbarSupported.
  */
-npf.userAgent.Support.prototype.getCssScrollBar = function() {
-  var propName = npf.userAgent.Support.Property_.CSS_SCROLL_BAR;
+npf.userAgent.support.getCssScrollBar = goog.functions.cacheReturnValue(
+  function() {
+    if (npf.userAgent.support.ASSUME_CSS_SCROLL_BAR) {
+      return true;
+    }
 
-  if (!goog.isDef(this.checks_[propName])) {
     /** @type {boolean} */
     var supported;
-    var styles = '#' + npf.userAgent.Support.MOD +
-      '{overflow: scroll; width: 40px }#' +
-      npf.userAgent.Support.prefixes
-        .join('scrollbar{width:0px} #' + npf.userAgent.Support.MOD + '::')
+    var styles = '#' + npf.userAgent.support.MOD +
+      '{overflow:scroll;width:40px}#' +
+      npf.userAgent.support.prefixes
+        .join('scrollbar{width:0px} #' + npf.userAgent.support.MOD + '::')
         .split('#')
         .slice(1)
         .join('#') + "scrollbar{width:0px}";
 
-    this.testStyles_(styles, function(node) {
+    npf.userAgent.support.testStyles_(styles, function(node) {
       supported = 'scrollWidth' in node && 40 == node.scrollWidth;
     });
 
-    this.checks_[propName] = supported;
+    return supported;
   }
+);
 
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+/**
+ * @define {boolean}
+ */
+goog.define('npf.userAgent.support.ASSUME_CSS_TRANSFORMS', false);
 
 /**
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.isTransformSupported.
  */
-npf.userAgent.support.getCssScrollBar = function() {
-  return npf.userAgent.Support.getInstance().getCssScrollBar();
-};
+npf.userAgent.support.getCssTransforms = goog.functions.cacheReturnValue(
+  function() {
+    return npf.userAgent.support.ASSUME_CSS_TRANSFORMS ||
+      npf.userAgent.support.testPropsAll_('transform');
+  }
+);
+
+/**
+ * @define {boolean}
+ */
+goog.define('npf.userAgent.support.ASSUME_CSS_TRANSFORMS_3D', false);
 
 /**
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.isTransform3dSupported.
  */
-npf.userAgent.Support.prototype.getCssTransforms = function() {
-  return this.isCssPropertySupported_(
-    npf.userAgent.Support.Property_.CSS_TRANSFORMS, 'transform');
-};
+npf.userAgent.support.getCssTransforms3d = goog.functions.cacheReturnValue(
+  function() {
+    if (npf.userAgent.support.ASSUME_CSS_TRANSFORMS_3D) {
+      return true;
+    }
 
-/**
- * @return {boolean}
- */
-npf.userAgent.support.getCssTransforms = function() {
-  return npf.userAgent.Support.getInstance().getCssTransforms();
-};
-
-/**
- * @return {boolean}
- */
-npf.userAgent.Support.prototype.getCssTransforms3d = function() {
-  var propName = npf.userAgent.Support.Property_.CSS_TRANSFORMS_3D;
-
-  if (!goog.isDef(this.checks_[propName])) {
     /** @type {boolean} */
-    var isPropertySupported = !!this.testPropsAll_('perspective');
+    var isPropertySupported =
+      npf.userAgent.support.testPropsAll_('perspective');
     /** @type {!Document} */
-    var doc = goog.dom.getDomHelper().getDocument();
+    var doc = goog.dom.getDocument();
 
     // Webkits 3D transforms are passed off to the browser's own graphics
     // renderer. It works fine in Safari on Leopard and Snow Leopard, but not
@@ -1176,9 +1059,9 @@ npf.userAgent.Support.prototype.getCssTransforms3d = function() {
 
       /** @type {string} */
       var style = '@media (transform-3d),(-webkit-transform-3d){#' +
-        npf.userAgent.Support.MOD + '{left:9px;position:absolute;height:3px;}}';
+        npf.userAgent.support.MOD + '{left:9px;position:absolute;height:3px;}}';
 
-      this.testStyles_(style, function(node, rule) {
+      npf.userAgent.support.testStyles_(style, function(node, rule) {
         // IE8 will bork if you create a custom build that excludes both
         // fontface and generatedcontent tests.
         // So we check for cssRules and that there is a rule available
@@ -1188,53 +1071,46 @@ npf.userAgent.Support.prototype.getCssTransforms3d = function() {
       });
     }
 
-    this.checks_[propName] = isPropertySupported;
+    return isPropertySupported;
   }
+);
 
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+/**
+ * @define {boolean}
+ */
+goog.define('npf.userAgent.support.ASSUME_CSS_TRANSITIONS', false);
 
 /**
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.isTransitionSupported.
  */
-npf.userAgent.support.getCssTransforms3d = function() {
-  return npf.userAgent.Support.getInstance().getCssTransforms3d();
-};
+npf.userAgent.support.getCssTransitions = goog.functions.cacheReturnValue(
+  function() {
+    return npf.userAgent.support.ASSUME_CSS_TRANSITIONS ||
+      npf.userAgent.support.testPropsAll_('transition');
+  }
+);
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.Support.prototype.getCssTransitions = function() {
-  return this.isCssPropertySupported_(
-    npf.userAgent.Support.Property_.CSS_TRANSITIONS, 'transition');
-};
+goog.define('npf.userAgent.support.ASSUME_CONTENT_EDITABLE', false);
 
 /**
- * @return {boolean}
- */
-npf.userAgent.support.getCssTransitions = function() {
-  return npf.userAgent.Support.getInstance().getCssTransitions();
-};
-
-/**
- * contentEditable
  * http://www.whatwg.org/specs/web-apps/current-work/multipage/editing.html#contenteditable
  * This is known to false positive in some mobile browsers
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.contentEditable.isSupported.
  */
-npf.userAgent.Support.prototype.getContentEditable = function() {
-  /** @type {!Document} */
-  var doc = goog.dom.getDomHelper().getDocument();
-
-  return 'contentEditable' in doc.documentElement;
+npf.userAgent.support.getContentEditable = function() {
+  return npf.userAgent.support.ASSUME_CONTENT_EDITABLE ||
+    'contentEditable' in goog.dom.getDocument().documentElement;
 };
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getContentEditable = function() {
-  return npf.userAgent.Support.getInstance().getContentEditable();
-};
+goog.define('npf.userAgent.support.ASSUME_CONTENT_SECURITY_POLICE', false);
 
 /**
  * Test for (experimental) Content Security Policy 1.1 support.
@@ -1246,112 +1122,128 @@ npf.userAgent.support.getContentEditable = function() {
  *
  * Editor's Draft: https://dvcs.w3.org/hg/content-security-policy/raw-file/tip/csp-specification.dev.html
  * @return {boolean}
+ * @deprecated
  */
-npf.userAgent.Support.prototype.getContentSecurityPolicy = function() {
-  /** @type {!Document} */
-  var doc = goog.dom.getDomHelper().getDocument();
+npf.userAgent.support.getContentSecurityPolicy = function() {
+  if (npf.userAgent.support.ASSUME_CONTENT_SECURITY_POLICE) {
+    return true;
+  }
 
-  return 'SecurityPolicy' in doc;
+  /** @type {!Document} */
+  var doc = goog.dom.getDocument();
+
+  return 'securityPolicy' in doc || 'SecurityPolicy' in doc;
 };
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getContentSecurityPolicy = function() {
-  return npf.userAgent.Support.getInstance().getContentSecurityPolicy();
-};
+goog.define('npf.userAgent.support.ASSUME_CONTEXT_MENU', false);
 
 /**
  * http://www.w3.org/TR/html5/interactive-elements.html#context-menus
  * Demo at http://thewebrocks.com/demos/context-menu/
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.contextMenu.isSupported.
  */
-npf.userAgent.Support.prototype.getContextMenu = function() {
+npf.userAgent.support.getContextMenu = function() {
+  if (npf.userAgent.support.ASSUME_CONTEXT_MENU) {
+    return true;
+  }
+
   /** @type {!Document} */
-  var doc = goog.dom.getDomHelper().getDocument();
+  var doc = goog.dom.getDocument();
 
   return 'contextMenu' in doc.documentElement &&
     'HTMLMenuItemElement' in goog.global;
 };
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getContextMenu = function() {
-  return npf.userAgent.Support.getInstance().getContextMenu();
-};
+goog.define('npf.userAgent.support.ASSUME_CORS', false);
 
 /**
  * @return {boolean}
- */
-npf.userAgent.Support.prototype.getCors = function() {
-  return !!(goog.global.XMLHttpRequest &&
-    'withCredentials' in new XMLHttpRequest());
-};
-
-/**
- * @return {boolean}
+ * @deprecated Use npf.userAgent.support.xhr.isCorsSupported.
  */
 npf.userAgent.support.getCors = function() {
-  return npf.userAgent.Support.getInstance().getCors();
+  return npf.userAgent.support.ASSUME_CORS ||
+    !!(goog.global.XMLHttpRequest && 'withCredentials' in new XMLHttpRequest());
 };
+
+/**
+ * @define {boolean}
+ */
+goog.define('npf.userAgent.support.ASSUME_DATA_URI', false);
+
+/**
+ * @private {boolean?}
+ */
+npf.userAgent.support.dataUri_ = null;
+
+/**
+ * @const {string}
+ */
+npf.userAgent.support.DATA_URI_SRC =
+  'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
 
 /**
  * https://github.com/Modernizr/Modernizr/issues/14
- * @param {function(boolean)} callback
- * @param {Object=} opt_scope
+ * @param {function(this: SCOPE, boolean)} callback
+ * @param {SCOPE=} opt_scope
+ * @template SCOPE
+ * @deprecated Use npf.userAgent.support.url.isDataUriSupported.
  */
-npf.userAgent.Support.prototype.getDataUri = function(callback, opt_scope) {
-  var propName = npf.userAgent.Support.Property_.DATA_URI;
-
-  if (goog.isDef(this.checks_[propName])) {
-    callback.call(opt_scope, /** @type {boolean} */ (this.checks_[propName]));
+npf.userAgent.support.getDataUri = function(callback, opt_scope) {
+  if (npf.userAgent.support.ASSUME_DATA_URI) {
+    callback.call(opt_scope, true);
+  } else if (goog.isNull(npf.userAgent.support.dataUri_)) {
+    var image = new Image();
+    image.onerror = function() {
+      npf.userAgent.support.dataUri_ = false;
+      callback.call(opt_scope, false);
+    };
+    image.onload = function() {
+      /** @type {boolean} */
+      var supported = 1 == image.width && 1 == image.height;
+      npf.userAgent.support.dataUri_ = supported;
+      callback.call(opt_scope, supported);
+    };
+    image.src = npf.userAgent.support.DATA_URI_SRC;
   } else {
-    var datauri = new Image();
-    datauri.onerror = goog.bind(function() {
-      this.checks_[propName] = false;
-      callback.call(opt_scope, /** @type {boolean} */ (this.checks_[propName]));
-    }, this);
-    datauri.onload = goog.bind(function() {
-      this.checks_[propName] = datauri.width == 1 && datauri.height == 1;
-      callback.call(opt_scope, /** @type {boolean} */ (this.checks_[propName]));
-    }, this);
-    datauri.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQAB' +
-      'AAACAUwAOw==';
+    callback.call(
+      opt_scope, /** @type {boolean} */ (npf.userAgent.support.dataUri_));
   }
 };
 
 /**
- * @param {function(boolean)} callback
- * @param {Object=} opt_scope
+ * @define {boolean}
  */
-npf.userAgent.support.getDataUri = function(callback, opt_scope) {
-  return npf.userAgent.Support.getInstance().getDataUri(callback, opt_scope);
-};
+goog.define('npf.userAgent.support.ASSUME_DRAD_AND_DROP', false);
 
 /**
  * @return {boolean}
+ * @deprecated
  */
-npf.userAgent.Support.prototype.getDragAndDrop = function() {
-  var propName = npf.userAgent.Support.Property_.DRAG_AND_DROP;
+npf.userAgent.support.getDragAndDrop = goog.functions.cacheReturnValue(
+  function() {
+    if (npf.userAgent.support.ASSUME_DRAD_AND_DROP) {
+      return true;
+    }
 
-  if (!goog.isDef(this.checks_[propName])) {
     /** @type {Element} */
     var element = goog.dom.createElement(goog.dom.TagName.DIV);
 
-    this.checks_[propName] = !!(('draggable' in element) ||
+    return !!(('draggable' in element) ||
       ('ondragstart' in element && 'ondrop' in element));
   }
-
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+);
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getDragAndDrop = function() {
-  return npf.userAgent.Support.getInstance().getDragAndDrop();
-};
+goog.define('npf.userAgent.support.ASSUME_DOWNLOAD_ATTRIBUTE', false);
 
 /**
  * a[download] attribute
@@ -1359,33 +1251,56 @@ npf.userAgent.support.getDragAndDrop = function() {
  * points to should be downloaded by the browser rather than navigating to it.
  * http://developers.whatwg.org/links.html#downloading-resources
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.elements.isDownloadAttributeSupported.
  */
-npf.userAgent.Support.prototype.getDownloadAttribute = function() {
-  return 'download' in goog.dom.createElement(goog.dom.TagName.A);
+npf.userAgent.support.getDownloadAttribute = function() {
+  return npf.userAgent.support.ASSUME_DOWNLOAD_ATTRIBUTE ||
+    ('download' in goog.dom.createElement(goog.dom.TagName.A));
 };
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getDownloadAttribute = function() {
-  return npf.userAgent.Support.getInstance().getDownloadAttribute();
-};
+goog.define('npf.userAgent.support.ASSUME_EVENT_SOURCE', false);
 
 /**
  * Server sent events aka eventsource
  * dev.w3.org/html5/eventsource/
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.network.isEventSourceSupported.
  */
-npf.userAgent.Support.prototype.getEventSource = function() {
-  return !!goog.global['EventSource'];
+npf.userAgent.support.getEventSource = function() {
+  return npf.userAgent.support.ASSUME_EVENT_SOURCE ||
+    !!goog.global['EventSource'];
 };
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getEventSource = function() {
-  return npf.userAgent.Support.getInstance().getEventSource();
-};
+goog.define('npf.userAgent.support.ASSUME_EXIF_ORIENTATION', false);
+
+/**
+ * @private {boolean?}
+ */
+npf.userAgent.support.exifOrientation_ = null;
+
+/**
+ * @const {string}
+ */
+npf.userAgent.support.ORIENTATION_SRC =
+  'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/4QAiRXhpZgAASUkqAAgAAAA' +
+  'BABIBAwABAAAABgASAAAAAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBA' +
+  'QEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQE' +
+  'BAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/wAARCAABAAIDA' +
+  'SIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwU' +
+  'FBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoK' +
+  'So0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5i' +
+  'ZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+' +
+  'Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ' +
+  '3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2N' +
+  'zg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqO' +
+  'kpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oAD' +
+  'AMBAAIRAxEAPwD+/iiiigD/2Q=='
 
 /**
  * EXIF Orientation test
@@ -1394,50 +1309,37 @@ npf.userAgent.support.getEventSource = function() {
  * accordingly. Looks like most desktop browsers just ignore this data.
  *
  * description: www.impulseadventure.com/photo/exif-orientation.html
- * @param {function(boolean)} callback
- * @param {Object=} opt_scope
+ * @param {function(this: SCOPE, boolean)} callback
+ * @param {SCOPE=} opt_scope
+ * @template SCOPE
+ * @deprecated Use npf.userAgent.support.image.isOrientationSupported.
  */
-npf.userAgent.Support.prototype.getExifOrientation = function(callback,
-    opt_scope) {
-  var propName = npf.userAgent.Support.Property_.EXIF_ORIENTATION;
-
-  if (goog.isDef(this.checks_[propName])) {
-    callback.call(opt_scope, /** @type {boolean} */ (this.checks_[propName]));
-  } else {
+npf.userAgent.support.getExifOrientation = function(callback, opt_scope) {
+  if (npf.userAgent.support.ASSUME_EXIF_ORIENTATION) {
+    callback.call(opt_scope, true);
+  } else if (goog.isNull(npf.userAgent.support.exifOrientation_)) {
     var image = new Image();
-    image.onerror = goog.bind(function() {
-      this.checks_[propName] = false;
-      callback.call(opt_scope, /** @type {boolean} */ (this.checks_[propName]));
-    }, this);
-    image.onload = goog.bind(function() {
-      this.checks_[propName] = 2 !== image.width;
-      callback.call(opt_scope, /** @type {boolean} */ (this.checks_[propName]));
-    }, this);
-    image.src = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/4QAiRXhpZ' +
-      'gAASUkqAAgAAAABABIBAwABAAAABgASAAAAAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQE' +
-      'BAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBA' +
-      'QEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE' +
-      'BAQEBAQEBAQH/wAARCAABAAIDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECA' +
-      'wQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaE' +
-      'II0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZ' +
-      'WZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMX' +
-      'Gx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAA' +
-      'AAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRM' +
-      'iMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVV' +
-      'ldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba' +
-      '3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAP' +
-      'wD+/iiiigD/2Q==';
+    image.onerror = function() {
+      npf.userAgent.support.exifOrientation_ = false;
+      callback.call(opt_scope, false);
+    };
+    image.onload = function() {
+      /** @type {boolean} */
+      var supported = 2 !== image.width;
+      npf.userAgent.support.exifOrientation_ = supported;
+      callback.call(opt_scope, supported);
+    };
+    image.src = npf.userAgent.support.ORIENTATION_SRC;
+  } else {
+    callback.call(opt_scope,
+      /** @type {boolean} */ (npf.userAgent.support.exifOrientation_));
   }
 };
 
 /**
- * @param {function(boolean)} callback
- * @param {Object=} opt_scope
+ * @define {boolean}
  */
-npf.userAgent.support.getExifOrientation = function(callback, opt_scope) {
-  return npf.userAgent.Support.getInstance().getExifOrientation(
-    callback, opt_scope);
-};
+goog.define('npf.userAgent.support.ASSUME_FILE_INPUT', false);
 
 /**
  * Detects whether input type="file" is available on the platform
@@ -1446,177 +1348,170 @@ npf.userAgent.support.getExifOrientation = function(callback, opt_scope) {
  * It's useful if you want to hide the upload feature of your app on devices
  * that don't support it (iphone, ipad, etc).
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.forms.isFileInputSupported.
  */
-npf.userAgent.Support.prototype.getFileInput = function() {
-  var propName = npf.userAgent.Support.Property_.FILE_INPUT;
+npf.userAgent.support.getFileInput = goog.functions.cacheReturnValue(
+  function() {
+    if (npf.userAgent.support.ASSUME_FILE_INPUT) {
+      return true;
+    }
 
-  if (!goog.isDef(this.checks_[propName])) {
     var inputElement = /** @type {HTMLInputElement} */ (
-      goog.dom.createDom(goog.dom.TagName.INPUT, {
-        'type': 'file'
-      })
-    );
-    this.checks_[propName] = !inputElement.disabled;
-  }
+      goog.dom.createElement(goog.dom.TagName.INPUT));
+    inputElement.type = goog.dom.InputType.FILE;
 
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+    return !inputElement.disabled;
+  }
+);
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getFileInput = function() {
-  return npf.userAgent.Support.getInstance().getFileInput();
-};
+goog.define('npf.userAgent.support.ASSUME_FILE_SYSTEM', false);
 
 /**
  * FileSystem API
  * dev.w3.org/2009/dap/file-system/file-dir-sys.html
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.file.isFileSystemSupported.
  */
-npf.userAgent.Support.prototype.getFileSystem = function() {
-  var propName = npf.userAgent.Support.Property_.FILE_SYSTEM;
-
-  if (!goog.isDef(this.checks_[propName])) {
-    this.checks_[propName] =
-      !!this.testDomProps_('requestFileSystem', goog.global);
+npf.userAgent.support.getFileSystem = goog.functions.cacheReturnValue(
+  function() {
+    return npf.userAgent.support.ASSUME_FILE_SYSTEM ||
+      !!npf.userAgent.support.testDomProps_('requestFileSystem', goog.global);
   }
-
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+);
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getFileSystem = function() {
-  return npf.userAgent.Support.getInstance().getFileSystem();
-};
+goog.define('npf.userAgent.support.ASSUME_FLEX_BOX', false);
 
 /**
  * The *new* flexbox
  * dev.w3.org/csswg/css3-flexbox
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.isFlexboxSupported.
  */
-npf.userAgent.Support.prototype.getFlexBox = function() {
-  return this.isCssPropertySupported_(
-    npf.userAgent.Support.Property_.FLEX_BOX, 'flexWrap');
-};
+npf.userAgent.support.getFlexBox = goog.functions.cacheReturnValue(function() {
+  return npf.userAgent.support.ASSUME_FLEX_BOX ||
+    npf.userAgent.support.testPropsAll_('flexWrap');
+});
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getFlexBox = function() {
-  return npf.userAgent.Support.getInstance().getFlexBox();
-};
+goog.define('npf.userAgent.support.ASSUME_FONT_FACE', false);
 
 /**
  * font-face detection routine by Diego Perini
  * http://javascript.nwbox.com/CSSSupport/
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.isFontFaceSupported.
  */
-npf.userAgent.Support.prototype.getFontFace = function() {
-  var propName = npf.userAgent.Support.Property_.FONT_FACE;
-
-  if (!goog.isDef(this.checks_[propName])) {
-    /** @type {boolean} */
-    var isPropertySupported;
-    /** @type {string} */
-    var style = '@font-face {font-family:"font";src:url("https://")}';
-
-    this.testStyles_(style, function(element, rule) {
-      var style = /** @type {HTMLStyleElement} */ (
-        goog.dom.getElement('s' + npf.userAgent.Support.MOD));
-      /** @type {StyleSheet} */
-      var sheet = /** @type {StyleSheet} */ (style['sheet']) ||
-        style.styleSheet;
-      /** @type {string} */
-      var cssText = '';
-
-      if (sheet['cssRules']) {
-        var cssSheet = /** @type {CSSStyleSheet} */ (sheet);
-        /** @type {CSSRule} */
-        var cssItem = cssSheet.cssRules.item(0);
-
-        if (cssItem) {
-          cssText = cssItem.cssText;
-        }
-      } else if (sheet.cssText) {
-        cssText = sheet.cssText;
-      }
-
-      isPropertySupported =
-        /src/i.test(cssText) && cssText.indexOf(rule.split(' ')[0]) === 0;
-    });
-
-    this.checks_[propName] = isPropertySupported;
+npf.userAgent.support.getFontFace = goog.functions.cacheReturnValue(function() {
+  if (npf.userAgent.support.ASSUME_FONT_FACE) {
+    return true;
   }
 
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+  /** @type {boolean} */
+  var isPropertySupported;
+  /** @type {string} */
+  var style = '@font-face {font-family:"font";src:url("https://")}';
+
+  npf.userAgent.support.testStyles_(style, function(element, rule) {
+    var style = /** @type {HTMLStyleElement} */ (
+      goog.dom.getElement('s' + npf.userAgent.support.MOD));
+    /** @type {StyleSheet} */
+    var sheet = /** @type {StyleSheet} */ (style['sheet']) ||
+      style.styleSheet;
+    /** @type {string} */
+    var cssText = '';
+
+    if (sheet['cssRules']) {
+      var cssSheet = /** @type {CSSStyleSheet} */ (sheet);
+      /** @type {CSSRule} */
+      var cssItem = cssSheet.cssRules.item(0);
+
+      if (cssItem) {
+        cssText = cssItem.cssText;
+      }
+    } else if (sheet.cssText) {
+      cssText = sheet.cssText;
+    }
+
+    isPropertySupported = /src/i.test(cssText) &&
+      cssText.indexOf(rule.split(' ')[0]) === 0;
+  });
+
+  return isPropertySupported;
+});
+
+/**
+ * @define {boolean}
+ */
+goog.define('npf.userAgent.support.ASSUME_FULL_SCREEN', false);
 
 /**
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.fullscreen.isSupported.
  */
-npf.userAgent.support.getFontFace = function() {
-  return npf.userAgent.Support.getInstance().getFontFace();
-};
-
-/**
- * @return {boolean}
- */
-npf.userAgent.Support.prototype.getFullScreen = function() {
-  /** @type {!Document} */
-  var doc = goog.dom.getDomHelper().getDocument();
-
-  for (var i = 0; i < npf.userAgent.Support.domPrefixes.length; i++) {
-    if (doc[npf.userAgent.Support.domPrefixes[i] + 'CancelFullScreen']) {
+npf.userAgent.support.getFullScreen = goog.functions.cacheReturnValue(
+  function() {
+    if (npf.userAgent.support.ASSUME_FULL_SCREEN) {
       return true;
     }
-  }
 
-  return !!doc['cancelFullScreen'];
-};
+    /** @type {!Document} */
+    var doc = goog.dom.getDocument();
+
+    for (var i = 0; i < npf.userAgent.support.domPrefixes.length; i++) {
+      if (doc[npf.userAgent.support.domPrefixes[i] + 'CancelFullScreen']) {
+        return true;
+      }
+    }
+
+    return !!doc['cancelFullScreen'];
+  }
+);
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getFullScreen = function() {
-  return npf.userAgent.Support.getInstance().getFullScreen();
-};
+goog.define('npf.userAgent.support.ASSUME_GENERATED_CONTENT', false);
 
 /**
  * CSS generated content detection
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.isGeneratedContentSupported.
  */
-npf.userAgent.Support.prototype.getGeneratedContent = function() {
-  var propName = npf.userAgent.Support.Property_.GENERATED_CONTENT;
+npf.userAgent.support.getGeneratedContent = goog.functions.cacheReturnValue(
+  function() {
+    if (npf.userAgent.support.ASSUME_GENERATED_CONTENT) {
+      return true;
+    }
 
-  if (!goog.isDef(this.checks_[propName])) {
     /** @type {boolean} */
     var isPropertySupported;
     /** @type {string} */
     var style = [
-      '#', npf.userAgent.Support.MOD, '{font:0/0 a}#',
-      npf.userAgent.Support.MOD, ':after{content:"',
-      npf.userAgent.Support.SMILE, '";visibility:hidden;font:3px/1 a}'
+      '#', npf.userAgent.support.MOD, '{font:0/0 a}#',
+      npf.userAgent.support.MOD, ':after{content:"',
+      npf.userAgent.support.SMILE, '";visibility:hidden;font:3px/1 a}'
     ].join('');
 
-    this.testStyles_(style, function(node, rule) {
+    npf.userAgent.support.testStyles_(style, function(node, rule) {
       isPropertySupported = node.offsetHeight >= 3;
     });
 
-    this.checks_[propName] = isPropertySupported;
+    return isPropertySupported;
   }
-
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+);
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getGeneratedContent = function() {
-  return npf.userAgent.Support.getInstance().getGeneratedContent();
-};
+goog.define('npf.userAgent.support.ASSUME_GEOLOCATION', false);
 
 /**
  * Tests for the new Geolocation API specification.
@@ -1626,83 +1521,87 @@ npf.userAgent.support.getGeneratedContent = function() {
  * or view a fallback solution using google's geo API:
  *   http://gist.github.com/366184
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.geolocation.isSupported.
  */
-npf.userAgent.Support.prototype.getGeolocation = function() {
-  return 'geolocation' in navigator;
+npf.userAgent.support.getGeolocation = function() {
+  return npf.userAgent.support.ASSUME_GEOLOCATION ||
+    ('geolocation' in navigator);
 };
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getGeolocation = function() {
-  return npf.userAgent.Support.getInstance().getGeolocation();
-};
+goog.define('npf.userAgent.support.ASSUME_HASH_CHANGE', false);
 
 /**
  * documentMode logic from YUI to filter out IE8 Compat Mode which false
  * positives.
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.events.isHashChangeEventSupported.
  */
-npf.userAgent.Support.prototype.getHashChange = function() {
-  var propName = npf.userAgent.Support.Property_.HASH_CHANGE;
+npf.userAgent.support.getHashChange = goog.functions.cacheReturnValue(
+  function() {
+    if (npf.userAgent.support.ASSUME_HASH_CHANGE) {
+      return true;
+    }
 
-  if (!goog.isDef(this.checks_[propName])) {
     /** @type {!Document} */
-    var doc = goog.dom.getDomHelper().getDocument();
-    this.checks_[propName] =
-      this.hasEvent(goog.events.EventType.HASHCHANGE, goog.global) &&
+    var doc = goog.dom.getDocument();
+
+    return npf.userAgent.support.hasEvent(
+        goog.events.EventType.HASHCHANGE, goog.global) &&
       (!goog.isDef(doc['documentMode']) || 7 < doc['documentMode']);
   }
-
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+);
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getHashChange = function() {
-  return npf.userAgent.Support.getInstance().getHashChange();
-};
+goog.define('npf.userAgent.support.ASSUME_HISTORY', false);
 
 /**
+ * @param {Window=} opt_win
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.history.isSupported.
  */
-npf.userAgent.Support.prototype.getHistory = function() {
-  return !!(goog.global.history && goog.global.history.pushState);
-};
-
-/**
- * @return {boolean}
- */
-npf.userAgent.support.getHistory = function() {
-  return npf.userAgent.Support.getInstance().getHistory();
-};
-
-/**
- * @return {boolean}
- */
-npf.userAgent.Support.prototype.getHsla = function() {
-  var propName = npf.userAgent.Support.Property_.HSLA;
-
-  if (!goog.isDef(this.checks_[propName])) {
-    // Same as rgba(), in fact, browsers re-map hsla() to rgba() internally,
-    // except IE9 who retains it as hsla
-    this.setCss_('background-color:hsla(120,40%,100%,.5)');
-
-    this.checks_[propName] =
-      this.contains_(this.mStyle_.backgroundColor, 'rgba') ||
-      this.contains_(this.mStyle_.backgroundColor, 'hsla');
+npf.userAgent.support.getHistory = function(opt_win) {
+  if (npf.userAgent.support.ASSUME_HISTORY) {
+    return true;
   }
 
-  return /** @type {boolean} */ (this.checks_[propName]);
+  var win = opt_win || window;
+
+  return !!(win.history && win.history.pushState);
 };
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getHsla = function() {
-  return npf.userAgent.Support.getInstance().getHsla();
-};
+goog.define('npf.userAgent.support.ASSUME_HSLA', false);
+
+/**
+ * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.isHslaSupported.
+ */
+npf.userAgent.support.getHsla = goog.functions.cacheReturnValue(function() {
+  if (npf.userAgent.support.ASSUME_HSLA) {
+    return true;
+  }
+
+  // Same as rgba(), in fact, browsers re-map hsla() to rgba() internally,
+  // except IE9 who retains it as hsla
+  npf.userAgent.support.setCss_('background-color:hsla(120,40%,100%,.5)');
+
+  return npf.userAgent.support.contains_(
+      npf.userAgent.support.mStyle_.backgroundColor, 'rgba') ||
+    npf.userAgent.support.contains_(
+      npf.userAgent.support.mStyle_.backgroundColor, 'hsla');
+});
+
+/**
+ * @define {boolean}
+ */
+goog.define('npf.userAgent.support.ASSUME_INDEXED_DB', false);
 
 /**
  * Vendors had inconsistent prefixing with the experimental Indexed DB:
@@ -1711,130 +1610,134 @@ npf.userAgent.support.getHsla = function() {
  *     mozIndexedDB
  * For speed, we don't test the legacy (and beta-only) indexedDB
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.indexedDb.isSupported.
  */
-npf.userAgent.Support.prototype.getIndexedDb = function() {
-  var propName = npf.userAgent.Support.Property_.INDEXED_DB;
-
-  if (!goog.isDef(this.checks_[propName])) {
-    this.checks_[propName] = !!this.testDomProps_('indexedDB', goog.global);
+npf.userAgent.support.getIndexedDb = goog.functions.cacheReturnValue(
+  function() {
+    return npf.userAgent.support.ASSUME_INDEXED_DB ||
+      !!npf.userAgent.support.testDomProps_('indexedDB', goog.global);
   }
-
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+);
 
 /**
- * @return {boolean}
+ * @return {IDBFactory}
+ * @deprecated Use npf.userAgent.support.indexedDb.getDbFactory.
  */
-npf.userAgent.support.getIndexedDb = function() {
-  return npf.userAgent.Support.getInstance().getIndexedDb();
-};
+npf.userAgent.support.getIndexedDbObject = goog.functions.cacheReturnValue(
+  function() {
+    return /** @type {IDBFactory} */ (
+      npf.userAgent.support.testDomProps_('indexedDB', goog.global) || null);
+  }
+);
+
+/**
+ * @return {IDBTransaction}
+ * @deprecated Use npf.userAgent.support.indexedDb.getIdbTransaction.
+ */
+npf.userAgent.support.getIdbTransactionObject = goog.functions.cacheReturnValue(
+  function() {
+    return /** @type {IDBTransaction} */ (
+      npf.userAgent.support.testDomProps_(
+        'IDBTransaction', goog.global) || null);
+  }
+);
+
+/**
+ * @return {IDBKeyRange}
+ * @deprecated Use npf.userAgent.support.indexedDb.getIdbKeyRange.
+ */
+npf.userAgent.support.getIdbKeyRangeObject = goog.functions.cacheReturnValue(
+  function() {
+    return /** @type {IDBKeyRange} */ (
+      npf.userAgent.support.testDomProps_('IDBKeyRange', goog.global) || null);
+  }
+);
+
+/**
+ * @define {boolean}
+ */
+goog.define('npf.userAgent.support.ASSUME_INLINE_SVG', false);
 
 /**
  * specifically for SVG inline in HTML, not within XHTML
  * test page: paulirish.com/demo/inline-svg
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.svg.isInlineSupported.
  */
-npf.userAgent.Support.prototype.getInlineSvg = function() {
-  var propName = npf.userAgent.Support.Property_.INLINE_SVG;
+npf.userAgent.support.getInlineSvg = goog.functions.cacheReturnValue(
+  function() {
+    if (npf.userAgent.support.ASSUME_INLINE_SVG) {
+      return true;
+    }
 
-  if (!goog.isDef(this.checks_[propName])) {
     /** @type {Element} */
     var div = goog.dom.createElement(goog.dom.TagName.DIV);
     div.innerHTML = '<svg/>';
 
-    this.checks_[propName] = (div.firstChild && div.firstChild.namespaceURI) ==
-      npf.svg.Ns.SVG;
+    return (div.firstChild && div.firstChild.namespaceURI) == npf.svg.Ns.SVG;
   }
-
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+);
 
 /**
- * @return {boolean}
- */
-npf.userAgent.support.getInlineSvg = function() {
-  return npf.userAgent.Support.getInstance().getInlineSvg();
-};
-
-/**
- * @return {boolean}
- */
-npf.userAgent.Support.prototype.getInput = function() {
-  var propName = npf.userAgent.Support.Property_.INPUT;
-
-  if (!goog.isDef(this.checks_[propName])) {
-    this.webForms_();
-  }
-
-  return !!this.checks_[propName];
-};
-
-/**
- * @return {boolean}
+ * @return {!Object.<boolean>}
+ * @deprecated Use npf.userAgent.support.forms.getSupportedInputAttributes.
  */
 npf.userAgent.support.getInput = function() {
-  return npf.userAgent.Support.getInstance().getInput();
+  return npf.userAgent.support.getWebForms_().input;
 };
 
 /**
- * @return {boolean}
- */
-npf.userAgent.Support.prototype.getInputTypes = function() {
-  var propName = npf.userAgent.Support.Property_.INPUT_TYPES;
-
-  if (!goog.isDef(this.checks_[propName])) {
-    this.webForms_();
-  }
-
-  return !!this.checks_[propName];
-};
-
-/**
- * @return {boolean}
+ * @return {!Object.<boolean>}
+ * @deprecated Use npf.userAgent.support.forms.
  */
 npf.userAgent.support.getInputTypes = function() {
-  return npf.userAgent.Support.getInstance().getInputTypes();
+  return npf.userAgent.support.getWebForms_().inputTypes;
 };
 
 /**
  * input features and input types go directly onto the ret object, bypassing
  * the tests loop.
  * Hold this guy to execute in a moment.
+ * @return {{input:!Object.<boolean>,inputTypes:!Object.<boolean>}}
  * @private
  */
-npf.userAgent.Support.prototype.webForms_ = function() {
-  var inputElement = /** @type {!HTMLInputElement} */ (
-    goog.dom.createElement(goog.dom.TagName.INPUT));
+npf.userAgent.support.getWebForms_ = goog.functions.cacheReturnValue(
+  function() {
+    var inputElement = /** @type {!HTMLInputElement} */ (
+      goog.dom.createElement(goog.dom.TagName.INPUT));
 
-  // Run through HTML5's new input attributes to see if the UA understands any.
-  // We're using f which is the <input> element created early on
-  // Mike Taylr has created a comprehensive resource for testing these attributes
-  //   when applied to all input types:
-  //   http://miketaylr.com/code/input-type-attr.html
-  // spec: http://www.whatwg.org/specs/web-apps/current-work/multipage/the-input-element.html#input-type-attr-summary
+    return {
+      // Run through HTML5's new input attributes to see if the UA understands
+      // any. We're using f which is the <input> element created early on
+      // Mike Taylr has created a comprehensive resource for testing these
+      // attributes when applied to all input types:
+      //   http://miketaylr.com/code/input-type-attr.html
+      // spec: http://www.whatwg.org/specs/web-apps/current-work/multipage/the-input-element.html#input-type-attr-summary
 
-  // Only input placeholder is tested while textarea's placeholder is not.
-  // Currently Safari 4 and Opera 11 have support only for the input placeholder
-  // Both tests are available in feature-detects/forms-placeholder.js
-  this.checks_[npf.userAgent.Support.Property_.INPUT] =
-    this.webFormsInput_(inputElement);
+      // Only input placeholder is tested while textarea's placeholder is not.
+      // Currently Safari 4 and Opera 11 have support only for the input
+      // placeholder
+      // Both tests are available in feature-detects/forms-placeholder.js
+      input: npf.userAgent.support.getWebFormsInput_(inputElement),
 
-  // Run through HTML5's new input types to see if the UA understands any.
-  //   This is put behind the tests runloop because it doesn't return a
-  //   true/false like all the other tests; instead, it returns an object
-  //   containing each input type with its corresponding true/false value
+      // Run through HTML5's new input types to see if the UA understands any.
+      //   This is put behind the tests runloop because it doesn't return a
+      //   true/false like all the other tests; instead, it returns an object
+      //   containing each input type with its corresponding true/false value
 
-  // Big thanks to @miketaylr for the html5 forms expertise. http://miketaylr.com/
-  this.checks_[npf.userAgent.Support.Property_.INPUT_TYPES] =
-    this.webFormsInputTypes_(inputElement);
-};
+      // Big thanks to @miketaylr for the html5 forms expertise.
+      // http://miketaylr.com/
+      inputTypes: npf.userAgent.support.getWebFormsInputTypes_(inputElement)
+    };
+  }
+);
 
 /**
  * @param {!HTMLInputElement} inputElement
  * @return {!Object.<boolean>}
  * @private
  */
-npf.userAgent.Support.prototype.webFormsInput_ = function(inputElement) {
+npf.userAgent.support.getWebFormsInput_ = function(inputElement) {
   /** @type {!Array.<string>} */
   var props = ['autocomplete', 'autofocus', 'list', 'placeholder', 'max', 'min',
     'multiple', 'pattern', 'required', 'step'];
@@ -1863,10 +1766,23 @@ npf.userAgent.Support.prototype.webFormsInput_ = function(inputElement) {
  * @return {!Object.<boolean>}
  * @private
  */
-npf.userAgent.Support.prototype.webFormsInputTypes_ = function(inputElement) {
+npf.userAgent.support.getWebFormsInputTypes_ = function(inputElement) {
   /** @type {!Array.<string>} */
-  var props = ['search', 'tel', 'url', 'email', 'datetime', 'date', 'month',
-    'week', 'time', 'datetime-local', 'number', 'range', 'color'];
+  var props = [
+    goog.dom.InputType.SEARCH,
+    goog.dom.InputType.TEL,
+    goog.dom.InputType.URL,
+    goog.dom.InputType.EMAIL,
+    goog.dom.InputType.DATETIME,
+    goog.dom.InputType.DATE,
+    goog.dom.InputType.MONTH,
+    goog.dom.InputType.WEEK,
+    goog.dom.InputType.TIME,
+    goog.dom.InputType.DATETIME_LOCAL,
+    goog.dom.InputType.NUMBER,
+    goog.dom.InputType.RANGE,
+    goog.dom.InputType.COLOR
+  ];
   /** @type {!Object.<boolean>} */
   var inputs = {};
 
@@ -1876,14 +1792,14 @@ npf.userAgent.Support.prototype.webFormsInputTypes_ = function(inputElement) {
     inputElement.setAttribute('type', inputElemType);
 
     /** @type {boolean} */
-    var bool = inputElement.type !== 'text';
+    var bool = inputElement.type !== goog.dom.InputType.TEXT;
 
     // We first check to see if the type we give it sticks..
     // If the type does, we feed it a textual value, which shouldn't be valid.
     // If the value doesn't stick, we know there's input sanitization which
     // infers a custom UI
     if (bool) {
-      inputElement.value = npf.userAgent.Support.SMILE;
+      inputElement.value = npf.userAgent.support.SMILE;
       inputElement.style.cssText = 'position:absolute;visibility:hidden;';
 
       if (
@@ -1891,7 +1807,7 @@ npf.userAgent.Support.prototype.webFormsInputTypes_ = function(inputElement) {
         goog.isDef(inputElement.style['WebkitAppearance'])
       ) {
         /** @type {!Document} */
-        var doc = goog.dom.getDomHelper().getDocument();
+        var doc = goog.dom.getDocument();
         var defaultView = /** @type {ViewCSS} */ (doc['defaultView']);
         goog.dom.appendChild(doc.documentElement, inputElement);
 
@@ -1922,7 +1838,7 @@ npf.userAgent.Support.prototype.webFormsInputTypes_ = function(inputElement) {
         bool = !!inputElement.checkValidity && !inputElement.checkValidity();
       } else {
         // If the upgraded input compontent rejects the :) text, we got a winner
-        bool = inputElement.value != npf.userAgent.Support.SMILE;
+        bool = inputElement.value != npf.userAgent.support.SMILE;
       }
     }
 
@@ -1931,6 +1847,11 @@ npf.userAgent.Support.prototype.webFormsInputTypes_ = function(inputElement) {
 
   return inputs;
 };
+
+/**
+ * @define {boolean}
+ */
+goog.define('npf.userAgent.support.ASSUME_LOCAL_STORAGE', false);
 
 /**
  * In FF4, if disabled, window.localStorage should === null.
@@ -1950,144 +1871,137 @@ npf.userAgent.Support.prototype.webFormsInputTypes_ = function(inputElement) {
  *   www.quirksmode.org/dom/html5.html
  * But IE8 doesn't support either with local files
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.storage.isLocalStorageSupported.
  */
-npf.userAgent.Support.prototype.getLocalStorage = function() {
-  var propName = npf.userAgent.Support.Property_.LOCAL_STORAGE;
+npf.userAgent.support.getLocalStorage = goog.functions.cacheReturnValue(
+  function() {
+    if (npf.userAgent.support.ASSUME_LOCAL_STORAGE) {
+      return true;
+    }
 
-  if (!goog.isDef(this.checks_[propName])) {
     /** @type {boolean} */
     var supported = false;
 
     try {
-      goog.global['localStorage']['setItem'](npf.userAgent.Support.MOD,
-        npf.userAgent.Support.MOD);
-      goog.global['localStorage']['removeItem'](npf.userAgent.Support.MOD);
+      goog.global['localStorage']['setItem'](
+        npf.userAgent.support.MOD, npf.userAgent.support.MOD);
+      goog.global['localStorage']['removeItem'](npf.userAgent.support.MOD);
 
       supported = true;
     } catch(e) { }
 
-    this.checks_[propName] = supported;
+    return supported;
   }
-
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+);
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getLocalStorage = function() {
-  return npf.userAgent.Support.getInstance().getLocalStorage();
-};
+goog.define('npf.userAgent.support.ASSUME_LOW_BATTERY', false);
 
 /**
  * Low Battery Level
  * Enable a developer to remove CPU intensive CSS/JS when battery is low
  * developer.mozilla.org/en/DOM/window.navigator.mozBattery
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.battery.isLowLevel.
  */
-npf.userAgent.Support.prototype.getLowBattery = function() {
-  var propName = npf.userAgent.Support.Property_.LOW_BATTERY;
+npf.userAgent.support.getLowBattery = goog.functions.cacheReturnValue(
+  function() {
+    if (npf.userAgent.support.ASSUME_LOW_BATTERY) {
+      return true;
+    }
 
-  if (!goog.isDef(this.checks_[propName])) {
-    var minLevel = 0.20;
-    var battery = this.testDomProps_('battery', navigator);
+    var battery = npf.userAgent.support.testDomProps_('battery', navigator);
 
-    this.checks_[propName] = !!(battery && !battery['charging'] &&
-      battery['level'] <= minLevel);
+    return !!battery && !battery['charging'] && battery['level'] <= 0.20;
   }
-
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+);
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getLowBattery = function() {
-  return npf.userAgent.Support.getInstance().getLowBattery();
-};
+goog.define('npf.userAgent.support.ASSUME_MATH', false);
 
 /**
  * MathML
  * http://www.w3.org/Math/
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.mathml.isSupported.
  */
-npf.userAgent.Support.prototype.getMath = function() {
-  var propName = npf.userAgent.Support.Property_.MATH;
-
-  if (!goog.isDef(this.checks_[propName])) {
-    var supported = false;
-    /** @type {!Document} */
-    var doc = goog.dom.getDomHelper().getDocument();
-
-    if (doc.createElementNS) {
-      var div = /** @type {!HTMLElement} */ (
-        goog.dom.createElement(goog.dom.TagName.DIV));
-      div.style.position = 'absolute';
-
-      /** @type {!Element} */
-      var mathElement = doc.createElementNS(npf.svg.Ns.MATH_ML, 'math');
-      goog.dom.appendChild(div, mathElement);
-
-      /** @type {!Element} */
-      var mfracElement = doc.createElementNS(npf.svg.Ns.MATH_ML, 'mfrac');
-      goog.dom.appendChild(mathElement, mfracElement);
-
-      /** @type {!Element} */
-      var mi1Element = doc.createElementNS(npf.svg.Ns.MATH_ML, 'mi');
-      goog.dom.appendChild(mi1Element, doc.createTextNode('xx'));
-      goog.dom.appendChild(mfracElement, mi1Element);
-
-      /** @type {!Element} */
-      var mi2Element = doc.createElementNS(npf.svg.Ns.MATH_ML, 'mi');
-      goog.dom.appendChild(mi2Element, doc.createTextNode('yy'));
-      goog.dom.appendChild(mfracElement, mi2Element);
-
-      goog.dom.appendChild(doc.body, div);
-      supported = div.offsetHeight > div.offsetWidth;
-    }
-
-    this.checks_[propName] = supported;
+npf.userAgent.support.getMath = goog.functions.cacheReturnValue(function() {
+  if (npf.userAgent.support.ASSUME_MATH) {
+    return true;
   }
 
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+  var supported = false;
+  /** @type {!Document} */
+  var doc = goog.dom.getDocument();
+
+  if (doc.createElementNS) {
+    var div = /** @type {!HTMLElement} */ (
+      goog.dom.createElement(goog.dom.TagName.DIV));
+    div.style.position = 'absolute';
+
+    /** @type {!Element} */
+    var mathElement = doc.createElementNS(npf.svg.Ns.MATH_ML, 'math');
+    goog.dom.appendChild(div, mathElement);
+
+    /** @type {!Element} */
+    var mfracElement = doc.createElementNS(npf.svg.Ns.MATH_ML, 'mfrac');
+    goog.dom.appendChild(mathElement, mfracElement);
+
+    /** @type {!Element} */
+    var mi1Element = doc.createElementNS(npf.svg.Ns.MATH_ML, 'mi');
+    goog.dom.appendChild(mi1Element, doc.createTextNode('xx'));
+    goog.dom.appendChild(mfracElement, mi1Element);
+
+    /** @type {!Element} */
+    var mi2Element = doc.createElementNS(npf.svg.Ns.MATH_ML, 'mi');
+    goog.dom.appendChild(mi2Element, doc.createTextNode('yy'));
+    goog.dom.appendChild(mfracElement, mi2Element);
+
+    goog.dom.appendChild(doc.body, div);
+    supported = div.offsetHeight > div.offsetWidth;
+  }
+
+  return supported;
+});
+
+/**
+ * @define {boolean}
+ */
+goog.define('npf.userAgent.support.ASSUME_MULTIPLE_BACKGROUNDS', false);
 
 /**
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.isMultipleBgsSupported.
  */
-npf.userAgent.support.getMath = function() {
-  return npf.userAgent.Support.getInstance().getMath();
-};
+npf.userAgent.support.getMultipleBackgrounds = goog.functions.cacheReturnValue(
+  function() {
+    if (npf.userAgent.support.ASSUME_MULTIPLE_BACKGROUNDS) {
+      return true;
+    }
 
-/**
- * @return {boolean}
- */
-npf.userAgent.Support.prototype.getMultipleBackgrounds = function() {
-  var propName = npf.userAgent.Support.Property_.MULTIPLE_BACKGROUNDS;
-
-  if (!goog.isDef(this.checks_[propName])) {
     // Setting multiple images AND a color on the background shorthand property
     //  and then querying the style.background property value for the number of
     //  occurrences of "url(" is a reliable method for detecting ACTUAL support
     // for this!
 
-    this.setCss_('background:url(https://),url(https://),red url(https://)');
+    npf.userAgent.support.setCss_(
+      'background:url(https://),url(https://),red url(https://)');
 
     // If the UA supports multiple backgrounds, there should be three
     // occurrences of the string "url(" in the return value
     // for elemStyle.background
-    this.checks_[propName] = /(url\s*\(.*?){3}/.test(this.mStyle_.background);
+    return /(url\s*\(.*?){3}/.test(npf.userAgent.support.mStyle_.background);
   }
-
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+);
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getMultipleBackgrounds = function() {
-  return npf.userAgent.Support.getInstance().getMultipleBackgrounds();
-};
+goog.define('npf.userAgent.support.ASSUME_NOTIFICATION', false);
 
 /**
  * window.webkitNotifications is only used by Chrome
@@ -2096,494 +2010,441 @@ npf.userAgent.support.getMultipleBackgrounds = function() {
  * window.Notification only exist in the draft specs
  * http://dev.w3.org/2006/webapi/WebNotifications/publish/Notifications.html#idl-if-Notification
  * @return {boolean}
- */
-npf.userAgent.Support.prototype.getNotification = function() {
-  var propName = npf.userAgent.Support.Property_.NOTIFICATION;
-
-  if (!goog.isDef(this.checks_[propName])) {
-    this.checks_[propName] = !!this.testDomProps_('Notifications', goog.global);
-  }
-
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
-
-/**
- * @return {boolean}
+ * @deprecated Use npf.userAgent.support.notification.isSupported.
  */
 npf.userAgent.support.getNotification = function() {
-  return npf.userAgent.Support.getInstance().getNotification();
+  return npf.userAgent.support.ASSUME_NOTIFICATION ||
+    (
+      'Notification' in goog.global &&
+      'permission' in goog.global['Notification'] &&
+      'requestPermission' in goog.global['Notification']
+    );
 };
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.Support.prototype.getOpacity = function() {
-  var propName = npf.userAgent.Support.Property_.OPACITY;
+goog.define('npf.userAgent.support.ASSUME_OPACITY', false);
 
-  if (!goog.isDef(this.checks_[propName])) {
-    // Browsers that actually have CSS Opacity implemented have done so
-    //  according to spec, which means their return values are within the
-    //  range of [0.0,1.0] - including the leading zero.
-
-    this.setCss_(npf.userAgent.Support.prefixes.join('opacity:.55;'));
-
-    // The non-literal . in this regex is intentional:
-    //   German Chrome returns this value as 0,55
-    // https://github.com/Modernizr/Modernizr/issues/#issue/59/comment/516632
-    this.checks_[propName] = /^0.55$/.test(this.mStyle_.opacity);
+/**
+ * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.isOpacitySupported.
+ */
+npf.userAgent.support.getOpacity = goog.functions.cacheReturnValue(function() {
+  if (npf.userAgent.support.ASSUME_OPACITY) {
+    return true;
   }
 
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+  // Browsers that actually have CSS Opacity implemented have done so
+  //  according to spec, which means their return values are within the
+  //  range of [0.0,1.0] - including the leading zero.
+
+  npf.userAgent.support.setCss_(
+    npf.userAgent.support.prefixes.join('opacity:.55;'));
+
+  // The non-literal . in this regex is intentional:
+  //   German Chrome returns this value as 0,55
+  // https://github.com/Modernizr/Modernizr/issues/#issue/59/comment/516632
+  return /^0.55$/.test(npf.userAgent.support.mStyle_.opacity);
+});
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getOpacity = function() {
-  return npf.userAgent.Support.getInstance().getOpacity();
-};
+goog.define('npf.userAgent.support.ASSUME_PERFORMANCE', false);
 
 /**
  * Navigation Timing (Performance)
  * https://dvcs.w3.org/hg/webperf/raw-file/tip/specs/NavigationTiming/
  * http://www.html5rocks.com/en/tutorials/webperformance/basics/
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.performance.isSupported.
  */
-npf.userAgent.Support.prototype.getPerformance = function() {
-  var propName = npf.userAgent.Support.Property_.PERFORMANCE;
-
-  if (!goog.isDef(this.checks_[propName])) {
-    this.checks_[propName] = !!this.testDomProps_('performance', goog.global);
+npf.userAgent.support.getPerformance = goog.functions.cacheReturnValue(
+  function() {
+    return npf.userAgent.support.ASSUME_PERFORMANCE ||
+      !!npf.userAgent.support.testDomProps_('performance', goog.global);
   }
-
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+);
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getPerformance = function() {
-  return npf.userAgent.Support.getInstance().getPerformance();
-};
+goog.define('npf.userAgent.support.ASSUME_POST_MESSAGE', false);
 
 /**
  * @return {boolean}
- */
-npf.userAgent.Support.prototype.getPostMessage = function() {
-  return !!goog.global['postMessage'];
-};
-
-/**
- * @return {boolean}
+ * @deprecated Use npf.userAgent.support.postMessage.isSupported.
  */
 npf.userAgent.support.getPostMessage = function() {
-  return npf.userAgent.Support.getInstance().getPostMessage();
+  return npf.userAgent.support.ASSUME_POST_MESSAGE ||
+    !!goog.global['postMessage'];
 };
+
+/**
+ * @define {boolean}
+ */
+goog.define('npf.userAgent.support.ASSUME_RGBA', false);
 
 /**
  * http://css-tricks.com/rgba-browser-support/
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.isRgbaSupported.
  */
-npf.userAgent.Support.prototype.getRgba = function() {
-  var propName = npf.userAgent.Support.Property_.RGBA;
-
-  if (!goog.isDef(this.checks_[propName])) {
-    this.setCss_('background-color:rgba(150,255,150,.5)');
-
-    this.checks_[propName] = this.contains_(
-      this.mStyle_.backgroundColor, 'rgba');
+npf.userAgent.support.getRgba = goog.functions.cacheReturnValue(function() {
+  if (npf.userAgent.support.ASSUME_RGBA) {
+    return true;
   }
 
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+  npf.userAgent.support.setCss_('background-color:rgba(150,255,150,.5)');
+
+  return npf.userAgent.support.contains_(
+    npf.userAgent.support.mStyle_.backgroundColor, 'rgba');
+});
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getRgba = function() {
-  return npf.userAgent.Support.getInstance().getRgba();
-};
+goog.define('npf.userAgent.support.ASSUME_SCRIPT_ASYNC', false);
 
 /**
  * @return {boolean}
- */
-npf.userAgent.Support.prototype.getScriptAsync = function() {
-  return 'async' in goog.dom.createElement(goog.dom.TagName.SCRIPT);
-};
-
-/**
- * @return {boolean}
+ * @deprecated Use npf.userAgent.support.elements.isScriptAsyncAttributeSupported.
  */
 npf.userAgent.support.getScriptAsync = function() {
-  return npf.userAgent.Support.getInstance().getScriptAsync();
+  return npf.userAgent.support.ASSUME_SCRIPT_ASYNC ||
+    ('async' in goog.dom.createElement(goog.dom.TagName.SCRIPT));
 };
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.Support.prototype.getScriptDefer = function() {
-  return 'defer' in goog.dom.createElement(goog.dom.TagName.SCRIPT);
-};
+goog.define('npf.userAgent.support.ASSUME_SCRIPT_DEFER', false);
 
 /**
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.elements.isScriptDeferAttributeSupported.
  */
 npf.userAgent.support.getScriptDefer = function() {
-  return npf.userAgent.Support.getInstance().getScriptDefer();
+  return npf.userAgent.support.ASSUME_SCRIPT_DEFER ||
+    ('defer' in goog.dom.createElement(goog.dom.TagName.SCRIPT));
 };
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.Support.prototype.getSessionStorage = function() {
-  var propName = npf.userAgent.Support.Property_.SESSION_STORAGE;
+goog.define('npf.userAgent.support.ASSUME_SESSION_STORAGE', false);
 
-  if (!goog.isDef(this.checks_[propName])) {
+/**
+ * @return {boolean}
+ * @deprecated Use npf.userAgent.support.storage.isSessionStorageSupported.
+ */
+npf.userAgent.support.getSessionStorage = goog.functions.cacheReturnValue(
+  function() {
+    if (npf.userAgent.support.ASSUME_SESSION_STORAGE) {
+      return true;
+    }
+
     /** @type {boolean} */
     var supported = false;
 
     try {
-      goog.global['sessionStorage']['setItem'](npf.userAgent.Support.MOD,
-        npf.userAgent.Support.MOD);
-      goog.global['sessionStorage']['removeItem'](npf.userAgent.Support.MOD);
+      goog.global['sessionStorage']['setItem'](
+        npf.userAgent.support.MOD, npf.userAgent.support.MOD);
+      goog.global['sessionStorage']['removeItem'](npf.userAgent.support.MOD);
 
       supported = true;
     } catch(e) { }
 
-    this.checks_[propName] = supported;
+    return supported;
+  }
+);
+
+/**
+ * @define {boolean}
+ */
+goog.define('npf.userAgent.support.ASSUME_SMIL', false);
+
+/**
+ * @return {boolean}
+ * @deprecated Use npf.userAgent.support.svg.isSmilSupported.
+ */
+npf.userAgent.support.getSmil = goog.functions.cacheReturnValue(function() {
+  if (npf.userAgent.support.ASSUME_SMIL) {
+    return true;
   }
 
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+  /** @type {!Document} */
+  var doc = goog.dom.getDocument();
+
+  return !!doc.createElementNS && /SVGAnimate/.test({}.toString.call(
+      doc.createElementNS(npf.svg.Ns.SVG, 'animate')));
+});
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getSessionStorage = function() {
-  return npf.userAgent.Support.getInstance().getSessionStorage();
-};
-
-/**
- * @return {boolean}
- */
-npf.userAgent.Support.prototype.getSmil = function() {
-  var propName = npf.userAgent.Support.Property_.SMIL;
-
-  if (!goog.isDef(this.checks_[propName])) {
-    /** @type {!Document} */
-    var doc = goog.dom.getDomHelper().getDocument();
-    this.checks_[propName] = !!doc.createElementNS &&
-      /SVGAnimate/.test({}.toString.call(
-        doc.createElementNS(npf.svg.Ns.SVG, 'animate')));
-  }
-
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
-
-/**
- * @return {boolean}
- */
-npf.userAgent.support.getSmil = function() {
-  return npf.userAgent.Support.getInstance().getSmil();
-};
+goog.define('npf.userAgent.support.ASSUME_STYLE_SCOPED', false);
 
 /**
  * Browser support test for <style scoped>
  * http://www.w3.org/TR/html5/the-style-element.html#attr-style-scoped
  * @return {boolean}
- */
-npf.userAgent.Support.prototype.getStyleScoped = function() {
-  return 'scoped' in goog.dom.createElement(goog.dom.TagName.STYLE);
-};
-
-/**
- * @return {boolean}
+ * @deprecated Use npf.userAgent.support.elements.isStyleScopedAttributeSupported.
  */
 npf.userAgent.support.getStyleScoped = function() {
-  return npf.userAgent.Support.getInstance().getStyleScoped();
+  return npf.userAgent.support.ASSUME_STYLE_SCOPED ||
+    ('scoped' in goog.dom.createElement(goog.dom.TagName.STYLE));
 };
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.Support.prototype.getSvg = function() {
-  var propName = npf.userAgent.Support.Property_.SVG;
+goog.define('npf.userAgent.support.ASSUME_SVG', false);
 
-  if (!goog.isDef(this.checks_[propName])) {
-    /** @type {!Document} */
-    var doc = goog.dom.getDomHelper().getDocument();
-    this.checks_[propName] = !!doc.createElementNS &&
-      !!doc.createElementNS(npf.svg.Ns.SVG, 'svg')['createSVGRect'];
+/**
+ * @return {boolean}
+ * @deprecated Use npf.userAgent.support.svg.isSupported.
+ */
+npf.userAgent.support.getSvg = goog.functions.cacheReturnValue(function() {
+  if (npf.userAgent.support.ASSUME_SVG) {
+    return true;
   }
 
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+  /** @type {!Document} */
+  var doc = goog.dom.getDocument();
+
+  return !!doc.createElementNS &&
+    !!doc.createElementNS(npf.svg.Ns.SVG, 'svg')['createSVGRect'];
+});
+
+/**
+ * @define {boolean}
+ */
+goog.define('npf.userAgent.support.ASSUME_SVG_CLIP_PATHS', false);
 
 /**
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.svg.isClipPathSupported.
  */
-npf.userAgent.support.getSvg = function() {
-  return npf.userAgent.Support.getInstance().getSvg();
-};
+npf.userAgent.support.getSvgClipPaths = goog.functions.cacheReturnValue(
+  function() {
+    if (npf.userAgent.support.ASSUME_SVG_CLIP_PATHS) {
+      return true;
+    }
 
-/**
- * @return {boolean}
- */
-npf.userAgent.Support.prototype.getSvgClipPaths = function() {
-  var propName = npf.userAgent.Support.Property_.SVG_CLIP_PATHS;
-
-  if (!goog.isDef(this.checks_[propName])) {
     /** @type {!Document} */
-    var doc = goog.dom.getDomHelper().getDocument();
-    this.checks_[propName] = !!doc.createElementNS &&
-      /SVGClipPath/.test({}.toString.call(
+    var doc = goog.dom.getDocument();
+
+    return !!doc.createElementNS && /SVGClipPath/.test({}.toString.call(
         doc.createElementNS(npf.svg.Ns.SVG, 'clipPath')));
   }
-
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+);
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getSvgClipPaths = function() {
-  return npf.userAgent.Support.getInstance().getSvgClipPaths();
-};
+goog.define('npf.userAgent.support.ASSUME_SVG_FILTERS', false);
 
 /**
  * Detect support for svg filters - http://www.w3.org/TR/SVG11/filters.html.
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.svg.isFilterSupported.
  */
-npf.userAgent.Support.prototype.getSvgFilters = function() {
-  var propName = npf.userAgent.Support.Property_.SVG_FILTERS;
+npf.userAgent.support.getSvgFilters = goog.functions.cacheReturnValue(
+  function() {
+    if (npf.userAgent.support.ASSUME_SVG_FILTERS) {
+      return true;
+    }
 
-  if (!goog.isDef(this.checks_[propName])) {
     var supported = false;
 
     try {
-      var el = /** @type {Function|undefined} */ (goog.global['SVGFEColorMatrixElement']);
+      var el = /** @type {Function|undefined} */ (
+        goog.global['SVGFEColorMatrixElement']);
       supported = goog.isDef(el) && 2 == el['SVG_FECOLORMATRIX_TYPE_SATURATE'];
     } catch(e) {}
 
-    this.checks_[propName] = supported;
+    return supported;
   }
-
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+);
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getSvgFilters = function() {
-  return npf.userAgent.Support.getInstance().getSvgFilters();
-};
+goog.define('npf.userAgent.support.ASSUME_TEXT_SHADOW', false);
 
 /**
  * FF3.0 will false positive on this test
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.css.isTextShadowSupported.
  */
-npf.userAgent.Support.prototype.getTextShadow = function() {
-  var propName = npf.userAgent.Support.Property_.TEXT_SHADOW;
-
-  if (!goog.isDef(this.checks_[propName])) {
-    this.checks_[propName] =
-      goog.dom.createElement(goog.dom.TagName.DIV).style.textShadow === '';
+npf.userAgent.support.getTextShadow = goog.functions.cacheReturnValue(
+  function() {
+    return npf.userAgent.support.ASSUME_TEXT_SHADOW ||
+      '' === goog.dom.createElement(goog.dom.TagName.DIV).style.textShadow;
   }
-
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+);
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getTextShadow = function() {
-  return npf.userAgent.Support.getInstance().getTextShadow();
-};
+goog.define('npf.userAgent.support.ASSUME_TOUCH', false);
 
 /**
  * For more info, see: http://modernizr.github.com/Modernizr/touch.html
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.events.isTouchEventSupported.
  */
-npf.userAgent.Support.prototype.getTouch = function() {
-  var propName = npf.userAgent.Support.Property_.TOUCH;
-
-  if (!goog.isDef(this.checks_[propName])) {
-    /** @type {!Document} */
-    var doc = goog.dom.getDomHelper().getDocument();
-
-    if (
-      ('ontouchstart' in goog.global) ||
-      /** @type {*} */ (goog.global['DocumentTouch']) &&
-      doc instanceof goog.global['DocumentTouch']
-    ) {
-      this.checks_[propName] = true;
-    } else {
-      /** @type {boolean} */
-      var bool;
-      /** @type {string} */
-      var rule = [
-        '@media (', npf.userAgent.Support.prefixes.join('touch-enabled),('),
-        npf.userAgent.Support.MOD, '){#' + npf.userAgent.Support.MOD +
-        '{top:9px;position:absolute}}'
-      ].join('');
-      this.testStyles_(rule, function(element, rule) {
-        bool = 9 === element.offsetTop;
-      });
-
-      this.checks_[propName] = bool;
-    }
+npf.userAgent.support.getTouch = goog.functions.cacheReturnValue(function() {
+  if (npf.userAgent.support.ASSUME_TOUCH) {
+    return true;
   }
 
-  return /** @type {boolean} */ (this.checks_[propName]);
-};
+  /** @type {!Document} */
+  var doc = goog.dom.getDocument();
+
+  if (
+    ('ontouchstart' in goog.global) ||
+    /** @type {*} */ (goog.global['DocumentTouch']) &&
+    doc instanceof goog.global['DocumentTouch']
+  ) {
+    return true;
+  }
+
+  /** @type {boolean} */
+  var bool;
+  /** @type {string} */
+  var rule = [
+    '@media (', npf.userAgent.support.prefixes.join('touch-enabled),('),
+    npf.userAgent.support.MOD, '){#' + npf.userAgent.support.MOD +
+    '{top:9px;position:absolute}}'
+  ].join('');
+  npf.userAgent.support.testStyles_(rule, function(element, rule) {
+    bool = 9 === element.offsetTop;
+  });
+
+  return bool;
+});
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getTouch = function() {
-  return npf.userAgent.Support.getInstance().getTouch();
-};
+goog.define('npf.userAgent.support.ASSUME_VIDEO_H264', false);
 
 /**
  * @return {string} 'probably', 'maybe' or empty string.
- */
-npf.userAgent.Support.prototype.getVideoH264 = function() {
-  if (this.getVideo()) {
-    var feature = /** @type {npf.userAgent.Support.VideoFeature?} */ (
-      this.checks_[npf.userAgent.Support.Property_.VIDEO]);
-
-    return feature ? feature.h264 : '';
-  }
-
-  return '';
-};
-
-/**
- * @return {string} 'probably', 'maybe' or empty string.
+ * @deprecated Use npf.userAgent.support.video.isH264Supported.
  */
 npf.userAgent.support.getVideoH264 = function() {
-  return npf.userAgent.Support.getInstance().getVideoH264();
+  return npf.userAgent.support.ASSUME_VIDEO_H264 ?
+    'probably' : npf.userAgent.support.getVideo_().h264;
 };
 
 /**
- * @return {string} 'probably', 'maybe' or empty string.
+ * @define {boolean}
  */
-npf.userAgent.Support.prototype.getVideoOgg = function() {
-  if (this.getVideo()) {
-    var feature = /** @type {npf.userAgent.Support.VideoFeature?} */ (
-      this.checks_[npf.userAgent.Support.Property_.VIDEO]);
-
-    return feature ? feature.ogg : '';
-  }
-
-  return '';
-};
+goog.define('npf.userAgent.support.ASSUME_VIDEO_OGG', false);
 
 /**
  * @return {string} 'probably', 'maybe' or empty string.
+ * @deprecated Use npf.userAgent.support.video.isOggSupported.
  */
 npf.userAgent.support.getVideoOgg = function() {
-  return npf.userAgent.Support.getInstance().getVideoOgg();
+  return npf.userAgent.support.ASSUME_VIDEO_OGG ?
+    'probably' : npf.userAgent.support.getVideo_().ogg;
 };
 
 /**
- * @return {string} 'probably', 'maybe' or empty string.
+ * @define {boolean}
  */
-npf.userAgent.Support.prototype.getVideoWebm = function() {
-  if (this.getVideo()) {
-    var feature = /** @type {npf.userAgent.Support.VideoFeature?} */ (
-      this.checks_[npf.userAgent.Support.Property_.VIDEO]);
-
-    return feature ? feature.webm : '';
-  }
-
-  return '';
-};
+goog.define('npf.userAgent.support.ASSUME_VIDEO_WEBM', false);
 
 /**
  * @return {string} 'probably', 'maybe' or empty string.
+ * @deprecated Use npf.userAgent.support.video.isWebmSupported.
  */
 npf.userAgent.support.getVideoWebm = function() {
-  return npf.userAgent.Support.getInstance().getVideoWebm();
+  return npf.userAgent.support.ASSUME_VIDEO_WEBM ?
+    'probably' : npf.userAgent.support.getVideo_().webm;
 };
 
 /**
- * @return {boolean}
+ * @return {{h264:string,ogg:string,webm:string}}
+ * @private
  */
-npf.userAgent.Support.prototype.getVideo = function() {
-  if (!goog.isDef(this.checks_[npf.userAgent.Support.Property_.VIDEO])) {
-    var elem = /** @type {!HTMLVideoElement} */ (
-      goog.dom.createElement('video'));
-    /** @type {npf.userAgent.Support.VideoFeature?} */
-    var types = null;
+npf.userAgent.support.getVideo_ = goog.functions.cacheReturnValue(function() {
+  var elem = /** @type {!HTMLVideoElement} */ (
+    goog.dom.createElement('video'));
+  var result;
 
-    // IE9 Running on Windows Server SKU can cause an exception to be thrown,
-    // bug #224
-    try {
-      if (elem.canPlayType) {
-        types = {
-          ogg: elem.canPlayType('video/ogg; codecs="theora"')
-            .replace(/^no$/, ''),
-          // Without QuickTime, this value will be `undefined`.
-          // github.com/Modernizr/Modernizr/issues/546
-          h264: elem.canPlayType('video/mp4; codecs="avc1.42E01E"')
-            .replace(/^no$/, ''),
-          webm: elem.canPlayType('video/webm; codecs="vp8, vorbis"')
-            .replace(/^no$/, '')
-        };
-      }
-    } catch(e) { }
+  // IE9 Running on Windows Server SKU can cause an exception to be thrown,
+  // bug #224
+  try {
+    if (elem.canPlayType) {
+      result = {
+        ogg: elem.canPlayType('video/ogg; codecs="theora"')
+          .replace(/^no$/, ''),
+        // Without QuickTime, this value will be `undefined`.
+        // github.com/Modernizr/Modernizr/issues/546
+        h264: elem.canPlayType('video/mp4; codecs="avc1.42E01E"')
+          .replace(/^no$/, ''),
+        webm: elem.canPlayType('video/webm; codecs="vp8, vorbis"')
+          .replace(/^no$/, '')
+      };
+    }
+  } catch(e) { }
 
-    this.checks_[npf.userAgent.Support.Property_.VIDEO] = types;
-  }
-
-  return !!this.checks_[npf.userAgent.Support.Property_.VIDEO];
-};
+  return result || {
+    h264: '',
+    ogg: '',
+    webm: ''
+  };
+});
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getVideo = function() {
-  return npf.userAgent.Support.getInstance().getVideo();
-};
+goog.define('npf.userAgent.support.ASSUME_VIBRATE', false);
 
 /**
  * Vibration API
  * http://www.w3.org/TR/vibration/
  * https://developer.mozilla.org/en/DOM/window.navigator.mozVibrate
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.vibration.isSupported.
  */
-npf.userAgent.Support.prototype.getVibrate = function() {
-  return !!this.testDomProps_('vibrate', goog.global.navigator);
+npf.userAgent.support.getVibrate = function() {
+  return npf.userAgent.support.ASSUME_VIBRATE ||
+    !!npf.userAgent.support.testDomProps_('vibrate', goog.global.navigator);
 };
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getVibrate = function() {
-  return npf.userAgent.Support.getInstance().getVibrate();
-};
+goog.define('npf.userAgent.support.ASSUME_WEB_AUDIO', false);
 
 /**
  * Web Audio API
  * https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html
  * @return {boolean}
- */
-npf.userAgent.Support.prototype.getWebAudio = function() {
-  return !!goog.global['webkitAudioContext'] || !!goog.global['AudioContext'];
-};
-
-/**
- * @return {boolean}
+ * @deprecated Use npf.userAgent.support.audio.isWebAudioSupported.
  */
 npf.userAgent.support.getWebAudio = function() {
-  return npf.userAgent.Support.getInstance().getWebAudio();
+  return npf.userAgent.support.ASSUME_WEB_AUDIO ||
+    !!goog.global['webkitAudioContext'] || !!goog.global['AudioContext'];
 };
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.Support.prototype.getWebGl = function() {
+goog.define('npf.userAgent.support.ASSUME_WEB_GL', false);
+
+/**
+ * @return {boolean}
+ * @deprecated Use npf.userAgent.support.webgl.isSupported.
+ */
+npf.userAgent.support.getWebGl = function() {
   // This WebGL test may false positive.
   // But really it's quite impossible to know whether webgl will succeed until
   // after you create the context. You might have hardware that can support
@@ -2591,47 +2452,68 @@ npf.userAgent.Support.prototype.getWebGl = function() {
   // canvas. So this feature inference is weak, but intentionally so.
 
   // It is known to false positive in FF4 with certain hardware and the iPad 2.
-  return !!goog.global['WebGLRenderingContext'];
+  return npf.userAgent.support.ASSUME_WEB_GL ||
+    !!goog.global['WebGLRenderingContext'];
 };
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getWebGl = function() {
-  return npf.userAgent.Support.getInstance().getWebGl();
-};
+goog.define('npf.userAgent.support.ASSUME_WEB_SOCKET', false);
 
 /**
  * Mozilla is targeting to land MozWebSocket for FF6
  * bugzil.la/659324
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.network.isWebSocketSupported.
  */
-npf.userAgent.Support.prototype.getWebSocket = function() {
-  return 'WebSocket' in goog.global || 'MozWebSocket' in goog.global;
+npf.userAgent.support.getWebSocket = function() {
+  return npf.userAgent.support.ASSUME_WEB_SOCKET ||
+    'WebSocket' in goog.global || 'MozWebSocket' in goog.global;
 };
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getWebSocket = function() {
-  return npf.userAgent.Support.getInstance().getWebSocket();
-};
+goog.define('npf.userAgent.support.ASSUME_WEB_SOCKET_BINARY', false);
 
 /**
  * binaryType is truthy if there is support.. returns "blob" in new-ish chrome.
+ * plus.google.com/115535723976198353696/posts/ERN6zYozENV
+ * github.com/Modernizr/Modernizr/issues/370
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.network.isWebSocketBinarySupported.
  */
-npf.userAgent.Support.prototype.getWebSocketBinary = function() {
-  return 'WebSocket' in goog.global &&
-    !!(new WebSocket('ws://.'))['binaryType'];
-};
+npf.userAgent.support.getWebSocketBinary = goog.functions.cacheReturnValue(
+  function() {
+    if (npf.userAgent.support.ASSUME_WEB_SOCKET_BINARY) {
+      return true;
+    }
+
+    /** @type {string} */
+    var protocol = 'https:' == goog.global.location.protocol ? 'wss' : 'ws';
+
+    if ('WebSocket' in goog.global) {
+      /** @type {boolean} */
+      var protoBin = 'binaryType' in goog.global['WebSocket']['prototype'];
+
+      if (protoBin) {
+        return protoBin;
+      }
+
+      try {
+        return !!(new goog.global['WebSocket'](protocol + '://.')['binaryType']);
+      } catch (e){}
+    }
+
+    return false;
+  }
+);
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getWebSocketBinary = function() {
-  return npf.userAgent.Support.getInstance().getWebSocketBinary();
-};
+goog.define('npf.userAgent.support.ASSUME_WEB_SQL_DATABASE', false);
 
 /**
  * Web SQL database detection is tricky:
@@ -2643,94 +2525,85 @@ npf.userAgent.support.getWebSocketBinary = function() {
  * doesn't litter the web with these test databases. As a developer, you'll have
  * to account for this gotcha yourself.
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.storage.isWebSqlDbSupported.
  */
-npf.userAgent.Support.prototype.getWebSqlDatabase = function() {
-  return !!goog.global['openDatabase'];
+npf.userAgent.support.getWebSqlDatabase = function() {
+  return npf.userAgent.support.ASSUME_WEB_SQL_DATABASE ||
+    !!goog.global['openDatabase'];
 };
 
 /**
- * @return {boolean}
+ * @define {boolean}
  */
-npf.userAgent.support.getWebSqlDatabase = function() {
-  return npf.userAgent.Support.getInstance().getWebSqlDatabase();
-};
+goog.define('npf.userAgent.support.ASSUME_WEBP', false);
+
+/**
+ * @private {boolean?}
+ */
+npf.userAgent.support.webp_ = null;
+
+/**
+ * @const {string}
+ */
+npf.userAgent.support.WEBP_SRC =
+  'data:image/webp;base64,UklGRiwAAABXRUJQVlA4ICAAAAAUAgCdASoBAAEAL/3+/3+CAB/' +
+  'AAAFzrNsAAP5QAAAAAA==';
 
 /**
  * code.google.com/speed/webp/
- * @param {function(boolean)} callback
- * @param {Object=} opt_scope
+ * @param {function(this: SCOPE, boolean)} callback
+ * @param {SCOPE=} opt_scope
+ * @template SCOPE
+ * @deprecated Use npf.userAgent.support.image.isWebpSupported.
  */
-npf.userAgent.Support.prototype.getWebp = function(callback, opt_scope) {
-  var propName = npf.userAgent.Support.Property_.WEBP;
-
-  if (goog.isDef(this.checks_[propName])) {
-    callback.call(opt_scope, /** @type {boolean} */ (this.checks_[propName]));
-  } else {
+npf.userAgent.support.getWebp = function(callback, opt_scope) {
+  if (npf.userAgent.support.ASSUME_WEBP) {
+    callback.call(opt_scope, true);
+  } else if (goog.isNull(npf.userAgent.support.webp_)) {
     var image = new Image();
-    image.onerror = goog.bind(function() {
-      this.checks_[propName] = false;
-      callback.call(opt_scope, /** @type {boolean} */ (this.checks_[propName]));
-    }, this);
-    image.onload = goog.bind(function() {
-      this.checks_[propName] = 1 == image.width;
-      callback.call(opt_scope, /** @type {boolean} */ (this.checks_[propName]));
-    }, this);
-    image.src = 'data:image/webp;base64,UklGRiwAAABXRUJQVlA4ICAAAAAUAgCdASoBA' +
-      'AEAL/3+/3+CAB/AAAFzrNsAAP5QAAAAAA==';
+    image.onerror = function() {
+      npf.userAgent.support.webp_ = false;
+      callback.call(opt_scope, false);
+    };
+    image.onload = function() {
+      /** @type {boolean} */
+      var supported = 1 == image.width;
+      npf.userAgent.support.webp_ = supported;
+      callback.call(opt_scope, supported);
+    };
+    image.src = npf.userAgent.support.WEBP_SRC;
+  } else {
+    callback.call(
+      opt_scope, /** @type {boolean} */ (npf.userAgent.support.webp_));
   }
 };
 
 /**
- * @param {function(boolean)} callback
- * @param {Object=} opt_scope
+ * @define {boolean}
  */
-npf.userAgent.support.getWebp = function(callback, opt_scope) {
-  return npf.userAgent.Support.getInstance().getWebp(callback, opt_scope);
-};
+goog.define('npf.userAgent.support.ASSUME_WEB_WORKER', false);
 
 /**
  * @return {boolean}
- */
-npf.userAgent.Support.prototype.getWebWorker = function() {
-  return !!goog.global['Worker'];
-};
-
-/**
- * @return {boolean}
+ * @deprecated Use npf.userAgent.support.worker.isSupported.
  */
 npf.userAgent.support.getWebWorker = function() {
-  return npf.userAgent.Support.getInstance().getWebWorker();
+  return npf.userAgent.support.ASSUME_WEB_WORKER || !!goog.global['Worker'];
 };
+
+/**
+ * @define {boolean}
+ */
+goog.define('npf.userAgent.support.ASSUME_XHR2', false);
 
 /**
  * XML HTTP Request Level 2
  * www.w3.org/TR/XMLHttpRequest2/
  * @return {boolean}
- */
-npf.userAgent.Support.prototype.getXhr2 = function() {
-  return 'FormData' in goog.global;
-};
-
-/**
- * @return {boolean}
+ * @deprecated Use npf.userAgent.support.xhr.isXhr2Supported.
  */
 npf.userAgent.support.getXhr2 = function() {
-  return npf.userAgent.Support.getInstance().getXhr2();
-};
-
-/**
- * @param {npf.userAgent.Support.Property_} propName
- * @param {string} cssName
- * @return {boolean}
- * @private
- */
-npf.userAgent.Support.prototype.isCssPropertySupported_ = function(
-    propName, cssName) {
-  if (!goog.isDef(this.checks_[propName])) {
-    this.checks_[propName] = this.testPropsAll_(cssName);
-  }
-
-  return /** @type {boolean} */ (this.checks_[propName]);
+  return npf.userAgent.support.ASSUME_XHR2 || 'FormData' in goog.global;
 };
 
 /**
@@ -2742,8 +2615,8 @@ npf.userAgent.Support.prototype.isCssPropertySupported_ = function(
  * @param {Array.<string>=} opt_testNames
  * @private
  */
-npf.userAgent.Support.prototype.testStyles_ = function(rule, callback,
-    opt_nodes, opt_testNames) {
+npf.userAgent.support.testStyles_ = function(rule, callback, opt_nodes,
+    opt_testNames) {
   /** @type {number} */
   var nodes = opt_nodes || 0;
   /** @type {string} */
@@ -2751,7 +2624,7 @@ npf.userAgent.Support.prototype.testStyles_ = function(rule, callback,
   var div = /** @type {!HTMLElement} */ (
     goog.dom.createElement(goog.dom.TagName.DIV));
   /** @type {!Document} */
-  var doc = goog.dom.getDomHelper().getDocument();
+  var doc = goog.dom.getDocument();
   var body = doc.body;
   var fakeBody = body || goog.dom.createElement(goog.dom.TagName.BODY);
 
@@ -2760,16 +2633,16 @@ npf.userAgent.Support.prototype.testStyles_ = function(rule, callback,
       /** @type {!Element} */
       var node = goog.dom.createElement(goog.dom.TagName.DIV);
       node.id = opt_testNames ? opt_testNames[nodes] :
-        npf.userAgent.Support.MOD + (nodes + 1);
+        npf.userAgent.support.MOD + (nodes + 1);
       goog.dom.appendChild(div, node);
     }
   }
 
   /** @type {string} */
   var style = [
-    '&#173;','<style id="s', npf.userAgent.Support.MOD, '">', rule, '</style>'
+    '&#173;','<style id="s', npf.userAgent.support.MOD, '">', rule, '</style>'
   ].join('');
-  div.id = npf.userAgent.Support.MOD;
+  div.id = npf.userAgent.support.MOD;
 
   if (body) {
     div.innerHTML += style;
@@ -2804,7 +2677,7 @@ npf.userAgent.Support.prototype.testStyles_ = function(rule, callback,
  * @return {boolean}
  * @private
  */
-npf.userAgent.Support.prototype.contains_ = function(str, substr) {
+npf.userAgent.support.contains_ = function(str, substr) {
   return !!~('' + str).indexOf(substr);
 };
 
@@ -2816,12 +2689,12 @@ npf.userAgent.Support.prototype.contains_ = function(str, substr) {
  * @return {boolean}
  * @private
  */
-npf.userAgent.Support.prototype.testPropsAll_ = function(prop) {
+npf.userAgent.support.testPropsAll_ = function(prop) {
   var ucProp = prop.charAt(0).toUpperCase() + prop.slice(1);
   var props = (prop + ' ' +
-    npf.userAgent.Support.cssomPrefixes.join(ucProp + ' ') + ucProp).split(' ');
+    npf.userAgent.support.cssomPrefixes.join(ucProp + ' ') + ucProp).split(' ');
 
-  return this.testProps_(props);
+  return npf.userAgent.support.testProps_(props);
 };
 
 /**
@@ -2832,9 +2705,12 @@ npf.userAgent.Support.prototype.testPropsAll_ = function(prop) {
  * @return {boolean}
  * @private
  */
-npf.userAgent.Support.prototype.testProps_ = function(props) {
+npf.userAgent.support.testProps_ = function(props) {
   for (var i in props) {
-    if (!this.contains_(props[i], '-') && goog.isDef(this.mStyle_[props[i]])) {
+    if (
+      !npf.userAgent.support.contains_(props[i], '-') &&
+      goog.isDef(npf.userAgent.support.mStyle_[props[i]])
+    ) {
       return true;
     }
   }
@@ -2845,33 +2721,24 @@ npf.userAgent.Support.prototype.testProps_ = function(props) {
 /**
  * @param {string} prop
  * @param {Object} obj
- * @param {Element=} opt_elem
- * @return {*}
+ * @return {*|undefined}
  * @private
  */
-npf.userAgent.Support.prototype.testDomProps_ = function(prop, obj, opt_elem) {
+npf.userAgent.support.testDomProps_ = function(prop, obj) {
   var ucProp = prop.charAt(0).toUpperCase() + prop.slice(1);
   var props = (prop + ' ' +
-    npf.userAgent.Support.cssomPrefixes.join(ucProp + ' ') + ucProp).split(' ');
+    npf.userAgent.support.cssomPrefixes.join(ucProp + ' ') + ucProp).split(' ');
 
   for (var i in props) {
     /** @type {*} */
     var item = obj[props[i]];
 
     if (goog.isDef(item)) {
-      if (goog.isNull(opt_elem)) {
-        return props[i];
-      }
-
-      if (goog.isFunction(item)) {
-        return goog.bind(item, opt_elem || obj);
-      }
-
       return item;
     }
   }
 
-  return false;
+  return undefined;
 };
 
 /**
@@ -2882,9 +2749,9 @@ npf.userAgent.Support.prototype.testDomProps_ = function(prop, obj, opt_elem) {
  * @return {string}
  * @private
  */
-npf.userAgent.Support.prototype.testPropsPrefixed_ = function(props) {
+npf.userAgent.support.testPropsPrefixed_ = function(props) {
   for (var i in props) {
-    if (goog.isDef(this.mStyle_[props[i]])) {
+    if (goog.isDef(npf.userAgent.support.mStyle_[props[i]])) {
       return props[i];
     }
   }
@@ -2896,17 +2763,18 @@ npf.userAgent.Support.prototype.testPropsPrefixed_ = function(props) {
  * Detects support for a given event, with an optional element to test on
  *
  * @example
- *   npf.userAgent.Support.getInstance().hasEvent('gesturestart', elem)
+ *   npf.userAgent.support.hasEvent('gesturestart', elem)
  *
  * @param {string} eventName
  * @param {Element|Window=} opt_element
  * @return {boolean}
+ * @deprecated Use npf.userAgent.support.utils.hasEvent.
  */
-npf.userAgent.Support.prototype.hasEvent = function(eventName, opt_element) {
+npf.userAgent.support.hasEvent = function(eventName, opt_element) {
   /** @type {Element|Window} */
   var element = opt_element ||
-    goog.dom.createElement(npf.userAgent.Support.eventTagNames[eventName] ||
-    goog.dom.TagName.DIV);
+    goog.dom.createElement(npf.userAgent.support.eventTagNames[eventName] ||
+      goog.dom.TagName.DIV);
   /** @type {string} */
   var eventFullName = 'on' + eventName;
 
@@ -2945,6 +2813,6 @@ npf.userAgent.Support.prototype.hasEvent = function(eventName, opt_element) {
  * @param {string} str
  * @private
  */
-npf.userAgent.Support.prototype.setCss_ = function(str) {
-  this.mStyle_.cssText = str;
+npf.userAgent.support.setCss_ = function(str) {
+  npf.userAgent.support.mStyle_.cssText = str;
 };

@@ -13,10 +13,11 @@ goog.require('npf.ui.StatedRenderer');
 
 /**
  * @constructor
+ * @struct
  * @extends {npf.ui.StatedRenderer}
  */
 npf.ui.form.FieldRenderer = function() {
-  goog.base(this);
+  npf.ui.form.FieldRenderer.base(this, 'constructor');
 };
 goog.inherits(npf.ui.form.FieldRenderer, npf.ui.StatedRenderer);
 goog.addSingletonGetter(npf.ui.form.FieldRenderer);
@@ -36,30 +37,39 @@ npf.ui.form.FieldRenderer.prototype.getCssClass = function() {
 /** @inheritDoc */
 npf.ui.form.FieldRenderer.prototype.createDom = function(component) {
   var fieldContainer = /** @type {!npf.ui.form.Field} */ (component);
-  /** @type {Element} */
-  var element = goog.base(this, 'createDom', fieldContainer);
+  /** @type {!Element} */
+  var element = npf.ui.form.FieldRenderer.base(
+    this, 'createDom', fieldContainer);
+  /** @type {goog.dom.DomHelper} */
+  var domHelper = component.getDomHelper();
 
   if (fieldContainer.isLabelEnabled()) {
     /** @type {!Element} */
     var labelElement = this.createLabelElement(fieldContainer);
-    goog.dom.appendChild(element, labelElement);
+    domHelper.appendChild(element, labelElement);
   }
 
   /** @type {!Element} */
   var contentElement = fieldContainer.getDomHelper().createDom(
     goog.dom.TagName.DIV, this.getContentCssClass());
-  goog.dom.appendChild(element, contentElement);
+  domHelper.appendChild(element, contentElement);
+
+  if (fieldContainer.isPlaceholderEnabled()) {
+    /** @type {!Element} */
+    var placeholderElement = this.createPlaceholderElement(fieldContainer);
+    domHelper.appendChild(contentElement, placeholderElement);
+  }
 
   if (fieldContainer.isErrorEnabled()) {
     /** @type {!Element} */
     var errorMessageElement = this.createErrorMessageElement(fieldContainer);
-    goog.dom.appendChild(element, errorMessageElement);
+    domHelper.appendChild(element, errorMessageElement);
   }
 
   if (fieldContainer.isNoticeEnabled()) {
     /** @type {!Element} */
     var noticeElement = this.createNoticeElement(fieldContainer);
-    goog.dom.appendChild(element, noticeElement);
+    domHelper.appendChild(element, noticeElement);
   }
 
   this.appendContent(fieldContainer, element);
@@ -74,7 +84,7 @@ npf.ui.form.FieldRenderer.prototype.setState = function(component, state,
     this.setDisabled(/** @type {npf.ui.form.Field} */ (component), enable);
   }
 
-  goog.base(this, 'setState', component, state, enable);
+  npf.ui.form.FieldRenderer.base(this, 'setState', component, state, enable);
 };
 
 /** @inheritDoc */
@@ -135,7 +145,7 @@ npf.ui.form.FieldRenderer.prototype.setLabelVisible = function(component,
 npf.ui.form.FieldRenderer.prototype.createLabelElement = function(component) {
   /** @type {!Element} */
   var element = component.getDomHelper().createDom(
-    goog.dom.TagName.DIV, this.getLabelCssClass());
+    goog.dom.TagName.LABEL, this.getLabelCssClass());
   this.setContent(element, component.getLabel());
 
   return element;
@@ -171,6 +181,30 @@ npf.ui.form.FieldRenderer.prototype.createNoticeElement = function(component) {
 };
 
 /**
+ * @param {npf.ui.form.Field} component
+ * @param {boolean} visible
+ */
+npf.ui.form.FieldRenderer.prototype.setPlaceholderVisible = function(component,
+    visible) {
+  this.setVisible(component.getPlaceholderElement(), visible);
+};
+
+/**
+ * @param {npf.ui.form.Field} component
+ * @return {!Element}
+ * @protected
+ */
+npf.ui.form.FieldRenderer.prototype.createPlaceholderElement = function(
+    component) {
+  /** @type {!Element} */
+  var element = component.getDomHelper().createDom(
+    goog.dom.TagName.DIV, this.getPlaceholderCssClass());
+  this.setContent(element, component.getPlaceholder());
+
+  return element;
+};
+
+/**
  * @param {Element} element
  * @param {boolean=} opt_select
  */
@@ -182,6 +216,18 @@ npf.ui.form.FieldRenderer.prototype.focus = function(element, opt_select) {
       element.focus();
     }
   }
+};
+
+/**
+ * @param {npf.ui.form.Field} component
+ * @return {boolean}
+ */
+npf.ui.form.FieldRenderer.prototype.isFocused = function(component) {
+  /** @type {Element} */
+  var valueElement = component.getValueElement();
+
+  return !!valueElement &&
+    valueElement === component.getDomHelper().getDocument().activeElement;
 };
 
 /**
@@ -315,6 +361,14 @@ npf.ui.form.FieldRenderer.prototype.getNoticeElement = function(element) {
  * @param {Element} element
  * @return {Element}
  */
+npf.ui.form.FieldRenderer.prototype.getPlaceholderElement = function(element) {
+  return this.getElementByClass(this.getPlaceholderCssClass(), element);
+};
+
+/**
+ * @param {Element} element
+ * @return {Element}
+ */
 npf.ui.form.FieldRenderer.prototype.getValueElement = function(element) {
   return this.getElementByClass(this.getValueCssClass(), element);
 };
@@ -352,6 +406,13 @@ npf.ui.form.FieldRenderer.prototype.getLabelCssClass = function() {
  */
 npf.ui.form.FieldRenderer.prototype.getNoticeCssClass = function() {
   return goog.getCssName(this.getStructuralCssClass(), 'notice');
+};
+
+/**
+ * @return {string}
+ */
+npf.ui.form.FieldRenderer.prototype.getPlaceholderCssClass = function() {
+  return goog.getCssName(this.getStructuralCssClass(), 'placeholder');
 };
 
 /**

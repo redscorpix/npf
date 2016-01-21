@@ -1,12 +1,10 @@
 goog.provide('npf.ui.imageCrop.CropperRenderer');
 
 goog.require('goog.array');
-goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('goog.dom.classlist');
 goog.require('goog.math.Size');
 goog.require('goog.object');
-goog.require('goog.style');
 goog.require('npf.ui.StatedRenderer');
 goog.require('npf.ui.imageCrop.Direction');
 
@@ -16,11 +14,10 @@ goog.require('npf.ui.imageCrop.Direction');
  * @extends {npf.ui.StatedRenderer}
  */
 npf.ui.imageCrop.CropperRenderer = function() {
-  goog.base(this);
+  npf.ui.imageCrop.CropperRenderer.base(this, 'constructor');
 
   /**
-   * @type {Object.<npf.ui.imageCrop.Direction,string>}
-   * @private
+   * @private {Object.<npf.ui.imageCrop.Direction,string>}
    */
   this.directionCssClassesMap_ = null;
 };
@@ -42,17 +39,23 @@ npf.ui.imageCrop.CropperRenderer.prototype.getCssClass = function() {
 
 /** @inheritDoc */
 npf.ui.imageCrop.CropperRenderer.prototype.createDom = function(component) {
-  var cropper = /** @type {npf.ui.imageCrop.Cropper} */ (component);
-  /** @type {Element} */
-  var element = goog.base(this, 'createDom', component);
+  var cropper = /** @type {!npf.ui.imageCrop.Cropper} */ (component);
   /** @type {!Element} */
-  var contentElement = component.getDomHelper().createDom(
+  var element = npf.ui.imageCrop.CropperRenderer.base(
+    this, 'createDom', component);
+  /** @type {goog.dom.DomHelper} */
+  var domHelper = component.getDomHelper();
+  /** @type {!Element} */
+  var contentElement = domHelper.createDom(
     goog.dom.TagName.DIV, this.getContentCssClass());
-  /** @type {!Element} */
+  /** @type {!HTMLImageElement} */
   var imageElement = this.createImageElement(cropper);
+  /** @type {!Element} */
+  var faderElement = this.createFaderElement(cropper);
 
-  goog.dom.appendChild(contentElement, imageElement);
-  goog.dom.appendChild(element, contentElement);
+  domHelper.appendChild(contentElement, imageElement);
+  domHelper.appendChild(contentElement, faderElement);
+  domHelper.appendChild(element, contentElement);
 
   /** @type {!Array.<npf.ui.imageCrop.Direction>} */
   var directions = [
@@ -71,7 +74,7 @@ npf.ui.imageCrop.CropperRenderer.prototype.createDom = function(component) {
     var directionElement = this.createDirectionElement(cropper, direction);
 
     if (directionElement) {
-      goog.dom.appendChild(element, directionElement);
+      domHelper.appendChild(element, directionElement);
     }
   }, this);
 
@@ -85,7 +88,7 @@ npf.ui.imageCrop.CropperRenderer.prototype.getContentElement = function(
 };
 
 /**
- * @param {npf.ui.imageCrop.Cropper} component
+ * @param {!npf.ui.imageCrop.Cropper} component
  * @param {!goog.math.Rect} rect
  * @param {number} scale
  */
@@ -93,20 +96,23 @@ npf.ui.imageCrop.CropperRenderer.prototype.setCroppedRect = function(component,
     rect, scale) {
   /** @type {Element} */
   var element = component.getElement();
-  /** @type {Element} */
+  /** @type {HTMLImageElement} */
   var imageElement = component.getImageElement();
 
   if (element && imageElement) {
     /** @type {!goog.math.Rect} */
     var scaledRect = rect.clone().scale(component.getScale()).round();
-    goog.style.setSize(element, scaledRect.width, scaledRect.height);
-    goog.style.setPosition(element, scaledRect.left, scaledRect.top);
-    goog.style.setPosition(imageElement, -scaledRect.left, -scaledRect.top);
+    element.style.width = scaledRect.width + 'px';
+    element.style.height = scaledRect.height + 'px';
+    element.style.left = scaledRect.left + 'px';
+    element.style.top = scaledRect.top + 'px';
+    imageElement.style.left = -scaledRect.left + 'px';
+    imageElement.style.top = -scaledRect.top + 'px';
   }
 };
 
 /**
- * @param {npf.ui.imageCrop.Cropper} component
+ * @param {!npf.ui.imageCrop.Cropper} component
  * @param {npf.ui.imageCrop.Direction} direction
  * @return {Element}
  * @protected
@@ -118,7 +124,7 @@ npf.ui.imageCrop.CropperRenderer.prototype.createDirectionElement = function(
     var cssClass = this.getDirectionCssClass(direction);
 
     return component.getDomHelper().createDom(
-      goog.dom.TagName.INS, cssClass);
+      goog.dom.TagName.DIV, cssClass);
   }
 
   return null;
@@ -153,7 +159,7 @@ npf.ui.imageCrop.CropperRenderer.prototype.getDirection = function(element) {
 };
 
 /**
- * @param {npf.ui.imageCrop.Cropper} component
+ * @param {!npf.ui.imageCrop.Cropper} component
  * @param {npf.ui.imageCrop.Direction} direction
  * @param {boolean} enable
  */
@@ -167,16 +173,17 @@ npf.ui.imageCrop.CropperRenderer.prototype.setDirection = function(component,
   if (element && cssClass) {
     /** @type {Element} */
     var directionElement = component.getDirectionElement(direction);
+    /** @type {goog.dom.DomHelper} */
+    var domHelper = component.getDomHelper();
 
     if (enable) {
       if (!directionElement) {
-        directionElement = component.getDomHelper().createDom(
-          goog.dom.TagName.INS, cssClass);
-        goog.dom.appendChild(element, directionElement);
+        directionElement = domHelper.createDom(goog.dom.TagName.DIV, cssClass);
+        domHelper.appendChild(element, directionElement);
       }
     } else {
       if (directionElement) {
-        goog.dom.removeNode(directionElement);
+        domHelper.removeNode(directionElement);
       }
     }
   }
@@ -192,11 +199,7 @@ npf.ui.imageCrop.CropperRenderer.prototype.getDirectionElement = function(
   /** @type {string} */
   var cssClass = this.getDirectionCssClass(direction);
 
-  if (cssClass) {
-    return this.getElementByClass(cssClass, element);
-  }
-
-  return null;
+  return cssClass ? this.getElementByClass(cssClass, element) : null;
 };
 
 /**
@@ -213,29 +216,48 @@ npf.ui.imageCrop.CropperRenderer.prototype.getDirectionCssClass = function(
 /**
  * @private
  */
-npf.ui.imageCrop.CropperRenderer.prototype.checkDirectionCssClasses_ = function(
-    ) {
+npf.ui.imageCrop.CropperRenderer.prototype.checkDirectionCssClasses_ =
+    function() {
   if (!this.directionCssClassesMap_) {
     var Direction = npf.ui.imageCrop.Direction;
+    var baseClass = this.getStructuralCssClass();
     this.directionCssClassesMap_ = goog.object.create(
-      Direction.BOTTOM,
-        goog.getCssName(this.getStructuralCssClass(), 'direction-bottom'),
-      Direction.LEFT,
-        goog.getCssName(this.getStructuralCssClass(), 'direction-left'),
-      Direction.LEFT_BOTTOM,
-        goog.getCssName(this.getStructuralCssClass(), 'direction-leftBottom'),
-      Direction.LEFT_TOP,
-        goog.getCssName(this.getStructuralCssClass(), 'direction-leftTop'),
-      Direction.RIGHT,
-        goog.getCssName(this.getStructuralCssClass(), 'direction-right'),
+      Direction.BOTTOM, goog.getCssName(baseClass, 'direction-bottom'),
+      Direction.LEFT, goog.getCssName(baseClass, 'direction-left'),
+      Direction.LEFT_BOTTOM, goog.getCssName(baseClass, 'direction-leftBottom'),
+      Direction.LEFT_TOP, goog.getCssName(baseClass, 'direction-leftTop'),
+      Direction.RIGHT, goog.getCssName(baseClass, 'direction-right'),
       Direction.RIGHT_BOTTOM,
-        goog.getCssName(this.getStructuralCssClass(), 'direction-rightBottom'),
-      Direction.RIGHT_TOP,
-        goog.getCssName(this.getStructuralCssClass(), 'direction-rightTop'),
-      Direction.TOP,
-        goog.getCssName(this.getStructuralCssClass(), 'direction-top')
+                            goog.getCssName(baseClass, 'direction-rightBottom'),
+      Direction.RIGHT_TOP, goog.getCssName(baseClass, 'direction-rightTop'),
+      Direction.TOP, goog.getCssName(baseClass, 'direction-top')
     );
   }
+};
+
+/**
+ * @param {!npf.ui.imageCrop.Cropper} component
+ * @return {!HTMLImageElement}
+ * @protected
+ */
+npf.ui.imageCrop.CropperRenderer.prototype.createImageElement = function(
+    component) {
+  /** @type {!goog.math.Size} */
+  var imageSize = component.getImageNaturalSize();
+  /** @type {Image|HTMLImageElement|HTMLCanvasElement} */
+  var image = component.getImage();
+  /** @type {string} */
+  var src = image instanceof HTMLCanvasElement ?
+    image.toDataURL() : image.src;
+
+  return /** @type {!HTMLImageElement} */ (
+    component.getDomHelper().createDom(goog.dom.TagName.IMG, {
+      'class': this.getImageCssClass(),
+      'height': imageSize.height,
+      'src': src,
+      'width': imageSize.width
+    })
+  );
 };
 
 /**
@@ -243,29 +265,23 @@ npf.ui.imageCrop.CropperRenderer.prototype.checkDirectionCssClasses_ = function(
  * @return {!Element}
  * @protected
  */
-npf.ui.imageCrop.CropperRenderer.prototype.createImageElement = function(
+npf.ui.imageCrop.CropperRenderer.prototype.createFaderElement = function(
     component) {
-  /** @type {!goog.math.Size} */
-  var imageSize = component.getImageNaturalSize();
-
-  return component.getDomHelper().createDom(goog.dom.TagName.IMG, {
-    'class': this.getImageCssClass(),
-    'height': imageSize.height,
-    'src': component.getImage().src,
-    'width': imageSize.width
-  });
+  return component.getDomHelper().createDom(
+    goog.dom.TagName.DIV, this.getFaderCssClass());
 };
 
 /**
  * @param {Element} element
- * @return {Element}
+ * @return {HTMLImageElement}
  */
 npf.ui.imageCrop.CropperRenderer.prototype.getImageElement = function(element) {
-  return this.getElementByClass(this.getImageCssClass(), element);
+  return /** @type {HTMLImageElement} */ (
+    this.getElementByClass(this.getImageCssClass(), element));
 };
 
 /**
- * @param {Image} image
+ * @param {!(Image|HTMLImageElement|HTMLCanvasElement)} image
  * @param {number=} opt_scale
  * @return {!goog.math.Size}
  */
@@ -287,18 +303,19 @@ npf.ui.imageCrop.CropperRenderer.prototype.getImageSize = function(image,
 };
 
 /**
- * @param {npf.ui.imageCrop.Cropper} component
+ * @param {!npf.ui.imageCrop.Cropper} component
  * @param {number} scale
  */
 npf.ui.imageCrop.CropperRenderer.prototype.setScale = function(component,
     scale) {
-  /** @type {Element} */
+  /** @type {HTMLImageElement} */
   var element = component.getImageElement();
 
   if (element) {
     /** @type {!goog.math.Size} */
-    var imageSize = component.getImageNaturalSize();
-    goog.style.setSize(element, imageSize.scale(scale).round());
+    var imageSize = component.getImageNaturalSize().scale(scale).round();
+    element.style.width = imageSize.width + 'px';
+    element.style.height = imageSize.height + 'px';
   }
 };
 
@@ -307,6 +324,13 @@ npf.ui.imageCrop.CropperRenderer.prototype.setScale = function(component,
  */
 npf.ui.imageCrop.CropperRenderer.prototype.getContentCssClass = function() {
   return goog.getCssName(this.getStructuralCssClass(), 'content');
+};
+
+/**
+ * @return {string}
+ */
+npf.ui.imageCrop.CropperRenderer.prototype.getFaderCssClass = function() {
+  return goog.getCssName(this.getStructuralCssClass(), 'fader');
 };
 
 /**

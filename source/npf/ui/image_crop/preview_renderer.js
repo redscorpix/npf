@@ -1,12 +1,11 @@
 goog.provide('npf.ui.imageCrop.PreviewRenderer');
 
-goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('goog.math.Rect');
 goog.require('goog.math.Size');
 goog.require('goog.style');
 goog.require('npf.ui.StatedRenderer');
-goog.require('npf.userAgent.support');
+goog.require('npf.userAgent.css');
 
 
 /**
@@ -14,7 +13,7 @@ goog.require('npf.userAgent.support');
  * @extends {npf.ui.StatedRenderer}
  */
 npf.ui.imageCrop.PreviewRenderer = function() {
-  goog.base(this);
+  npf.ui.imageCrop.PreviewRenderer.base(this, 'constructor');
 };
 goog.inherits(npf.ui.imageCrop.PreviewRenderer, npf.ui.StatedRenderer);
 goog.addSingletonGetter(npf.ui.imageCrop.PreviewRenderer);
@@ -34,13 +33,10 @@ npf.ui.imageCrop.PreviewRenderer.prototype.getCssClass = function() {
 
 /** @inheritDoc */
 npf.ui.imageCrop.PreviewRenderer.prototype.createDom = function(component) {
-  /** @type {Element} */
-  var element = goog.base(this, 'createDom', component);
   /** @type {!Element} */
-  var contentElement = component.getDomHelper().createDom(
-    goog.dom.TagName.DIV, this.getContentCssClass());
-
-  goog.dom.appendChild(element, contentElement);
+  var element = npf.ui.imageCrop.PreviewRenderer.base(
+    this, 'createDom', component);
+  element.innerHTML = '<div class="' + this.getContentCssClass() + '"></div>';
 
   return element;
 };
@@ -52,7 +48,7 @@ npf.ui.imageCrop.PreviewRenderer.prototype.getContentElement = function(
 };
 
 /**
- * @param {npf.ui.imageCrop.Preview} component
+ * @param {!npf.ui.imageCrop.Preview} component
  * @param {goog.math.Rect} rect
  * @param {number} scale
  */
@@ -60,61 +56,63 @@ npf.ui.imageCrop.PreviewRenderer.prototype.setCroppedRect = function(component,
     rect, scale) {
   /** @type {Element} */
   var contentElement = component.getContentElement();
-  /** @type {Element} */
+  /** @type {HTMLImageElement} */
   var imageElement = component.getImageElement();
 
   if (contentElement && imageElement) {
-    /** @type {Image} */
+    /** @type {Image|HTMLImageElement|HTMLCanvasElement} */
     var image = component.getImage();
 
     if (rect && image) {
       /** @type {!goog.math.Rect} */
       var imageRect = rect.clone().scale(scale).round();
-      goog.style.setSize(contentElement, imageRect.width, imageRect.height);
+      contentElement.style.width = imageRect.width + 'px';
+      contentElement.style.height = imageRect.height + 'px';
 
-      if (npf.userAgent.support.getCssTransforms3d()) {
+      if (npf.userAgent.css.isTransform3dSupported()) {
         goog.style.setStyle(imageElement, 'transform',
           'scale(' + scale + ') ' +
           'translate3d(' + (-rect.left) + 'px,' + (-rect.top) + 'px, 0)');
       } else {
         /** @type {!goog.math.Size} */
         var imageSize = component.getImageNaturalSize().scale(scale).round();
-
-        goog.style.setPosition(imageElement, -imageRect.left, -imageRect.top);
-        goog.style.setSize(imageElement, imageSize);
+        imageElement.style.left = -imageRect.left + 'px';
+        imageElement.style.top = -imageRect.top + 'px';
+        imageElement.style.width = imageSize.width + 'px';
+        imageElement.style.height = imageSize.height + 'px';
       }
     }
   }
 };
 
 /**
- * @param {npf.ui.imageCrop.Preview} component
- * @param {Image} image
- * @param {Image=} opt_oldImage
+ * @param {!npf.ui.imageCrop.Preview} component
+ * @param {Image|HTMLImageElement|HTMLCanvasElement} image
  */
-npf.ui.imageCrop.PreviewRenderer.prototype.setImage = function(component, image,
-    opt_oldImage) {
+npf.ui.imageCrop.PreviewRenderer.prototype.setImage = function(component,
+    image) {
   /** @type {Element} */
   var contentElement = component.getContentElement();
 
   if (contentElement) {
-    /** @type {Element} */
-    var imageElement;
+    /** @type {HTMLImageElement} */
+    var imageElement = component.getImageElement();
+    /** @type {goog.dom.DomHelper} */
+    var domHelper = component.getDomHelper();
 
-    if (opt_oldImage) {
-      imageElement = component.getImageElement();
-      goog.dom.removeNode(imageElement);
+    if (imageElement) {
+      domHelper.removeNode(imageElement);
     }
 
     if (image) {
       imageElement = this.createImageElement(component, image);
-      goog.dom.appendChild(contentElement, imageElement);
+      domHelper.appendChild(contentElement, imageElement);
     }
   }
 };
 
 /**
- * @param {Image} image
+ * @param {Image|HTMLImageElement|HTMLCanvasElement} image
  * @param {number=} opt_scale
  * @return {goog.math.Size?}
  */
@@ -140,29 +138,34 @@ npf.ui.imageCrop.PreviewRenderer.prototype.getImageSize = function(image,
 };
 
 /**
- * @param {npf.ui.imageCrop.Preview} component
- * @param {!Image} image
- * @return {!Element}
+ * @param {!npf.ui.imageCrop.Preview} component
+ * @param {!(Image|HTMLImageElement|HTMLCanvasElement)} image
+ * @return {!HTMLImageElement}
  */
 npf.ui.imageCrop.PreviewRenderer.prototype.createImageElement = function(
     component, image) {
   /** @type {goog.math.Size} */
   var size = this.getImageSize(image);
+  /** @type {string} */
+  var src = image instanceof HTMLCanvasElement ? image.toDataURL() : image.src;
 
-  return component.getDomHelper().createDom(goog.dom.TagName.IMG, {
-    'class': this.getImageCssClass(),
-    'height': size.height,
-    'src': image.src,
-    'width': size.width
-  });
+  return /** @type {!HTMLImageElement} */ (
+    component.getDomHelper().createDom(goog.dom.TagName.IMG, {
+      'class': this.getImageCssClass(),
+      'height': size.height,
+      'src': src,
+      'width': size.width
+    })
+  );
 };
 
 /**
  * @param {Element} element
- * @return {Element}
+ * @return {HTMLImageElement}
  */
 npf.ui.imageCrop.PreviewRenderer.prototype.getImageElement = function(element) {
-  return this.getElementByClass(this.getImageCssClass(), element);
+  return /** @type {HTMLImageElement} */ (
+    this.getElementByClass(this.getImageCssClass(), element));
 };
 
 /**

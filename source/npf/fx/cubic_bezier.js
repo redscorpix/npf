@@ -137,7 +137,7 @@ npf.fx.CubicBezier = function(t, p1x, p1y, p2x, p2y, duration) {
         t1 = t2;
       }
 
-      t2 = (t1 - t0) *.5 + t0;
+      t2 = (t1 - t0) * 0.5 + t0;
     }
 
     return t2; // Failure.

@@ -1,17 +1,25 @@
 goog.provide('npf.ui.StatedComponent');
 
+goog.require('goog.array');
+goog.require('goog.dom');
 goog.require('goog.events.Event');
 goog.require('goog.events.EventType');
 goog.require('goog.events.KeyCodes');
 goog.require('goog.events.KeyHandler');
 goog.require('goog.events.KeyHandler.EventType');
+goog.require('goog.string');
 goog.require('goog.ui.Component');
 goog.require('goog.ui.Component.Error');
 goog.require('goog.ui.Component.EventType');
 goog.require('goog.ui.Component.State');
 goog.require('goog.userAgent');
+goog.require('npf.dom.Content');
+goog.require('npf.events.ClickHandler');
+goog.require('npf.events.HoverHandler');
+goog.require('npf.events.HoverHandler.EventType');
 goog.require('npf.ui.RenderedComponent');
 goog.require('npf.ui.StatedRenderer');
+goog.require('npf.userAgent.events');
 
 
 /**
@@ -39,23 +47,25 @@ goog.require('npf.ui.StatedRenderer');
  * @param {goog.dom.DomHelper=} opt_domHelper Optional DOM helper, used for
  *     document interaction.
  * @constructor
+ * @struct
  * @extends {npf.ui.RenderedComponent}
  */
 npf.ui.StatedComponent = function(opt_renderer, opt_domHelper) {
-  goog.base(this, opt_renderer || npf.ui.StatedRenderer.getInstance(),
-    opt_domHelper);
+  npf.ui.StatedComponent.base(this, 'constructor', opt_renderer ||
+    npf.ui.StatedRenderer.getInstance(), opt_domHelper);
 
   /**
-   * Current component state; a bit mask of {@link goog.ui.Component.State}s.
-   * @private {number}
+   * Whether the component allows text selection within its DOM.  Defaults to
+   * false.
+   * @private {boolean}
    */
-  this.state_ = 0x00;
+  this.allowTextSelection_ = true;
 
   /**
-   * A bit mask of {@link goog.ui.Component.State}s this component supports.
-   * @private {number}
+   * Aria-label
+   * @private {string?}
    */
-  this.supportedStates_ = 0x00;
+  this.ariaLabel_ = null;
 
   /**
    * A bit mask of {@link goog.ui.Component.State}s for which this component
@@ -73,6 +83,42 @@ npf.ui.StatedComponent = function(opt_renderer, opt_domHelper) {
   this.autoStates_ = goog.ui.Component.State.ALL;
 
   /**
+   * Text caption or DOM structure displayed in the component.
+   * @private {npf.dom.Content}
+   */
+  this.content_ = null;
+
+  /**
+   * Whether the component should listen for and handle mouse events;
+   * defaults to true.
+   * @private {boolean}
+   */
+  this.handleMouseEvents_ = true;
+
+  /**
+   * @private {npf.events.HoverHandler}
+   */
+  this.hoverHandler_ = null;
+
+  /**
+   * Keyboard event handler.
+   * @private {goog.events.KeyHandler}
+   */
+  this.keyHandler_ = null;
+
+  /**
+   * The component's preferred ARIA role.
+   * @private {?goog.a11y.aria.Role}
+   */
+  this.preferredAriaRole_ = null;
+
+  /**
+   * Current component state; a bit mask of {@link goog.ui.Component.State}s.
+   * @private {number}
+   */
+  this.state_ = 0x00;
+
+  /**
    * A bit mask of {@link goog.ui.Component.State}s for which this component
    * dispatches state transition events. Because events are expensive, the
    * default behavior is to not dispatch any state transition events at all.
@@ -85,44 +131,33 @@ npf.ui.StatedComponent = function(opt_renderer, opt_domHelper) {
   this.statesWithTransitionEvents_ = 0x00;
 
   /**
+   * A bit mask of {@link goog.ui.Component.State}s this component supports.
+   * @private {number}
+   */
+  this.supportedStates_ = 0x00;
+
+  /**
+   * @private {goog.math.Coordinate}
+   */
+  this.touchMovePosition_ = null;
+
+  /**
+   * @private {goog.math.Coordinate}
+   */
+  this.touchStartPosition_ = null;
+
+  /**
    * Component visibility.
    * @private {boolean}
    */
   this.visible_ = true;
-
-  /**
-   * Keyboard event handler.
-   * @private {goog.events.KeyHandler}
-   */
-  this.keyHandler_ = null;
-
-  /**
-   * Whether the component should listen for and handle mouse events; defaults to
-   * true.
-   * @private {boolean}
-   */
-  this.handleMouseEvents_ = true;
-
-
-  /**
-   * Whether the component allows text selection within its DOM.  Defaults to
-   * false.
-   * @private {boolean}
-   */
-  this.allowTextSelection_ = false;
-
-  /**
-   * The component's preferred ARIA role.
-   * @private {?goog.a11y.aria.Role}
-   */
-  this.preferredAriaRole_ = null;
 };
 goog.inherits(npf.ui.StatedComponent, npf.ui.RenderedComponent);
 
 
 /** @inheritDoc */
 npf.ui.StatedComponent.prototype.createDom = function() {
-  goog.base(this, 'createDom');
+  npf.ui.StatedComponent.base(this, 'createDom');
 
   /** @type {Element} */
   var element = this.getElement();
@@ -138,12 +173,7 @@ npf.ui.StatedComponent.prototype.createDom = function() {
     renderer.setAllowTextSelection(element, false);
   }
 
-  // Initialize visibility.
-  if (!this.isVisible()) {
-    // The renderer is assumed to create visible elements. Since hiding
-    // elements can be expensive, only do it if needed (bug 1037105).
-    renderer.setVisible(element, false);
-  }
+  this.applyVisible(this.visible_);
 };
 
 /**
@@ -155,7 +185,7 @@ npf.ui.StatedComponent.prototype.createDom = function() {
  * @override
  */
 npf.ui.StatedComponent.prototype.decorateInternal = function(element) {
-  goog.base(this, 'decorateInternal', element);
+  npf.ui.StatedComponent.base(this, 'decorateInternal', element);
 
   var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
 
@@ -173,9 +203,12 @@ npf.ui.StatedComponent.prototype.decorateInternal = function(element) {
 
 /** @inheritDoc */
 npf.ui.StatedComponent.prototype.enterDocument = function() {
-  goog.base(this, 'enterDocument');
+  npf.ui.StatedComponent.base(this, 'enterDocument');
 
   var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
+
+  // Call the renderer's setAriaStates method to set element's aria attributes.
+  renderer.setAriaStates(this, this.getElementStrict());
 
   // Call the renderer's initializeDom method to configure properties of the
   // component's DOM that can only be done once it's in the document.
@@ -201,14 +234,119 @@ npf.ui.StatedComponent.prototype.enterDocument = function() {
         var keyHandler = this.getKeyHandler();
         keyHandler.attach(keyTarget);
 
-        this.getHandler()
-          .listen(keyHandler, goog.events.KeyHandler.EventType.KEY,
-            this.handleKeyEvent)
-          .listen(keyTarget, goog.events.EventType.FOCUS, this.handleFocus)
-          .listen(keyTarget, goog.events.EventType.BLUR, this.handleBlur);
+        this.getHandler().
+          listen(keyHandler, goog.events.KeyHandler.EventType.KEY,
+            this.handleKeyEvent).
+          listen(keyTarget, goog.events.EventType.FOCUS, this.handleFocus).
+          listen(keyTarget, goog.events.EventType.BLUR, this.handleBlur);
       }
     }
   }
+};
+
+/**
+ * Cleans up the component before its DOM is removed from the document, and
+ * removes event handlers.  Overrides
+ * {@link npf.ui.RenderedComponent#exitDocument} by making sure that components
+ * that are removed from the document aren't focusable (i.e. have no tab index).
+ * @override
+ */
+npf.ui.StatedComponent.prototype.exitDocument = function() {
+  npf.ui.StatedComponent.base(this, 'exitDocument');
+
+  goog.dispose(this.hoverHandler_);
+  this.hoverHandler_ = null;
+
+  this.touchMovePosition_ = null;
+  this.touchStartPosition_ = null;
+
+  if (this.keyHandler_) {
+    this.keyHandler_.detach();
+  }
+
+  if (this.isVisible() && this.isEnabled()) {
+    var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
+    renderer.setFocusable(this, false);
+  }
+};
+
+
+/** @override */
+npf.ui.StatedComponent.prototype.disposeInternal = function() {
+  npf.ui.StatedComponent.base(this, 'disposeInternal');
+
+  goog.dispose(this.keyHandler_);
+  this.keyHandler_ = null;
+};
+
+/**
+ * Returns the text caption or DOM structure displayed in the component.
+ * @return {npf.dom.Content} Text caption or DOM structure
+ *     comprising the component's contents.
+ */
+npf.ui.StatedComponent.prototype.getContent = function() {
+  return this.content_;
+};
+
+
+/**
+ * Sets the component's content to the given text caption, element, or array of
+ * nodes.  (If the argument is an array of nodes, it must be an actual array,
+ * not an array-like object.)
+ * @param {npf.dom.Content} content Text caption or DOM
+ *     structure to set as the component's contents.
+ */
+npf.ui.StatedComponent.prototype.setContent = function(content) {
+  var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
+  // Controls support pluggable renderers; delegate to the renderer.
+  renderer.setContent(this.getElement(), content);
+
+  // setContentInternal needs to be after the renderer, since the implementation
+  // may depend on the content being in the DOM.
+  this.setContentInternal(content);
+};
+
+
+/**
+ * Sets the component's content to the given text caption, element, or array
+ * of nodes.  Unlike {@link #setContent}, doesn't modify the component's DOM.
+ * Called by renderers during element decoration.
+ *
+ * This should only be used by subclasses and its associated renderers.
+ *
+ * @param {npf.dom.Content} content Text caption or DOM structure
+ *     to set as the component's contents.
+ * @protected
+ */
+npf.ui.StatedComponent.prototype.setContentInternal = function(content) {
+  this.content_ = content;
+};
+
+/**
+ * @return {string} Text caption of the control or empty string if none.
+ */
+npf.ui.StatedComponent.prototype.getCaption = function() {
+  var content = this.getContent();
+
+  if (!content) {
+    return '';
+  }
+
+  var caption = goog.isString(content) ?
+    content : goog.isArray(content) ?
+      goog.array.map(content, goog.dom.getRawTextContent).join('') :
+        goog.dom.getTextContent(/** @type {!Node} */ (content));
+
+  return goog.string.collapseBreakingSpaces(caption);
+};
+
+
+/**
+ * Sets the text caption of the component.
+ * @param {string} caption Text caption of the component.
+ */
+npf.ui.StatedComponent.prototype.setCaption = function(caption) {
+  this.setContent(caption);
 };
 
 /**
@@ -253,16 +391,16 @@ npf.ui.StatedComponent.prototype.getKeyEventTarget = function() {
   return renderer.getKeyEventTarget(this);
 };
 
-
 /**
  * Returns the keyboard event handler for this component, lazily created the
- * first time this method is called.  Considered protected; should only be
- * used within this package and by subclasses.
- * @return {goog.events.KeyHandler} Keyboard event handler for this component.
- * @protected
+ * first time this method is called. The keyboard event handler listens for
+ * keyboard events on the component's key event target, as determined by its
+ * renderer.
+ * @return {!goog.events.KeyHandler} Keyboard event handler for this component.
  */
 npf.ui.StatedComponent.prototype.getKeyHandler = function() {
-  return this.keyHandler_ || (this.keyHandler_ = new goog.events.KeyHandler());
+  return this.keyHandler_ ||
+    (this.keyHandler_ = new goog.events.KeyHandler(this.getKeyEventTarget()));
 };
 
 
@@ -296,6 +434,33 @@ npf.ui.StatedComponent.prototype.setPreferredAriaRole = function(role) {
 
 
 /**
+ * Gets the control's aria label.
+ * @return {?string} This control's aria label.
+ */
+npf.ui.StatedComponent.prototype.getAriaLabel = function() {
+  return this.ariaLabel_;
+};
+
+
+/**
+ * Sets the control's aria label. This can be used to assign aria label to the
+ * element after it is rendered.
+ * @param {string} label The string to set as the aria label for this control.
+ *     No escaping is done on this value.
+ */
+npf.ui.StatedComponent.prototype.setAriaLabel = function(label) {
+  this.ariaLabel_ = label;
+
+  var element = this.getElement();
+
+  if (element) {
+    var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
+    renderer.setAriaLabel(element, label);
+  }
+};
+
+
+/**
  * Enables or disables mouse event handling on the component.
  * @param {boolean} enable Whether to enable mouse event handling.
  * @private
@@ -305,72 +470,90 @@ npf.ui.StatedComponent.prototype.enableMouseEventHandling_ = function(enable) {
   var handler = this.getHandler();
   /** @type {Element} */
   var element = this.getElement();
-  /** @type {Element} */
-  var hoverableElement = this.getHoverableElement();
+  /** @type {boolean} */
+  var touch = npf.userAgent.events.isTouchEventSupported();
+  /** @type {boolean} */
+  var click =
+    !touch || (touch && !goog.userAgent.MOBILE && !goog.userAgent.ANDROID);
 
-  if (enable) {
-    handler
-      .listen(hoverableElement, goog.events.EventType.MOUSEOVER,
-        this.handleMouseOver)
-      .listen(element, goog.events.EventType.MOUSEDOWN, this.handleMouseDown)
-      .listen(element, goog.events.EventType.MOUSEUP, this.handleMouseUp)
-      .listen(hoverableElement, goog.events.EventType.MOUSEOUT,
-        this.handleMouseOut);
-
-    if (goog.userAgent.IE) {
-      handler.listen(element, goog.events.EventType.DBLCLICK,
-        this.handleDblClick);
+  if (touch) {
+    if (enable) {
+      handler.
+        listen(element, goog.events.EventType.TOUCHSTART,
+          this.handleTouchStart).
+        listen(element, goog.events.EventType.TOUCHMOVE,
+          this.handleTouchMove).
+        listen(element, [
+          goog.events.EventType.TOUCHEND,
+          goog.events.EventType.TOUCHCANCEL
+        ], this.handleTouchEnd);
+    } else {
+      handler.
+        unlisten(element, goog.events.EventType.TOUCHSTART,
+          this.handleTouchStart).
+        unlisten(element, goog.events.EventType.TOUCHMOVE,
+          this.handleTouchMove).
+        unlisten(element, [
+          goog.events.EventType.TOUCHEND,
+          goog.events.EventType.TOUCHCANCEL
+        ], this.handleTouchEnd);
     }
-  } else {
-    handler
-      .unlisten(hoverableElement, goog.events.EventType.MOUSEOVER,
-        this.handleMouseOver)
-      .unlisten(element, goog.events.EventType.MOUSEDOWN, this.handleMouseDown)
-      .unlisten(element, goog.events.EventType.MOUSEUP, this.handleMouseUp)
-      .unlisten(hoverableElement, goog.events.EventType.MOUSEOUT,
-        this.handleMouseOut);
+  }
 
-    if (goog.userAgent.IE) {
-      handler.unlisten(element, goog.events.EventType.DBLCLICK,
-        this.handleDblClick);
+  if (click) {
+    if (enable) {
+      /** @type {Element} */
+      var hoverableElement = this.getHoverableElement();
+
+      this.hoverHandler_ = new npf.events.HoverHandler(hoverableElement);
+
+      handler.
+        listen(this.hoverHandler_, [
+          npf.events.HoverHandler.EventType.HOVERIN,
+          npf.events.HoverHandler.EventType.HOVEROUT
+        ], this.handleHover).
+        listen(element, goog.events.EventType.MOUSEDOWN, this.handleMouseDown).
+        listen(element, goog.events.EventType.MOUSEUP, this.handleMouseUp);
+
+      if (this.handleContextMenu != goog.nullFunction) {
+        handler.listen(element, goog.events.EventType.CONTEXTMENU,
+          this.handleContextMenu);
+      }
+
+      if (goog.userAgent.EDGE_OR_IE) {
+        handler.
+          listen(element, goog.events.EventType.DBLCLICK, this.handleDblClick);
+      }
+    } else {
+      handler.
+        unlisten(this.hoverHandler_, [
+          npf.events.HoverHandler.EventType.HOVERIN,
+          npf.events.HoverHandler.EventType.HOVEROUT
+        ], this.handleHover).
+        unlisten(element, goog.events.EventType.MOUSEDOWN, this.handleMouseDown).
+        unlisten(element, goog.events.EventType.MOUSEUP, this.handleMouseUp);
+
+      this.hoverHandler_.dispose();
+      this.hoverHandler_ = null;
+
+      if (this.handleContextMenu != goog.nullFunction) {
+        handler.unlisten(element, goog.events.EventType.CONTEXTMENU,
+          this.handleContextMenu);
+      }
+
+      if (goog.userAgent.EDGE_OR_IE) {
+        handler.
+          unlisten(element, goog.events.EventType.DBLCLICK, this.handleDblClick);
+      }
     }
   }
 };
 
-
-/**
- * Cleans up the component before its DOM is removed from the document, and
- * removes event handlers.  Overrides
- * {@link npf.ui.RenderedComponent#exitDocument} by making sure that components
- * that are removed from the document aren't focusable (i.e. have no tab index).
- * @override
- */
-npf.ui.StatedComponent.prototype.exitDocument = function() {
-  goog.base(this, 'exitDocument');
-
-  if (this.keyHandler_) {
-    this.keyHandler_.detach();
-  }
-
-  if (this.isVisible() && this.isEnabled()) {
-    var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
-    renderer.setFocusable(this, false);
-  }
-};
-
-
-/** @override */
-npf.ui.StatedComponent.prototype.disposeInternal = function() {
-  goog.base(this, 'disposeInternal');
-
-  goog.dispose(this.keyHandler_);
-  this.keyHandler_ = null;
-};
 
 /** @override */
 npf.ui.StatedComponent.prototype.setRightToLeft = function(rightToLeft) {
   // The superclass implementation ensures the component isn't in the document.
-  goog.base(this, 'setRightToLeft', rightToLeft);
+  npf.ui.StatedComponent.base(this, 'setRightToLeft', rightToLeft);
 
   var element = this.getElement();
 
@@ -438,23 +621,39 @@ npf.ui.StatedComponent.prototype.isVisible = function() {
 npf.ui.StatedComponent.prototype.setVisible = function(visible, opt_force) {
   if (opt_force || (this.visible_ != visible && this.dispatchEvent(visible ?
       goog.ui.Component.EventType.SHOW : goog.ui.Component.EventType.HIDE))) {
-    var element = this.getElement();
-    var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
-
-    if (element) {
-      renderer.setVisible(element, visible);
-    }
-
-    if (this.isEnabled()) {
-      renderer.setFocusable(this, visible);
-    }
-
-    this.visible_ = visible;
+    this.setVisibleInternal(visible);
+    this.applyVisible(visible);
 
     return true;
   }
 
   return false;
+};
+
+/**
+ * @param {boolean} visible
+ * @protected
+ */
+npf.ui.StatedComponent.prototype.setVisibleInternal = function(visible) {
+  this.visible_ = visible;
+};
+
+/**
+ * @param {boolean} visible
+ * @protected
+ */
+npf.ui.StatedComponent.prototype.applyVisible = function(visible) {
+  /** @type {Element} */
+  var element = this.getElement();
+  var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
+
+  if (element) {
+    renderer.setVisible(element, visible);
+  }
+
+  if (this.isInDocument() && this.isEnabled()) {
+    renderer.setFocusable(this, visible);
+  }
 };
 
 
@@ -471,10 +670,7 @@ npf.ui.StatedComponent.prototype.isEnabled = function() {
  * Enables or disables the component.  Does nothing if this state transition
  * is disallowed.  If the component is both visible and focusable, updates its
  * focused state and tab index as needed.  If the component is being disabled,
- * ensures that it is also deactivated and un-highlighted first.  Note that the
- * component's enabled/disabled state is "locked" as long as it is hosted in a
- * {@link goog.ui.Container} that is itself disabled; this is to prevent clients
- * from accidentally re-enabling a component that is in a disabled container.
+ * ensures that it is also deactivated and un-highlighted first.
  * @param {boolean} enable Whether to enable or disable the component.
  * @see #isTransitionAllowed
  */
@@ -484,11 +680,13 @@ npf.ui.StatedComponent.prototype.setEnabled = function(enable) {
       this.setActive(false);
       this.setHighlighted(false);
     }
+
     if (this.isVisible()) {
       var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
       renderer.setFocusable(this, enable);
     }
-    this.setState(goog.ui.Component.State.DISABLED, !enable);
+
+    this.setState(goog.ui.Component.State.DISABLED, !enable, true);
   }
 };
 
@@ -660,8 +858,15 @@ npf.ui.StatedComponent.prototype.hasState = function(state) {
  * transition events; use advisedly.
  * @param {goog.ui.Component.State} state State to set or clear.
  * @param {boolean} enable Whether to set or clear the state (if supported).
+ * @param {boolean=} opt_calledFrom Prevents looping with setEnabled.
  */
-npf.ui.StatedComponent.prototype.setState = function(state, enable) {
+npf.ui.StatedComponent.prototype.setState = function(state, enable,
+    opt_calledFrom) {
+  if (!opt_calledFrom && state == goog.ui.Component.State.DISABLED) {
+    this.setEnabled(!enable);
+    return;
+  }
+
   if (this.isSupportedState(state) && enable != this.hasState(state)) {
     var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
     // Delegate actual styling to the renderer, since it is DOM-specific.
@@ -804,53 +1009,38 @@ npf.ui.StatedComponent.prototype.isTransitionAllowed = function(state, enable) {
     !this.isDisposed();
 };
 
-
 /**
- * Handles mouseover events.  Dispatches an ENTER event; if the event isn't
- * canceled, the component is enabled, and it supports auto-highlighting,
- * highlights the component.  Considered protected; should only be used
- * within this package and by subclasses.
- * @param {goog.events.BrowserEvent} e Mouse event to handle.
+ * @param {goog.events.BrowserEvent} e
  */
-npf.ui.StatedComponent.prototype.handleMouseOver = function(e) {
-  var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
-
-  // Ignore mouse moves between descendants.
-  if (
-    !renderer.isMouseEventWithinElement(e, this.getHoverableElement()) &&
-    this.dispatchEvent(goog.ui.Component.EventType.ENTER) &&
-    this.isEnabled() &&
-    this.isAutoState(goog.ui.Component.State.HOVER)
-  ) {
-    this.setHighlighted(true);
-  }
-};
-
-
-/**
- * Handles mouseout events.  Dispatches a LEAVE event; if the event isn't
- * canceled, and the component supports auto-highlighting, deactivates and
- * un-highlights the component.  Considered protected; should only be used
- * within this package and by subclasses.
- * @param {goog.events.BrowserEvent} e Mouse event to handle.
- */
-npf.ui.StatedComponent.prototype.handleMouseOut = function(e) {
-  var renderer = /** @type {npf.ui.StatedRenderer} */ (this.getRenderer());
-
-  if (
-    !renderer.isMouseEventWithinElement(e, this.getHoverableElement()) &&
-    this.dispatchEvent(goog.ui.Component.EventType.LEAVE)
-  ) {
-    if (this.isAutoState(goog.ui.Component.State.ACTIVE)) {
-      // Deactivate on mouseout; otherwise we lose track of the mouse button.
-      this.setActive(false);
+npf.ui.StatedComponent.prototype.handleHover = function(e) {
+  if (npf.events.HoverHandler.EventType.HOVERIN == e.type) {
+    if (
+      this.dispatchEvent(goog.ui.Component.EventType.ENTER) &&
+      this.isEnabled() &&
+      this.isAutoState(goog.ui.Component.State.HOVER)
+    ) {
+      this.setHighlighted(true);
     }
+  } else {
+    if (this.dispatchEvent(goog.ui.Component.EventType.LEAVE)) {
+      if (this.isAutoState(goog.ui.Component.State.ACTIVE)) {
+        // Deactivate on mouseout; otherwise we lose track of the mouse button.
+        this.setActive(false);
+      }
 
-    if (this.isAutoState(goog.ui.Component.State.HOVER)) {
-      this.setHighlighted(false);
+      if (this.isAutoState(goog.ui.Component.State.HOVER)) {
+        this.setHighlighted(false);
+      }
     }
   }
 };
+
+/**
+ * Handles contextmenu events.
+ * @param {goog.events.BrowserEvent} e Event to handle.
+ */
+npf.ui.StatedComponent.prototype.handleContextMenu = goog.nullFunction;
+
 
 /**
  * @return {Element}
@@ -863,7 +1053,7 @@ npf.ui.StatedComponent.prototype.getHoverableElement = function() {
  * Handles mousedown events.  If the component is enabled, highlights and
  * activates it.  If the component isn't configured for keyboard access,
  * prevents it from receiving keyboard focus.  Considered protected; should
- * only be used within this package andy by subclasses.
+ * only be used within this package and by subclasses.
  * @param {goog.events.BrowserEvent} e Mouse event to handle.
  */
 npf.ui.StatedComponent.prototype.handleMouseDown = function(e) {
@@ -907,9 +1097,98 @@ npf.ui.StatedComponent.prototype.handleMouseUp = function(e) {
     if (this.isAutoState(goog.ui.Component.State.HOVER)) {
       this.setHighlighted(true);
     }
-    if (this.isActive() &&
-        this.performActionInternal(e) &&
-        this.isAutoState(goog.ui.Component.State.ACTIVE)) {
+
+    if (
+      this.isActive() &&
+      this.performActionInternal(e) &&
+      this.isAutoState(goog.ui.Component.State.ACTIVE)
+    ) {
+      this.setActive(false);
+    }
+  }
+};
+
+
+/**
+ * @param {goog.events.BrowserEvent} e Mouse event to handle.
+ */
+npf.ui.StatedComponent.prototype.handleTouchStart = function(e) {
+  var nativeEvent = /** @type {!Event} */ (e.getBrowserEvent());
+
+  if (!(nativeEvent['touches'] && 1 == nativeEvent['touches'].length)) {
+    return;
+  }
+
+  if (this.isEnabled()) {
+    this.touchStartPosition_ =
+      npf.events.ClickHandler.getPositionFromEvent(nativeEvent);
+    this.touchMovePosition_ = null;
+
+    // Highlight enabled component on mousedown, regardless of the mouse button.
+    if (this.isAutoState(goog.ui.Component.State.HOVER)) {
+      this.setHighlighted(true);
+    }
+
+    // Activate the component, and focus its key event target (if supported).
+    if (this.isAutoState(goog.ui.Component.State.ACTIVE)) {
+      this.setActive(true);
+    }
+  }
+
+  // Cancel the default action unless the component allows text selection.
+  if (!this.isAllowTextSelection()) {
+    e.preventDefault();
+  }
+};
+
+
+/**
+ * @param {goog.events.BrowserEvent} e Mouse event to handle.
+ */
+npf.ui.StatedComponent.prototype.handleTouchMove = function(e) {
+  if (this.touchStartPosition_) {
+    var nativeEvent = /** @type {!Event} */ (e.getBrowserEvent());
+    this.touchMovePosition_ =
+      npf.events.ClickHandler.getPositionFromEvent(nativeEvent);
+  }
+};
+
+
+/**
+ * @param {goog.events.BrowserEvent} e Mouse event to handle.
+ */
+npf.ui.StatedComponent.prototype.handleTouchEnd = function(e) {
+  var nativeEvent = /** @type {!Event} */ (e.getBrowserEvent());
+
+  if (
+    !this.touchStartPosition_ ||
+    (nativeEvent['touches'] && nativeEvent['touches'].length)
+  ) {
+    return;
+  }
+
+  /** @type {number} */
+  var xDistance = this.touchMovePosition_ ?
+    Math.abs(this.touchMovePosition_.x - this.touchStartPosition_.x) : 0;
+  /** @type {number} */
+  var yDistance = this.touchMovePosition_ ?
+    Math.abs(this.touchMovePosition_.y - this.touchStartPosition_.y) : 0;
+
+  this.touchStartPosition_ = null;
+
+  if (this.isEnabled()) {
+    if (this.isAutoState(goog.ui.Component.State.HOVER)) {
+      this.setHighlighted(false);
+    }
+
+    if (
+      this.isActive() &&
+      (
+        Math.max(xDistance, yDistance) >= 10 ||
+        this.performActionInternal(e)
+      ) &&
+      this.isAutoState(goog.ui.Component.State.ACTIVE)
+    ) {
       this.setActive(false);
     }
   }
@@ -962,14 +1241,11 @@ npf.ui.StatedComponent.prototype.performActionInternal = function(e) {
     this);
 
   if (e) {
-    /** @type {!Array.<string>} */
-    var properties = [
-      'altKey', 'ctrlKey', 'metaKey', 'shiftKey', 'platformModifierKey'
-    ];
-
-    for (var property, i = 0; property = properties[i]; i++) {
-      actionEvent[property] = e[property];
-    }
+    actionEvent.altKey = e.altKey;
+    actionEvent.ctrlKey = e.ctrlKey;
+    actionEvent.metaKey = e.metaKey;
+    actionEvent.shiftKey = e.shiftKey;
+    actionEvent.platformModifierKey = e.platformModifierKey;
   }
 
   return this.dispatchEvent(actionEvent);
@@ -1020,7 +1296,8 @@ npf.ui.StatedComponent.prototype.handleBlur = function(e) {
  */
 npf.ui.StatedComponent.prototype.handleKeyEvent = function(e) {
   if (
-    this.isVisible() && this.isEnabled() &&
+    this.isEnabled() && this.isVisible() &&
+    this.getChildCount() &&
     this.handleKeyEventInternal(e)
   ) {
     e.preventDefault();

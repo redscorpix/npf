@@ -26,7 +26,7 @@ npf.string.phoneNumber.parse = function(phone) {
     codeLength = 2;
   } else if (goog.array.contains(four, parseInt(phone.substr(0, 4), 10))) {
     codeLength = 4;
-  } else if (goog.array.contains(four, parseInt(phone.substr(0, 5), 10))) {
+  } else if (goog.array.contains(five, parseInt(phone.substr(0, 5), 10))) {
     codeLength = 5;
   } else {
     codeLength = 3;

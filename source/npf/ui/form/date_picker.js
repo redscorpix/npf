@@ -12,12 +12,14 @@ goog.require('npf.ui.form.Field');
  * @param {npf.ui.form.DatePickerRenderer=} opt_renderer
  * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
+ * @struct
  * @extends {npf.ui.form.Field}
  */
 npf.ui.form.DatePicker = function(name, opt_renderer, opt_domHelper) {
   var renderer = opt_renderer || npf.ui.form.DatePickerRenderer.getInstance();
 
-  goog.base(this, name, renderer, opt_domHelper);
+  npf.ui.form.DatePicker.base(
+    this, 'constructor', name, renderer, opt_domHelper);
 
   /**
    * @private {number?}
@@ -49,6 +51,11 @@ npf.ui.form.DatePicker = function(name, opt_renderer, opt_domHelper) {
    */
   this.year_ = null;
 
+  /**
+   * @private {boolean}
+   */
+  this.yearReversed_ = false;
+
   this.addClassName(renderer.getFieldCssClass());
 };
 goog.inherits(npf.ui.form.DatePicker, npf.ui.form.Field);
@@ -59,27 +66,29 @@ npf.ui.form.DatePicker.prototype.enterDocument = function() {
   /** @type {Element} */
   var dayElement = this.getDayElement();
   /** @type {Element} */
-  var monthElement = this.getDayElement();
+  var monthElement = this.getMonthElement();
   /** @type {Element} */
-  var yearElement = this.getDayElement();
-  var EventType = goog.events.EventType;
+  var yearElement = this.getYearElement();
 
   if (dayElement) {
-    this.getHandler().listen(dayElement, EventType.CHANGE, this.onChange_);
+    this.getHandler().listen(
+      dayElement, goog.events.EventType.CHANGE, this.onChange_);
   }
 
   if (monthElement) {
-    this.getHandler().listen(monthElement, EventType.CHANGE, this.onChange_);
+    this.getHandler().listen(
+      monthElement, goog.events.EventType.CHANGE, this.onChange_);
   }
 
   if (yearElement) {
-    this.getHandler().listen(yearElement, EventType.CHANGE, this.onChange_);
+    this.getHandler().listen(
+      yearElement, goog.events.EventType.CHANGE, this.onChange_);
   }
 };
 
 /** @inheritDoc */
 npf.ui.form.DatePicker.prototype.disposeInternal = function() {
-  goog.base(this, 'disposeInternal');
+  npf.ui.form.DatePicker.base(this, 'disposeInternal');
 
   this.maxDate_ = null;
   this.minDate_ = null;
@@ -114,13 +123,28 @@ npf.ui.form.DatePicker.prototype.getValue = function() {
   return [this.getYear(), this.getMonth(), this.getDay()];
 };
 
+/** @inheritDoc */
+npf.ui.form.DatePicker.prototype.setValue = function(value, opt_noRender,
+    opt_force) {
+  if (!(
+    goog.isArray(value) && 3 == value.length &&
+    (goog.isNull(value[0]) || goog.isNumber(value[0])) &&
+    (goog.isNull(value[1]) || goog.isNumber(value[1])) &&
+    (goog.isNull(value[2]) || goog.isNumber(value[2]))
+  )) {
+    throw Error(npf.ui.form.Field.Error.TYPE_INVALID);
+  }
+
+  npf.ui.form.DatePicker.base(this, 'setValue', value, opt_noRender, opt_force);
+};
+
 /**
  * @return {!Array.<number?>}
  * @override
  */
 npf.ui.form.DatePicker.prototype.getValueFromElement = function() {
   return /** @type {!Array.<number?>} */ (
-    goog.base(this, 'getValueFromElement'));
+    npf.ui.form.DatePicker.base(this, 'getValueFromElement'));
 };
 
 /** @inheritDoc */
@@ -130,7 +154,7 @@ npf.ui.form.DatePicker.prototype.setValueInternal = function(value) {
   this.month_ = values[1];
   this.year_  = values[0];
 
-  goog.base(this, 'setValueInternal', value);
+  npf.ui.form.DatePicker.base(this, 'setValueInternal', value);
 };
 
 /** @inheritDoc */
@@ -173,6 +197,8 @@ npf.ui.form.DatePicker.prototype.correctValue = function(value) {
         result = [minYear, minMonth, minDay];
       } else if (0 < goog.date.Date.compare(date, maxDate)) {
         result = [maxYear, maxMonth, maxDay];
+      } else {
+        result = [possibleValue[0], possibleValue[1], possibleValue[2]];
       }
     } else {
       if (possibleValue[0]) {
@@ -224,6 +250,14 @@ npf.ui.form.DatePicker.prototype.getDay = function() {
 };
 
 /**
+ * @param {number} value
+ * @return {string}
+ */
+npf.ui.form.DatePicker.prototype.getDayLabel = function(value) {
+  return value + '';
+};
+
+/**
  * @return {number?}
  */
 npf.ui.form.DatePicker.prototype.getMonth = function() {
@@ -231,10 +265,26 @@ npf.ui.form.DatePicker.prototype.getMonth = function() {
 };
 
 /**
+ * @param {number} value
+ * @return {string}
+ */
+npf.ui.form.DatePicker.prototype.getMonthLabel = function(value) {
+  return value + '';
+};
+
+/**
  * @return {number?}
  */
 npf.ui.form.DatePicker.prototype.getYear = function() {
   return this.year_;
+};
+
+/**
+ * @param {number} value
+ * @return {string}
+ */
+npf.ui.form.DatePicker.prototype.getYearLabel = function(value) {
+  return value + '';
 };
 
 /**
@@ -311,6 +361,20 @@ npf.ui.form.DatePicker.prototype.getYearElement = function() {
     this.getRenderer());
 
   return renderer.getYearElement(this.getElement());
+};
+
+/**
+ * @return {boolean}
+ */
+npf.ui.form.DatePicker.prototype.isYearReversed = function() {
+  return this.yearReversed_;
+};
+
+/**
+ * @param {boolean} reverse
+ */
+npf.ui.form.DatePicker.prototype.setYearReversed = function(reverse) {
+  this.yearReversed_ = reverse;
 };
 
 /**

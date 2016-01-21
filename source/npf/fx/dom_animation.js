@@ -28,13 +28,13 @@ goog.require('npf.fx.dom.Transform');
 /**
  * @param {Element} element
  * @param {number} time
- * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=} opt_acc Acceleration
- *          function, returns 0-1 for inputs 0-1.
+ * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
+ *    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @constructor
  * @extends {goog.fx.AnimationParallelQueue}
  */
 npf.fx.DomAnimation = function(element, time, opt_acc) {
-  goog.base(this);
+  npf.fx.DomAnimation.base(this, 'constructor');
 
   /**
    * @type {Element}
@@ -56,7 +56,7 @@ goog.inherits(npf.fx.DomAnimation, goog.fx.AnimationParallelQueue);
 
 /** @inheritDoc */
 npf.fx.DomAnimation.prototype.disposeInternal = function() {
-  goog.base(this, 'disposeInternal');
+  npf.fx.DomAnimation.base(this, 'disposeInternal');
 
   this.element = null;
   this.accel = null;

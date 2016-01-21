@@ -39,11 +39,13 @@ goog.require('npf.fx.Animation');
  * @param {number} time Length of animation in milliseconds.
  * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
  *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
- * @extends {npf.fx.Animation}
  * @constructor
+ * @struct
+ * @extends {npf.fx.Animation}
  */
 npf.fx.dom.PredefinedEffect = function(element, start, end, time, opt_acc) {
-  goog.base(this, start, end, time, opt_acc);
+  npf.fx.dom.PredefinedEffect.base(
+    this, 'constructor', start, end, time, opt_acc);
 
   /**
    * DOM Node that will be used in the animation
@@ -63,19 +65,22 @@ npf.fx.dom.PredefinedEffect.prototype.updateStyle = goog.nullFunction;
 /** @override */
 npf.fx.dom.PredefinedEffect.prototype.onAnimate = function() {
   this.updateStyle();
-  goog.base(this, 'onAnimate');
+
+  npf.fx.dom.PredefinedEffect.base(this, 'onAnimate');
 };
 
 /** @override */
 npf.fx.dom.PredefinedEffect.prototype.onEnd = function() {
   this.updateStyle();
-  goog.base(this, 'onEnd');
+
+  npf.fx.dom.PredefinedEffect.base(this, 'onEnd');
 };
 
 /** @override */
 npf.fx.dom.PredefinedEffect.prototype.onBegin = function() {
   this.updateStyle();
-  goog.base(this, 'onBegin');
+
+  npf.fx.dom.PredefinedEffect.base(this, 'onBegin');
 };
 
 /**
@@ -91,13 +96,15 @@ npf.fx.dom.PredefinedEffect.prototype.onBegin = function() {
  *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.PredefinedEffect}
  * @constructor
+ * @struct
  */
 npf.fx.dom.Slide = function(element, start, end, time, opt_acc) {
   if (start.length != 2 || end.length != 2) {
     throw Error('Start and end points must be 2D');
   }
 
-  goog.base(this, element, start, end, time, opt_acc);
+  npf.fx.dom.Slide.base(
+    this, 'constructor', element, start, end, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.Slide, npf.fx.dom.PredefinedEffect);
 
@@ -118,9 +125,11 @@ npf.fx.dom.Slide.prototype.updateStyle = function() {
  *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.PredefinedEffect}
  * @constructor
+ * @struct
  */
 npf.fx.dom.SlideLeft = function(element, start, end, time, opt_acc) {
-  goog.base(this, element, [start], [end], time, opt_acc);
+  npf.fx.dom.SlideLeft.base(
+    this, 'constructor', element, [start], [end], time, opt_acc);
 };
 goog.inherits(npf.fx.dom.SlideLeft, npf.fx.dom.PredefinedEffect);
 
@@ -138,9 +147,11 @@ npf.fx.dom.SlideLeft.prototype.updateStyle = function() {
  *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.PredefinedEffect}
  * @constructor
+ * @struct
  */
 npf.fx.dom.SlideRight = function(element, start, end, time, opt_acc) {
-  goog.base(this, element, [start], [end], time, opt_acc);
+  npf.fx.dom.SlideRight.base(
+    this, 'constructor', element, [start], [end], time, opt_acc);
 };
 goog.inherits(npf.fx.dom.SlideRight, npf.fx.dom.PredefinedEffect);
 
@@ -158,9 +169,11 @@ npf.fx.dom.SlideRight.prototype.updateStyle = function() {
  *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.PredefinedEffect}
  * @constructor
+ * @struct
  */
 npf.fx.dom.SlideTop = function(element, start, end, time, opt_acc) {
-  goog.base(this, element, [start], [end], time, opt_acc);
+  npf.fx.dom.SlideTop.base(
+    this, 'constructor', element, [start], [end], time, opt_acc);
 };
 goog.inherits(npf.fx.dom.SlideTop, npf.fx.dom.PredefinedEffect);
 
@@ -179,17 +192,20 @@ npf.fx.dom.SlideTop.prototype.updateStyle = function() {
  *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.Slide}
  * @constructor
+ * @struct
  */
 npf.fx.dom.SlideFrom = function(element, end, time, opt_acc) {
   var start = [element.offsetLeft, element.offsetTop];
-  goog.base(this, element, start, end, time, opt_acc);
+  npf.fx.dom.SlideFrom.base(
+    this, 'constructor', element, start, end, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.SlideFrom, npf.fx.dom.Slide);
 
 /** @override */
 npf.fx.dom.SlideFrom.prototype.onBegin = function() {
   this.startPoint = [this.element.offsetLeft, this.element.offsetTop];
-  goog.base(this, 'onBegin');
+
+  npf.fx.dom.SlideFrom.base(this, 'onBegin');
 };
 
 /**
@@ -201,17 +217,20 @@ npf.fx.dom.SlideFrom.prototype.onBegin = function() {
  *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.SlideLeft}
  * @constructor
+ * @struct
  */
 npf.fx.dom.SlideLeftFrom = function(element, end, time, opt_acc) {
   var start = element.offsetLeft;
-  goog.base(this, element, start, end, time, opt_acc);
+  npf.fx.dom.SlideLeftFrom.base(
+    this, 'constructor', element, start, end, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.SlideLeftFrom, npf.fx.dom.SlideLeft);
 
 /** @override */
 npf.fx.dom.SlideLeftFrom.prototype.onBegin = function() {
   this.startPoint = [this.element.offsetLeft];
-  goog.base(this, 'onBegin');
+
+  npf.fx.dom.SlideLeftFrom.base(this, 'onBegin');
 };
 
 /**
@@ -223,17 +242,20 @@ npf.fx.dom.SlideLeftFrom.prototype.onBegin = function() {
  *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.SlideTop}
  * @constructor
+ * @struct
  */
 npf.fx.dom.SlideTopFrom = function(element, end, time, opt_acc) {
   var start = element.offsetTop;
-  goog.base(this, element, start, end, time, opt_acc);
+  npf.fx.dom.SlideTopFrom.base(
+    this, 'constructor', element, start, end, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.SlideTopFrom, npf.fx.dom.SlideTop);
 
 /** @override */
 npf.fx.dom.SlideTopFrom.prototype.onBegin = function() {
   this.startPoint = [this.element.offsetTop];
-  goog.base(this, 'onBegin');
+
+  npf.fx.dom.SlideTopFrom.base(this, 'onBegin');
 };
 
 /**
@@ -247,13 +269,15 @@ npf.fx.dom.SlideTopFrom.prototype.onBegin = function() {
  *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.PredefinedEffect}
  * @constructor
+ * @struct
  */
 npf.fx.dom.Swipe = function(element, start, end, time, opt_acc) {
   if (start.length != 2 || end.length != 2) {
     throw Error('Start and end points must be 2D');
   }
 
-  goog.base(this, element, start, end, time, opt_acc);
+  npf.fx.dom.Swipe.base(
+    this, 'constructor', element, start, end, time, opt_acc);
 
   /**
    * Maximum width for element.
@@ -308,13 +332,15 @@ npf.fx.dom.Swipe.prototype.clip_ = function(x, y, w, h) {
  *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.PredefinedEffect}
  * @constructor
+ * @struct
  */
 npf.fx.dom.Scroll = function(element, start, end, time, opt_acc) {
   if (start.length != 2 || end.length != 2) {
     throw Error('Start and end points must be 2D');
   }
 
-  goog.base(this, element, start, end, time, opt_acc);
+  npf.fx.dom.Scroll.base(
+    this, 'constructor', element, start, end, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.Scroll, npf.fx.dom.PredefinedEffect);
 
@@ -339,13 +365,15 @@ npf.fx.dom.Scroll.prototype.updateStyle = function() {
  *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.PredefinedEffect}
  * @constructor
+ * @struct
  */
 npf.fx.dom.Resize = function(element, start, end, time, opt_acc) {
   if (start.length != 2 || end.length != 2) {
     throw Error('Start and end points must be 2D');
   }
 
-  goog.base(this, element, start, end, time, opt_acc);
+  npf.fx.dom.Resize.base(
+    this, 'constructor', element, start, end, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.Resize, npf.fx.dom.PredefinedEffect);
 
@@ -371,9 +399,11 @@ npf.fx.dom.Resize.prototype.updateStyle = function() {
  *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.PredefinedEffect}
  * @constructor
+ * @struct
  */
 npf.fx.dom.ResizeWidth = function(element, start, end, time, opt_acc) {
-  goog.base(this, element, [start], [end], time, opt_acc);
+  npf.fx.dom.ResizeWidth.base(
+    this, 'constructor', element, [start], [end], time, opt_acc);
 };
 goog.inherits(npf.fx.dom.ResizeWidth, npf.fx.dom.PredefinedEffect);
 
@@ -397,9 +427,11 @@ npf.fx.dom.ResizeWidth.prototype.updateStyle = function() {
  *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.PredefinedEffect}
  * @constructor
+ * @struct
  */
 npf.fx.dom.ResizeHeight = function(element, start, end, time, opt_acc) {
-  goog.base(this, element, [start], [end], time, opt_acc);
+  npf.fx.dom.ResizeHeight.base(
+    this, 'constructor', element, [start], [end], time, opt_acc);
 };
 goog.inherits(npf.fx.dom.ResizeHeight, npf.fx.dom.PredefinedEffect);
 
@@ -423,6 +455,7 @@ npf.fx.dom.ResizeHeight.prototype.updateStyle = function() {
  *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.PredefinedEffect}
  * @constructor
+ * @struct
  */
 npf.fx.dom.Fade = function(element, start, end, time, opt_acc) {
   if (goog.isNumber(start)) {
@@ -433,7 +466,7 @@ npf.fx.dom.Fade = function(element, start, end, time, opt_acc) {
     end = [end];
   }
 
-  goog.base(this, element, start, end, time, opt_acc);
+  npf.fx.dom.Fade.base(this, 'constructor', element, start, end, time, opt_acc);
 
   if (start.length != 1 || end.length != 1) {
     throw Error('Start and end points must be 1D');
@@ -448,7 +481,7 @@ goog.inherits(npf.fx.dom.Fade, npf.fx.dom.PredefinedEffect);
  * @override
  */
 npf.fx.dom.Fade.prototype.updateStyle = function() {
-  goog.style.setOpacity(this.element, this.coords[0]);
+  this.element.style.opacity = this.coords[0];
 };
 
 /**
@@ -475,9 +508,10 @@ npf.fx.dom.Fade.prototype.hide = function() {
  *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.Fade}
  * @constructor
+ * @struct
  */
 npf.fx.dom.FadeOut = function(element, time, opt_acc) {
-  goog.base(this, element, 1, 0, time, opt_acc);
+  npf.fx.dom.FadeOut.base(this, 'constructor', element, 1, 0, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.FadeOut, npf.fx.dom.Fade);
 
@@ -490,9 +524,10 @@ goog.inherits(npf.fx.dom.FadeOut, npf.fx.dom.Fade);
  *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.Fade}
  * @constructor
+ * @struct
  */
 npf.fx.dom.FadeIn = function(element, time, opt_acc) {
-  goog.base(this, element, 0, 1, time, opt_acc);
+  npf.fx.dom.FadeIn.base(this, 'constructor', element, 0, 1, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.FadeIn, npf.fx.dom.Fade);
 
@@ -505,22 +540,26 @@ goog.inherits(npf.fx.dom.FadeIn, npf.fx.dom.Fade);
  *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.Fade}
  * @constructor
+ * @struct
  */
 npf.fx.dom.FadeOutAndHide = function(element, time, opt_acc) {
-  goog.base(this, element, 1, 0, time, opt_acc);
+  npf.fx.dom.FadeOutAndHide.base(
+    this, 'constructor', element, 1, 0, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.FadeOutAndHide, npf.fx.dom.Fade);
 
 /** @override */
 npf.fx.dom.FadeOutAndHide.prototype.onBegin = function() {
   this.show();
-  goog.base(this, 'onBegin');
+
+  npf.fx.dom.FadeOutAndHide.base(this, 'onBegin');
 };
 
 /** @override */
 npf.fx.dom.FadeOutAndHide.prototype.onEnd = function() {
   this.hide();
-  goog.base(this, 'onEnd');
+
+  npf.fx.dom.FadeOutAndHide.base(this, 'onEnd');
 };
 
 
@@ -533,9 +572,11 @@ npf.fx.dom.FadeOutAndHide.prototype.onEnd = function() {
  *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.Fade}
  * @constructor
+ * @struct
  */
 npf.fx.dom.FadeInAndShow = function(element, time, opt_acc) {
-  goog.base(this, element, 0, 1, time, opt_acc);
+  npf.fx.dom.FadeInAndShow.base(
+    this, 'constructor', element, 0, 1, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.FadeInAndShow, npf.fx.dom.Fade);
 
@@ -543,7 +584,8 @@ goog.inherits(npf.fx.dom.FadeInAndShow, npf.fx.dom.Fade);
 /** @override */
 npf.fx.dom.FadeInAndShow.prototype.onBegin = function() {
   this.show();
-  goog.base(this, 'onBegin');
+
+  npf.fx.dom.FadeInAndShow.base(this, 'onBegin');
 };
 
 
@@ -558,13 +600,15 @@ npf.fx.dom.FadeInAndShow.prototype.onBegin = function() {
  *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @extends {npf.fx.dom.PredefinedEffect}
  * @constructor
+ * @struct
  */
 npf.fx.dom.BgColorTransform = function(element, start, end, time, opt_acc) {
   if (start.length != 3 || end.length != 3) {
     throw Error('Start and end points must be 3D');
   }
 
-  goog.base(this, element, start, end, time, opt_acc);
+  npf.fx.dom.BgColorTransform.base(
+    this, 'constructor', element, start, end, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.BgColorTransform, npf.fx.dom.PredefinedEffect);
 
@@ -638,6 +682,7 @@ npf.fx.dom.bgColorFadeIn = function(element, start, time, opt_eventHandler) {
  * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
  *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @constructor
+ * @struct
  * @extends {npf.fx.dom.PredefinedEffect}
  */
 npf.fx.dom.ColorTransform = function(element, start, end, time, opt_acc) {
@@ -645,7 +690,8 @@ npf.fx.dom.ColorTransform = function(element, start, end, time, opt_acc) {
     throw Error('Start and end points must be 3D');
   }
 
-  goog.base(this, element, start, end, time, opt_acc);
+  npf.fx.dom.ColorTransform.base(
+    this, 'constructor', element, start, end, time, opt_acc);
 };
 goog.inherits(npf.fx.dom.ColorTransform, npf.fx.dom.PredefinedEffect);
 
@@ -674,10 +720,12 @@ npf.fx.dom.ColorTransform.prototype.updateStyle = function() {
  * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number|null=}
  *                    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @constructor
+ * @struct
  * @extends {npf.fx.dom.PredefinedEffect}
  */
 npf.fx.dom.Transform = function(element, time, opt_acc) {
-  goog.base(this, element, [0], [1], time, opt_acc);
+  npf.fx.dom.Transform.base(
+    this, 'constructor', element, [0], [1], time, opt_acc);
 
   this.startParameters_ = {};
   this.endParameters_ = {};
@@ -700,7 +748,7 @@ npf.fx.dom.Transform.prototype.endParameters_;
 
 /** @inheritDoc */
 npf.fx.dom.Transform.prototype.disposeInternal = function() {
-  goog.base(this, 'disposeInternal');
+  npf.fx.dom.Transform.base(this, 'disposeInternal');
 
   this.startParameters_ = null;
   this.endParameters_ = null;

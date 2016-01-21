@@ -8,10 +8,11 @@ goog.require('goog.object');
 
 /**
  * @constructor
+ * @struct
  * @extends {goog.Disposable}
  */
 npf.fx.TransitionHelper = function() {
-  goog.base(this);
+  npf.fx.TransitionHelper.base(this, 'constructor');
 
   /**
    * @type {Object.<goog.fx.TransitionBase>}
@@ -26,7 +27,7 @@ goog.inherits(npf.fx.TransitionHelper, goog.Disposable);
 npf.fx.TransitionHelper.prototype.disposeInternal = function() {
   this.removeAll();
 
-  goog.base(this, 'disposeInternal');
+  npf.fx.TransitionHelper.base(this, 'disposeInternal');
 
   this.transitionsMap_ = null;
 };

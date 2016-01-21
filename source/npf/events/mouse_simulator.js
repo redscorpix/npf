@@ -9,10 +9,11 @@ goog.require('goog.events.EventType');
 /**
  * @param {Node} element
  * @constructor
+ * @struct
  * @extends {goog.Disposable}
  */
 npf.events.MouseSimulator = function(element) {
-  goog.base(this);
+  npf.events.MouseSimulator.base(this, 'constructor');
 
   /**
    * @private {Node}
@@ -20,7 +21,7 @@ npf.events.MouseSimulator = function(element) {
   this.element_ = element;
 
   /**
-   * @private {goog.events.EventHandler}
+   * @private {goog.events.EventHandler.<!npf.events.MouseSimulator>}
    */
   this.handler_ = new goog.events.EventHandler(this);
   this.registerDisposable(this.handler_);
@@ -40,7 +41,7 @@ goog.inherits(npf.events.MouseSimulator, goog.Disposable);
 
 /** @inheritDoc */
 npf.events.MouseSimulator.prototype.disposeInternal = function() {
-  goog.base(this, 'disposeInternal');
+  npf.events.MouseSimulator.base(this, 'disposeInternal');
 
   this.element_ = null;
   this.handler_ = null;

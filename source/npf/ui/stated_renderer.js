@@ -1,42 +1,66 @@
 goog.provide('npf.ui.StatedRenderer');
 
 goog.require('goog.a11y.aria');
+goog.require('goog.a11y.aria.Role');
 goog.require('goog.a11y.aria.State');
 goog.require('goog.array');
 goog.require('goog.asserts');
 goog.require('goog.dom');
 goog.require('goog.dom.classlist');
 goog.require('goog.object');
+goog.require('goog.string');
 goog.require('goog.style');
 goog.require('goog.ui.Component.State');
 goog.require('goog.userAgent');
+goog.require('npf.dom');
+goog.require('npf.dom.Content');
 goog.require('npf.ui.Renderer');
 
 
 /**
  * @constructor
+ * @struct
  * @extends {npf.ui.Renderer}
  */
 npf.ui.StatedRenderer = function() {
-  goog.base(this);
+  npf.ui.StatedRenderer.base(this, 'constructor');
 };
 goog.inherits(npf.ui.StatedRenderer, npf.ui.Renderer);
 goog.addSingletonGetter(npf.ui.StatedRenderer);
 
 
 /**
- * Map of component states to corresponding ARIA states.  Since the mapping of
- * component states to ARIA states is neither component- nor renderer-specific,
- * this is a static property of the renderer class, and is initialized on first
- * use.
- * @private {Object.<goog.a11y.aria.State>}
+ * Map of component states to corresponding ARIA attributes.  Since the mapping
+ * of component states to ARIA attributes is neither component- nor
+ * renderer-specific, this is a static property of the renderer class, and is
+ * initialized on first use.
+ * @private {Object<goog.ui.Component.State, goog.a11y.aria.State>}
  */
-npf.ui.StatedRenderer.ARIA_STATE_MAP_;
+npf.ui.StatedRenderer.ariaAttributeMap_ = null;
 
 /**
- * @param {function(new: npf.ui.StatedRenderer, ...)} ctor
+ * Map of certain ARIA states to ARIA roles that support them. Used for checked
+ * and selected Component states because they are used on Components with ARIA
+ * roles that do not support the corresponding ARIA state.
+ * @private {!Object<goog.a11y.aria.Role, goog.a11y.aria.State>}
+ * @const
+ */
+npf.ui.StatedRenderer.TOGGLE_ARIA_STATE_MAP_ = goog.object.create(
+  goog.a11y.aria.Role.BUTTON,             goog.a11y.aria.State.PRESSED,
+  goog.a11y.aria.Role.CHECKBOX,           goog.a11y.aria.State.CHECKED,
+  goog.a11y.aria.Role.MENU_ITEM,          goog.a11y.aria.State.SELECTED,
+  goog.a11y.aria.Role.MENU_ITEM_CHECKBOX, goog.a11y.aria.State.CHECKED,
+  goog.a11y.aria.Role.MENU_ITEM_RADIO,    goog.a11y.aria.State.CHECKED,
+  goog.a11y.aria.Role.RADIO,              goog.a11y.aria.State.CHECKED,
+  goog.a11y.aria.Role.TAB,                goog.a11y.aria.State.SELECTED,
+  goog.a11y.aria.Role.TREEITEM,           goog.a11y.aria.State.SELECTED
+);
+
+/**
+ * @param {function(new: OBJECT, ...)} ctor
  * @param {string} cssClassName
- * @return {!npf.ui.StatedRenderer}
+ * @return {!OBJECT}
+ * @template OBJECT
  */
 npf.ui.StatedRenderer.getCustomRenderer = function(ctor, cssClassName) {
   var renderer = new ctor();
@@ -65,20 +89,6 @@ npf.ui.StatedRenderer.prototype.getAriaRole = function() {
 };
 
 
-/** @inheritDoc */
-npf.ui.StatedRenderer.prototype.createDom = function(component) {
-  /** @type {Element} */
-  var element = goog.base(this, 'createDom', component);
-
-  if (element) {
-    this.setAriaStates(
-      /** @type {!npf.ui.StatedComponent} */ (component), element);
-  }
-
-  return element;
-};
-
-
 /**
  * Default implementation of {@code decorate} for
  * {@link npf.ui.StatedComponent}s.
@@ -98,6 +108,8 @@ npf.ui.StatedRenderer.prototype.decorate = function(component, element) {
     component.setId(element.id);
   }
 
+  var contentElem = this.getContentElement(element);
+
   // Initialize the component's state based on the decorated element's CSS class.
   // This implementation is optimized to minimize object allocations, string
   // comparisons, and DOM access.
@@ -107,8 +119,7 @@ npf.ui.StatedRenderer.prototype.decorate = function(component, element) {
   var hasRendererClassName = false;
   var hasStructuralClassName = false;
   var hasCombinedClassName = false;
-  var classNames = /** @type {!Array.<string>} */ (
-    goog.dom.classlist.get(element));
+  var classNames = goog.array.toArray(goog.dom.classlist.get(element));
 
   goog.array.forEach(classNames, function(className) {
     if (!hasRendererClassName && className == rendererClassName) {
@@ -122,6 +133,14 @@ npf.ui.StatedRenderer.prototype.decorate = function(component, element) {
     } else {
       state |= this.getStateFromClass(className);
     }
+
+    if (this.getStateFromClass(className) == goog.ui.Component.State.DISABLED) {
+      goog.asserts.assertElement(contentElem);
+
+      if (goog.dom.isFocusableTabIndex(contentElem)) {
+        goog.dom.setFocusableTabIndex(contentElem, false);
+      }
+    }
   }, this);
   statedComponent.setStateInternal(state);
 
@@ -129,6 +148,7 @@ npf.ui.StatedRenderer.prototype.decorate = function(component, element) {
   // any extra class names set on the component.
   if (!hasRendererClassName) {
     classNames.push(rendererClassName);
+
     if (structuralClassName == rendererClassName) {
       hasStructuralClassName = true;
     }
@@ -149,8 +169,6 @@ npf.ui.StatedRenderer.prototype.decorate = function(component, element) {
       extraClassNames || hasCombinedClassName) {
     goog.dom.classlist.addAll(element, classNames);
   }
-
-  this.setAriaStates(statedComponent, element);
 
   return element;
 };
@@ -190,7 +208,16 @@ npf.ui.StatedRenderer.prototype.setAriaRole = function(element,
     opt_preferredRole) {
   var ariaRole = opt_preferredRole || this.getAriaRole();
 
-  if (element && ariaRole) {
+  if (ariaRole) {
+    goog.asserts.assert(
+      element, 'The element passed as a first parameter cannot be null.');
+
+    var currentRole = goog.a11y.aria.getRole(element);
+
+    if (ariaRole == currentRole) {
+      return;
+    }
+
     goog.a11y.aria.setRole(element, ariaRole);
   }
 };
@@ -208,23 +235,45 @@ npf.ui.StatedRenderer.prototype.setAriaStates = function(component, element) {
   goog.asserts.assert(component);
   goog.asserts.assert(element);
 
+  var ariaLabel = component.getAriaLabel();
+
+  if (goog.isDefAndNotNull(ariaLabel)) {
+    this.setAriaLabel(element, ariaLabel);
+  }
+
+  if (!component.isVisible()) {
+    goog.a11y.aria.setState(
+      element, goog.a11y.aria.State.HIDDEN, !component.isVisible());
+  }
+
   if (!component.isEnabled()) {
     this.updateAriaState(element, goog.ui.Component.State.DISABLED, true);
   }
 
-  if (component.isSelected()) {
-    this.updateAriaState(element, goog.ui.Component.State.SELECTED, true);
+  if (component.isSupportedState(goog.ui.Component.State.SELECTED)) {
+    this.updateAriaState(
+      element, goog.ui.Component.State.SELECTED, component.isSelected());
   }
 
   if (component.isSupportedState(goog.ui.Component.State.CHECKED)) {
-    this.updateAriaState(element, goog.ui.Component.State.CHECKED,
-      component.isChecked());
+    this.updateAriaState(
+      element, goog.ui.Component.State.CHECKED, component.isChecked());
   }
 
   if (component.isSupportedState(goog.ui.Component.State.OPENED)) {
-    this.updateAriaState(element, goog.ui.Component.State.OPENED,
-      component.isOpen());
+    this.updateAriaState(
+      element, goog.ui.Component.State.OPENED, component.isOpen());
   }
+};
+
+
+/**
+ * Sets the element's ARIA label.
+ * @param {!Element} element Element whose ARIA label is to be updated.
+ * @param {string} ariaLabel Label to add to the element.
+ */
+npf.ui.StatedRenderer.prototype.setAriaLabel = function(element, ariaLabel) {
+  goog.a11y.aria.setLabel(element, ariaLabel);
 };
 
 
@@ -235,10 +284,10 @@ npf.ui.StatedRenderer.prototype.setAriaStates = function(component, element) {
  */
 npf.ui.StatedRenderer.prototype.setAllowTextSelection = function(element,
     allow) {
-  // On all browsers other than IE and Opera, it isn't necessary to recursively
-  // apply unselectable styling to the element's children.
+  // On all browsers other than IE, Edge and Opera, it isn't necessary
+  // to recursively apply unselectable styling to the element's children.
   goog.style.setUnselectable(
-    element, !allow, !goog.userAgent.IE && !goog.userAgent.OPERA);
+    element, !allow, !goog.userAgent.EDGE_OR_IE && !goog.userAgent.OPERA);
 };
 
 
@@ -325,11 +374,7 @@ npf.ui.StatedRenderer.prototype.setFocusable = function(component, focusable) {
  * @return {boolean}
  */
 npf.ui.StatedRenderer.prototype.isElementShown = function(element) {
-  if (element) {
-    return goog.style.isElementShown(element);
-  }
-
-  return false;
+  return element ? goog.style.isElementShown(element) : false;
 };
 
 /**
@@ -342,23 +387,8 @@ npf.ui.StatedRenderer.prototype.setVisible = function(element, visible) {
   // needed.  It should be possible to do animated reveals, for example.
   if (element) {
     goog.style.setElementShown(element, visible);
+    goog.a11y.aria.setState(element, goog.a11y.aria.State.HIDDEN, !visible);
   }
-};
-
-/**
- * Checks if a mouse event (mouseover or mouseout) occured below an element.
- * @param {goog.events.BrowserEvent} evt Mouse event (should be mouseover or
- *     mouseout).
- * @param {Element} element The ancestor element.
- * @return {boolean} Whether the event has a relatedTarget (the element the
- *     mouse is coming from) and it's a descendent of element.
- */
-npf.ui.StatedRenderer.prototype.isMouseEventWithinElement = function(evt,
-    element) {
-  // If relatedTarget is null, it means there was no previous element (e.g.
-  // the mouse moved out of the window).  Assume this means that the mouse
-  // event was not within the element.
-  return !!evt.relatedTarget && goog.dom.contains(element, evt.relatedTarget);
 };
 
 /**
@@ -394,8 +424,8 @@ npf.ui.StatedRenderer.prototype.setState = function(component, state, enable) {
 npf.ui.StatedRenderer.prototype.updateAriaState = function(element, state,
     enable) {
   // Ensure the ARIA state map exists.
-  if (!npf.ui.StatedRenderer.ARIA_STATE_MAP_) {
-    npf.ui.StatedRenderer.ARIA_STATE_MAP_ = goog.object.create(
+  if (!npf.ui.StatedRenderer.ariaAttributeMap_) {
+    npf.ui.StatedRenderer.ariaAttributeMap_ = goog.object.create(
       goog.ui.Component.State.DISABLED, goog.a11y.aria.State.DISABLED,
       goog.ui.Component.State.SELECTED, goog.a11y.aria.State.SELECTED,
       goog.ui.Component.State.CHECKED, goog.a11y.aria.State.CHECKED,
@@ -403,11 +433,69 @@ npf.ui.StatedRenderer.prototype.updateAriaState = function(element, state,
     );
   }
 
-  /** @type {goog.a11y.aria.State|undefined} */
-  var ariaState = npf.ui.StatedRenderer.ARIA_STATE_MAP_[state];
+  goog.asserts.assert(
+    element, 'The element passed as a first parameter cannot be null.');
 
-  if (element && ariaState) {
-    goog.a11y.aria.setState(element, ariaState, enable);
+  var ariaAttr = npf.ui.StatedRenderer.getAriaStateForAriaRole_(
+    element, npf.ui.StatedRenderer.ariaAttributeMap_[state]);
+
+  if (ariaAttr) {
+    goog.a11y.aria.setState(element, ariaAttr, enable);
+  }
+};
+
+/**
+ * Returns the appropriate ARIA attribute based on ARIA role if the ARIA
+ * attribute is an ARIA state.
+ * @param {!Element} element The element from which to get the ARIA role for
+ * matching ARIA state.
+ * @param {goog.a11y.aria.State} attr The ARIA attribute to check to see if it
+ * can be applied to the given ARIA role.
+ * @return {goog.a11y.aria.State} An ARIA attribute that can be applied to the
+ * given ARIA role.
+ * @private
+ */
+npf.ui.StatedRenderer.getAriaStateForAriaRole_ = function(element, attr) {
+  var role = goog.a11y.aria.getRole(element);
+
+  if (!role) {
+    return attr;
+  }
+
+  role = /** @type {goog.a11y.aria.Role} */ (role);
+
+  var matchAttr = npf.ui.StatedRenderer.TOGGLE_ARIA_STATE_MAP_[role] || attr;
+
+  return npf.ui.StatedRenderer.isAriaState_(attr) ? matchAttr : attr;
+};
+
+/**
+ * Determines if the given ARIA attribute is an ARIA property or ARIA state.
+ * @param {goog.a11y.aria.State} attr The ARIA attribute to classify.
+ * @return {boolean} If the ARIA attribute is an ARIA state.
+ * @private
+ */
+npf.ui.StatedRenderer.isAriaState_ = function(attr) {
+  return attr == goog.a11y.aria.State.CHECKED ||
+    attr == goog.a11y.aria.State.SELECTED;
+};
+
+/**
+ * Takes a component's root element, and sets its content to the given text
+ * caption or DOM structure. The default implementation replaces the children
+ * of the given element.  Renderers that create more complex DOM structures
+ * must override this method accordingly.
+ * @param {Element} element The component's root element.
+ * @param {npf.dom.Content} content Text caption or DOM structure to be
+ *     set as the component's content. The DOM nodes will not be cloned, they
+ *     will only moved under the content element of the component.
+ */
+npf.ui.StatedRenderer.prototype.setContent = function(element, content) {
+  /** @type {Element} */
+  var contentElem = this.getContentElement(element);
+
+  if (contentElem) {
+    npf.dom.setContent(contentElem, content);
   }
 };
 
@@ -427,7 +515,7 @@ npf.ui.StatedRenderer.prototype.getKeyEventTarget = function(component) {
 /** @inheritDoc */
 npf.ui.StatedRenderer.prototype.getClassNames = function(component) {
   /** @type {Array.<string>} */
-  var classNames = goog.base(this, 'getClassNames', component);
+  var classNames = npf.ui.StatedRenderer.base(this, 'getClassNames', component);
   var statedComponent = /** @type {npf.ui.StatedComponent} */ (component);
   // Add state-specific class names, if any.
   var classNamesForState = this.getClassNamesForState(
@@ -507,6 +595,15 @@ npf.ui.StatedRenderer.prototype.getStateFromClass = function(className) {
  * @private
  */
 npf.ui.StatedRenderer.prototype.createClassByStateMap_ = function() {
+  var baseClass = this.getStructuralCssClass();
+
+  // This ensures space-separated css classnames are not allowed, which some
+  // StatedRenderers had been doing.  See http://b/13694665.
+  var isValidClassName = !goog.string.contains(
+    goog.string.normalizeWhitespace(baseClass), ' ');
+  goog.asserts.assert(isValidClassName,
+      'StatedRenderer has an invalid css class: \'' + baseClass + '\'');
+
   /**
    * Map of component states to state-specific structural class names,
    * used when changing the DOM in response to a state change.  Precomputed

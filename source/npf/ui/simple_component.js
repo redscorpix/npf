@@ -1,6 +1,5 @@
 goog.provide('npf.ui.SimpleComponent');
 
-goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('npf.ui.Component');
 
@@ -10,11 +9,12 @@ goog.require('npf.ui.Component');
  * @param {string|Array.<string>=} opt_contentClassName
  * @param {goog.dom.DomHelper=} opt_domHelper Optional DOM helper.
  * @constructor
+ * @struct
  * @extends {npf.ui.Component}
  */
 npf.ui.SimpleComponent = function(opt_className, opt_contentClassName,
     opt_domHelper) {
-  goog.base(this, opt_domHelper);
+  npf.ui.SimpleComponent.base(this, 'constructor', opt_domHelper);
 
   /** @type {Array.<string>} */
   var classNames = null;
@@ -63,14 +63,16 @@ goog.inherits(npf.ui.SimpleComponent, npf.ui.Component);
 
 /** @inheritDoc */
 npf.ui.SimpleComponent.prototype.createDom = function() {
+  /** @type {goog.dom.DomHelper} */
+  var domHelper = this.getDomHelper();
   /** @type {!Element} */
-  var element = this.getDomHelper().createDom(this.tagName_, this.classNames_);
+  var element = domHelper.createDom(this.tagName_, this.classNames_);
   this.setElementInternal(element);
 
   if (this.contentClassNames_) {
-    this.contentElement_ = this.getDomHelper().createDom(this.contentTagName_,
-      this.contentClassNames_);
-    goog.dom.appendChild(element, this.contentElement_);
+    this.contentElement_ = domHelper.createDom(
+      this.contentTagName_, this.contentClassNames_);
+    domHelper.appendChild(element, this.contentElement_);
   } else {
     this.contentElement_ = element;
   }
@@ -78,7 +80,7 @@ npf.ui.SimpleComponent.prototype.createDom = function() {
 
 /** @inheritDoc */
 npf.ui.SimpleComponent.prototype.decorateInternal = function(element) {
-  goog.base(this, 'decorateInternal', element);
+  npf.ui.SimpleComponent.base(this, 'decorateInternal', element);
 
   if (this.contentClassNames_) {
     this.contentElement_ = this.getElementByClass(this.contentClassNames_[0]);
@@ -87,7 +89,7 @@ npf.ui.SimpleComponent.prototype.decorateInternal = function(element) {
 
 /** @inheritDoc */
 npf.ui.SimpleComponent.prototype.disposeInternal = function() {
-  goog.base(this, 'disposeInternal');
+  npf.ui.SimpleComponent.base(this, 'disposeInternal');
 
   this.classNames_ = null;
   this.contentClassNames_ = null;

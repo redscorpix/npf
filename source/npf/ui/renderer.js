@@ -8,6 +8,7 @@ goog.require('goog.dom.classlist');
 
 /**
  * @constructor
+ * @struct
  */
 npf.ui.Renderer = function() {
 
@@ -20,12 +21,12 @@ goog.addSingletonGetter(npf.ui.Renderer);
  * as the base CSS class to apply to all elements rendered by that renderer.
  * An example to use this function using a color palette:
  *
- * @param {function(new: npf.ui.Renderer, ...)} ctor The constructor of the
+ * @param {function(new: OBJECT, ...)} ctor The constructor of the
  *    renderer you are trying to create.
  * @param {string} cssClassName The name of the CSS class for this renderer.
- * @return {!npf.ui.Renderer} An instance of the desired
- *   renderer with its getCssClass() method overridden to return the supplied
- *   custom CSS class name.
+ * @return {!OBJECT} An instance of the desired renderer with its getCssClass()
+ *   method overridden to return the supplied custom CSS class name.
+ * @template OBJECT
  */
 npf.ui.Renderer.getCustomRenderer = function(ctor, cssClassName) {
   var renderer = new ctor();
@@ -51,14 +52,11 @@ npf.ui.Renderer.CSS_CLASS = goog.getCssName('npf-component');
 
 /**
  * @param {!npf.ui.RenderedComponent} component
- * @return {Element}
+ * @return {!Element}
  */
 npf.ui.Renderer.prototype.createDom = function(component) {
-  /** @type {!Element} */
-  var element = component.getDomHelper().createDom(goog.dom.TagName.DIV,
+  return component.getDomHelper().createDom(goog.dom.TagName.DIV,
     this.getClassNames(component).join(' '));
-
-  return element;
 };
 
 /**
@@ -259,14 +257,15 @@ npf.ui.Renderer.prototype.getStructuralCssClass = function() {
  *       followed by
  *   <li>the structural CSS class returned by {@link getStructuralCssClass} (if
  *       different from the renderer-specific CSS class), followed by
- *   <li>any extra classes returned by the component's {@code getExtraClassNames}
- *       method and
+ *   <li>any extra classes returned by the component's
+ *       {@code getExtraClassNames} method.
  * </ol>
  * Since all components have at least one renderer-specific CSS class name, this
  * method is guaranteed to return an array of at least one element.
  * @param {npf.ui.RenderedComponent} component Component whose CSS classes are
  *                                           to be returned.
- * @return {Array.<string>} Array of CSS class names applicable to the component.
+ * @return {!Array.<string>} Array of CSS class names applicable to the
+ *    component.
  * @protected
  */
 npf.ui.Renderer.prototype.getClassNames = function(component) {

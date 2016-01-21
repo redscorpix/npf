@@ -5,19 +5,22 @@ goog.require('npf.graphics.chromaKey.convertor');
 
 
 /**
- * @param {HTMLCanvasElement|Image|HTMLImageElement} source Canvas or loaded image.
+ * @param {HTMLCanvasElement|Image|HTMLImageElement} source Canvas or loaded
+ *    image.
  * @param {HTMLCanvasElement} destination
  * @constructor
+ * @struct
  * @extends {npf.graphics.Effect}
  */
 npf.graphics.ChromaKey = function(source, destination) {
-  goog.base(this, source, destination);
+  npf.graphics.ChromaKey.base(this, 'constructor', source, destination);
 };
 goog.inherits(npf.graphics.ChromaKey, npf.graphics.Effect);
 
 
 /**
- * @param {HTMLCanvasElement|Image|HTMLImageElement} source Canvas or loaded image.
+ * @param {HTMLCanvasElement|Image|HTMLImageElement} source Canvas or loaded
+ *    image.
  * @param {Object.<number|string>=} opt_attrs
  * @param {goog.dom.DomHelper=} opt_domHelper
  * @return {!npf.graphics.ChromaKey}
@@ -55,26 +58,29 @@ npf.graphics.ChromaKey.prototype.convert = function(back) {
 /**
  * @param {npf.graphics.chromaKey.convertor.Back} back
  * @param {string} workerSrc
- * @param {function(HTMLCanvasElement?)} callback
- * @param {Object=} opt_scope
+ * @param {function(this: SCOPE, HTMLCanvasElement?)} callback
+ * @param {SCOPE=} opt_scope
+ * @template SCOPE
  */
 npf.graphics.ChromaKey.prototype.convertInWorker = function(back, workerSrc,
     callback, opt_scope) {
   if (this.drawImage(this.source, this.destination)) {
+    /** @type {HTMLCanvasElement} */
+    var destination = this.destination;
     var ctx = /** @type {CanvasRenderingContext2D} */ (
-      this.destination.getContext('2d'));
+      destination.getContext('2d'));
     /** @type {ImageData} */
     var imageData = ctx.getImageData(
-      0, 0, this.destination.width, this.destination.height);
+      0, 0, destination.width, destination.height);
 
     var worker = new goog.global['Worker'](workerSrc);
-    worker['onerror'] = goog.bind(function(evt) {
+    worker['onerror'] = function(evt) {
       worker['onerror'] = null;
       worker['onmessage'] = null;
 
       callback.call(opt_scope, null);
-    }, this);
-    worker['onmessage'] = goog.bind(function(evt) {
+    };
+    worker['onmessage'] = function(evt) {
       var imageData = /** @type {ImageData} */ (evt.data);
 
       worker['onerror'] = null;
@@ -83,11 +89,11 @@ npf.graphics.ChromaKey.prototype.convertInWorker = function(back, workerSrc,
       if (imageData) {
         // Overwrite original image.
         ctx.putImageData(imageData, 0, 0);
-        callback.call(opt_scope, this.destination);
+        callback.call(opt_scope, destination);
       } else {
         callback.call(opt_scope, null);
       }
-    }, this);
+    };
     worker['postMessage']({
       'back': back,
       'imageData': imageData

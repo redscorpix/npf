@@ -11,22 +11,20 @@ goog.require('npf.fx.CubicBezier');
  * @param {Array.<number>} end Array for end coordinates.
  * @param {number} duration Length of animation in milliseconds.
  * @param {Array.<number>|npf.fx.Animation.Timing|function(number):number=}
- * 								    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
+ *    opt_acc Acceleration function, returns 0-1 for inputs 0-1.
  * @constructor
+ * @struct
  * @extends {goog.fx.Animation}
  */
 npf.fx.Animation = function(start, end, duration, opt_acc) {
   var accel = opt_acc;
 
   if (goog.isArray(opt_acc)) {
-    if (4 == opt_acc.length) {
-      accel = npf.fx.Animation.getAcceleration(opt_acc, duration);
-    } else {
-      accel = null;
-    }
+    accel = 4 == opt_acc.length ?
+      npf.fx.Animation.getAcceleration(opt_acc, duration) : null;
   }
 
-  goog.base(this, start, end, duration,
+  npf.fx.Animation.base(this, 'constructor', start, end, duration,
     /** @type {Function|null|undefined} */ (accel));
 };
 goog.inherits(npf.fx.Animation, goog.fx.Animation);
@@ -73,14 +71,8 @@ npf.fx.Animation.getCssAcceleration = function(accel) {
  * @param {number} now The current time.
  */
 npf.fx.Animation.prototype.cycle = function(now) {
-  /** @type {number?} */
-  var time;
-
-  if (npf.fx.Animation.enabled || now == this.startTime) {
-    time = now;
-  } else {
-    time = this.endTime;
-  }
-
-  goog.base(this, 'cycle', time || 0);
+  /** @type {number} */
+  var time = npf.fx.Animation.enabled || now == this.startTime ?
+    now : (this.endTime || 0);
+  npf.fx.Animation.base(this, 'cycle', time);
 };

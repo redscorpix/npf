@@ -1,0 +1,29 @@
+.npfLabs-resizeHandler {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.npfLabs-resizeHandler,
+.npfLabs-resizeHandler-expand,
+.npfLabs-resizeHandler-contractTrigger,
+.npfLabs-resizeHandler-contractTrigger:before {
+  content: " ";
+  display: block;
+  height: 100%;
+  left: 0;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.npfLabs-resizeHandler-expand,
+.npfLabs-resizeHandler-contractTrigger {
+  background: #eee;
+  overflow: auto;
+}
+
+.npfLabs-resizeHandler-contractTrigger:before {
+  height: 200%;
+  width: 200%;
+}

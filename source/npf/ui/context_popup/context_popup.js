@@ -1,12 +1,14 @@
 goog.provide('npf.ui.ContextPopup');
 
-goog.require('goog.dom');
 goog.require('goog.positioning.AnchoredPosition');
 goog.require('goog.positioning.Corner');
+goog.require('goog.ui.Component.Error');
+goog.require('goog.ui.Component.EventType');
+goog.require('goog.Disposable');
 goog.require('goog.ui.Popup');
 goog.require('goog.ui.PopupBase.EventType');
 goog.require('npf.fx.KeyframeAnimation');
-goog.require('npf.ui.RenderedComponent');
+goog.require('npf.ui.StatedComponent');
 goog.require('npf.ui.contextPopup.Renderer');
 
 
@@ -15,11 +17,19 @@ goog.require('npf.ui.contextPopup.Renderer');
  * @param {npf.ui.contextPopup.Renderer=} opt_renderer
  * @param {goog.dom.DomHelper=} opt_domHelper
  * @constructor
- * @extends {npf.ui.RenderedComponent}
+ * @struct
+ * @extends {npf.ui.StatedComponent}
  */
 npf.ui.ContextPopup = function(opt_anchorElement, opt_renderer, opt_domHelper) {
   var renderer = opt_renderer || npf.ui.contextPopup.Renderer.getInstance();
-  goog.base(this, renderer, opt_domHelper);
+  npf.ui.ContextPopup.base(this, 'constructor', renderer, opt_domHelper);
+
+  /**
+   * Whether the menu can move the focus to its key event target when it is
+   * shown.
+   * @private {boolean}
+   */
+  this.allowAutoFocus_ = true;
 
   /**
    * @private {Element}
@@ -32,21 +42,25 @@ npf.ui.ContextPopup = function(opt_anchorElement, opt_renderer, opt_domHelper) {
   this.fadeElement_ = renderer.createFaderElement(this);
 
   /**
-   * @private {goog.ui.Popup}
+   * @private {Node}
    */
-  this.popup_ = null;
-
-  /**
-   * @private {npf.fx.KeyframeAnimation}
-   */
-  this.showTransition_ = null;
+  this.fadeParentElement_ = this.getDomHelper().getDocument().body;
 
   /**
    * @private {boolean}
    */
-  this.visible_ = false;
+  this.faderVisible_ = false;
+
+  /**
+   * @private {goog.ui.Popup}
+   */
+  this.popup_ = this.createPopup();
+  this.popup_.setParentEventTarget(this);
+  this.registerDisposable(this.popup_);
+
+  this.setVisible(false);
 };
-goog.inherits(npf.ui.ContextPopup, npf.ui.RenderedComponent);
+goog.inherits(npf.ui.ContextPopup, npf.ui.StatedComponent);
 
 
 /**
@@ -57,60 +71,99 @@ npf.ui.ContextPopup.ANIMATION_DURATION = 300;
 
 /** @inheritDoc */
 npf.ui.ContextPopup.prototype.enterDocument = function() {
-  goog.base(this, 'enterDocument');
+  npf.ui.ContextPopup.base(this, 'enterDocument');
 
-  /** @type {Element} */
-  var element = this.getElement();
+  var element = /** @type {!Element} */ (this.getElement());
+  /** @type {goog.fx.Transition} */
+  var showTransition = this.createShowTransition(element);
 
-  this.showTransition_ = new npf.fx.KeyframeAnimation(
-    element, npf.ui.ContextPopup.ANIMATION_DURATION);
-  this.registerDisposable(this.showTransition_);
-  this.showTransition_.setEndStylesUsed(true);
-  this.showTransition_.fromToOpacity(0, 1);
+  if (showTransition) {
+    if (showTransition instanceof goog.Disposable) {
+      this.disposeOnExitDocument(showTransition);
+    }
 
-  this.popup_ = this.createPopup(element);
-  this.popup_.setTransition(this.showTransition_);
-  this.popup_.setParentEventTarget(this);
+    this.popup_.setTransition(showTransition);
+  }
 
-  var PopupEventType = goog.ui.PopupBase.EventType;
+  this.popup_.setElement(element);
 
-  this.getHandler()
-    .listen(this.popup_, PopupEventType.BEFORE_SHOW, this.onBeforeShow_)
-    .listen(this.popup_, PopupEventType.BEFORE_HIDE, this.onBeforeHide_);
+  this.getHandler().
+    listen(this, goog.ui.Component.EventType.ENTER, this.handleEnter).
+    listen(this.popup_, [
+      goog.ui.PopupBase.EventType.BEFORE_HIDE,
+      goog.ui.PopupBase.EventType.BEFORE_SHOW
+    ], this.onBeforeShowOrHide_);
 
-  this.setVisibleInternal(this.visible_);
+  if (this.isVisible()) {
+    this._setFaderVisible(true);
+  }
 };
 
 /** @inheritDoc */
 npf.ui.ContextPopup.prototype.exitDocument = function() {
-  this.popup_.dispose();
-  this.popup_ = null;
-  this.showTransition_ = null;
+  this._setFaderVisible(false);
 
-  if (this.visible_) {
-    this.setFaderVisible(false);
-  }
-
-  goog.base(this, 'exitDocument');
+  npf.ui.ContextPopup.base(this, 'exitDocument');
 };
 
 /** @inheritDoc */
 npf.ui.ContextPopup.prototype.disposeInternal = function() {
-  goog.base(this, 'disposeInternal');
+  npf.ui.ContextPopup.base(this, 'disposeInternal');
 
   this.anchorElement_ = null;
   this.fadeElement_ = null;
+  this.fadeParentElement_ = null;
+  this.popup_ = null;
 };
 
 /**
- * @param {Element} element
- * @return {!goog.ui.Popup}
+ * @param {goog.events.Event} evt
+ * @protected
  */
-npf.ui.ContextPopup.prototype.createPopup = function(element) {
-  var position = new goog.positioning.AnchoredPosition(
-    this.getAnchorElement(), goog.positioning.Corner.BOTTOM_LEFT);
+npf.ui.ContextPopup.prototype.handleEnter = function(evt) {
+  if (this.allowAutoFocus_) {
+    this.getKeyEventTarget().focus();
+  }
+};
 
-  return new goog.ui.Popup(element, position);
+/** @inheritDoc */
+npf.ui.ContextPopup.prototype.applyVisible = function(visible) {
+  npf.ui.ContextPopup.base(this, 'applyVisible', visible);
+
+  if (this.isInDocument()) {
+    this._setFaderVisible(visible);
+    this.popup_.setVisible(visible);
+
+    if (
+      visible &&
+      this.allowAutoFocus_ &&
+      this.isEnabled()
+    ) {
+      this.getKeyEventTarget().focus();
+    }
+  }
+};
+
+/**
+ * @return {boolean} Whether the component can automatically move focus to its
+ *    key event target when it is set to visible.
+ */
+npf.ui.ContextPopup.prototype.getAllowAutoFocus = function() {
+  return this.allowAutoFocus_;
+};
+
+/**
+ * Sets whether the component can automatically move focus to its key event
+ * target when it is set to visible.
+ * @param {boolean} allow Whether the component can automatically move focus
+ *    to its key event target when it is set to visible.
+ */
+npf.ui.ContextPopup.prototype.setAllowAutoFocus = function(allow) {
+  this.allowAutoFocus_ = allow;
+
+  if (allow) {
+    this.getRenderer().setFocusable(this, true);
+  }
 };
 
 /**
@@ -121,10 +174,69 @@ npf.ui.ContextPopup.prototype.getAnchorElement = function() {
 };
 
 /**
- * @param {Element} element
+ * @return {Element}
  */
-npf.ui.ContextPopup.prototype.setAnchorElement = function(element) {
-  this.anchorElement_ = element;
+npf.ui.ContextPopup.prototype.getFadeElement = function() {
+  return this.fadeElement_;
+};
+
+/**
+ * @return {Node}
+ */
+npf.ui.ContextPopup.prototype.getFadeParentElement = function() {
+  return this.fadeParentElement_;
+};
+
+/**
+ * @param {Node} element
+ */
+npf.ui.ContextPopup.prototype.setFadeParentElement = function(element) {
+  if (this.isInDocument()) {
+    throw Error(goog.ui.Component.Error.ALREADY_RENDERED);
+  }
+
+  this.fadeParentElement_ = element;
+};
+
+/**
+ * @param {boolean} visible
+ * @private
+ */
+npf.ui.ContextPopup.prototype._setFaderVisible = function(visible) {
+  if (this.faderVisible_ != visible) {
+    this.faderVisible_ = visible;
+    this.applyFaderVisible(visible);
+  }
+};
+
+/**
+ * @param {boolean} visible
+ * @protected
+ */
+npf.ui.ContextPopup.prototype.applyFaderVisible = function(visible) {
+  if (this.fadeElement_) {
+    /** @type {goog.dom.DomHelper} */
+    var domHelper = this.getDomHelper();
+
+    if (visible) {
+      domHelper.appendChild(this.fadeParentElement_, this.fadeElement_);
+    } else {
+      domHelper.removeNode(this.fadeElement_);
+    }
+  }
+};
+
+/**
+ * @return {!goog.ui.Popup}
+ * @protected
+ */
+npf.ui.ContextPopup.prototype.createPopup = function() {
+  /** @type {goog.positioning.AnchoredPosition} */
+  var position = this.anchorElement_ ?
+    new goog.positioning.AnchoredPosition(
+      this.anchorElement_, goog.positioning.Corner.BOTTOM_LEFT) : null;
+
+  return new goog.ui.Popup(null, position);
 };
 
 /**
@@ -135,54 +247,25 @@ npf.ui.ContextPopup.prototype.getPopup = function() {
 };
 
 /**
- * @param {boolean} visible
- */
-npf.ui.ContextPopup.prototype.setVisible = function(visible) {
-  if (this.visible_ != visible) {
-    this.visible_ = visible;
-    this.setVisibleInternal(this.visible_);
-  }
-};
-
-/**
- * @param {boolean} visible
+ * @param {!Element} element
+ * @return {goog.fx.Transition}
  * @protected
  */
-npf.ui.ContextPopup.prototype.setVisibleInternal = function(visible) {
-  if (this.popup_) {
-    this.popup_.setVisible(visible);
-  }
+npf.ui.ContextPopup.prototype.createShowTransition = function(element) {
+  var transition = new npf.fx.KeyframeAnimation(
+    element, npf.ui.ContextPopup.ANIMATION_DURATION);
+  transition.setEndStylesUsed(true);
+  transition.fromToOpacity(0, 1);
+
+  return transition;
 };
 
 /**
  * @param {goog.events.Event} evt
  * @private
  */
-npf.ui.ContextPopup.prototype.onBeforeShow_ = function(evt) {
-  this.visible_ = true;
-  this.setFaderVisible(this.visible_);
-};
-
-/**
- * @param {goog.events.Event} evt
- * @private
- */
-npf.ui.ContextPopup.prototype.onBeforeHide_ = function(evt) {
-  this.visible_ = false;
-  this.setFaderVisible(this.visible_);
-};
-
-/**
- * @param {boolean} visible
- * @protected
- */
-npf.ui.ContextPopup.prototype.setFaderVisible = function(visible) {
-  if (this.fadeElement_) {
-    if (visible) {
-      goog.dom.appendChild(this.getDomHelper().getDocument().body,
-        this.fadeElement_);
-    } else {
-      goog.dom.removeNode(this.fadeElement_);
-    }
-  }
+npf.ui.ContextPopup.prototype.onBeforeShowOrHide_ = function(evt) {
+  /** @type {boolean} */
+  var visible = goog.ui.PopupBase.EventType.BEFORE_SHOW == evt.type;
+  this.setVisible(visible);
 };

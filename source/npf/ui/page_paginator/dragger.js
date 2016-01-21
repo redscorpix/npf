@@ -14,7 +14,8 @@ goog.require('goog.fx.Dragger');
  * @extends {goog.fx.Dragger}
  */
 npf.ui.pagePaginator.Dragger = function(target, opt_handle, opt_limits) {
-  goog.base(this, target, opt_handle, opt_limits);
+  npf.ui.pagePaginator.Dragger.base(
+    this, 'constructor', target, opt_handle, opt_limits);
 
   /**
    * @private {boolean}
@@ -31,7 +32,7 @@ goog.inherits(npf.ui.pagePaginator.Dragger, goog.fx.Dragger);
 
 /** @inheritDoc */
 npf.ui.pagePaginator.Dragger.prototype.startDrag = function(e) {
-  goog.base(this, 'startDrag', e);
+  npf.ui.pagePaginator.Dragger.base(this, 'startDrag', e);
 
   if (goog.events.EventType.TOUCHSTART == e.type) {
     e.stopPropagation();
@@ -41,7 +42,7 @@ npf.ui.pagePaginator.Dragger.prototype.startDrag = function(e) {
 /** @inheritDoc */
 npf.ui.pagePaginator.Dragger.prototype.doDrag = function(e, x, y,
     dragFromScroll) {
-  goog.base(this, 'doDrag', e, x, y, dragFromScroll);
+  npf.ui.pagePaginator.Dragger.base(this, 'doDrag', e, x, y, dragFromScroll);
 
   if (goog.events.EventType.TOUCHMOVE == e.type) {
     e.stopPropagation();
@@ -50,7 +51,7 @@ npf.ui.pagePaginator.Dragger.prototype.doDrag = function(e, x, y,
 
 /** @inheritDoc */
 npf.ui.pagePaginator.Dragger.prototype.endDrag = function(e, opt_dragCanceled) {
-  goog.base(this, 'endDrag', e, opt_dragCanceled);
+  npf.ui.pagePaginator.Dragger.base(this, 'endDrag', e, opt_dragCanceled);
 
   if (
     goog.events.EventType.TOUCHEND == e.type &&

@@ -5,10 +5,11 @@ goog.provide('npf.style.animation.PlayState');
 goog.provide('npf.style.animation.Property');
 
 goog.require('goog.array');
+goog.require('goog.dom');
 goog.require('goog.string');
 goog.require('goog.style');
 goog.require('npf.fx.css3.easing');
-goog.require('npf.userAgent.support');
+goog.require('npf.userAgent.utils');
 
 
 /**
@@ -482,8 +483,10 @@ npf.style.animation.getValues_ = function(element, style) {
  * @private
  */
 npf.style.animation.getValue_ = function(element, style) {
-  /** @type {string} */
-  var property = npf.userAgent.support.getCssPropertyName(style);
+  /** @type {!goog.dom.DomHelper} */
+  var domHelper = goog.dom.getDomHelper(element);
+  /** @type {string?} */
+  var property = npf.userAgent.utils.prefixedCss(style);
   /** @type {string} */
   var value;
 

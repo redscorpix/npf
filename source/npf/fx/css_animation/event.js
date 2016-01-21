@@ -7,10 +7,11 @@ goog.require('goog.events.Event');
  * @param {npf.fx.cssAnimation.EventType} type
  * @param {npf.fx.CssAnimation} animation
  * @constructor
+ * @struct
  * @extends {goog.events.Event}
  */
 npf.fx.cssAnimation.Event = function(type, animation) {
-  goog.base(this, type);
+  npf.fx.cssAnimation.Event.base(this, 'constructor', type);
 
   /**
    * @type {number}
