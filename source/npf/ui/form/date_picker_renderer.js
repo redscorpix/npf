@@ -277,17 +277,17 @@ npf.ui.form.DatePickerRenderer.prototype.setValue = function(component, value) {
 
   if (dayElement) {
     dayElement.innerHTML = dayHtml;
-    goog.dom.forms.setValue(dayElement, day || 0);
+    goog.dom.forms.setValue(dayElement, String(day || 0));
   }
 
   if (monthElement) {
     monthElement.innerHTML = monthHtml;
-    goog.dom.forms.setValue(monthElement, month || 0);
+    goog.dom.forms.setValue(monthElement, String(month || 0));
   }
 
   if (yearElement) {
     yearElement.innerHTML = yearHtml;
-    goog.dom.forms.setValue(yearElement, year || 0);
+    goog.dom.forms.setValue(yearElement, String(year || 0));
   }
 };
 
