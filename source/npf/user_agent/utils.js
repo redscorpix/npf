@@ -121,19 +121,16 @@ npf.userAgent.utils.mq = function(mq, opt_domHelper) {
     return mql ? !!mql['matches'] : false;
   }
 
-  /** @type {boolean} */
-  var bool = false;
   /** @type {string} */
   var styles = '@media ' + mq + ' {#' +
     npf.userAgent.utils.ID + '{position:absolute;}}';
 
-  npf.userAgent.utils.testStyles(styles, function(node) {
+  return npf.userAgent.utils.testStyles(styles, function(node) {
     var styles = win.getComputedStyle ?
       win.getComputedStyle(node, null) : node.currentStyle;
-    bool = 'absolute' == styles['position'];
-  }, null, null, domHelper);
 
-  return bool;
+    return 'absolute' == styles['position'];
+  }, null, null, domHelper);
 };
 
 /**
