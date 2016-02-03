@@ -51,7 +51,8 @@ npf.history.Html5History = function(opt_domHelper, opt_transformer) {
    * @type {npf.history.Html5History.TokenTransformer}
    * @private
    */
-  this.transformer_ = opt_transformer || null;
+  this.transformer_ = opt_transformer ||
+    new npf.history.Html5History.TokenTransformer();
 
   /**
    * Whether to use the fragment to store the token, defaults to true.
