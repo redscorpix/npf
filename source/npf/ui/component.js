@@ -65,6 +65,33 @@ npf.ui.Component.EventHandler;
  */
 npf.ui.Component.IncrementalDom;
 
+/**
+ * @private {npf.ui.Component.IncrementalDom?}
+ */
+npf.ui.Component._incrementalDom = null;
+
+
+/**
+ * @return {npf.ui.Component.IncrementalDom}
+ */
+npf.ui.Component.getIncrementalDom = function() {
+  if (!npf.ui.Component._incrementalDom) {
+    npf.ui.Component._incrementalDom = {
+      elementOpen: npf.dom.incremental.elementOpen,
+      elementOpenStart: npf.dom.incremental.elementOpenStart,
+      elementOpenEnd: npf.dom.incremental.elementOpenEnd,
+      elementClose: npf.dom.incremental.elementClose,
+      elementVoid: npf.dom.incremental.elementVoid,
+      elementPlaceholder: npf.dom.incremental.elementPlaceholder,
+      text: npf.dom.incremental.text,
+      attr: npf.dom.incremental.attr
+    };
+  }
+
+  return /** @type {npf.ui.Component.IncrementalDom} */ (
+    npf.ui.Component._incrementalDom);
+};
+
 
 /** @inheritDoc */
 npf.ui.Component.prototype.enterDocument = function() {
@@ -310,16 +337,7 @@ npf.ui.Component.prototype.incrementalPatch = function() {
     if (!this.incrementalUpdateWrapper_) {
       var self = this;
       this.incrementalUpdateWrapper_ = function(data) {
-        self.incrementalUpdate({
-          elementOpen: npf.dom.incremental.elementOpen,
-          elementOpenStart: npf.dom.incremental.elementOpenStart,
-          elementOpenEnd: npf.dom.incremental.elementOpenEnd,
-          elementClose: npf.dom.incremental.elementClose,
-          elementVoid: npf.dom.incremental.elementVoid,
-          elementPlaceholder: npf.dom.incremental.elementPlaceholder,
-          text: npf.dom.incremental.text,
-          attr: npf.dom.incremental.attr
-        }, data);
+        self.incrementalUpdate(npf.ui.Component.getIncrementalDom(), data);
       };
     }
 
